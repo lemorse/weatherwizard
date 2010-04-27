@@ -1,0 +1,581 @@
+package chartview.gui.toolbar.controlpanels;
+
+import astro.calc.GeoPoint;
+
+import astro.calc.GreatCircle;
+
+import chartview.gui.toolbar.controlpanels.station.BSPDisplay;
+import chartview.gui.toolbar.controlpanels.station.HeadingPanel;
+import chartview.gui.toolbar.controlpanels.station.StationDataPanel;
+import chartview.gui.toolbar.controlpanels.station.WindGaugePanel;
+import chartview.gui.toolbar.controlpanels.station.WindVanePanel;
+
+import chartview.routing.enveloppe.custom.RoutingPoint;
+
+import chartview.util.WWGnlUtilities;
+import chartview.ctx.WWContext;
+
+import chartview.routing.enveloppe.custom.RoutingUtil;
+
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+
+import java.awt.Insets;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import java.util.ArrayList;
+import java.util.Date;
+
+import java.util.Iterator;
+import java.util.TimeZone;
+
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JSeparator;
+import javax.swing.JSlider;
+import javax.swing.JTabbedPane;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
+public class RoutingPanel extends JPanel
+{
+  private int current_routing_mode = -1;
+  
+  private int twa   = 0;
+  private int twd   = 0;
+  private float tws = 0F;
+  private int hdg   = 0;
+  private float bsp = 0.0F;
+  private Date date = null;
+  private GeoPoint position = null;
+  
+  private ArrayList<RoutingPoint> bestRoute = null;
+  
+  private GridBagLayout gridBagLayoutOne    = new GridBagLayout();
+  private GridBagLayout gridBagLayoutTwo    = new GridBagLayout();
+
+  private WindVanePanel windVanePanel       = new WindVanePanel();
+  private WindGaugePanel windGaugePanel     = new WindGaugePanel();
+  private StationDataPanel stationDataPanel = new StationDataPanel();
+  private BSPDisplay bspDisplay             = new BSPDisplay();
+  private HeadingPanel headingPanel         = new HeadingPanel();
+  
+  private JTabbedPane tabbedPane    = new JTabbedPane();
+  private JPanel stepPanel          = new JPanel();
+  private JPanel summaryPanelHolder = new JPanel();
+  private JPanel summaryPanel       = new JPanel();
+  
+  private JLabel dateLabel = new JLabel();
+  private JSlider routeSlider = new JSlider();
+  private JLabel positionLabel = new JLabel();
+  
+  private JLabel fromPositionLabel = new JLabel(WWGnlUtilities.buildMessage("from"));
+  private JLabel toPositionLabel   = new JLabel(WWGnlUtilities.buildMessage("to"));
+  private JLabel fromDateLabel = new JLabel(WWGnlUtilities.buildMessage("from"));
+  private JLabel toDateLabel   = new JLabel(WWGnlUtilities.buildMessage("to"));
+  private JLabel duration      = new JLabel(WWGnlUtilities.buildMessage("duration"));
+  private JLabel bspRangeLabel = new JLabel(WWGnlUtilities.buildMessage("bsp-range"));
+  private JLabel twsRangeLabel = new JLabel(WWGnlUtilities.buildMessage("tws-range"));
+  private JLabel twaRangeLabel = new JLabel(WWGnlUtilities.buildMessage("twa-range"));
+
+  int routeSliderValue = 1;
+  private JLabel gcLabel = new JLabel();
+  private JLabel actualDistLabel = new JLabel();
+  private JButton prevButton = new JButton();
+  private JButton nextButton = new JButton();
+  private JButton syncGribButton = new JButton();
+  private JCheckBox autoSyncCheckBox = new JCheckBox();
+  private JPanel bottomPanel = new JPanel();
+  private GridBagLayout gridBagLayout1 = new GridBagLayout();
+  private JSeparator jSeparator1 = new JSeparator();
+  private JSeparator jSeparator2 = new JSeparator();
+  private JSeparator jSeparator3 = new JSeparator();
+
+  public RoutingPanel()
+  {
+    try
+    {
+      jbInit();
+    }
+    catch (Exception e)
+    {
+      e.printStackTrace();
+    }
+  }
+
+  private void jbInit() throws Exception
+  {
+    this.setLayout(new BorderLayout());
+    this.setSize(new Dimension(400, 340));
+    this.setPreferredSize(new Dimension(ChartControlPane.WIDTH, 340));
+    this.add(tabbedPane, BorderLayout.CENTER);
+    
+    tabbedPane.add(WWGnlUtilities.buildMessage("summary"), summaryPanelHolder);
+    tabbedPane.add(WWGnlUtilities.buildMessage("steps"), stepPanel);
+    summaryPanelHolder.setLayout(new BorderLayout());
+    summaryPanelHolder.add(summaryPanel, BorderLayout.NORTH);
+
+    stepPanel.setLayout(gridBagLayoutOne);
+    stepPanel.setSize(new Dimension(395, 300));
+    stepPanel.setPreferredSize(new Dimension(190, 300));
+    summaryPanel.setLayout(gridBagLayoutTwo);
+
+    windVanePanel.setPreferredSize(new Dimension(80, 80));
+    windGaugePanel.setPreferredSize(new Dimension(30, 100));
+    headingPanel.setPreferredSize(new Dimension(190, 30));
+    headingPanel.setSize(new Dimension(190, 30));
+    dateLabel.setText(WWGnlUtilities.buildMessage("grib-date"));
+    routeSlider.setToolTipText(WWGnlUtilities.buildMessage("grib-frame-index"));
+    routeSlider.setMinimum(1);
+    routeSlider.setMaximum(10);
+    routeSlider.setValue(1);
+    routeSlider.setPreferredSize(new Dimension(190, 40));
+    routeSlider.setSize(new Dimension(190, 27));
+    routeSlider.setSnapToTicks(true);
+    routeSlider.setPaintTicks(true);
+    routeSlider.setMajorTickSpacing(1);
+    routeSlider.addChangeListener(new ChangeListener()
+        {
+          public void stateChanged(ChangeEvent evt)
+          {
+            JSlider slider = (JSlider) evt.getSource();
+
+            if (!slider.getValueIsAdjusting())
+            {
+              int sv = slider.getValue();
+              if (sv != routeSliderValue)
+              {
+                routeSliderValue = sv;
+  //            System.out.println("Slider Value:" + routeSliderValue);   
+                updateData();
+              }
+            }
+          }
+        });
+    positionLabel.setText(WWGnlUtilities.buildMessage("position"));
+    gcLabel.setText(WWGnlUtilities.buildMessage("gc"));
+    actualDistLabel.setText(WWGnlUtilities.buildMessage("actual"));
+//  prevButton.setText("<");
+    prevButton.setIcon(new ImageIcon(this.getClass().getResource("img/previous.png")));
+    prevButton.setToolTipText(WWGnlUtilities.buildMessage("previous-step"));
+    prevButton.setFont(new Font("Courier New", 0, 10));
+    prevButton.setPreferredSize(new Dimension(22, 18));
+    prevButton.addActionListener(new ActionListener()
+        {
+          public void actionPerformed(ActionEvent e)
+          {
+            prevButton_actionPerformed(e);
+          }
+        });
+//  nextButton.setText(">");
+    nextButton.setIcon(new ImageIcon(this.getClass().getResource("img/next.png")));
+    nextButton.setFont(new Font("Courier New", 0, 10));
+    nextButton.setPreferredSize(new Dimension(22, 18));
+    nextButton.setToolTipText(WWGnlUtilities.buildMessage("next-step"));
+    nextButton.addActionListener(new ActionListener()
+        {
+          public void actionPerformed(ActionEvent e)
+          {
+            nextButton_actionPerformed(e);
+          }
+        });
+//  syncGribButton.setText("S");
+    syncGribButton.setIcon(new ImageIcon(this.getClass().getResource("img/action.png")));
+    syncGribButton.setFont(new Font("Courier New", 0, 10));
+    syncGribButton.setPreferredSize(new Dimension(22, 18));
+    syncGribButton.setToolTipText(WWGnlUtilities.buildMessage("synchronize-with-grib"));
+    syncGribButton.addActionListener(new ActionListener()
+        {
+          public void actionPerformed(ActionEvent e)
+          {
+            syncGribButton_actionPerformed(e);
+          }
+        });
+    autoSyncCheckBox.setText("AutoSync");
+    autoSyncCheckBox.setActionCommand("autoSyncCheckBox");
+    autoSyncCheckBox.addActionListener(new ActionListener()
+        {
+          public void actionPerformed(ActionEvent e)
+          {
+            autoSyncCheckBox_actionPerformed(e);
+          }
+        });
+    bottomPanel.setLayout(gridBagLayout1);
+    stepPanel.add(windVanePanel, 
+                  new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.NORTH, GridBagConstraints.NONE, 
+                                         new Insets(0, 2, 0, 0), 0, 0));
+    stepPanel.add(bspDisplay, 
+                  new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.SOUTH, GridBagConstraints.HORIZONTAL, 
+                                         new Insets(0, 2, 0, 0), 0, 0));
+    stepPanel.add(windGaugePanel, 
+                  new GridBagConstraints(1, 0, 1, 2, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, 
+                                         new Insets(0, 5, 0, 0), 0, 0));
+
+    stepPanel.add(stationDataPanel, 
+                  new GridBagConstraints(2, 0, 1, 2, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, 
+                                         new Insets(0, 5, 0, 0), 0, 0));
+
+    stepPanel.add(headingPanel, 
+                  new GridBagConstraints(0, 2, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, 
+                                         new Insets(2, 0, 0, 0), 0, 0));
+    stepPanel.add(dateLabel, 
+                  new GridBagConstraints(0, 3, 3, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, 
+                                         new Insets(2, 0, 0, 0), 0, 0));
+    stepPanel.add(positionLabel, 
+                  new GridBagConstraints(0, 4, 3, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, 
+                                         new Insets(0, 0, 0, 0), 0, 0));
+    stepPanel.add(routeSlider, 
+                  new GridBagConstraints(0, 5, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, 
+                                         new Insets(0, 0, 0, 0), 0, 0));
+
+    bottomPanel.add(prevButton, 
+                    new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, 
+                                           new Insets(0, 0, 0, 2), 0, 0));
+    bottomPanel.add(nextButton, 
+                    new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, 
+                                           new Insets(0, 0, 0, 2), 0, 0));
+    bottomPanel.add(syncGribButton, 
+                    new GridBagConstraints(2, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, 
+                                           new Insets(0, 0, 0, 2), 0, 0));
+    bottomPanel.add(autoSyncCheckBox, new GridBagConstraints(3, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, 
+          new Insets(0, 0, 0, 0), 0, 0));
+    stepPanel.add(bottomPanel, 
+                  new GridBagConstraints(0, 7, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, 
+                                         new Insets(0, 0, 0, 0), 0, 0));
+    summaryPanel.add(new JLabel(WWGnlUtilities.buildMessage("from")), 
+                     new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, 
+                                            new Insets(10, 2, 0, 0), 0, 0));
+    summaryPanel.add(fromPositionLabel, 
+                     new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, 
+                                            new Insets(10, 2, 0, 0), 0, 0));
+    summaryPanel.add(new JLabel(WWGnlUtilities.buildMessage("to")), 
+                     new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, 
+                                            new Insets(0, 2, 0, 0), 0, 0));
+    summaryPanel.add(toPositionLabel, 
+                     new GridBagConstraints(1, 1, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, 
+                                            new Insets(0, 2, 0, 0), 0, 0));
+    summaryPanel.add(new JLabel(WWGnlUtilities.buildMessage("from")), 
+                     new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, 
+                                            new Insets(0, 2, 0, 0), 0, 0));
+    summaryPanel.add(fromDateLabel, 
+                     new GridBagConstraints(1, 2, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, 
+                                            new Insets(0, 2, 0, 0), 0, 0));
+    summaryPanel.add(new JLabel(WWGnlUtilities.buildMessage("to")), 
+                     new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, 
+                                            new Insets(0, 2, 0, 0), 0, 0));
+    summaryPanel.add(toDateLabel, 
+                     new GridBagConstraints(1, 3, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, 
+                                            new Insets(0, 2, 0, 0), 0, 0));
+
+    summaryPanel.add(duration, 
+                     new GridBagConstraints(0, 5, 2, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, 
+                                            new Insets(0, 2, 0, 0), 0, 0));
+
+
+    summaryPanel.add(bspRangeLabel, 
+                     new GridBagConstraints(0, 7, 2, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, 
+                                            new Insets(0, 2, 0, 0), 0, 0));
+    summaryPanel.add(twsRangeLabel, 
+                     new GridBagConstraints(0, 8, 2, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, 
+                                            new Insets(0, 2, 0, 0), 0, 0));
+    summaryPanel.add(twaRangeLabel, 
+                     new GridBagConstraints(0, 9, 2, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, 
+                                            new Insets(0, 2, 0, 0), 0, 0));
+    summaryPanel.add(gcLabel, 
+                     new GridBagConstraints(0, 11, 2, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, 
+                                            new Insets(0, 2, 0, 0), 0, 0));
+    summaryPanel.add(actualDistLabel, 
+                     new GridBagConstraints(0, 12, 2, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, 
+                                            new Insets(0, 2, 0, 0), 0, 0));
+    summaryPanel.add(jSeparator1, 
+                     new GridBagConstraints(0, 4, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, 
+                                            new Insets(0, 0, 0, 0), 0, 0));
+    summaryPanel.add(jSeparator2, 
+                     new GridBagConstraints(0, 6, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, 
+                                            new Insets(0, 0, 0, 0), 0, 0));
+    summaryPanel.add(jSeparator3, 
+                     new GridBagConstraints(0, 10, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, 
+                                            new Insets(0, 0, 0, 0), 0, 0));
+    this.validate();
+  }
+
+  private void updateData()
+  {
+    if (routeSliderValue == 1)
+      prevButton.setEnabled(false);
+    else
+      prevButton.setEnabled(true);
+      
+    if (routeSliderValue == routeSlider.getMaximum())
+      nextButton.setEnabled(false);
+    else
+      nextButton.setEnabled(true);
+
+    RoutingPoint rp = null;
+    RoutingPoint ic = null; // Isochron Center
+    try
+    {
+      int r = bestRoute.size() - routeSliderValue;
+      rp = bestRoute.get(r);
+      if (r == 0) // Last one
+        ic = rp;
+      else
+        ic = bestRoute.get(r - 1);
+      setRouteData(rp, ic, current_routing_mode);
+    }
+    catch (Exception e)
+    {
+      e.printStackTrace();
+    }    
+    if (autoSyncCheckBox.isSelected())
+      syncGribButton_actionPerformed(null);
+  }
+  
+  public void setTwa(int twa)
+  {
+    this.twa = twa;
+    windVanePanel.setWindDir(twa);
+    stationDataPanel.setTWA(twa);
+  }
+
+  public int getTwa()
+  {
+    return twa;
+  }
+
+  public void setTwd(int twd)
+  {
+    this.twd = twd;
+    stationDataPanel.setTWD(twd);
+  }
+
+  public int getTwd()
+  {
+    return twd;
+  }
+
+  public void setTws(float tws)
+  {
+    this.tws = tws;
+    windGaugePanel.setTws(tws);
+    stationDataPanel.setTWS(tws);
+  }
+
+  public float getTws()
+  {
+    return tws;
+  }
+
+  public void setHdg(int hdg)
+  {
+    this.hdg = hdg;
+    headingPanel.setHdg(hdg);
+  }
+
+  public int getHdg()
+  {
+    return hdg;
+  }
+
+  public void setDate(Date date)
+  {
+    this.date = date;
+    if (date != null)
+    {
+      WWGnlUtilities.SDF_UT.setTimeZone(TimeZone.getTimeZone("127"));
+      dateLabel.setText(WWGnlUtilities.SDF_UT.format(date));
+    }
+    else
+      dateLabel.setText("");
+  }
+
+  public Date getDate()
+  {
+    return date;
+  }
+
+  public void setPosition(GeoPoint position)
+  {
+    this.position = position;
+    positionLabel.setText(position.toString());
+  }
+
+  public GeoPoint getPosition()
+  {
+    return position;
+  }
+
+  public void setBsp(float bsp)
+  {
+    this.bsp = bsp;
+    stationDataPanel.setBSP(bsp);
+    bspDisplay.setBsp(bsp);
+  }
+
+  public float getBsp()
+  {
+    return bsp;
+  }
+
+  public void setBestRoute(ArrayList<RoutingPoint> bestRoute, int routingType)
+  {
+    GreatCircle gc = WWContext.getInstance().getGreatCircle();
+
+    this.bestRoute = bestRoute;
+//  routeSlider.setMinimum(1);
+    if (bestRoute != null)
+    {
+      routeSlider.setMaximum(bestRoute.size());
+      routeSlider.setValue(1);
+      prevButton.setEnabled(false);
+      RoutingPoint rp = null;
+      RoutingPoint ic = null; // Isochron Center
+      
+      // Generate summary
+      double minTWS = Double.MAX_VALUE, maxTWS = -Double.MAX_VALUE;
+      double minBSP = Double.MAX_VALUE, maxBSP = -Double.MAX_VALUE;
+      
+      int minTWA = Integer.MAX_VALUE, maxTWA = Integer.MIN_VALUE;
+      
+      double actualDistance = 0D;
+      GeoPoint prevPos      = null;
+      
+      current_routing_mode = routingType;    
+
+      Iterator<RoutingPoint> iterator = bestRoute.iterator();
+      while (iterator.hasNext())
+      {
+        rp = iterator.next();
+        if (rp.getAncestor() != null) // Not for the first one
+        {
+          double bsp = rp.getBsp();
+          double tws = rp.getTws();
+          int twa = Math.abs(rp.getTwa());          
+          if (twa > 180) twa = 360 - twa;
+          
+          if (bsp < minBSP) minBSP = bsp;
+          if (bsp > maxBSP) maxBSP = bsp;
+          if (tws < minTWS) minTWS = tws;
+          if (tws > maxTWS) maxTWS = tws;
+          if (twa > maxTWA) maxTWA = twa;
+          if (twa < minTWA) minTWA = twa;
+        }
+        if (prevPos != null)
+          actualDistance += gc.getDistanceInNM(prevPos, rp.getPosition());
+        prevPos = rp.getPosition();
+      }
+      Date fromDate    = bestRoute.get(bestRoute.size() - 1).getDate();
+      Date toDate      = bestRoute.get(0).getDate();
+      long elapsed     = toDate.getTime() - fromDate.getTime();
+      final long NBMSEC_PER_HOUR = 3600 * 1000;
+      final long NBMSEC_PER_DAY  = 24 * NBMSEC_PER_HOUR;
+      int nbDay  = (int)(elapsed / NBMSEC_PER_DAY);
+      int nbHour = (int)Math.round(((double)(elapsed - (nbDay * NBMSEC_PER_DAY)) / (double)NBMSEC_PER_HOUR));
+      
+      GeoPoint fromPos = bestRoute.get(bestRoute.size() - 1).getPosition();
+      GeoPoint toPos   = bestRoute.get(0).getPosition();
+      
+      fromPositionLabel.setText(fromPos.toString());
+      toPositionLabel.setText(toPos.toString());
+      fromDateLabel.setText(WWGnlUtilities.SDF_UT_day.format(fromDate));
+      toDateLabel.setText(WWGnlUtilities.SDF_UT_day.format(toDate));
+      duration.setText(WWGnlUtilities.buildMessage("duration", new String[] { Integer.toString(nbDay), Integer.toString(nbHour) }));
+      bspRangeLabel.setText(WWGnlUtilities.buildMessage("bsp-range", new String[] { WWGnlUtilities.XXX12.format(minBSP), WWGnlUtilities.XXX12.format(maxBSP) }));
+      twsRangeLabel.setText(WWGnlUtilities.buildMessage("tws-range", new String[] { WWGnlUtilities.XXX12.format(minTWS), WWGnlUtilities.XXX12.format(maxTWS) }));
+      twaRangeLabel.setText(WWGnlUtilities.buildMessage("twa-range", new String[] { Integer.toString(minTWA), Integer.toString(maxTWA) }));
+      
+      // from-to
+      double gcDist = gc.getDistanceInNM(fromPos, toPos);
+      gcLabel.setText(WWGnlUtilities.buildMessage("gc", new String[] { WWGnlUtilities.XXX12.format(gcDist) }));
+      actualDistLabel.setText(WWGnlUtilities.buildMessage("actual", new String[] { WWGnlUtilities.XXX12.format(actualDistance) }));
+      
+      try
+      {
+        int r = bestRoute.size() - 1;
+        rp = bestRoute.get(r); // The first one
+        if (r == 0) // Last one
+          ic = rp;
+        else
+          ic = bestRoute.get(r-1);
+        setRouteData(rp, ic, routingType);
+      }
+      catch (Exception e)
+      {
+        e.printStackTrace();
+      }
+    }
+  }
+
+  private void setRouteData(RoutingPoint rp, RoutingPoint center, int routingType)
+  { 
+    try
+    {
+      double bsp        = (routingType == RoutingUtil.REAL_ROUTING ? center.getBsp() : rp.getBsp()); 
+      Date date         = rp.getDate();
+      GeoPoint position = rp.getPosition();
+      int twa           = (routingType == RoutingUtil.REAL_ROUTING ? - center.getTwa() : - rp.getTwa()); 
+      double tws        = (routingType == RoutingUtil.REAL_ROUTING ? center.getTws() : rp.getTws()); 
+      int twd           = (routingType == RoutingUtil.REAL_ROUTING ? center.getTwd() : rp.getTwd());
+      int hdg           = (routingType == RoutingUtil.REAL_ROUTING ? center.getHdg() : rp.getHdg());
+      
+//    System.out.println("TWA:" + twa);
+      setBsp((float)bsp);
+      setPosition(position);
+      setTwa(twa);
+      setTwd(twd);
+      setTws((float)tws);
+      setDate(date);
+      setHdg(hdg);
+      WWContext.getInstance().firePlotBoatAt(position, hdg);
+      
+      repaint();
+    }
+    catch (Exception e)
+    {
+      e.printStackTrace();
+    }
+  }
+  
+  public ArrayList<RoutingPoint> getBestRoute()
+  {
+    return bestRoute;
+  }
+
+  private void prevButton_actionPerformed(ActionEvent e)
+  {
+    routeSliderValue -= 1;
+    routeSlider.setValue(routeSliderValue);
+    updateData();
+    if (autoSyncCheckBox.isSelected())
+      syncGribButton_actionPerformed(e);
+  }
+
+  private void nextButton_actionPerformed(ActionEvent e)
+  {
+    routeSliderValue += 1;
+    routeSlider.setValue(routeSliderValue);
+    updateData();
+    if (autoSyncCheckBox.isSelected())
+      syncGribButton_actionPerformed(e);
+  }
+
+  private void syncGribButton_actionPerformed(ActionEvent e)
+  {
+//  System.out.println("Synchronizing with GRIB for " + this.date.toString());
+    WWContext.getInstance().fireSyncGribWithDate(date);
+  }
+
+  private void autoSyncCheckBox_actionPerformed(ActionEvent e)
+  {
+    syncGribButton.setEnabled(!autoSyncCheckBox.isSelected());
+  }
+}
