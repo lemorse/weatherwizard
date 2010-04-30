@@ -92,6 +92,7 @@ public class CommandPanelPopup
   private JCheckBoxMenuItem showPlaces;
   private JCheckBoxMenuItem showSailMail;
   private JCheckBoxMenuItem showGrid;
+  private JCheckBoxMenuItem clickScroll;
 
   private JMenu routingMenu;
   private JCheckBoxMenuItem showIsochrons;
@@ -156,6 +157,7 @@ public class CommandPanelPopup
   private final String INTERRUPT_ROUTING = WWGnlUtilities.buildMessage("interrupt-routing");
   private final String ERASE_ROUTING = WWGnlUtilities.buildMessage("remove-routing");
   private final String ERASE_ROUTING_BOAT = WWGnlUtilities.buildMessage("erase-routing-boat");
+  private final String CLICK_SCROLL = WWGnlUtilities.buildMessage("click-scroll");
 
   private final String DROP_FLAGS = WWGnlUtilities.buildMessage("drop-flags");
 
@@ -393,6 +395,12 @@ public class CommandPanelPopup
     showGrid.setSelected(parent.chartPanel.isWithGrid());
     showGrid.setBackground(Color.white);
     showGrid.addActionListener(this);
+        
+    clickScroll = new JCheckBoxMenuItem(CLICK_SCROLL);
+    chartMenu.add(clickScroll);
+    clickScroll.setSelected(parent.chartPanel.isMouseEdgeProximityDetectionEnabled());
+    clickScroll.setBackground(Color.white);
+    clickScroll.addActionListener(this);
 
     routingMenu = new JMenu(ROUTING_MENU);
     routingMenu.setIcon(new ImageIcon(this.getClass().getResource("navigation.png")));
@@ -710,6 +718,11 @@ public class CommandPanelPopup
       if (parent.compositeCheckBox != null && parent.compositeCheckBox.length >= 2)
         parent.compositeCheckBox[parent.compositeCheckBox.length - 1].setSelected(showGrid.isSelected());
       parent.chartPanel.repaint();
+    }
+    else if (event.getActionCommand().equals(CLICK_SCROLL))
+    {
+      parent.chartPanel.setMouseEdgeProximityDetectionEnabled(clickScroll.isSelected());
+//    parent.chartPanel.repaint();
     }
     else if (event.getActionCommand().equals(SHOW_ISOCHRONS))
     {
