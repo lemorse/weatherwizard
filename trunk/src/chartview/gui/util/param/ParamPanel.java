@@ -268,6 +268,9 @@ public final class ParamPanel
       case ParamData.DEFAULT_FAX_BLUR:
         it = new FaxBlurList(0);
         break;
+      case ParamData.CLICK_SCROLL:
+        it = Boolean.TRUE;
+        break;
       default:
         break;
     }
@@ -331,7 +334,8 @@ public final class ParamPanel
                        i == ParamData.CONFIRM_ON_EXIT ||
                        i == ParamData.USE_TRANSPARENT_GRIB_WIND || 
                        i == ParamData.COLOR_RANGE ||
-                       i == ParamData.DISPLAY_WIND_WITH_COLOR_WIND_RANGE)
+                       i == ParamData.DISPLAY_WIND_WITH_COLOR_WIND_RANGE ||
+                       i == ParamData.CLICK_SCROLL)
                 data[i][1] = new Boolean(s);    
               else if (i == ParamData.POLAR_FILE_LOC)              // DataFiles, Polars
                 data[i][1] = new DataFile(new String[] {"xml"}, "Polars", s);
@@ -412,7 +416,8 @@ public final class ParamPanel
 //      ParamData.LOOK_AND_FEEL, 
         ParamData.PREFERRED_WIND_DISPLAY,
         ParamData.DISPLAY_WIND_WITH_COLOR_WIND_RANGE,
-        ParamData.DEFAULT_FAX_BLUR }, 
+        ParamData.DEFAULT_FAX_BLUR,
+        ParamData.CLICK_SCROLL }, 
       new int[] // Routing
       { ParamData.NMEA_SERVER_URL, 
         ParamData.NMEA_POLLING_FREQ, 
@@ -619,7 +624,8 @@ public final class ParamPanel
                    currentIndex == ParamData.STOP_ROUTING_ON_EXHAUSTED_GRIB ||
                    currentIndex == ParamData.USE_TRANSPARENT_GRIB_WIND ||
                    currentIndex == ParamData.COLOR_RANGE ||
-                   currentIndex == ParamData.DISPLAY_WIND_WITH_COLOR_WIND_RANGE)
+                   currentIndex == ParamData.DISPLAY_WIND_WITH_COLOR_WIND_RANGE ||
+                   currentIndex == ParamData.CLICK_SCROLL)
           {
             try { /* boolean b = */ new Boolean(after); }
             catch (Exception e) 

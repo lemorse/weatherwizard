@@ -2878,6 +2878,7 @@ public class CommandPanel
     chartPanel.setPositionToolTipEnabled(true);
     chartPanel.setConfirmDDZoom(((Boolean) ParamPanel.data[ParamData.CONFIRM_DD_ZOOM][1]).booleanValue());
     chartPanel.setDdRectColor((Color) ParamPanel.data[ParamData.DD_ZOOM_COLOR][1]);
+    chartPanel.setMouseEdgeProximityDetectionEnabled(((Boolean) ParamPanel.data[ParamData.CLICK_SCROLL][1]).booleanValue());
     
     chartPanel.setOpaque(false);
     chartPanel.setCleanFirst(true);
