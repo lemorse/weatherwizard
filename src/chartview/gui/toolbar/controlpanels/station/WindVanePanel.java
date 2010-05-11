@@ -9,6 +9,7 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 
+import java.awt.GradientPaint;
 import java.awt.Graphics;
 
 import java.awt.Graphics2D;
@@ -50,7 +51,11 @@ public class WindVanePanel
     Point center = new Point(this.getWidth() / 2, this.getWidth() / 2);
     Graphics2D g2d = (Graphics2D)g;
     // Background
-    g2d.setColor(Color.black);
+//  g2d.setColor(Color.black); 
+    Color startColor = Color.black; // new Color(255, 255, 255);
+    Color endColor   = Color.gray; // new Color(102, 102, 102);
+    GradientPaint gradient = new GradientPaint(0, this.getHeight(), startColor, 0, 0, endColor); // vertical, upside down
+    (g2d).setPaint(gradient);
 //  g2d.fillRect(0, 0, this.getWidth(), this.getHeight());
     g2d.fillOval(0, 0, this.getWidth(), this.getHeight());
     // Boat

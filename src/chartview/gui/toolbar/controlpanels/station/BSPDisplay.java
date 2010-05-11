@@ -6,6 +6,9 @@ import java.awt.Color;
 import java.awt.Dimension;
 
 import java.awt.Font;
+import java.awt.GradientPaint;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 
@@ -65,5 +68,16 @@ public class BSPDisplay
   public float getBsp()
   {
     return bsp;
+  }
+  
+  public void paintComponent(Graphics gr)
+  {
+    Color startColor = Color.black; // new Color(255, 255, 255);
+    Color endColor   = Color.gray; // new Color(102, 102, 102);
+    GradientPaint gradient = new GradientPaint(0, this.getHeight(), startColor, 0, 0, endColor); // vertical, upside down
+    ((Graphics2D)gr).setPaint(gradient);    
+    int w = this.getWidth();
+    int h = this.getHeight();
+    gr.fillRect(0, 0, w, h);
   }
 }

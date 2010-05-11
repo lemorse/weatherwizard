@@ -4,7 +4,10 @@ import java.awt.Color;
 import java.awt.Dimension;
 
 import java.awt.Font;
+import java.awt.GradientPaint;
 import java.awt.Graphics;
+
+import java.awt.Graphics2D;
 
 import javax.swing.JPanel;
 
@@ -37,7 +40,11 @@ public class HeadingPanel
     int w = this.getWidth();
     int h = this.getHeight();
     final int FONT_SIZE = 12;
-    gr.setColor(Color.black);
+//  g2d.setColor(Color.black); 
+    Color startColor = Color.black; // new Color(255, 255, 255);
+    Color endColor   = Color.gray; // new Color(102, 102, 102);
+    GradientPaint gradient = new GradientPaint(0, this.getHeight(), startColor, 0, 0, endColor); // vertical, upside down
+    ((Graphics2D)gr).setPaint(gradient);
     gr.fillRect(0, 0, w, h);
     // Width: 30 on each side = 60
     gr.setColor(Color.white);

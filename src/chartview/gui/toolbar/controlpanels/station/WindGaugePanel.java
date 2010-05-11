@@ -3,6 +3,7 @@ package chartview.gui.toolbar.controlpanels.station;
 import java.awt.Color;
 import java.awt.Dimension;
 
+import java.awt.GradientPaint;
 import java.awt.Graphics;
 
 import java.awt.Graphics2D;
@@ -59,6 +60,11 @@ public class WindGaugePanel
   {
     Graphics2D g2d = (Graphics2D)gr;
     // Gauge background 
+//  g2d.setColor(Color.black); 
+    Color startColor = Color.black; // new Color(255, 255, 255);
+    Color endColor   = Color.gray; // new Color(102, 102, 102);
+    GradientPaint gradient = new GradientPaint(0, this.getHeight(), startColor, 0, 0, endColor); // vertical, upside down
+    (g2d).setPaint(gradient);
     int gaugeHeight = this.getHeight();
     g2d.fillRect(0, 
                  0, 
