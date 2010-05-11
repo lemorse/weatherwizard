@@ -2,6 +2,8 @@ package chartview.util.http;
 
 import chartview.util.WWGnlUtilities;
 import chartview.ctx.WWContext;
+
+import chartview.util.ImageUtil;
 import chartview.util.gifutil.GIFInputStream;
 import chartview.util.gifutil.GIFOutputStream;
 
@@ -151,7 +153,16 @@ public class HTTPClient
           gifImage.init(new GIFInputStream(urlConn.getInputStream()));
         }
         else
-          image = ImageIO.read(chartUrl);
+        {
+          boolean tif = urlStr.toUpperCase().endsWith(".TIFF") || urlStr.toUpperCase().endsWith(".TIF");
+          if (tif)
+          {
+            InputStream is = chartUrl.openStream();
+            image = ImageUtil.readImage(is, tif);     
+          }
+          else
+            image = ImageIO.read(chartUrl);
+        }
       }
       catch (Exception e)
       {

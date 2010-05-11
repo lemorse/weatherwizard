@@ -2467,10 +2467,13 @@ public class CommandPanel
                       }
                       try
                       {
-                        double lat = Double.parseDouble(doc.selectNodes("/data/lat[1]").item(0).getFirstChild().getNodeValue());
-                        double lng = Double.parseDouble(doc.selectNodes("/data/lng[1]").item(0).getFirstChild().getNodeValue());
+                        double lat = 0d;
+                        try { lat = Double.parseDouble(doc.selectNodes("/data/lat[1]").item(0).getFirstChild().getNodeValue()); } catch (Exception ignore) {}
+                        double lng = 0d;
+                        try { lng = Double.parseDouble(doc.selectNodes("/data/lng[1]").item(0).getFirstChild().getNodeValue()); } catch (Exception ignore) {}
                         boatPosition = new GeoPoint(lat, lng);
-                        int hdg = (int)Math.round(Double.parseDouble(doc.selectNodes("/data/cog").item(0).getFirstChild().getNodeValue()));
+                        int hdg = 0;
+                        try { hdg = (int)Math.round(Double.parseDouble(doc.selectNodes("/data/cog").item(0).getFirstChild().getNodeValue())); } catch (Exception ignore) {}
                         boatHeading = hdg;
                         chartPanel.repaint();
                       }
@@ -2482,7 +2485,7 @@ public class CommandPanel
                     }
                     catch (Exception e)
                     {
-                        WWContext.getInstance().fireExceptionLogging(e);
+                      WWContext.getInstance().fireExceptionLogging(e);
                       e.printStackTrace();
                     }
                     // then wait
@@ -6393,12 +6396,16 @@ public class CommandPanel
   private static String getSolarTimeTooltip(GeoPoint gp)
   {
     String str = "Solar Time: XX:XX:XX";
-    Date ut = TimeUtil.getGMT();
-//  System.out.println("UTC:" + ut.toString());
-    long longUT = ut.getTime();
-    long solarTime = longUT + (long)((gp.getG() / 15D) * (3600000D));
-    Date solarDate = new Date(solarTime);
-    str = WWGnlUtilities.buildMessage("solar") + ":" + WWGnlUtilities.SDF_SOLAR.format(solarDate);    
+    try
+    {
+      Date ut = TimeUtil.getGMT();
+  //  System.out.println("UTC:" + ut.toString());
+      long longUT = ut.getTime();
+      long solarTime = longUT + (long)((gp.getG() / 15D) * (3600000D));
+      Date solarDate = new Date(solarTime);
+      str = WWGnlUtilities.buildMessage("solar") + ":" + WWGnlUtilities.SDF_SOLAR.format(solarDate);    
+    }
+    catch (Exception ignore) {}
     return str;
   }
   

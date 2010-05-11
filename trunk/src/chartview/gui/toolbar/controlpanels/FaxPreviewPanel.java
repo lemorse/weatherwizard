@@ -136,7 +136,7 @@ public class FaxPreviewPanel
   
   private final void displayImage() throws Exception
   {
-    final Image faxImg = ImageUtil.readImage(imgName);
+    final Image faxImg = ImageUtil.blur(ImageUtil.toBufferedImage(ImageUtil.readImage(imgName)));
     final int w = faxImg.getWidth(null);
     final int h = faxImg.getHeight(null);
     double wFact = w / instance.getSize().getWidth();

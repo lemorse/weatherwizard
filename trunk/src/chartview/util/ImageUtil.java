@@ -424,7 +424,7 @@ public class ImageUtil
     }
     // Get the image's color model
     ColorModel cm = pg.getColorModel();
-    return cm.hasAlpha();
+    return (cm==null?null:cm.hasAlpha());
   }
   
   public static BufferedImage toBufferedImage(Image image)
