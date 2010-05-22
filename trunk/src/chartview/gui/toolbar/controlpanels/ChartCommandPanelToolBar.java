@@ -45,6 +45,9 @@ public class ChartCommandPanelToolBar
   private JRadioButton grabRadioButton = new JRadioButton();
   private JRadioButton crossRadioButton = new JRadioButton();
   private JRadioButton arrowRadioButton = new JRadioButton();
+
+  private JSeparator js1 = new JSeparator();
+  private JSeparator js2 = new JSeparator();
   
   private JButton expandCollapseControlButton = new JButton();
   private boolean controlExpanded = false;
@@ -73,6 +76,7 @@ public class ChartCommandPanelToolBar
   private void jbInit()
     throws Exception
   {
+    this.setSize(new Dimension(400, 56));
     zoomInButton.setIcon(new ImageIcon(this.getClass().getResource("img/zoomin.gif")));
     zoomInButton.setToolTipText(WWGnlUtilities.buildMessage("fax-zoom-in"));
     zoomInButton.setActionCommand("zoomIn");
@@ -136,10 +140,16 @@ public class ChartCommandPanelToolBar
     expandCollapseHolder.add(expandCollapseControlButton);
     extraComponentHolder.add(expandCollapseHolder, BorderLayout.EAST);
     
+    js1.setOrientation(JSeparator.VERTICAL);
+    js1.setPreferredSize(new Dimension(2, 20));
+    radioButtonHolder.add(js1);
     radioButtonHolder.add(ddRadioButton, null);
     radioButtonHolder.add(grabRadioButton, null);
     radioButtonHolder.add(crossRadioButton, null);
     radioButtonHolder.add(arrowRadioButton, null);
+    js2.setOrientation(JSeparator.VERTICAL);
+    js2.setPreferredSize(new Dimension(2, 20));
+    radioButtonHolder.add(js2);
 
     buttonGroup.add(ddRadioButton);
     buttonGroup.add(grabRadioButton);
