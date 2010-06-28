@@ -198,7 +198,7 @@ public class ChartAdjust
            // Display file list
            UpdatePanel updatePanel = new UpdatePanel();
            sendPing("Software update requested for:\n" + downloadMess);
-            WWContext.getInstance().fireSetStatus(WWGnlUtilities.buildMessage("soft-update-available"));
+           WWContext.getInstance().fireSetStatus(WWGnlUtilities.buildMessage("soft-update-available"));
  
            if (proceed)
              updatePanel.setTopLabel(WWGnlUtilities.buildMessage("following-updated"));
@@ -216,6 +216,13 @@ public class ChartAdjust
              }
            };
          thread.start();
+         // TODO Remove CoreContext listener
+       }
+       public void networkOk(boolean b) 
+       {
+         WWContext.getInstance().fireSetStatus(WWGnlUtilities.buildMessage("network-connection-status", new String[] { Boolean.toString(b) }));
+         WWContext.getInstance().fireNetworkOK(b);
+         // TODO Remove CoreContext listener if !b
        }
      });
     checkForUpdate.start();
