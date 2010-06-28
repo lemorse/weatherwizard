@@ -20,7 +20,7 @@ import chartview.gui.util.dialog.InternetGRIB;
 import chartview.gui.util.dialog.LoadAtStartupPanel;
 import chartview.gui.util.dialog.PositionInputPanel;
 import chartview.gui.util.dialog.PredefZonesTablePanel;
-import chartview.gui.util.dialog.WeatherDataInputPanel;
+import chartview.gui.util.dialog.CompositeDetailsInputPanel;
 import chartview.gui.util.param.CategoryPanel;
 import chartview.gui.util.param.ParamData;
 import chartview.gui.util.param.ParamPanel;
@@ -159,7 +159,7 @@ public class AdjustFrame
   private JSplitPane jSplitPane = null;
   private ChartCommandPanelToolBar commandPanelToolbar = new ChartCommandPanelToolBar();
   
-  private WeatherDataInputPanel inputPanel = null;
+  private CompositeDetailsInputPanel inputPanel = null;
   private PositionInputPanel pip = null;
 
   protected AdjustFrame instance = this;
@@ -1126,7 +1126,7 @@ public class AdjustFrame
   private void setupComposite(String faxFile, String gribFile)
   {
     if (inputPanel == null)
-      inputPanel = new WeatherDataInputPanel();
+      inputPanel = new CompositeDetailsInputPanel();
 
     FaxType[] faxarray = commandPanel.getFaxes();
 //  if (faxarray != null)
@@ -1179,18 +1179,18 @@ public class AdjustFrame
       
       boolean[] gribOptions = inputPanel.getGRIBOptions();
 
-      boolean atLeastOne3D = gribOptions[WeatherDataInputPanel.TWS_3D] ||
-                             gribOptions[WeatherDataInputPanel.PRMSL_3D] ||
-                             gribOptions[WeatherDataInputPanel.MB500_3D] ||
-                             gribOptions[WeatherDataInputPanel.WAVES_3D] ||
-                             gribOptions[WeatherDataInputPanel.TEMP_3D] ||
-                             gribOptions[WeatherDataInputPanel.PRATE_3D];
-      boolean atLeastOneContour = gribOptions[WeatherDataInputPanel.TWS_CONTOUR] ||
-                                  gribOptions[WeatherDataInputPanel.PRMSL_CONTOUR] ||
-                                  gribOptions[WeatherDataInputPanel.MB500_CONTOUR] ||
-                                  gribOptions[WeatherDataInputPanel.WAVES_CONTOUR] ||
-                                  gribOptions[WeatherDataInputPanel.TEMP_CONTOUR] ||
-                                  gribOptions[WeatherDataInputPanel.PRATE_CONTOUR];
+      boolean atLeastOne3D = gribOptions[CompositeDetailsInputPanel.TWS_3D] ||
+                             gribOptions[CompositeDetailsInputPanel.PRMSL_3D] ||
+                             gribOptions[CompositeDetailsInputPanel.MB500_3D] ||
+                             gribOptions[CompositeDetailsInputPanel.WAVES_3D] ||
+                             gribOptions[CompositeDetailsInputPanel.TEMP_3D] ||
+                             gribOptions[CompositeDetailsInputPanel.PRATE_3D];
+      boolean atLeastOneContour = gribOptions[CompositeDetailsInputPanel.TWS_CONTOUR] ||
+                                  gribOptions[CompositeDetailsInputPanel.PRMSL_CONTOUR] ||
+                                  gribOptions[CompositeDetailsInputPanel.MB500_CONTOUR] ||
+                                  gribOptions[CompositeDetailsInputPanel.WAVES_CONTOUR] ||
+                                  gribOptions[CompositeDetailsInputPanel.TEMP_CONTOUR] ||
+                                  gribOptions[CompositeDetailsInputPanel.PRATE_CONTOUR];
       if (((faxFile != null && faxFile.trim().length() > 0) || (faxarray != null && faxarray.length > 0)) && 
         /* inputPanel.getGribFileName().trim().length() > 0 && */
            atLeastOneContour) // Confirm Faxes + GRIB contour lines
@@ -1203,29 +1203,29 @@ public class AdjustFrame
         if (response == JOptionPane.NO_OPTION)
         {
           System.out.println("Canceling contour lines");
-          gribOptions[WeatherDataInputPanel.TWS_CONTOUR] = false;
-          gribOptions[WeatherDataInputPanel.PRMSL_CONTOUR] = false;
-          gribOptions[WeatherDataInputPanel.MB500_CONTOUR] = false;
-          gribOptions[WeatherDataInputPanel.WAVES_CONTOUR] = false;
-          gribOptions[WeatherDataInputPanel.TEMP_CONTOUR]  = false;
-          gribOptions[WeatherDataInputPanel.PRATE_CONTOUR] = false;
+          gribOptions[CompositeDetailsInputPanel.TWS_CONTOUR] = false;
+          gribOptions[CompositeDetailsInputPanel.PRMSL_CONTOUR] = false;
+          gribOptions[CompositeDetailsInputPanel.MB500_CONTOUR] = false;
+          gribOptions[CompositeDetailsInputPanel.WAVES_CONTOUR] = false;
+          gribOptions[CompositeDetailsInputPanel.TEMP_CONTOUR]  = false;
+          gribOptions[CompositeDetailsInputPanel.PRATE_CONTOUR] = false;
         }
       }
 //    commandPanel.setDisplayContour(withContourLines);
       commandPanel.setCurrentComment(inputPanel.getComment());
       
-      commandPanel.setDisplayPrmsl(gribOptions[WeatherDataInputPanel.PRMSL_DATA]);
-      commandPanel.setDisplay500mb(gribOptions[WeatherDataInputPanel.MB500_DATA]);
-      commandPanel.setDisplayWaves(gribOptions[WeatherDataInputPanel.WAVES_DATA]);
-      commandPanel.setDisplayTemperature(gribOptions[WeatherDataInputPanel.TEMP_DATA]);
-      commandPanel.setDisplayRain(gribOptions[WeatherDataInputPanel.PRATE_DATA]);
+      commandPanel.setDisplayPrmsl(gribOptions[CompositeDetailsInputPanel.PRMSL_DATA]);
+      commandPanel.setDisplay500mb(gribOptions[CompositeDetailsInputPanel.MB500_DATA]);
+      commandPanel.setDisplayWaves(gribOptions[CompositeDetailsInputPanel.WAVES_DATA]);
+      commandPanel.setDisplayTemperature(gribOptions[CompositeDetailsInputPanel.TEMP_DATA]);
+      commandPanel.setDisplayRain(gribOptions[CompositeDetailsInputPanel.PRATE_DATA]);
       
-      commandPanel.setDisplay3DTws(gribOptions[WeatherDataInputPanel.TWS_3D]);
-      commandPanel.setDisplay3DPrmsl(gribOptions[WeatherDataInputPanel.PRMSL_3D]);
-      commandPanel.setDisplay3D500mb(gribOptions[WeatherDataInputPanel.MB500_3D]);
-      commandPanel.setDisplay3DWaves(gribOptions[WeatherDataInputPanel.WAVES_3D]);
-      commandPanel.setDisplay3DTemperature(gribOptions[WeatherDataInputPanel.TEMP_3D]);
-      commandPanel.setDisplay3DRain(gribOptions[WeatherDataInputPanel.PRATE_3D]);
+      commandPanel.setDisplay3DTws(gribOptions[CompositeDetailsInputPanel.TWS_3D]);
+      commandPanel.setDisplay3DPrmsl(gribOptions[CompositeDetailsInputPanel.PRMSL_3D]);
+      commandPanel.setDisplay3D500mb(gribOptions[CompositeDetailsInputPanel.MB500_3D]);
+      commandPanel.setDisplay3DWaves(gribOptions[CompositeDetailsInputPanel.WAVES_3D]);
+      commandPanel.setDisplay3DTemperature(gribOptions[CompositeDetailsInputPanel.TEMP_3D]);
+      commandPanel.setDisplay3DRain(gribOptions[CompositeDetailsInputPanel.PRATE_3D]);
       if (atLeastOne3D)
       {
         tabbedPane.setEnabledAt(1, true);  
@@ -1238,12 +1238,12 @@ public class AdjustFrame
           tabbedPane.setSelectedIndex(0);
         tabbedPane.setEnabledAt(1, false);
       }
-      commandPanel.setDisplayContourTWS(gribOptions[WeatherDataInputPanel.TWS_CONTOUR]);
-      commandPanel.setDisplayContourPRMSL(gribOptions[WeatherDataInputPanel.PRMSL_CONTOUR]);
-      commandPanel.setDisplayContour500mb(gribOptions[WeatherDataInputPanel.MB500_CONTOUR]);
-      commandPanel.setDisplayContourWaves(gribOptions[WeatherDataInputPanel.WAVES_CONTOUR]);
-      commandPanel.setDisplayContourTemp(gribOptions[WeatherDataInputPanel.TEMP_CONTOUR]);
-      commandPanel.setDisplayContourPrate(gribOptions[WeatherDataInputPanel.PRATE_CONTOUR]);
+      commandPanel.setDisplayContourTWS(gribOptions[CompositeDetailsInputPanel.TWS_CONTOUR]);
+      commandPanel.setDisplayContourPRMSL(gribOptions[CompositeDetailsInputPanel.PRMSL_CONTOUR]);
+      commandPanel.setDisplayContour500mb(gribOptions[CompositeDetailsInputPanel.MB500_CONTOUR]);
+      commandPanel.setDisplayContourWaves(gribOptions[CompositeDetailsInputPanel.WAVES_CONTOUR]);
+      commandPanel.setDisplayContourTemp(gribOptions[CompositeDetailsInputPanel.TEMP_CONTOUR]);
+      commandPanel.setDisplayContourPrate(gribOptions[CompositeDetailsInputPanel.PRATE_CONTOUR]);
 
 //    System.out.println("InputPanel OK");
       WWContext.getInstance().fireSetLoading(true);
@@ -1381,26 +1381,26 @@ public class AdjustFrame
     }
   }
 
-  private boolean haveGRIBOtpionsChanged(WeatherDataInputPanel ip, CommandPanel cp)
+  private boolean haveGRIBOtpionsChanged(CompositeDetailsInputPanel ip, CommandPanel cp)
   {
     boolean[] gribOptions = ip.getGRIBOptions();
-    return (gribOptions[WeatherDataInputPanel.PRMSL_DATA] != cp.isDisplayPrmsl() ||
-            gribOptions[WeatherDataInputPanel.MB500_DATA] != cp.isDisplay500mb() ||
-            gribOptions[WeatherDataInputPanel.WAVES_DATA] != cp.isDisplayWaves() ||
-            gribOptions[WeatherDataInputPanel.TEMP_DATA] != cp.isDisplayTemperature() ||
-            gribOptions[WeatherDataInputPanel.PRATE_DATA] != cp.isDisplayRain() ||
-            gribOptions[WeatherDataInputPanel.TWS_3D] != cp.isDisplay3DTws() ||
-            gribOptions[WeatherDataInputPanel.PRMSL_3D] != cp.isDisplay3DPrmsl() || 
-            gribOptions[WeatherDataInputPanel.MB500_3D] != cp.isDisplay3D500mb() ||
-            gribOptions[WeatherDataInputPanel.WAVES_3D] != cp.isDisplay3DWaves() ||
-            gribOptions[WeatherDataInputPanel.TEMP_3D] != cp.isDisplay3DTemperature() ||
-            gribOptions[WeatherDataInputPanel.PRATE_3D] != cp.isDisplay3DRain() ||
-            gribOptions[WeatherDataInputPanel.TWS_CONTOUR] != cp.isDisplayContourTWS() ||
-            gribOptions[WeatherDataInputPanel.PRMSL_CONTOUR] != cp.isDisplayContourPRMSL() ||
-            gribOptions[WeatherDataInputPanel.MB500_CONTOUR] != cp.isDisplayContour500mb() ||
-            gribOptions[WeatherDataInputPanel.WAVES_CONTOUR] != cp.isDisplayContourWaves() ||
-            gribOptions[WeatherDataInputPanel.TEMP_CONTOUR] != cp.isDisplayContourTemp() ||
-            gribOptions[WeatherDataInputPanel.PRATE_CONTOUR] != cp.isDisplayContourPrate());
+    return (gribOptions[CompositeDetailsInputPanel.PRMSL_DATA] != cp.isDisplayPrmsl() ||
+            gribOptions[CompositeDetailsInputPanel.MB500_DATA] != cp.isDisplay500mb() ||
+            gribOptions[CompositeDetailsInputPanel.WAVES_DATA] != cp.isDisplayWaves() ||
+            gribOptions[CompositeDetailsInputPanel.TEMP_DATA] != cp.isDisplayTemperature() ||
+            gribOptions[CompositeDetailsInputPanel.PRATE_DATA] != cp.isDisplayRain() ||
+            gribOptions[CompositeDetailsInputPanel.TWS_3D] != cp.isDisplay3DTws() ||
+            gribOptions[CompositeDetailsInputPanel.PRMSL_3D] != cp.isDisplay3DPrmsl() || 
+            gribOptions[CompositeDetailsInputPanel.MB500_3D] != cp.isDisplay3D500mb() ||
+            gribOptions[CompositeDetailsInputPanel.WAVES_3D] != cp.isDisplay3DWaves() ||
+            gribOptions[CompositeDetailsInputPanel.TEMP_3D] != cp.isDisplay3DTemperature() ||
+            gribOptions[CompositeDetailsInputPanel.PRATE_3D] != cp.isDisplay3DRain() ||
+            gribOptions[CompositeDetailsInputPanel.TWS_CONTOUR] != cp.isDisplayContourTWS() ||
+            gribOptions[CompositeDetailsInputPanel.PRMSL_CONTOUR] != cp.isDisplayContourPRMSL() ||
+            gribOptions[CompositeDetailsInputPanel.MB500_CONTOUR] != cp.isDisplayContour500mb() ||
+            gribOptions[CompositeDetailsInputPanel.WAVES_CONTOUR] != cp.isDisplayContourWaves() ||
+            gribOptions[CompositeDetailsInputPanel.TEMP_CONTOUR] != cp.isDisplayContourTemp() ||
+            gribOptions[CompositeDetailsInputPanel.PRATE_CONTOUR] != cp.isDisplayContourPrate());
   }
   
   private void appendFrameTitle(String s)
