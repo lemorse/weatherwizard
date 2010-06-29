@@ -166,7 +166,7 @@ public class CommandPanel
 //private JLabel imgHolder;
   protected ChartPanel chartPanel;
   
-  protected FaxImage[] faxImage;
+  protected transient FaxImage[] faxImage;
   private int currentFaxIndex = -1;
   
   private String currentComment = "";
@@ -318,12 +318,12 @@ public class CommandPanel
                                                     islandsTws      = null,
                                                     islandsPrate    = null;
 
-  private boolean displayGribPRMSLContour = true,
+  private boolean displayGribPRMSLContour  = true,
                   displayGrib500HGTContour = true,
-                  displayGribTWSContour = true,
-                  displayGribWavesContour = true,
-                  displayGribTempContour = true,
-                  displayGribPrateContour = true;
+                  displayGribTWSContour    = true,
+                  displayGribWavesContour  = true,
+                  displayGribTempContour   = true,
+                  displayGribPrateContour  = true;
 
   private ArrayList<CurveUtil.GeoBump> twsBumps = null;
   private ArrayList<CurveUtil.GeoBump> prmslBumps = null;
@@ -2053,12 +2053,12 @@ public class CommandPanel
         {
           // Read data
           final String fileName = WWGnlUtilities.chooseFile(instance, 
-                                                          JFileChooser.FILES_ONLY, 
-                                                          new String[] { "ptrn" }, 
-                                                          "Patterns", 
-                                                          ParamPanel.data[ParamData.PATTERN_DIR][1].toString(), 
-                                                          "Open", 
-                                                          "Use Pattern");
+                                                            JFileChooser.FILES_ONLY, 
+                                                            new String[] { "ptrn" }, 
+                                                            "Patterns", 
+                                                            ParamPanel.data[ParamData.PATTERN_DIR][1].toString(), 
+                                                            "Open", 
+                                                            "Use Pattern");
           loadWithPattern(fileName);
         }
 
@@ -2066,6 +2066,8 @@ public class CommandPanel
         {
           if (fileName != null && fileName.trim().length() > 0)
           {
+            // Reset comment
+            currentComment = "";
             boolean dyn = WWGnlUtilities.isPatternDynamic(fileName);
             if (dyn)
             {
@@ -5744,6 +5746,21 @@ public class CommandPanel
       }
       g2.setStroke(originalStroke);
     }
+    if (gribSliceInfo != -1D && fromGRIBSlice == null && toGRIBSlice == null) // Routing GRIB Slice
+    {
+//    System.out.println("GribSliceInfo at Point D:" + gribSliceInfo);      
+      int[] xy = gsp.getPointFromD(gribSliceInfo);
+      if (gribData != null)
+      {
+        GribHelper.GribPointData gpd = gribData.getGribPointData()[xy[0]][xy[1]];
+        GeoPoint gp = new GeoPoint(gpd.getLat(), gpd.getLng());
+//      System.out.println("X:" + xy[0] + ", Y:" + xy[1] + " -> " + gp.toString());
+        
+        Point pt = chartPanel.getPanelPoint(gp);
+        gr.setColor(Color.red);
+        gr.fillOval(pt.x - 8, pt.y - 8, 16, 16);        
+      }
+    }
     
     if (displayPageSize)
     {
@@ -6060,6 +6077,9 @@ public class CommandPanel
 //          JOptionPane.showMessageDialog(null, "Routing is in the clipboard\n(Ctrl+V in any editor...)", "Routing completed", JOptionPane.INFORMATION_MESSAGE);
             WWContext.getInstance().fireSetStatus(WWGnlUtilities.buildMessage("routing-in-clip"));
             WWContext.getInstance().fireRoutingAvailable(true, bestRoute);
+            
+            displayGRIBSlice(bestRoute);
+            
   //        routingMode = false;
   //        JOptionPane.showMessageDialog(null, "Isochron Calculation completed", "Routing", 1);
 //          System.out.println("RoutingMode:" + routingMode + ", from:" + (from==null?"":"not ") + "null" +
@@ -6362,32 +6382,64 @@ public class CommandPanel
   
   private void displayGRIBSlice()
   {
+    displayGRIBSlice(null);
+  }
+  
+  private void displayGRIBSlice(ArrayList<RoutingPoint> bestRoute)
+  {
 //  System.out.println("displayGRIBSlice...");
     ArrayList<GribHelper.GribCondition> data2plot = new ArrayList<GribHelper.GribCondition>();
     int nbSteps = 1000;
-    for (int idx=0; idx <= nbSteps; idx++)
+    if (fromGRIBSlice != null && toGRIBSlice != null) // GRIB Slice
     {
-      Point from = chartPanel.getPanelPoint(fromGRIBSlice);
-      Point to   = chartPanel.getPanelPoint(toGRIBSlice);
-      int x = from.x + (int)((idx * ((float)to.x - (float)from.x)) / (float)nbSteps);
-      int y = from.y + (int)((idx * ((float)to.y - (float)from.y)) / (float)nbSteps);
-    //        System.out.println("x:" + x + ", y:" + y);
-      GeoPoint gp = chartPanel.getGeoPos(x, y);
-      GribHelper.GribCondition gribPoint = null;
-      try 
-      { 
-        gribPoint = GribHelper.gribLookup(gp, gribData); 
-        data2plot.add(gribPoint);
-      }
-      catch (Exception ignore) 
+      for (int idx=0; idx <= nbSteps; idx++)
       {
-        ignore.printStackTrace();
-      }          
+        Point from = chartPanel.getPanelPoint(fromGRIBSlice);
+        Point to   = chartPanel.getPanelPoint(toGRIBSlice);
+        int x = from.x + (int)((idx * ((float)to.x - (float)from.x)) / (float)nbSteps);
+        int y = from.y + (int)((idx * ((float)to.y - (float)from.y)) / (float)nbSteps);
+      //        System.out.println("x:" + x + ", y:" + y);
+        GeoPoint gp = chartPanel.getGeoPos(x, y);
+        GribHelper.GribCondition gribPoint = null;
+        try 
+        { 
+          gribPoint = GribHelper.gribLookup(gp, gribData); 
+          data2plot.add(gribPoint);
+        }
+        catch (Exception ignore) 
+        {
+          ignore.printStackTrace();
+        }          
+      }
+    }
+    else // This is a routing
+    {
+      // Route is upside down
+      int routeSize = bestRoute.size();
+//    for (RoutingPoint rp : bestRoute)
+      for (int i=routeSize - 1; i >= 0; i--)
+      {
+        RoutingPoint rp = bestRoute.get(i);
+        GeoPoint gp = rp.getPosition();
+        GribHelper.GribCondition gribPoint = null;
+        try 
+        { 
+          gribPoint = GribHelper.gribLookup(gp, gribData); 
+          data2plot.add(gribPoint);
+        }
+        catch (Exception ignore) 
+        {
+          ignore.printStackTrace();
+        }          
+      }
     }
     if (gsp == null)
-      gsp = new GRIBSlicePanel(data2plot);
+      gsp = new GRIBSlicePanel(data2plot, 1);
     else
+    {
       gsp.setData(data2plot);
+      gsp.setForkWidth(1);
+    }
     
     jSplitPane.setLeftComponent(gsp);
   }
