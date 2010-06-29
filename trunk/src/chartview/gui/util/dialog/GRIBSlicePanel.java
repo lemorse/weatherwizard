@@ -1,34 +1,25 @@
 package chartview.gui.util.dialog;
 
+
 import chartview.ctx.WWContext;
 
-import chartview.gui.util.param.ParamData;
-import chartview.gui.util.param.ParamPanel;
-
-import chartview.util.WWGnlUtilities;
 import chartview.util.grib.GribHelper;
 
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
-
 import java.awt.Dimension;
-
 import java.awt.Font;
 import java.awt.Graphics;
-
 import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-
 import java.awt.Insets;
-
 import java.awt.Point;
 import java.awt.Stroke;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -42,11 +33,12 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+
 public class GRIBSlicePanel
      extends JPanel
 {
-  private ArrayList<GribHelper.GribCondition> data2plot;
-  private ArrayList<GribHelper.GribCondition> smoothedData;
+  private transient ArrayList<GribHelper.GribCondition> data2plot;
+  private transient ArrayList<GribHelper.GribCondition> smoothedData;
   private JPanel checkBoxPanel = new JPanel();
   private JPanel checkBoxTopPanel = new JPanel();
   private JPanel smoothFactorPanel = new JPanel();
@@ -81,6 +73,22 @@ public class GRIBSlicePanel
   private DecimalFormat tempFormat   = new DecimalFormat("##0'°C'");
   private DecimalFormat prateFormat  = new DecimalFormat("##0.00 'mm/h'");
 
+  public GRIBSlicePanel(ArrayList<GribHelper.GribCondition> data, int fw)
+  {
+    if (fw % 2 == 0)
+      throw new RuntimeException("Fork Width must be odd");
+    forkWidth = fw;
+    data2plot = data;
+    try
+    {
+      jbInit();
+    }
+    catch (Exception e)
+    {
+      e.printStackTrace();
+    }
+  }
+  
   public GRIBSlicePanel(ArrayList<GribHelper.GribCondition> data)
   {
     data2plot = data;
@@ -100,8 +108,18 @@ public class GRIBSlicePanel
     computeData();
   }
   
-  GribHelper.GribCondition gribMini = null;
-  GribHelper.GribCondition gribMaxi = null;
+  private transient GribHelper.GribCondition gribMini = null;
+  private transient GribHelper.GribCondition gribMaxi = null;
+
+  public int[] getPointFromD(double d) // d goes from 0 to 1
+  {
+    int size = data2plot.size();
+    double dIdx = d * size;
+    int x = data2plot.get((int)dIdx).vertIdx;
+    int y = data2plot.get((int)dIdx).horIdx;
+    
+    return new int[] { x, y };
+  }
 
   private void jbInit()
     throws Exception
@@ -205,24 +223,18 @@ public class GRIBSlicePanel
     checkBoxTopPanel.add(dataLabel,
                          new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
                                                 new Insets(0, 3, 3, 0), 0, 0));
-    checkBoxTopPanel.add(twsCheckBox,
-                         new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
-                                                new Insets(0, 3, 0, 0), 0, 0));
-    checkBoxTopPanel.add(prmslCheckBox,
-                         new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
-                                                new Insets(0, 3, 0, 0), 0, 0));
-    checkBoxTopPanel.add(hgt500CheckBox,
-                         new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
-                                                new Insets(0, 3, 0, 0), 0, 0));
-    checkBoxTopPanel.add(wavesCheckBox,
-                         new GridBagConstraints(0, 4, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
-                                                new Insets(0, 3, 0, 0), 0, 0));
-    checkBoxTopPanel.add(tempCheckBox,
-                         new GridBagConstraints(0, 5, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
-                                                new Insets(0, 3, 0, 0), 0, 0));
-    checkBoxTopPanel.add(rainCheckBox,
-                         new GridBagConstraints(0, 6, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
-                                                new Insets(0, 3, 0, 0), 0, 0));
+    checkBoxTopPanel.add(twsCheckBox, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL,
+          new Insets(0, 3, 0, 0), 0, 0));
+    checkBoxTopPanel.add(prmslCheckBox, new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL,
+          new Insets(0, 3, 0, 0), 0, 0));
+    checkBoxTopPanel.add(hgt500CheckBox, new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL,
+          new Insets(0, 3, 0, 0), 0, 0));
+    checkBoxTopPanel.add(wavesCheckBox, new GridBagConstraints(0, 4, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL,
+          new Insets(0, 3, 0, 0), 0, 0));
+    checkBoxTopPanel.add(tempCheckBox, new GridBagConstraints(0, 5, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL,
+          new Insets(0, 3, 0, 0), 0, 0));
+    checkBoxTopPanel.add(rainCheckBox, new GridBagConstraints(0, 6, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL,
+          new Insets(0, 3, 0, 0), 0, 0));
     
     computeData();
   }
@@ -358,7 +370,12 @@ public class GRIBSlicePanel
     smoothedData = smooth(data2plot, forkWidth);
     repaint();
   }
-  
+
+  public void setForkWidth(int forkWidth)
+  {
+    this.forkWidth = forkWidth;
+  }
+
   class GRIBSliceDataPanel extends JPanel
   {
     private int infoX = -1;
