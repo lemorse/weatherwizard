@@ -244,6 +244,15 @@ public class WWContext
     }    
   }
 
+  public void fireSetCursor(int shape)
+  {
+    for (int i=0; i < this.getListeners().size(); i++)
+    {
+      ApplicationEventListener l = this.getListeners().get(i);
+      l.toggleGrabScroll(shape);
+    }    
+  }
+
   public void fireGribInfo(int currentIndex, 
                            int maxIndex, 
                            String gribInfo2, 

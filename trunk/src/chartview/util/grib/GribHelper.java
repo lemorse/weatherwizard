@@ -429,6 +429,27 @@ public class GribHelper
     public GribCondition()
     {
     }
+    
+    public GribCondition(float windspeed,
+                         int winddir,
+                         float hgt500,
+                         int horIdx,
+                         int vertIdx,
+                         float prmsl,
+                         float waves,
+                         float temp,
+                         float rain)
+    {
+      this.windspeed = windspeed;
+      this.winddir = winddir;
+      this.hgt500 = hgt500;
+      this.horIdx = horIdx;
+      this.vertIdx = vertIdx;
+      this.prmsl = prmsl;
+      this.waves = waves;
+      this.temp = temp;
+      this.rain = rain;
+    }
   }
 
   public static class GribConditionData
@@ -1238,6 +1259,5 @@ public class GribHelper
     System.out.println("123 is" + (isBetween(123,    0,  200)?" ":" not") + " between " + 0 + " and " + 200);
     System.out.println("123 is" + (isBetween(123,    0, -200)?" ":" not") + " between " + 0 + " and " + -200);
     System.out.println("123 is" + (isBetween(123, -100,  200)?" ":" not") + " between " + -100 + " and " + 200);
-  }
-  
+  }  
 }
