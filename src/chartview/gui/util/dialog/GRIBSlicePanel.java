@@ -30,6 +30,7 @@ import java.util.ArrayList;
 
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
@@ -43,7 +44,8 @@ public class GRIBSlicePanel
   private JPanel checkBoxTopPanel = new JPanel();
   private JPanel smoothFactorPanel = new JPanel();
   
-  private int forkWidth = 75;
+  public final static int DEFAULT_FORK_WIDTH = 75;
+  private int forkWidth = DEFAULT_FORK_WIDTH;
   
   private GRIBSliceDataPanel dataPanel = new GRIBSliceDataPanel();
   
@@ -76,8 +78,13 @@ public class GRIBSlicePanel
   public GRIBSlicePanel(ArrayList<GribHelper.GribCondition> data, int fw)
   {
     if (fw % 2 == 0)
-      throw new RuntimeException("Fork Width must be odd");
-    forkWidth = fw;
+    {
+   // throw new RuntimeException("Fork Width must be odd");
+      JOptionPane.showMessageDialog(this, "Fork width must be odd.\nUsing " + Integer.toString(fw + 1) + " instead of " + Integer.toString(fw), "Smoothing", JOptionPane.ERROR_MESSAGE);    
+      forkWidth = fw + 1;
+    }
+    else
+      forkWidth = fw;
     data2plot = data;
     try
     {
@@ -204,6 +211,7 @@ public class GRIBSlicePanel
       {
         public void actionPerformed(ActionEvent e)
         {
+//        System.out.println("Action performed!");
           smoothTextField_actionPerformed(e);
         }
       });
@@ -252,7 +260,7 @@ public class GRIBSlicePanel
     gribMini.hgt500 = Integer.MAX_VALUE;   gribMaxi.hgt500 = 0;
     gribMini.rain = Float.MAX_VALUE;       gribMaxi.rain = 0f;
     int nbNull = 0;
-    for (GribHelper.GribCondition ghgc : data2plot)
+    for (GribHelper.GribCondition ghgc : data2plot) // Mini/Maxi
     {
       if (ghgc != null)
       {
@@ -276,40 +284,52 @@ public class GRIBSlicePanel
         nbNull++;
     }
     //  System.out.println("Will plot " + data2plot.size() + " point(s), " + nbNull + " null(s).");
-    smoothedData = smooth(data2plot, forkWidth); 
+    smooth(forkWidth); 
   }
   
-  private ArrayList<GribHelper.GribCondition> smooth(ArrayList<GribHelper.GribCondition> data2smooth, int fork)  
+  private void smooth(int fork)  
   {
     if ((fork % 2) != 1)
     {
+      JOptionPane.showMessageDialog(this, "Fork width must be odd", "Smoothing", JOptionPane.ERROR_MESSAGE);      
       throw new RuntimeException("Fork must be odd.");
     }
-    ArrayList<GribHelper.GribCondition> smoothed = new ArrayList<GribHelper.GribCondition>();
-    for (GribHelper.GribCondition cond : data2smooth)
-      smoothed.add(cond);
-    
-    int halfFork = ((fork-1) / 2);
-//  for (int i=halfFork; i<(data2smooth.size() - halfFork); i++)    
-    for (int i=0; i<data2smooth.size(); i++)    
+    smoothedData = new ArrayList<GribHelper.GribCondition>(data2plot.size());
+
+    for (GribHelper.GribCondition cond : data2plot) // Clone the array
     {
-      double tws = 0D;      
+      smoothedData.add(new GribHelper.GribCondition(cond.windspeed,
+                                                    cond.winddir,
+                                                    cond.hgt500,
+                                                    cond.horIdx,
+                                                    cond.vertIdx,
+                                                    cond.prmsl,
+                                                    cond.waves,
+                                                    cond.temp,
+                                                    cond.rain));
+    }
+    int halfFork = ((fork-1) / 2);
+    for (int i=0; i<data2plot.size(); i++)    
+    {
+      double tws    = 0D;      
       double hgt500 = 0D;
-      double prmsl = 0D;
-      double waves = 0D;
-      double temp = 0D;
-      double rain = 0D;
+      double prmsl  = 0D;
+      double waves  = 0D;
+      double temp   = 0D;
+      double rain   = 0D;
       for (int j=(i-halfFork); j<=(i+halfFork); j++)
       {
         int _j = j;
-        if (_j<0) _j = 0;
-        if (_j>=data2smooth.size()) _j = data2smooth.size() - 1;
-        tws += data2smooth.get(_j).windspeed;
-        hgt500 += data2smooth.get(_j).hgt500;
-        prmsl += data2smooth.get(_j).prmsl;
-        waves += data2smooth.get(_j).waves;
-        temp += data2smooth.get(_j).temp;
-        rain += data2smooth.get(_j).rain;
+        if (_j<0) 
+          _j = 0;
+        if (_j>=data2plot.size()) 
+          _j = data2plot.size() - 1;
+        tws    += data2plot.get(_j).windspeed;
+        hgt500 += data2plot.get(_j).hgt500;
+        prmsl  += data2plot.get(_j).prmsl;
+        waves  += data2plot.get(_j).waves;
+        temp   += data2plot.get(_j).temp;
+        rain   += data2plot.get(_j).rain;
       }
       tws = tws / fork;
       hgt500 = hgt500 / fork;
@@ -318,14 +338,14 @@ public class GRIBSlicePanel
       temp = temp / fork;
       rain = rain / fork;
 
-      smoothed.get(i).windspeed = (float)tws;      
-      smoothed.get(i).hgt500 = (float)hgt500;      
-      smoothed.get(i).prmsl = (int)prmsl;      
-      smoothed.get(i).waves = (int)waves;      
-      smoothed.get(i).temp = (float)temp;      
-      smoothed.get(i).rain = (float)rain;      
+      smoothedData.get(i).windspeed = (float)tws;      
+      smoothedData.get(i).hgt500    = (float)hgt500;      
+      smoothedData.get(i).prmsl     = (int)prmsl;      
+      smoothedData.get(i).waves     = (int)waves;      
+      smoothedData.get(i).temp      = (float)temp;      
+      smoothedData.get(i).rain      = (float)rain;      
     }
-    return smoothed;    
+//  return smoothed;    
   }
   
   private void twsCheckBox_actionPerformed(ActionEvent e)
@@ -366,14 +386,42 @@ public class GRIBSlicePanel
 
   private void smoothTextField_actionPerformed(ActionEvent e)
   {
-    forkWidth = Integer.parseInt(smoothTextField.getText());
-    smoothedData = smooth(data2plot, forkWidth);
-    repaint();
+    try
+    {
+      int fw = Integer.parseInt(smoothTextField.getText());
+      if (fw % 2 == 1)
+      {
+        forkWidth = fw;
+        smooth(forkWidth);
+        repaint();
+      }
+      else
+      {
+        JOptionPane.showMessageDialog(this, "Fork width must be odd", "Smoothing", JOptionPane.ERROR_MESSAGE);
+        smoothTextField.setText(Integer.toString(forkWidth));
+      }
+    }
+    catch (NumberFormatException nfe)
+    {
+      JOptionPane.showMessageDialog(this, nfe.toString(), "Smoothing", JOptionPane.ERROR_MESSAGE);
+    }
   }
 
   public void setForkWidth(int forkWidth)
   {
-    this.forkWidth = forkWidth;
+    System.out.println("Setting forkWidth to " + forkWidth);
+    if (forkWidth % 2 == 1)
+    {
+      this.forkWidth = forkWidth;
+      smooth(forkWidth);
+      repaint();
+    }
+    else
+    {
+      JOptionPane.showMessageDialog(this, "Fork width must be odd", "Smoothing", JOptionPane.ERROR_MESSAGE);      
+    }
+    smoothTextField.setText(Integer.toString(this.forkWidth));
+    smoothTextField.repaint();
   }
 
   class GRIBSliceDataPanel extends JPanel
@@ -551,7 +599,8 @@ public class GRIBSlicePanel
 
         int dataIdx = (int)((float)infoX * (float)gribSize / (float)this.getWidth());
 //      System.out.println("GRIB Idx:" + dataIdx + " pour x:" + infoX + " / " + this.getWidth());
-        GribHelper.GribCondition gribPoint = data2plot.get(dataIdx);
+//      GribHelper.GribCondition gribPoint = data2plot.get(dataIdx);
+        GribHelper.GribCondition gribPoint = smoothedData.get(dataIdx);
         if (displayTWS)
         {
           int y = (int)(this.getHeight() - (gribPoint.windspeed * windscale));

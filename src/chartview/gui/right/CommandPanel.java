@@ -222,8 +222,8 @@ public class CommandPanel
   
   protected String gribFileName = "";
   protected String gribRequest = "";
-  protected GribHelper.GribConditionData wgd[] = null;
-  protected GribHelper.GribConditionData originalWgd[] = null;
+  protected transient GribHelper.GribConditionData wgd[] = null;
+  protected transient GribHelper.GribConditionData originalWgd[] = null;
   
   private int gribIndex = 0;
   protected boolean drawHeavyDot = false;
@@ -245,17 +245,17 @@ public class CommandPanel
   private String tooltipMess = null;
   private boolean replace = false;
   
-  private GeoPoint fromGRIBSlice = null, toGRIBSlice = null;
+  private transient GeoPoint fromGRIBSlice = null, toGRIBSlice = null;
   private double gribSliceInfo = -1D;
   
-  protected GeoPoint from = null, to = null, closest = null;
-  private RoutingPoint closestPoint = null;
-  private GeoPoint boatPosition = null;
+  protected transient GeoPoint from = null, to = null, closest = null;
+  private transient RoutingPoint closestPoint = null;
+  private transient GeoPoint boatPosition = null;
   private int boatHeading = -1;
   
   private int nmeaPollingInterval = ((Integer) ParamPanel.data[ParamData.NMEA_POLLING_FREQ][1]).intValue();
   private boolean goNmea          = false;
-  private Thread nmeaThread       = null;
+  private transient Thread nmeaThread       = null;
   
   protected boolean routingMode         = false;
   protected boolean routingForecastMode = false;
@@ -266,11 +266,11 @@ public class CommandPanel
 //private static int routingForkWidth = ((Integer) ParamPanel.data[ParamData.ROUTING_FORK_WIDTH][1]).intValue(); // 50;
 //private static int routingStep      = ((Integer) ParamPanel.data[ParamData.ROUTING_STEP][1]).intValue(); // 10;
     
-  protected ArrayList<ArrayList<RoutingPoint>> allCalculatedIsochrons = new ArrayList<ArrayList<RoutingPoint>>();
+  protected transient ArrayList<ArrayList<RoutingPoint>> allCalculatedIsochrons = new ArrayList<ArrayList<RoutingPoint>>();
   
   private boolean displayPageSize = false;
   
-  private GeoPoint routingPoint = null;
+  private transient GeoPoint routingPoint = null;
   private int routingHeading    = -1;
   
   protected double whRatio = 1D;
@@ -311,12 +311,12 @@ public class CommandPanel
 
   private static boolean coloredWind = true;
   
-  private ArrayList<ArrayList<ArrayList<GeoPoint>>> islandsPressure = null,
-                                                    islands500mb    = null,
-                                                    islandsTemp     = null,
-                                                    islandsWave     = null,
-                                                    islandsTws      = null,
-                                                    islandsPrate    = null;
+  private transient ArrayList<ArrayList<ArrayList<GeoPoint>>> islandsPressure = null,
+                                                              islands500mb    = null,
+                                                              islandsTemp     = null,
+                                                              islandsWave     = null,
+                                                              islandsTws      = null,
+                                                              islandsPrate    = null;
 
   private boolean displayGribPRMSLContour  = true,
                   displayGrib500HGTContour = true,
@@ -325,20 +325,20 @@ public class CommandPanel
                   displayGribTempContour   = true,
                   displayGribPrateContour  = true;
 
-  private ArrayList<CurveUtil.GeoBump> twsBumps = null;
-  private ArrayList<CurveUtil.GeoBump> prmslBumps = null;
-  private ArrayList<CurveUtil.GeoBump> hgt500Bumps = null;
-  private ArrayList<CurveUtil.GeoBump> tempBumps = null;
-  private ArrayList<CurveUtil.GeoBump> wavesBumps = null;
-  private ArrayList<CurveUtil.GeoBump> prateBumps = null;
+  private transient ArrayList<CurveUtil.GeoBump> twsBumps = null;
+  private transient ArrayList<CurveUtil.GeoBump> prmslBumps = null;
+  private transient ArrayList<CurveUtil.GeoBump> hgt500Bumps = null;
+  private transient ArrayList<CurveUtil.GeoBump> tempBumps = null;
+  private transient ArrayList<CurveUtil.GeoBump> wavesBumps = null;
+  private transient ArrayList<CurveUtil.GeoBump> prateBumps = null;
   
-  private IsoPointsThread isoPointsThread = null;
+  private transient IsoPointsThread isoPointsThread = null;
   
   private boolean showPlaces = true,
                   showSMStations = false,
                   showWeatherStations = false;
   
-  private AnimateThread animateThread = null;
+  private transient AnimateThread animateThread = null;
   
   private Font dataFont  = new Font("Tahoma", Font.BOLD, 12);
   private Font titleFont = new Font("Tahoma", Font.BOLD, 12);
@@ -1268,22 +1268,22 @@ public class CommandPanel
     previousBlurSharpOption = blurSharpOption;
   }
   
-  double nLat  =   65D;
-  double sLat  =  -65D;
-  double wLong = -180D;
-  double eLong =  180D;
+  private double nLat  =   65D;
+  private double sLat  =  -65D;
+  private double wLong = -180D;
+  private double eLong =  180D;
   
-  double tmpNLat  = Double.MAX_VALUE;
-  double tmpSLat  = Double.MAX_VALUE;
-  double tmpWLong = Double.MAX_VALUE;
-  double tmpELong = Double.MAX_VALUE;
+  private double tmpNLat  = Double.MAX_VALUE;
+  private double tmpSLat  = Double.MAX_VALUE;
+  private double tmpWLong = Double.MAX_VALUE;
+  private double tmpELong = Double.MAX_VALUE;
   
-  static GeoPoint[] gpa = null;
-  static String[] ptLabels = null;
-  static Boolean[] showPlacesArray = null;
+  private static GeoPoint[] gpa = null;
+  private static String[] ptLabels = null;
+  private static Boolean[] showPlacesArray = null;
 
-  private ArrayList<WWGnlUtilities.SailMailStation> sma = null;
-  private ArrayList<WWGnlUtilities.WeatherStation> wsta = null;
+  private transient ArrayList<WWGnlUtilities.SailMailStation> sma = null;
+  private transient ArrayList<WWGnlUtilities.WeatherStation> wsta = null;
 
 //private DraggableFlag /*Image*/ greenFlagImage = null;
   private ImageIcon greenFlagImage = null;
@@ -4182,6 +4182,12 @@ public class CommandPanel
           currentComment = Utilities.superTrim(doc.selectNodes("//composite-comment").item(0).getFirstChild().getNodeValue());
           WWContext.getInstance().fireLogging("Comment:" + currentComment + "\n");
         }
+        else
+        {
+          WWContext.getInstance().fireLogging("Reseting Comment...\n");
+          currentComment = "";
+        }
+        
         String projType = "";
         try { projType = ((XMLElement)doc.selectNodes("//projection").item(0)).getAttribute("type"); } catch (Exception ignore) { projType = MERCATOR; }
         if (projType.equals(MERCATOR))
@@ -4627,7 +4633,7 @@ public class CommandPanel
                   String pattern = dynamic.getAttribute("pattern");
                   String ext = dynamic.getAttribute("extension");
                   Date now = new Date();
-                  dir = WWGnlUtilities.translatePath(dir, now);
+                  dir = WWGnlUtilities.translatePath(dir, now).replace('/', File.separatorChar);
                   SimpleDateFormat sdf = new SimpleDateFormat(pattern);
                   faxName = dir + File.separator + prefix + sdf.format(now) + "." + ext;
                   
@@ -4929,7 +4935,7 @@ public class CommandPanel
   private final boolean doItAfter = true;
   private boolean smoothingRequired = true;
   // GRIB Data
-  private GribHelper.GribConditionData gribData = null;
+  private transient GribHelper.GribConditionData gribData = null;
   
   public void chartPanelPaintComponentFeature(final Graphics gr)
   {
@@ -5857,8 +5863,8 @@ public class CommandPanel
 
   private StartRoutingPanel dp = null;
 
-  private GeoPoint isoFrom;
-  private GeoPoint isoTo;
+  private transient GeoPoint isoFrom;
+  private transient GeoPoint isoTo;
 
   private double timeInterval     = ((Double) ParamPanel.data[ParamData.ROUTING_TIME_INTERVAL][1]).doubleValue(); // 6.0;
   private int routingForkWidth    = ((Integer) ParamPanel.data[ParamData.ROUTING_FORK_WIDTH][1]).intValue();      // 50;
@@ -5866,6 +5872,9 @@ public class CommandPanel
 
   public void startIsochronComputation()
   {
+    fromGRIBSlice = null;
+    toGRIBSlice = null;
+    
     boolean init = true;
     TimeZone.setDefault(TimeZone.getTimeZone("127"));
 
@@ -6006,7 +6015,7 @@ public class CommandPanel
           WWContext.getInstance().fireSetLoading(false, WWGnlUtilities.buildMessage("routing"));
           WWContext.getInstance().fireLogging(WWGnlUtilities.buildMessage("isochrones-calculated", new String[] { Integer.toString(i), Long.toString(after - before) }) + "\n");          
           // Reverse, for the clipboard
-          String clipboardContent = "L;G;Date;UT;TWS;TWD;BSP;HDG\n";
+          String clipboardContent = "L;(dec L);G;(dec G);Date;UTC;TWS;TWD;BSP;HDG\n";
           if (closestPoint != null && allCalculatedIsochrons != null)
           {
             Calendar cal = new GregorianCalendar();
@@ -6061,7 +6070,9 @@ public class CommandPanel
               String hdg = Integer.toString(ic.getHdg());
                   
               clipboardContent += (lat + ";" + 
+                                   Double.toString(rp.getPosition().getL()) + ";" +
                                    lng + ";" + 
+                                   Double.toString(rp.getPosition().getG()) + ";" +
                                    date + ";" + 
                                    time + ";" + 
                                    tws + ";" +
@@ -6147,6 +6158,8 @@ public class CommandPanel
     //      boatHeading = 45;
             if (boatPosition != null && ((Boolean) ParamPanel.data[ParamData.ROUTING_FROM_CURR_LOC][1]).booleanValue())
             {
+              if (allCalculatedIsochrons != null) // reset
+                shutOffRouting(); // Caution: this one resets from & to.         
               from = boatPosition;
               to = null;
             }
@@ -6156,14 +6169,9 @@ public class CommandPanel
               to = here;
             else if (from != null && to != null)
             {
-              to = null;
-              from = here;
               if (allCalculatedIsochrons != null) // reset
-              {
-                allCalculatedIsochrons = null;
-                eraseRoutingBoat();
-                WWContext.getInstance().fireRoutingAvailable(false, null);            
-              }
+                shutOffRouting(); // Caution: this one resets from & to.         
+              from = here;
             }
           }
         }
@@ -6389,16 +6397,18 @@ public class CommandPanel
   {
 //  System.out.println("displayGRIBSlice...");
     ArrayList<GribHelper.GribCondition> data2plot = new ArrayList<GribHelper.GribCondition>();
-    int nbSteps = 1000;
+    int fw = 1; // That's for routing
     if (fromGRIBSlice != null && toGRIBSlice != null) // GRIB Slice
     {
+      fw = GRIBSlicePanel.DEFAULT_FORK_WIDTH;
+      int nbSteps = 1000;
       for (int idx=0; idx <= nbSteps; idx++)
       {
         Point from = chartPanel.getPanelPoint(fromGRIBSlice);
         Point to   = chartPanel.getPanelPoint(toGRIBSlice);
         int x = from.x + (int)((idx * ((float)to.x - (float)from.x)) / (float)nbSteps);
         int y = from.y + (int)((idx * ((float)to.y - (float)from.y)) / (float)nbSteps);
-      //        System.out.println("x:" + x + ", y:" + y);
+//      System.out.println("x:" + x + ", y:" + y);
         GeoPoint gp = chartPanel.getGeoPos(x, y);
         GribHelper.GribCondition gribPoint = null;
         try 
@@ -6434,11 +6444,11 @@ public class CommandPanel
       }
     }
     if (gsp == null)
-      gsp = new GRIBSlicePanel(data2plot, 1);
+      gsp = new GRIBSlicePanel(data2plot, fw);
     else
     {
       gsp.setData(data2plot);
-      gsp.setForkWidth(1);
+      gsp.setForkWidth(fw);
     }
     
     jSplitPane.setLeftComponent(gsp);
@@ -6881,6 +6891,18 @@ public class CommandPanel
       fromGRIBSlice = null;
       toGRIBSlice = null;
     }
+    else
+    {
+      // Set the mouse
+      WWContext.getInstance().fireSetCursor(ChartCommandPanelToolBar.CROSS_HAIR_CURSOR);
+    }
+    from = null;
+    to = null;
+    closest = null;
+    allCalculatedIsochrons = null;
+    eraseRoutingBoat();
+    WWContext.getInstance().fireRoutingAvailable(false, null);
+
     resizeSplitPane = true;
   }
 
@@ -7123,6 +7145,21 @@ public class CommandPanel
   public boolean isDisplayContourTWS()
   {
     return displayContourTWS;
+  }
+
+  public ArrayList<ArrayList<RoutingPoint>> getAllCalculatedIsochrons()
+  {
+    return allCalculatedIsochrons;
+  }
+  
+  public void shutOffRouting()
+  {
+    from = null;
+    to = null;
+    allCalculatedIsochrons = null;
+    WWContext.getInstance().fireRoutingAvailable(false, null);
+    setEnableGRIBSlice(false);
+    eraseRoutingBoat();
   }
 
   public class FaxImage
