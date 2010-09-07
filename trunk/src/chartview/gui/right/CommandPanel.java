@@ -1117,7 +1117,7 @@ public class CommandPanel
         contourCheckBox[i] = new JCheckBox("");
         final int dataType = contourList.get(i);
         String tooltip = "";
-        switch (dataType) // TODO Localise tooltips
+        switch (dataType) // LOCALIZE tooltips
         {
           case GRIBDataUtil.TYPE_TWS:
             contourCheckBox[i].setBackground((Color) ParamPanel.data[ParamData.GRIB_WIND_COLOR][1]);
@@ -2755,7 +2755,7 @@ public class CommandPanel
             displayComboBox.removeAllItems();
             displayComboBox.setEnabled(false);
 //          if (thereIs3D)
-            displayComboBox.addItem("- None -"); // TODO Localize
+            displayComboBox.addItem("- None -"); // LOCALIZE
         /*  if (thereIsWind) */ displayComboBox.addItem(dataLabels[WIND_SPEED]); // Always keep wind
             if (thereIsPrmsl && displayPrmsl)  displayComboBox.addItem(dataLabels[PRMSL]);
             if (thereIsHgt500 && display500mb) displayComboBox.addItem(dataLabels[HGT500]);
@@ -5487,7 +5487,7 @@ public class CommandPanel
       for (WWGnlUtilities.SailMailStation sms : sma)
       {
         Point pt = chartPanel.getPanelPoint(sms.getGp());
-        chartPanel.postit(gr, sms.getStationName(), pt.x, pt.y, Color.blue);
+        chartPanel.postit(gr, sms.getStationName().replace(" - ", "\n"), pt.x, pt.y, Color.blue);
         Color orig = gr.getColor();
         gr.setColor(Color.blue);
         gr.drawOval(pt.x - 5, pt.y - 5, 10, 10);
