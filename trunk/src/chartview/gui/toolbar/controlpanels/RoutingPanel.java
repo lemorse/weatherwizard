@@ -56,7 +56,7 @@ public class RoutingPanel extends JPanel
   private int hdg   = 0;
   private float bsp = 0.0F;
   private Date date = null;
-  private GeoPoint position = null;
+  private transient GeoPoint position = null;
   
   private ArrayList<RoutingPoint> bestRoute = null;
   
@@ -99,6 +99,7 @@ public class RoutingPanel extends JPanel
   private JSeparator jSeparator1 = new JSeparator();
   private JSeparator jSeparator2 = new JSeparator();
   private JSeparator jSeparator3 = new JSeparator();
+  private JLabel elapsedLabel = new JLabel();
 
   public RoutingPanel()
   {
@@ -134,6 +135,7 @@ public class RoutingPanel extends JPanel
     headingPanel.setPreferredSize(new Dimension(190, 30));
     headingPanel.setSize(new Dimension(190, 30));
     dateLabel.setText(WWGnlUtilities.buildMessage("grib-date"));
+    
     routeSlider.setToolTipText(WWGnlUtilities.buildMessage("grib-frame-index"));
     routeSlider.setMinimum(1);
     routeSlider.setMaximum(10);
@@ -210,32 +212,25 @@ public class RoutingPanel extends JPanel
           }
         });
     bottomPanel.setLayout(gridBagLayout1);
-    stepPanel.add(windVanePanel, 
-                  new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.NORTH, GridBagConstraints.NONE, 
-                                         new Insets(0, 2, 0, 0), 0, 0));
-    stepPanel.add(bspDisplay, 
-                  new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.SOUTH, GridBagConstraints.HORIZONTAL, 
-                                         new Insets(0, 2, 0, 0), 0, 0));
-    stepPanel.add(windGaugePanel, 
-                  new GridBagConstraints(1, 0, 1, 2, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, 
-                                         new Insets(0, 5, 0, 0), 0, 0));
+    elapsedLabel.setText("ELapsed: 0");
+    stepPanel.add(windVanePanel, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.NORTH, GridBagConstraints.NONE,
+          new Insets(0, 2, 0, 0), 0, 0));
+    stepPanel.add(bspDisplay, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.SOUTH, GridBagConstraints.HORIZONTAL,
+          new Insets(0, 2, 0, 0), 0, 0));
+    stepPanel.add(windGaugePanel, new GridBagConstraints(1, 0, 1, 2, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+          new Insets(0, 5, 0, 0), 0, 0));
 
-    stepPanel.add(stationDataPanel, 
-                  new GridBagConstraints(2, 0, 1, 2, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, 
-                                         new Insets(0, 5, 0, 0), 0, 0));
+    stepPanel.add(stationDataPanel, new GridBagConstraints(2, 0, 1, 2, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
+          new Insets(0, 5, 0, 0), 0, 0));
 
-    stepPanel.add(headingPanel, 
-                  new GridBagConstraints(0, 2, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, 
-                                         new Insets(2, 0, 0, 0), 0, 0));
-    stepPanel.add(dateLabel, 
-                  new GridBagConstraints(0, 3, 3, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, 
-                                         new Insets(2, 0, 0, 0), 0, 0));
-    stepPanel.add(positionLabel, 
-                  new GridBagConstraints(0, 4, 3, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, 
-                                         new Insets(0, 0, 0, 0), 0, 0));
-    stepPanel.add(routeSlider, 
-                  new GridBagConstraints(0, 5, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, 
-                                         new Insets(0, 0, 0, 0), 0, 0));
+    stepPanel.add(headingPanel, new GridBagConstraints(0, 2, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+          new Insets(2, 0, 0, 0), 0, 0));
+    stepPanel.add(dateLabel, new GridBagConstraints(0, 3, 3, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
+          new Insets(2, 0, 0, 0), 0, 0));
+    stepPanel.add(positionLabel, new GridBagConstraints(0, 4, 3, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
+          new Insets(0, 0, 0, 0), 0, 0));
+    stepPanel.add(routeSlider, new GridBagConstraints(0, 6, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
+          new Insets(0, 0, 0, 0), 0, 0));
 
     bottomPanel.add(prevButton, 
                     new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, 
@@ -248,62 +243,69 @@ public class RoutingPanel extends JPanel
                                            new Insets(0, 0, 0, 2), 0, 0));
     bottomPanel.add(autoSyncCheckBox, new GridBagConstraints(3, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, 
           new Insets(0, 0, 0, 0), 0, 0));
-    stepPanel.add(bottomPanel, 
-                  new GridBagConstraints(0, 7, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, 
-                                         new Insets(0, 0, 0, 0), 0, 0));
-    summaryPanel.add(new JLabel(WWGnlUtilities.buildMessage("from")), 
-                     new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, 
+    stepPanel.add(bottomPanel, new GridBagConstraints(0, 8, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
+          new Insets(0, 0, 0, 0), 0, 0));
+    stepPanel.add(elapsedLabel, new GridBagConstraints(0, 5, 3, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
+          new Insets(0, 0, 0, 0), 0, 0));
+    summaryPanel.add(new JLabel(WWGnlUtilities.buildMessage("from")),
+                     new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
                                             new Insets(10, 2, 0, 0), 0, 0));
-    summaryPanel.add(fromPositionLabel, 
-                     new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, 
+    summaryPanel.add(fromPositionLabel,
+                     new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE,
                                             new Insets(10, 2, 0, 0), 0, 0));
-    summaryPanel.add(new JLabel(WWGnlUtilities.buildMessage("to")), 
-                     new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, 
+    summaryPanel.add(new JLabel(WWGnlUtilities.buildMessage("to")),
+                     new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
                                             new Insets(0, 2, 0, 0), 0, 0));
-    summaryPanel.add(toPositionLabel, 
-                     new GridBagConstraints(1, 1, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, 
+    summaryPanel.add(toPositionLabel,
+                     new GridBagConstraints(1, 1, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE,
                                             new Insets(0, 2, 0, 0), 0, 0));
-    summaryPanel.add(new JLabel(WWGnlUtilities.buildMessage("from")), 
-                     new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, 
+    summaryPanel.add(new JLabel(WWGnlUtilities.buildMessage("from")),
+                     new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
                                             new Insets(0, 2, 0, 0), 0, 0));
-    summaryPanel.add(fromDateLabel, 
-                     new GridBagConstraints(1, 2, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, 
+    summaryPanel.add(fromDateLabel,
+                     new GridBagConstraints(1, 2, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE,
                                             new Insets(0, 2, 0, 0), 0, 0));
-    summaryPanel.add(new JLabel(WWGnlUtilities.buildMessage("to")), 
-                     new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, 
+    summaryPanel.add(new JLabel(WWGnlUtilities.buildMessage("to")),
+                     new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
                                             new Insets(0, 2, 0, 0), 0, 0));
-    summaryPanel.add(toDateLabel, 
-                     new GridBagConstraints(1, 3, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, 
-                                            new Insets(0, 2, 0, 0), 0, 0));
-
-    summaryPanel.add(duration, 
-                     new GridBagConstraints(0, 5, 2, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, 
+    summaryPanel.add(toDateLabel,
+                     new GridBagConstraints(1, 3, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE,
                                             new Insets(0, 2, 0, 0), 0, 0));
 
+    summaryPanel.add(duration,
+                     new GridBagConstraints(0, 5, 2, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0,
+                                                                                                                               2,
+                                                                                                                               0,
+                                                                                                                               0),
+                                            0, 0));
 
-    summaryPanel.add(bspRangeLabel, 
-                     new GridBagConstraints(0, 7, 2, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, 
+
+    summaryPanel.add(bspRangeLabel,
+                     new GridBagConstraints(0, 7, 2, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
                                             new Insets(0, 2, 0, 0), 0, 0));
-    summaryPanel.add(twsRangeLabel, 
-                     new GridBagConstraints(0, 8, 2, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, 
+    summaryPanel.add(twsRangeLabel,
+                     new GridBagConstraints(0, 8, 2, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
                                             new Insets(0, 2, 0, 0), 0, 0));
-    summaryPanel.add(twaRangeLabel, 
-                     new GridBagConstraints(0, 9, 2, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, 
+    summaryPanel.add(twaRangeLabel,
+                     new GridBagConstraints(0, 9, 2, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
                                             new Insets(0, 2, 0, 0), 0, 0));
-    summaryPanel.add(gcLabel, 
-                     new GridBagConstraints(0, 11, 2, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, 
+    summaryPanel.add(gcLabel,
+                     new GridBagConstraints(0, 11, 2, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0,
+                                                                                                                                2,
+                                                                                                                                0,
+                                                                                                                                0),
+                                            0, 0));
+    summaryPanel.add(actualDistLabel,
+                     new GridBagConstraints(0, 12, 2, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
                                             new Insets(0, 2, 0, 0), 0, 0));
-    summaryPanel.add(actualDistLabel, 
-                     new GridBagConstraints(0, 12, 2, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, 
-                                            new Insets(0, 2, 0, 0), 0, 0));
-    summaryPanel.add(jSeparator1, 
-                     new GridBagConstraints(0, 4, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, 
+    summaryPanel.add(jSeparator1,
+                     new GridBagConstraints(0, 4, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                                             new Insets(0, 0, 0, 0), 0, 0));
-    summaryPanel.add(jSeparator2, 
-                     new GridBagConstraints(0, 6, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, 
+    summaryPanel.add(jSeparator2,
+                     new GridBagConstraints(0, 6, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                                             new Insets(0, 0, 0, 0), 0, 0));
-    summaryPanel.add(jSeparator3, 
-                     new GridBagConstraints(0, 10, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, 
+    summaryPanel.add(jSeparator3,
+                     new GridBagConstraints(0, 10, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                                             new Insets(0, 0, 0, 0), 0, 0));
     this.validate();
   }
@@ -393,6 +395,14 @@ public class RoutingPanel extends JPanel
     {
       WWGnlUtilities.SDF_UT.setTimeZone(TimeZone.getTimeZone("127"));
       dateLabel.setText(WWGnlUtilities.SDF_UT.format(date));
+      int[] elapsed = evaluateDaysHours(fromDate, date);
+      String mess = "";
+      if (elapsed[1] > 0)
+        mess = WWGnlUtilities.buildMessage("duration", new String[] { Integer.toString(elapsed[0]), 
+                                                                      Integer.toString(elapsed[1])});
+      else
+        mess = WWGnlUtilities.buildMessage("small.duration", new String[] { Integer.toString(elapsed[0]) });
+      elapsedLabel.setText(mess);
     }
     else
       dateLabel.setText("");
@@ -425,6 +435,9 @@ public class RoutingPanel extends JPanel
   {
     return bsp;
   }
+
+  Date fromDate    = null;
+  Date toDate      = null;
 
   public void setBestRoute(ArrayList<RoutingPoint> bestRoute, int routingType)
   {
@@ -473,13 +486,11 @@ public class RoutingPanel extends JPanel
           actualDistance += gc.getDistanceInNM(prevPos, rp.getPosition());
         prevPos = rp.getPosition();
       }
-      Date fromDate    = bestRoute.get(bestRoute.size() - 1).getDate();
-      Date toDate      = bestRoute.get(0).getDate();
-      long elapsed     = toDate.getTime() - fromDate.getTime();
-      final long NBMSEC_PER_HOUR = 3600 * 1000;
-      final long NBMSEC_PER_DAY  = 24 * NBMSEC_PER_HOUR;
-      int nbDay  = (int)(elapsed / NBMSEC_PER_DAY);
-      int nbHour = (int)Math.round(((double)(elapsed - (nbDay * NBMSEC_PER_DAY)) / (double)NBMSEC_PER_HOUR));
+      fromDate    = bestRoute.get(bestRoute.size() - 1).getDate();
+      toDate      = bestRoute.get(0).getDate();
+      int[] elapsed = evaluateDaysHours(fromDate, toDate);
+      int nbDay  = elapsed[0];
+      int nbHour = elapsed[1];
       
       GeoPoint fromPos = bestRoute.get(bestRoute.size() - 1).getPosition();
       GeoPoint toPos   = bestRoute.get(0).getPosition();
@@ -515,6 +526,16 @@ public class RoutingPanel extends JPanel
     }
   }
 
+  private int[] evaluateDaysHours(Date from, Date to)
+  {
+    long elapsed     = to.getTime() - from.getTime();
+    final long NBMSEC_PER_HOUR = 3600 * 1000;
+    final long NBMSEC_PER_DAY  = 24 * NBMSEC_PER_HOUR;
+    int nbDay  = (int)(elapsed / NBMSEC_PER_DAY);
+    int nbHour = (int)Math.round(((double)(elapsed - (nbDay * NBMSEC_PER_DAY)) / (double)NBMSEC_PER_HOUR));
+    return new int[] { nbDay, nbHour };    
+  }
+  
   private void setRouteData(RoutingPoint rp, RoutingPoint center, int routingType)
   { 
     try
