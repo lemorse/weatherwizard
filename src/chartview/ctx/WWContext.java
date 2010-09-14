@@ -46,9 +46,12 @@ public class WWContext
   public final static String SAILMAIL_STATIONS = "sailmail-stations.xml";
   public final static String NOAA_STATIONS     = "noaa-stations.xml";
   
+  public final static String CONFIG_PROPERTIES_FILE = "ww-config.properties";
+  
   private static WWContext context = null;
 
   private String compiled = "- unknown -";
+  private Date currentUTC = null;
   
   private DOMParser parser = null;
   private GreatCircle greatCircle = null;
@@ -1122,6 +1125,16 @@ public class WWContext
   {
 //  System.out.println("getGribFile is " + (gribFile==null?"":"not ") + "null");
     return gribFile;
+  }
+
+  public void setCurrentUTC(Date currentUTC)
+  {
+    this.currentUTC = currentUTC;
+  }
+
+  public Date getCurrentUTC()
+  {
+    return currentUTC;
   }
 
   public static class ToolFileFilter extends FileFilter
