@@ -88,7 +88,7 @@ public class AdjustFrame
   extends JFrame
 {
   private static final String FRAME_BASE_TITLE = WWGnlUtilities.buildMessage("product-name");
-  private static final SimpleDateFormat sdfForTitle = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss");
+  private static final SimpleDateFormat SDF_FOR_TITLE = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss");
   
   private BorderLayout borderLayout;
   private JTabbedPane tabbedPane = new JTabbedPane();
@@ -173,6 +173,24 @@ public class AdjustFrame
     borderLayout = new BorderLayout();
 //  commandPanel = new CommandPanel(this.mainZoomPanel);
     commandPanel = new CommandPanel(ccp.getMainZoomPanel());
+    
+    String ttOption = System.getProperty("tooltip.option", "on-chart");
+    if ("none".equals(ttOption))
+    {
+      commandPanel.getChartPanel().setPositionToolTipEnabled(false);
+      commandPanel.setDisplayAltTooltip(false);
+    }
+    else if ("on-chart".equals(ttOption))
+    {
+      commandPanel.getChartPanel().setPositionToolTipEnabled(true);
+      commandPanel.setDisplayAltTooltip(false);
+    }
+    else if ("tt-window".equals(ttOption))
+    {
+      commandPanel.getChartPanel().setPositionToolTipEnabled(true);
+      commandPanel.setDisplayAltTooltip(true);
+    }
+    
     commandPanelHolder = new JPanel(new BorderLayout());
     commandPanelHolder.add(commandPanel, BorderLayout.CENTER);    
     commandPanelHolder.add(commandPanelToolbar, BorderLayout.NORTH);        
@@ -271,7 +289,7 @@ public class AdjustFrame
   }
   
   private int nbLoad = 0;
-  OscillateThread oscillate = null;
+  private transient OscillateThread oscillate = null;
   
   private void setLoadingProgresssBar(boolean b, final String s)
   {
@@ -949,9 +967,10 @@ public class AdjustFrame
       {
         while (true)
         {
-          sdfForTitle.setTimeZone(TimeZone.getDefault());
+          SDF_FOR_TITLE.setTimeZone(TimeZone.getDefault());
           Date ut = TimeUtil.getGMT();
-          String title = FRAME_BASE_TITLE + " - UTC: " + sdfForTitle.format(ut);
+          WWContext.getInstance().setCurrentUTC(ut);
+          String title = FRAME_BASE_TITLE + " - UTC: " + SDF_FOR_TITLE.format(ut);
 //        System.out.println("Setting time to " + title);
           setTitle(title);
           try { Thread.sleep(1000L); } catch (Exception ignore) {}
@@ -1731,7 +1750,7 @@ public class AdjustFrame
 
   void fileExit_ActionPerformed(ActionEvent e)
   {
-    WWGnlUtilities.doOnExit();
+    WWGnlUtilities.doOnExit(this);
   }
 
   private void store()
