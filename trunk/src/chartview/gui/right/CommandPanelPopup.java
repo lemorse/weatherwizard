@@ -48,7 +48,7 @@ public class CommandPanelPopup
 {
   private CommandPanel parent;
 
-  private ArrayList<UserExitAction> userExitList = null;
+  private transient ArrayList<UserExitAction> userExitList = null;
   
   private JCheckBoxMenuItem showPrintablePageSize;
   
@@ -155,7 +155,7 @@ public class CommandPanelPopup
   private final String SHOW_BEST_ROUTE = WWGnlUtilities.buildMessage("show-best-route");
   private final String SHOW_ROUTING_LABELS = WWGnlUtilities.buildMessage("routing-labels");
   private final String INTERRUPT_ROUTING = WWGnlUtilities.buildMessage("interrupt-routing");
-  private final String ERASE_ROUTING = WWGnlUtilities.buildMessage("remove-routing");
+  private final String REMOVE_ROUTING = WWGnlUtilities.buildMessage("remove-routing");
   private final String ERASE_ROUTING_BOAT = WWGnlUtilities.buildMessage("erase-routing-boat");
   private final String CLICK_SCROLL = WWGnlUtilities.buildMessage("click-scroll");
 
@@ -348,24 +348,28 @@ public class CommandPanelPopup
 
     chartMenu.add(new JSeparator());
     
-    boolean altWin = parent.isDisplayAltTooltip();
-    boolean posTooltip = parent.chartPanel.isPositionToolTipEnabled();
+//  boolean altWin = parent.isDisplayAltTooltip();
+//  boolean posTooltip = parent.chartPanel.isPositionToolTipEnabled();
     
+    String ttOption = System.getProperty("tooltip.option", "on-chart");
     tooltip = new JRadioButtonMenuItem(TOOLTIP);
     chartMenu.add(tooltip);
-    tooltip.setSelected(posTooltip && !altWin);
+//  tooltip.setSelected(posTooltip && !altWin);
+    tooltip.setSelected("on-chart".equals(ttOption));
     tooltip.setBackground(Color.white);
     tooltip.addActionListener(this);
     
     notooltip = new JRadioButtonMenuItem(NO_TOOLTIP);
     chartMenu.add(notooltip);
-    notooltip.setSelected(!posTooltip);
+//  notooltip.setSelected(!posTooltip);
+    notooltip.setSelected("none".equals(ttOption));
     notooltip.setBackground(Color.white);
     notooltip.addActionListener(this);
     
     tooltipwin = new JRadioButtonMenuItem(TOOLTIP_WINDOW);
     chartMenu.add(tooltipwin);
-    tooltipwin.setSelected(posTooltip && altWin);
+//  tooltipwin.setSelected(posTooltip && altWin);
+    tooltipwin.setSelected("tt-window".equals(ttOption));
     tooltipwin.setBackground(Color.white);
     tooltipwin.addActionListener(this);
     
@@ -440,7 +444,7 @@ public class CommandPanelPopup
     eraseRoutingBoat.setBackground(Color.white);
     eraseRoutingBoat.addActionListener(this);
 
-    removeRouting = new JMenuItem(ERASE_ROUTING);
+    removeRouting = new JMenuItem(REMOVE_ROUTING);
     removeRouting.setIcon(new ImageIcon(this.getClass().getResource("remove_file.png")));
     routingMenu.add(removeRouting);
     removeRouting.setEnabled(parent.allCalculatedIsochrons != null);
@@ -654,16 +658,22 @@ public class CommandPanelPopup
     {
       parent.chartPanel.setPositionToolTipEnabled(!notooltip.isSelected());
       parent.setDisplayAltTooltip(tooltipwin.isSelected());
+      if (tooltip.isSelected())
+        System.setProperty("tooltip.option", "on-chart");
     }
     else if (event.getActionCommand().equals(NO_TOOLTIP))
     {
       parent.chartPanel.setPositionToolTipEnabled(!notooltip.isSelected());
       parent.setDisplayAltTooltip(!notooltip.isSelected());
+      if (notooltip.isSelected())
+        System.setProperty("tooltip.option", "none");
     }
     else if (event.getActionCommand().equals(TOOLTIP_WINDOW))
     {
       parent.chartPanel.setPositionToolTipEnabled(!notooltip.isSelected());
       parent.setDisplayAltTooltip(tooltipwin.isSelected());
+      if (tooltipwin.isSelected())
+        System.setProperty("tooltip.option", "tt-window");
     }
     else if (event.getActionCommand().equals(CHART_COLOR))
     {
@@ -747,20 +757,29 @@ public class CommandPanelPopup
     {
       parent.eraseRoutingBoat();
     }
-    else if (event.getActionCommand().equals(ERASE_ROUTING))
+    else if (event.getActionCommand().equals(REMOVE_ROUTING))
     {
-      parent.eraseRoutingBoat();
-      parent.from = null;
-      parent.to = null;
-      parent.allCalculatedIsochrons = null;
-      WWContext.getInstance().fireRoutingAvailable(false, null);
+      parent.shutOffRouting();
       parent.chartPanel.repaint();
     }
     else if (event.getActionCommand().equals(DROP_FLAGS))
     {
-      parent.from = null;
-      parent.to = null;
-      parent.chartPanel.repaint();
+      boolean drop = true;
+      // If routing exists?
+      if (parent.getAllCalculatedIsochrons() != null && parent.getAllCalculatedIsochrons().size() > 0)
+      {
+        int resp = JOptionPane.showConfirmDialog(this, 
+                                                 WWGnlUtilities.buildMessage("get-rid-of-routing"), 
+                                                 WWGnlUtilities.buildMessage("routing"), 
+                                                 JOptionPane.YES_NO_OPTION, 
+                                                 JOptionPane.QUESTION_MESSAGE);
+        drop = (resp == JOptionPane.YES_OPTION);
+      }
+      if (drop)
+      {
+        parent.shutOffRouting();
+        parent.chartPanel.repaint();
+      }
     }
     else if (isUserExitAction(event.getActionCommand()))
     {

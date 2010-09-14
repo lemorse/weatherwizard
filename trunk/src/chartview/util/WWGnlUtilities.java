@@ -67,6 +67,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.io.StringWriter;
 
 import java.net.URL;
@@ -86,6 +88,7 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.StringTokenizer;
+import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -99,12 +102,14 @@ import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.UIManager;
 
 import oracle.xml.parser.v2.DOMParser;
+import oracle.xml.parser.v2.NSResolver;
 import oracle.xml.parser.v2.XMLDocument;
 
 import oracle.xml.parser.v2.XMLElement;
@@ -116,6 +121,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
+
+import user.util.TimeUtil;
 
 public class WWGnlUtilities
 {
@@ -600,7 +607,7 @@ public class WWGnlUtilities
       regExp = twoFilePanel.getRegExprPatternTextField().getText();
       displayOpt = twoFilePanel.getDisplayOption();
     }
-    return new String[] { fileNameOne, fileNameTwo, regExp, displayOpt };
+    return new String[] { fileNameOne, fileNameTwo, regExp, displayOpt, twoFilePanel.getPDFTitle() };
   }
 
   public static void drawBoat(Graphics2D g2, Color c, Point pt, int boatLength, int trueHeading, float alpha)
@@ -1195,7 +1202,7 @@ public class WWGnlUtilities
     return comment;
   }
 
-  public static void doOnExit()
+  public static void doOnExit(JFrame frame)
   {
     boolean confirm = ((Boolean)ParamPanel.data[ParamData.CONFIRM_ON_EXIT][1]).booleanValue();
     boolean go = false;
@@ -1221,6 +1228,25 @@ public class WWGnlUtilities
     
     if (go)
     {
+      try
+      {
+        Properties props = new Properties();
+        props.setProperty("frame.width", Integer.toString(frame.getWidth()));
+        props.setProperty("frame.height", Integer.toString(frame.getHeight()));
+        props.setProperty("frame.x.pos", Integer.toString(frame.getX()));
+        props.setProperty("frame.y.pos", Integer.toString(frame.getY()));
+        props.store(new FileWriter("ww_position.properties"), "Generated " + new Date().toString());
+//      props.storeToXML(new FileOutputStream("ww_position.properties"), "Generated " + new Date().toString());
+        
+        props = new Properties();
+        props.setProperty("tooltip.option", System.getProperty("tooltip.option", "on-chart"));
+        props.store(new FileWriter(WWContext.CONFIG_PROPERTIES_FILE), "Generated " + new Date().toString());
+      }
+      catch (Exception forgetit) 
+      {
+        forgetit.printStackTrace();
+      }
+
       File updateFile = new File("update" + File.separator + "update.xml");
       if (updateFile.exists())
       {
@@ -1381,7 +1407,8 @@ public class WWGnlUtilities
                                                CommandPanel cp, 
                                                final Pattern pattern, 
                                                boolean countOnly,
-                                               String displayOption)
+                                               String displayOption,
+                                               BufferedWriter corellation)
   {
     int howMany = 0;
     
@@ -1413,7 +1440,7 @@ public class WWGnlUtilities
       for (int i=0; i<flist.length && keepWorking.valueOf(); i++)
       {
         if (flist[i].isDirectory())
-          howMany += drillDownAndGenerateImage(flist[i], imgDir, cp, pattern, countOnly, displayOption);
+          howMany += drillDownAndGenerateImage(flist[i], imgDir, cp, pattern, countOnly, displayOption, corellation);
         else
         {
           String fName = flist[i].getAbsolutePath();
@@ -1422,7 +1449,15 @@ public class WWGnlUtilities
             System.out.println("Generating Image for Composite [" + fName + "]");
             // That's here !!
             cp.restoreComposite(flist[i].getAbsolutePath(), displayOption);
+            String compositeComment = cp.getCurrentComment();            
             String imgfName = fName.substring(fName.lastIndexOf(File.separator) + 1) + ".png"; 
+            if (corellation != null)
+            {
+              String xmlCorellation = "  <data file='" + imgfName + "'>" +
+                                          "<![CDATA[" + compositeComment + "]]>" +
+                                        "</data>\n";
+              try { corellation.write(xmlCorellation); } catch (Exception ignore) {}
+            }
             imgfName = imgDir.toString() + File.separator + imgfName;
             String prefix = imgfName.trim().substring(0, imgfName.trim().lastIndexOf("."));
             String suffix = imgfName.trim().substring(imgfName.trim().lastIndexOf(".") + 1);        
@@ -1474,7 +1509,9 @@ public class WWGnlUtilities
   {
     Boolean deleteWhenDone = null;
     // 1 - Ask: Copy or Move
-    int resp = JOptionPane.showConfirmDialog(WWContext.getInstance().getMasterTopFrame(), WWGnlUtilities.buildMessage("do-you-wish-to-delete"), WWGnlUtilities.buildMessage("archive-composite"), 
+    int resp = JOptionPane.showConfirmDialog(WWContext.getInstance().getMasterTopFrame(), 
+                                             WWGnlUtilities.buildMessage("do-you-wish-to-delete"), 
+                                             WWGnlUtilities.buildMessage("archive-composite"), 
                                              JOptionPane.YES_NO_CANCEL_OPTION, 
                                              JOptionPane.QUESTION_MESSAGE);
     deleteWhenDone = Boolean.valueOf(resp == JOptionPane.YES_OPTION);
@@ -2234,6 +2271,7 @@ public class WWGnlUtilities
     final String generateIn = fromTo[1];
     String regExpPattern    = fromTo[2]; 
     final String displayOpt = fromTo[3];
+    final String pdfTitle   = fromTo[4];
     
     Pattern pattern = null;
     if (startFrom.trim().length() > 0 && generateIn.trim().length() > 0)
@@ -2262,7 +2300,7 @@ public class WWGnlUtilities
       if (ok2go) // Means pattern validated
       {
         // 1 - Count
-        final int howMany = drillDownAndGenerateImage(new File(startFrom), new File(generateIn), cp, pattern, true, displayOpt);       
+        final int howMany = drillDownAndGenerateImage(new File(startFrom), new File(generateIn), cp, pattern, true, displayOpt, null);       
         int resp = JOptionPane.showConfirmDialog(cp, 
                                                  WWGnlUtilities.buildMessage("image-gen-prompt", 
                                                                              new String[] { Integer.toString(howMany) }), 
@@ -2302,15 +2340,49 @@ public class WWGnlUtilities
               
               try
               {
+                // A file (xml) for the comments
+                BufferedWriter xc = new BufferedWriter(new FileWriter("image-comments.xml"));
+                xc.write("<root pattern='" + ptrn + "'>\n");
                 // Process Image Here
                 int howMuch = drillDownAndGenerateImage(new File(startFrom), 
                                                         new File(generateIn), 
                                                         cp, 
                                                         ptrn, 
                                                         false,
-                                                        displayOpt); 
+                                                        displayOpt,
+                                                        xc); 
+                xc.write("</root>\n");
+                xc.close();
+                if (howMuch > 0 && pdfTitle != null && pdfTitle.trim().length() > 0)
+                {
+                  JOptionPane.showMessageDialog(null, 
+                                                "Will now generate pdf here [" + pdfTitle + "], from user.dir [" + System.getProperty("user.dir") + "]", 
+                                                "Images Generation", 
+                                                JOptionPane.INFORMATION_MESSAGE);
+                  try
+                  {
+                    generatePDFDataFromImages(generateIn, pdfTitle);
+                    // Generate pdf
+                    try
+                    {
+                      // TASK Other systems
+//                    String cmd = "cmd /k start /min ." + File.separator + "publish-journal.bat \"journal.xml\" \"journal.pdf\"";
+                      String cmd = "cmd /k start ." + File.separator + "publish.pdf.images.bat";
+                      Runtime.getRuntime().exec(cmd);
+                    }
+                    catch (Exception e)
+                    {
+                      e.printStackTrace();
+                    }
+                  }
+                  catch (Exception ex)
+                  {
+                    ex.printStackTrace();
+                  }
+                }
+                
                 String mess = WWGnlUtilities.buildMessage("after-img-gen", // Show on File System after generation?
-                                                        new String[] {Integer.toString(howMuch)});
+                                                          new String[] {Integer.toString(howMuch)});
                 int resp = JOptionPane.showConfirmDialog(cp, 
                                                          mess, WWGnlUtilities.buildMessage("image-generation"), 
                                                          JOptionPane.YES_NO_OPTION, 
@@ -2321,6 +2393,10 @@ public class WWGnlUtilities
                   catch (Exception ex)
                   { JOptionPane.showMessageDialog(cp, ex.toString(), "Oops...", JOptionPane.ERROR_MESSAGE); }
                 }
+              }
+              catch (IOException ioe)
+              {
+                ioe.printStackTrace();
               }
               finally
               {
@@ -2339,6 +2415,95 @@ public class WWGnlUtilities
           System.out.println("Image generation canceled by user.");
       }
     }
+  }
+  
+  public static void generatePDFDataFromImages(String imgLoc, String pdfTitle) throws Exception
+  {
+    String[] month = new String[] { "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                                    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+    
+  // PrintStream out = System.out;
+    OutputStream os = new FileOutputStream("." + File.separator + "data4pdf.xml");
+    PrintStream out = new PrintStream(os) ;
+    
+    File root = new File(imgLoc);
+    File[] files = root.listFiles(new FilenameFilter()
+      {
+        public boolean accept(File dir, String name)
+        {
+          return name.endsWith(".waz.png");
+        }
+      });
+    
+    DOMParser parser = new DOMParser();
+    XMLDocument doc = null;
+    try
+    {
+      File f = new File("." + File.separator + "image-comments.xml");
+      if (!f.exists())
+        System.out.println("Tiens?");
+      URL url = f.toURI().toURL();
+      System.out.println("Parsing " + url.toString());
+      parser.parse(new FileInputStream(f));
+      doc = parser.getDocument();
+    }
+    catch (Exception ex)
+    {
+      ex.printStackTrace();
+    }
+    
+    out.println("<root>");
+    
+    for (int i=0; i<files.length; i++)
+    {
+      String fullPath = files[i].getAbsolutePath();
+      String fileName = fullPath.substring(fullPath.lastIndexOf(File.separator) + 1);
+      String comment = "";
+      if (doc != null)
+      {
+        try { comment = doc.selectNodes("//data[@file='" + fileName + "']").item(0).getTextContent(); }
+        catch (Exception ex) {}
+      }
+      String date = fileName.substring(0, 4) + "-" +
+                    month[Integer.parseInt(fileName.substring(5, 7)) - 1] + "-" +
+                    fileName.substring(8, 10) + " " +
+                    fileName.substring(11, 13) + ":00 UTC";
+      out.println("  <file date='" + date + "' path='" + fullPath + "' comment='" + comment.replace('\n', ' ').replace('\r', ' ').replaceAll("&", "&amp;") + "'/>");      
+    } 
+    out.println("</root>");
+    out.flush();
+    out.close();
+    os.close();
+    
+    // parameters file
+    String prmFileName = "scalable.cfg";
+    File prmFile = new File(".", prmFileName);
+    if (prmFile.exists())
+    {
+      parser.parse(prmFile.toURI().toURL());
+      doc = parser.getDocument();
+      NodeList nl = doc.selectNodes("//xop:property[@name='xslt.doc-title']", new NSResolver()
+        {
+          public String resolveNamespacePrefix(String prefix)
+          {
+            return "http://xmlns.oracle.com/oxp/config/";
+          }
+        });
+      if (nl.getLength() == 0)
+      {
+        System.out.println("doc-title not found...");
+        doc.print(System.out);
+      }
+      else
+      {
+        nl.item(0).setTextContent("'" + pdfTitle + "'");
+        PrintWriter pw = new PrintWriter(prmFile);
+        doc.print(pw);
+        pw.close();
+      }
+    }
+    else
+      System.out.println("Prm file not found: scalable.cfg");
   }
   
   public static boolean isPatternDynamic(String fileName)
@@ -2634,6 +2799,27 @@ public class WWGnlUtilities
     }
   }
 
+  public static String getSolarTimeTooltip(GeoPoint gp)
+  {
+    String str = "Solar Time: XX:XX:XX"; // Default
+    try
+    {
+      Date ut = WWContext.getInstance().getCurrentUTC(); // TimeUtil.getGMT();
+      long longUT = ut.getTime();
+      long solarTime = longUT + (long)((gp.getG() / 15D) * 3600000D);
+      Date solarDate = new Date(solarTime);
+      SDF_SOLAR.setTimeZone(TimeZone.getDefault());
+      str = buildMessage("solar") + ":" + SDF_SOLAR.format(solarDate);    
+      if (false)
+      {
+        System.out.println("At " + gp.toString() + ":" + SDF_UT.format(ut) + ", Solar:" +  SDF_SOLAR.format(solarDate) + " (" + solarDate.toString() + ")");
+      }
+    }
+    catch (Exception ignore) {}
+    return str;
+  }
+  
+
   public static class FilePreviewer
               extends JComponent
            implements PropertyChangeListener
@@ -2794,12 +2980,15 @@ public class WWGnlUtilities
     System.out.println("Returned:" + ar);
   }
   
-  public static void main1(String[] args)
+  public static void main(String[] args)
   {
 //  String ptrn = "jar_[0-9]+";
 //  String ptrn = ".jar_[0-9]+";
-    String ptrn = "\\.jar_[0-9]+$";
+    String ptrn = "\\.jar_[0-9]+$"; // + means one or many
+//  String ptrn = "\\.jar_[0-9]$";
 //  String ptrn = "\\.jar_[0-9]+\\>";
+    
+    System.out.println("Pattern: " + ptrn);
     String[] names = {"akeu.jar", "akeu.jar_1", "akeu.jar_2", "akeu.jar_02", "akeu_03", "akeu.jar_2 ", "akeujar_3" };
     Pattern pattern = Pattern.compile(ptrn);
     for (int i=0; i<names.length; i++)
@@ -2807,6 +2996,13 @@ public class WWGnlUtilities
       Matcher m = pattern.matcher(names[i]);
       System.out.println("[" + names[i] + "] " + (m.find()?"matches":"does not match"));
     }
+  }
+  
+  public static void main3(String[] args)
+  {
+    String comment = "This is a comment\non several Lines\rcontaing special character '&' to be replaced";
+    System.out.println("Before:" + comment);
+    System.out.println("After:" + comment.replace('\n', ' ').replace('\r', ' ').replaceAll("&", "&amp;"));
   }
   
   public static class SailMailStation

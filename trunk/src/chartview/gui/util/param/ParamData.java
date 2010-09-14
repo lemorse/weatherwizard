@@ -56,7 +56,10 @@ public class ParamData
     WWGnlUtilities.buildMessage("default-blur-for-faxes"),
     WWGnlUtilities.buildMessage("iso-prate-list"), 
     WWGnlUtilities.buildMessage("prate-color"),
-    WWGnlUtilities.buildMessage("click-scroll")
+    WWGnlUtilities.buildMessage("click-scroll"),
+    WWGnlUtilities.buildMessage("old-isochrons-color"),
+    WWGnlUtilities.buildMessage("show-routing-labels-by-default"),
+    WWGnlUtilities.buildMessage("show-isochrons-by-default")
   };
 
   private final static String[] helptext = 
@@ -109,12 +112,15 @@ public class ParamData
     WWGnlUtilities.buildMessage("help-default-blur-for-faxes"),
     WWGnlUtilities.buildMessage("help-iso-prate-list"), 
     WWGnlUtilities.buildMessage("help-prate-color"),
-    WWGnlUtilities.buildMessage("help-click-scroll")
+    WWGnlUtilities.buildMessage("help-click-scroll"),
+    WWGnlUtilities.buildMessage("help-old-isochrons-color"),
+    WWGnlUtilities.buildMessage("help-show-routing-labels-by-default"),
+    WWGnlUtilities.buildMessage("help-show-isochrons-by-default")
   };
     
   public final static String PARAM_FILE_NAME   = "config" + File.separator + "app-properties.xml";
 
-  public final static int NB_PRFERENCES         = 49;
+  public final static int NB_PRFERENCES         = 52;
   
   public final static int CHART_COLOR                    =  0;
   public final static int GRID_COLOR                     =  1;
@@ -165,6 +171,9 @@ public class ParamData
   public final static int ISOPRATE_LIST                  = 46;
   public final static int PRATE_CONTOUR                  = 47;
   public final static int CLICK_SCROLL                   = 48;
+  public final static int OLD_ISOCHRONS_COLOR            = 49;
+  public final static int SHOW_ROUTING_LABELS            = 50;
+  public final static int SHOW_ISOCHRONS                 = 51;
 
   public static String[] getLabels()
   {

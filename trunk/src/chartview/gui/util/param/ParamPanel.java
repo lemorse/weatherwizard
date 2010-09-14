@@ -79,10 +79,10 @@ public final class ParamPanel
 
   private final static String[] names = {KEY, VALUE};
   
-  private TableModel dataModel;
+  private transient TableModel dataModel;
 
   public static Object[][] data = null; // new Object[ParamData.labels.length][names.length];
-  private Object[][] localData = new Object[0][0];
+  private transient Object[][] localData = new Object[0][0];
   
   private JTable table;
   private JScrollPane scrollPane;
@@ -271,6 +271,15 @@ public final class ParamPanel
       case ParamData.CLICK_SCROLL:
         it = Boolean.TRUE;
         break;
+      case ParamData.OLD_ISOCHRONS_COLOR:
+        it = Color.lightGray;
+        break;
+      case ParamData.SHOW_ROUTING_LABELS:
+        it = Boolean.TRUE;
+        break;
+      case ParamData.SHOW_ISOCHRONS:
+        it = Boolean.TRUE;
+        break;
       default:
         break;
     }
@@ -311,7 +320,8 @@ public final class ParamPanel
                   i == ParamData.TEMP_CONTOUR ||
                   i == ParamData.PRATE_CONTOUR || 
                   i == ParamData.GPS_BOAT_COLOR ||
-                  i == ParamData.DD_ZOOM_COLOR)
+                  i == ParamData.DD_ZOOM_COLOR || 
+                  i == ParamData.OLD_ISOCHRONS_COLOR)
                 data[i][1] = WWGnlUtilities.buildColor(s);
               else if (i == ParamData.ROUTING_STEP ||              // Integers
                        i == ParamData.ROUTING_FORK_WIDTH ||  
@@ -335,7 +345,9 @@ public final class ParamPanel
                        i == ParamData.USE_TRANSPARENT_GRIB_WIND || 
                        i == ParamData.COLOR_RANGE ||
                        i == ParamData.DISPLAY_WIND_WITH_COLOR_WIND_RANGE ||
-                       i == ParamData.CLICK_SCROLL)
+                       i == ParamData.CLICK_SCROLL ||
+                       i == ParamData.SHOW_ROUTING_LABELS ||
+                       i == ParamData.SHOW_ISOCHRONS)
                 data[i][1] = new Boolean(s);    
               else if (i == ParamData.POLAR_FILE_LOC)              // DataFiles, Polars
                 data[i][1] = new DataFile(new String[] {"xml"}, "Polars", s);
@@ -409,7 +421,8 @@ public final class ParamPanel
         ParamData.TEMP_CONTOUR, 
         ParamData.PRATE_CONTOUR, 
         ParamData.GPS_BOAT_COLOR,
-        ParamData.DD_ZOOM_COLOR }, 
+        ParamData.DD_ZOOM_COLOR,
+        ParamData.OLD_ISOCHRONS_COLOR}, 
       new int[] // Display
       { ParamData.CHART_LINE_THICK, 
         ParamData.FAX_TRANSPARENCY, 
@@ -429,7 +442,9 @@ public final class ParamPanel
         ParamData.AVOID_TWS_GT, 
         ParamData.AVOID_TWA_LT, 
         ParamData.STOP_ROUTING_ON_EXHAUSTED_GRIB, 
-        ParamData.POLAR_SPEED_FACTOR }, 
+        ParamData.POLAR_SPEED_FACTOR,
+        ParamData.SHOW_ROUTING_LABELS,
+        ParamData.SHOW_ISOCHRONS}, 
       new int[] // Misc
       { ParamData.GRIB_FILES_LOC, 
         ParamData.FAX_FILES_LOC, 
