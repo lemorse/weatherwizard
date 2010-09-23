@@ -688,7 +688,24 @@ public class WWGnlUtilities
                               boolean displayWindSpeed,
                               boolean useThickWind)
   {
-    WWGnlUtilities.drawWind(gr, x, y, speed, dir, coloredWind, initialGribWindBaseColor, drawHeavyDot, drawWindColorBackground, displayWindSpeed, useThickWind, null, null, null, null);  
+    float alpha = 0.75f;
+    WWGnlUtilities.drawWind(gr, x, y, speed, dir, coloredWind, initialGribWindBaseColor, drawHeavyDot, drawWindColorBackground, displayWindSpeed, useThickWind, alpha);  
+  }
+
+  public static void drawWind(Graphics gr, 
+                              int x, 
+                              int y, 
+                              double speed, 
+                              double dir, 
+                              boolean coloredWind, 
+                              Color initialGribWindBaseColor, 
+                              boolean drawHeavyDot, 
+                              boolean drawWindColorBackground, 
+                              boolean displayWindSpeed,
+                              boolean useThickWind,
+                              float alpha)
+  {
+    WWGnlUtilities.drawWind(gr, x, y, speed, dir, coloredWind, initialGribWindBaseColor, drawHeavyDot, drawWindColorBackground, displayWindSpeed, useThickWind, null, null, null, null, alpha);  
   }
 
   public static void drawWind(Graphics gr, 
@@ -704,9 +721,10 @@ public class WWGnlUtilities
                               Point tl, 
                               Point br,
                               Point tr,
-                              Point bl)
+                              Point bl,
+                              float alpha)
   {
-    WWGnlUtilities.drawWind(gr, x, y, speed, dir, coloredWind, initialGribWindBaseColor, drawHeavyDot, drawWindColorBackground, displayWindSpeed, false, tl, br, tr, bl);    
+    WWGnlUtilities.drawWind(gr, x, y, speed, dir, coloredWind, initialGribWindBaseColor, drawHeavyDot, drawWindColorBackground, displayWindSpeed, false, tl, br, tr, bl, alpha);    
   }
   
   public static void drawWind(Graphics gr, 
@@ -725,6 +743,26 @@ public class WWGnlUtilities
                               Point tr,
                               Point bl)
   {
+    float alpha = 0.75f;
+    WWGnlUtilities.drawWind(gr, x, y, speed, dir, coloredWind, initialGribWindBaseColor, drawHeavyDot, drawWindColorBackground, displayWindSpeed, useThickWind, tl, br, tr, bl, alpha);    
+  }
+  public static void drawWind(Graphics gr, 
+                              int x, 
+                              int y, 
+                              double speed, 
+                              double dir, 
+                              boolean coloredWind, 
+                              Color initialGribWindBaseColor, 
+                              boolean drawHeavyDot, 
+                              boolean drawWindColorBackground, 
+                              boolean displayWindSpeed,
+                              boolean useThickWind,
+                              Point tl, 
+                              Point br,
+                              Point tr,
+                              Point bl,
+                              float alpha)
+  {
     boolean displayWindDirWithWindColorRange = ((Boolean)ParamPanel.data[ParamData.DISPLAY_WIND_WITH_COLOR_WIND_RANGE][1]).booleanValue();
     
     int discSize = 4; // Smallest
@@ -735,7 +773,6 @@ public class WWGnlUtilities
       gr.setColor(getWindColor(coloredWind, initialGribWindBaseColor, speed, true)); // Set transparency anyway
       int w = Math.abs(br.x - tl.x);
       int h = Math.abs(br.y - tl.y);
-      float alpha = 0.75f;
       ((Graphics2D) gr).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
       // Form non-square projections, use polygon
       if (tr != null && bl != null)
@@ -758,7 +795,6 @@ public class WWGnlUtilities
     Stroke originalStroke = ((Graphics2D) gr).getStroke();
     if (drawWindColorBackground)
     {
-      float alpha = 0.75f;
       ((Graphics2D) gr).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
     }
     if (useThickWind)
@@ -1088,9 +1124,14 @@ public class WWGnlUtilities
 
   public static void drawGRIBData(Graphics gr, int x, int y, Point tl, Point br, Point tr, Point bl)
   {
+    float alpha = 0.75f;
+    drawGRIBData(gr, x, y, tl, br, tr, bl, alpha);
+  }
+  
+  public static void drawGRIBData(Graphics gr, int x, int y, Point tl, Point br, Point tr, Point bl, float alpha)
+  {
     int w = Math.abs(br.x - tl.x);
     int h = Math.abs(br.y - tl.y);
-    float alpha = 0.75f;
     ((Graphics2D) gr).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
     if (tr != null && bl != null)
     {
@@ -1240,6 +1281,7 @@ public class WWGnlUtilities
         
         props = new Properties();
         props.setProperty("tooltip.option", System.getProperty("tooltip.option", "on-chart"));
+        props.setProperty("composite.sort", System.getProperty("composite.sort", "date.desc"));
         props.store(new FileWriter(WWContext.CONFIG_PROPERTIES_FILE), "Generated " + new Date().toString());
       }
       catch (Exception forgetit) 

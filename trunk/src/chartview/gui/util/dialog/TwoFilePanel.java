@@ -12,10 +12,13 @@ import java.awt.GridBagLayout;
 
 import java.awt.Insets;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import javax.swing.ButtonGroup;
+import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -46,6 +49,9 @@ public class TwoFilePanel
   private JRadioButton allRadioButton = new JRadioButton();
   private JRadioButton justFaxesRadioButton = new JRadioButton();
   private JRadioButton justGRIBRadioButton = new JRadioButton();
+  private JCheckBox pdfCheckBox = new JCheckBox();
+  private JLabel pdfTitleLabel = new JLabel("A title for the pdf:");
+  private JTextField pdfTitle = new JTextField();
 
   public TwoFilePanel()
   {
@@ -101,7 +107,20 @@ public class TwoFilePanel
     allRadioButton.setText(WWGnlUtilities.buildMessage("everything")); 
     allRadioButton.setSelected(true);
     justFaxesRadioButton.setText(WWGnlUtilities.buildMessage("just-faxes"));
-    justGRIBRadioButton.setText(WWGnlUtilities.buildMessage("just-gribs")); 
+    justGRIBRadioButton.setText(WWGnlUtilities.buildMessage("just-gribs"));
+    pdfCheckBox.setText("Generate PDF when done");
+    pdfCheckBox.setSelected(false);
+    pdfTitle.setEnabled(false);
+    pdfTitleLabel.setEnabled(false);
+    pdfCheckBox.addActionListener(new ActionListener()
+      {
+        public void actionPerformed(ActionEvent e)
+        {
+          pdfTitle.setEnabled(pdfCheckBox.isSelected());
+          pdfTitleLabel.setEnabled(pdfCheckBox.isSelected());
+        }                                    
+      });
+    pdfTitle.setPreferredSize(new Dimension(200, 24));
     this.add(leftLabel, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
     this.add(rightLabel, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
     this.add(leftChooser, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
@@ -112,6 +131,9 @@ public class TwoFilePanel
     gribOptionPanel.add(allRadioButton, null);
     gribOptionPanel.add(justFaxesRadioButton, null);
     gribOptionPanel.add(justGRIBRadioButton, null);
+    gribOptionPanel.add(pdfCheckBox, null);
+    gribOptionPanel.add(pdfTitleLabel, null);
+    gribOptionPanel.add(pdfTitle, null);
     this.add(gribOptionPanel, new GridBagConstraints(0, 4, 2, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
           new Insets(10, 10, 0, 0), 0, 0));
   }
@@ -155,5 +177,13 @@ public class TwoFilePanel
     else if (justGRIBRadioButton.isSelected())
       return JUST_GRIBS;
     return null;
+  }
+  
+  public String getPDFTitle()
+  {
+    if (pdfCheckBox.isSelected())
+      return pdfTitle.getText();
+    else
+      return null;
   }
 }
