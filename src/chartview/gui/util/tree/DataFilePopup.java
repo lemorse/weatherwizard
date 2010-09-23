@@ -37,6 +37,7 @@ import java.util.Collections;
 
 import java.util.List;
 
+import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
@@ -65,21 +66,29 @@ public class DataFilePopup
   implements ActionListener,
              PopupMenuListener
 {
-  JMenuItem show;
-  JMenuItem refresh;
-  JMenuItem filter;
-  JMenuItem gribDetails;
-  JMenuItem edit;
-  JMenuItem rename;
-  JMenuItem copyFavorite;
-  JMenuItem fileSystem;
-  JMenuItem sortByName;
-  JMenuItem sortByDate;
-  JMenuItem archiveComposite;
-  JMenuItem unarchiveComposite;
-  JMenuItem archiveCompositeDir;
+  private JMenuItem show;
+  private JMenuItem refresh;
+  private JMenuItem filter;
+  private JMenuItem gribDetails;
+  private JMenuItem edit;
+  private JMenuItem rename;
+  private JMenuItem copyFavorite;
+  private JMenuItem fileSystem;
+  private JMenu     sortByName;
+  
+  private JMenuItem sortByNameAsc;
+  private JMenuItem sortByNameDesc;
+  
+  private JMenu     sortByDate;
+  
+  private JMenuItem sortByDateAsc;
+  private JMenuItem sortByDateDesc;
 
-  JTreeFilePanel parent = null;
+  private JMenuItem archiveComposite;
+  private JMenuItem unarchiveComposite;
+  private JMenuItem archiveCompositeDir;
+
+  private JTreeFilePanel parent = null;
 
   private final static String SHOW = WWGnlUtilities.buildMessage("show");
   private final static String REFRESH = WWGnlUtilities.buildMessage("refresh-tree");
@@ -90,7 +99,11 @@ public class DataFilePopup
   private final static String COPY_TO_FAVORITE = WWGnlUtilities.buildMessage("copy-to-favorite");
   private final static String SHOW_FILE_SYSTEM = WWGnlUtilities.buildMessage("show-file-system");
   private final static String SORT_BY_NAME = WWGnlUtilities.buildMessage("sort-by-name");
+  private final static String SORT_BY_NAME_ASC  = WWGnlUtilities.buildMessage("ascending");
+  private final static String SORT_BY_NAME_DESC = WWGnlUtilities.buildMessage("descending");
   private final static String SORT_BY_DATE = WWGnlUtilities.buildMessage("sort-by-date");
+  private final static String SORT_BY_DATE_ASC  = WWGnlUtilities.buildMessage("ascending");
+  private final static String SORT_BY_DATE_DESC = WWGnlUtilities.buildMessage("descending");
   private final static String ARCHIVE_COMPOSITE = WWGnlUtilities.buildMessage("archive-composite");
   private final static String UNARCHIVE_COMPOSITE = WWGnlUtilities.buildMessage("unarchive-composite");
   private final static String ARCHIVE_COMPOSITE_DIR = WWGnlUtilities.buildMessage("archive-composite-dir");
@@ -121,10 +134,18 @@ public class DataFilePopup
     this.add(fileSystem = new JMenuItem(SHOW_FILE_SYSTEM));
     fileSystem.addActionListener(this);
     this.add(new JSeparator());
-    this.add(sortByDate = new JMenuItem(SORT_BY_DATE));
-    sortByDate.addActionListener(this);
-    this.add(sortByName = new JMenuItem(SORT_BY_NAME));
-    sortByName.addActionListener(this);
+    this.add(sortByDate = new JMenu(SORT_BY_DATE));
+    sortByDate.add(sortByDateAsc = new JMenuItem(SORT_BY_DATE_ASC));
+    sortByDateAsc.addActionListener(this);
+    sortByDate.add(sortByDateDesc = new JMenuItem(SORT_BY_DATE_DESC));
+    sortByDateDesc.addActionListener(this);
+    
+    this.add(sortByName = new JMenu(SORT_BY_NAME));
+    sortByName.add(sortByNameAsc = new JMenuItem(SORT_BY_NAME_ASC));
+    sortByNameAsc.addActionListener(this);
+    sortByName.add(sortByNameDesc = new JMenuItem(SORT_BY_NAME_DESC));
+    sortByNameDesc.addActionListener(this);
+    
     this.add(new JSeparator());
     this.add(archiveComposite = new JMenuItem(ARCHIVE_COMPOSITE));
     archiveComposite.addActionListener(this);
@@ -592,14 +613,32 @@ public class DataFilePopup
         try { Utilities.showFileSystem(dir); } catch (Exception e) { e.printStackTrace(); }          
       }
     }
-    else if (event.getActionCommand().equals(SORT_BY_DATE))
+    else if (event.getActionCommand().equals(SORT_BY_DATE_DESC) && ((JMenu)((JPopupMenu)((JMenuItem)event.getSource()).getParent()).getInvoker()).getActionCommand().equals(SORT_BY_DATE))
     {
-      this.parent.setSort(JTreeFilePanel.SORT_BY_DATE);
+      this.parent.setSort(JTreeFilePanel.SORT_BY_DATE_DESC);
+      if (this.parent.getType() == JTreeFilePanel.COMPOSITE_TYPE)
+        System.setProperty("composite.sort", "date.desc");
       refreshTree();
     }
-    else if (event.getActionCommand().equals(SORT_BY_NAME))
+    else if (event.getActionCommand().equals(SORT_BY_DATE_ASC) && ((JMenu)((JPopupMenu)((JMenuItem)event.getSource()).getParent()).getInvoker()).getActionCommand().equals(SORT_BY_DATE))
     {
-      this.parent.setSort(JTreeFilePanel.SORT_BY_NAME);
+      this.parent.setSort(JTreeFilePanel.SORT_BY_DATE_ASC);
+      if (this.parent.getType() == JTreeFilePanel.COMPOSITE_TYPE)
+        System.setProperty("composite.sort", "date.asc");
+      refreshTree();
+    }
+    else if (event.getActionCommand().equals(SORT_BY_NAME_ASC) && ((JMenu)((JPopupMenu)((JMenuItem)event.getSource()).getParent()).getInvoker()).getActionCommand().equals(SORT_BY_NAME))
+    {
+      this.parent.setSort(JTreeFilePanel.SORT_BY_NAME_ASC);
+      if (this.parent.getType() == JTreeFilePanel.COMPOSITE_TYPE)
+        System.setProperty("composite.sort", "name.asc");
+      refreshTree();
+    }
+    else if (event.getActionCommand().equals(SORT_BY_NAME_DESC) && ((JMenu)((JPopupMenu)((JMenuItem)event.getSource()).getParent()).getInvoker()).getActionCommand().equals(SORT_BY_NAME))
+    {
+      this.parent.setSort(JTreeFilePanel.SORT_BY_NAME_DESC);
+      if (this.parent.getType() == JTreeFilePanel.COMPOSITE_TYPE)
+        System.setProperty("composite.sort", "name.desc");
       refreshTree();
     }
     else if (event.getActionCommand().equals(ARCHIVE_COMPOSITE))

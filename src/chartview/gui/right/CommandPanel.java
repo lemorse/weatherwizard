@@ -127,7 +127,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
-import javax.swing.JSeparator;
 import javax.swing.JSlider;
 import javax.swing.JSplitPane;
 import javax.swing.event.ChangeEvent;
@@ -194,8 +193,13 @@ public class CommandPanel
   private JLabel displayLabel       = new JLabel(WWGnlUtilities.buildMessage("display"));
   private JComboBox displayComboBox = new JComboBox();
   private JLabel boundariesLabel    = new JLabel(" - ");
-  private JSlider opacitySlider     = new JSlider();  
-  private float userOpacity         = ((Float) ParamPanel.data[ParamData.FAX_TRANSPARENCY][1]).floatValue();
+  
+  private JSlider faxOpacitySlider     = new JSlider();  
+  private float faxUserOpacity         = ((Float) ParamPanel.data[ParamData.FAX_TRANSPARENCY][1]).floatValue();
+
+  private JSlider gribOpacitySlider     = new JSlider();  
+  private float gribUserOpacity         = 0.75f; // ((Float) ParamPanel.data[ParamData.FAX_TRANSPARENCY][1]).floatValue();
+
   protected JCheckBox[] compositeCheckBox = null;
   protected JCheckBox[] contourCheckBox = null;
   
@@ -233,7 +237,8 @@ public class CommandPanel
   private boolean alreadyAskedAboutGRIB = false;
   
   private boolean drawChart = true;
-  private boolean drawIsochrons = true;
+  private boolean drawIsochrons = ((Boolean)ParamPanel.data[ParamData.SHOW_ISOCHRONS][1]).booleanValue();
+;
   private boolean drawBestRoute = true;
   private boolean drawGRIB = true;
   private boolean enableGRIBSlice = false;
@@ -260,7 +265,7 @@ public class CommandPanel
   protected boolean routingMode         = false;
   protected boolean routingForecastMode = false;
   protected boolean routingOnItsWay     = false;
-  private boolean postitOnRoute         = true;
+  private boolean postitOnRoute         = ((Boolean)ParamPanel.data[ParamData.SHOW_ROUTING_LABELS][1]).booleanValue();;
 
 //private double timeInterval         = ((Double) ParamPanel.data[ParamData.ROUTING_TIME_INTERVAL][1]).doubleValue(); // 6.0;
 //private static int routingForkWidth = ((Integer) ParamPanel.data[ParamData.ROUTING_FORK_WIDTH][1]).intValue(); // 50;
@@ -371,7 +376,7 @@ public class CommandPanel
   private final static int ZOOMEXPAND_IMAGE  = 2;
   private final static int ZOOMSHRINK_IMAGE  = 3;
   
-  private void displayAltWindow(Graphics graphics, String winTitle, String dataString)
+  private void setDisplayAltTooltip(Graphics graphics, String winTitle, String dataString)
   {
     int imageWidth = 24;
     Color endColor   = new Color(0.0f, 0.0f, 0.05f, 0.75f);
@@ -670,20 +675,25 @@ public class CommandPanel
     checkBoxCompositePanel.setLayout(new GridBagLayout());
     bottomPanel.setLayout(new BorderLayout());
     rightVerticalPanel.setLayout(new BorderLayout());
-    rightVerticalPanel.add(opacitySlider, BorderLayout.NORTH);    
+    
+    JPanel sliderHolder = new JPanel();
+    sliderHolder.add(faxOpacitySlider, null);
+    sliderHolder.add(gribOpacitySlider, null);
+    
+    rightVerticalPanel.add(sliderHolder, BorderLayout.NORTH);    
     rightBottomPanel.setLayout(new BorderLayout());
 //  rightBottomPanel.add(checkBoxCompositePanel, BorderLayout.NORTH);
 //  rightVerticalPanel.add(rightBottomPanel, BorderLayout.CENTER);
     rightVerticalPanel.add(checkBoxPanelHolder, BorderLayout.CENTER);
     rightVerticalPanel.add(blurSharpPanel, BorderLayout.SOUTH);    
     
-    opacitySlider.setMaximum(0);
-    opacitySlider.setMaximum(100);
-    opacitySlider.setToolTipText(WWGnlUtilities.buildMessage("fax-opacity"));
-    opacitySlider.setOrientation(JSlider.VERTICAL);
-    opacitySlider.setValue((int)(userOpacity * 100F));
-    opacitySlider.setEnabled(false);
-    opacitySlider.addChangeListener(new ChangeListener() 
+    faxOpacitySlider.setMaximum(0);
+    faxOpacitySlider.setMaximum(100);
+    faxOpacitySlider.setToolTipText(WWGnlUtilities.buildMessage("fax-opacity"));
+    faxOpacitySlider.setOrientation(JSlider.VERTICAL);
+    faxOpacitySlider.setValue((int)(faxUserOpacity * 100F));
+    faxOpacitySlider.setEnabled(false);
+    faxOpacitySlider.addChangeListener(new ChangeListener() 
     {
       public void stateChanged(ChangeEvent evt) 
       {
@@ -693,8 +703,30 @@ public class CommandPanel
         {
           // Get new value
           float value = (float)slider.getValue() / 100F;
-          userOpacity = value;
-          opacitySlider.setToolTipText("<html>" + WWGnlUtilities.buildMessage("fax-opacity") + ":<br>" + Float.toString(value) + "</html>");
+          faxUserOpacity = value;
+          faxOpacitySlider.setToolTipText("<html>" + WWGnlUtilities.buildMessage("fax-opacity") + ":<br>" + Float.toString(value) + "</html>");
+          chartPanel.repaint();
+        }
+      }
+    });
+    gribOpacitySlider.setMaximum(0);
+    gribOpacitySlider.setMaximum(100);
+    gribOpacitySlider.setToolTipText(WWGnlUtilities.buildMessage("grib-opacity"));
+    gribOpacitySlider.setOrientation(JSlider.VERTICAL);
+    gribOpacitySlider.setValue((int)(gribUserOpacity * 100F));
+    gribOpacitySlider.setEnabled(false);
+    gribOpacitySlider.addChangeListener(new ChangeListener() 
+    {
+      public void stateChanged(ChangeEvent evt) 
+      {
+        JSlider slider = (JSlider)evt.getSource();
+    
+        if (!slider.getValueIsAdjusting()) 
+        {
+          // Get new value
+          float value = (float)slider.getValue() / 100F;
+          gribUserOpacity = value;
+          gribOpacitySlider.setToolTipText("<html>" + WWGnlUtilities.buildMessage("grib-opacity") + ":<br>" + Float.toString(value) + "</html>");
           chartPanel.repaint();
         }
       }
@@ -885,7 +917,8 @@ public class CommandPanel
   
   public void removeCompositeCheckBoxes()
   {
-    opacitySlider.setEnabled(false);
+    faxOpacitySlider.setEnabled(false);
+    gribOpacitySlider.setEnabled(false);
     if (compositeCheckBox != null) // Remove before adding new ones
     {
       for (int i=0; i<compositeCheckBox.length; i++)
@@ -920,9 +953,11 @@ public class CommandPanel
     int nbFaxes = 0;
     if (faxes != null)
     {
-      opacitySlider.setEnabled(true);
+      faxOpacitySlider.setEnabled(true);
       nbFaxes = faxes.length;
     }
+    gribOpacitySlider.setEnabled(wgd != null);
+
     compositeCheckBox = new JCheckBox[nbFaxes + EXTRA_CHECK_BOXES + (wgd!=null?1:0)]; 
 
     for (int i=0; faxes != null && i<faxes.length; i++)
@@ -3711,6 +3746,9 @@ public class CommandPanel
           {
             try
             {
+              // Tooltip Option
+              boolean dpt = chartPanel.isPositionToolTipEnabled();
+              chartPanel.setPositionToolTipEnabled(false);
               Utilities.makeSureTempExists();
               WWContext.getInstance().fireSetStatus(WWGnlUtilities.buildMessage("generating-google"));
               WWContext.getInstance().fireSetLoading(true, WWGnlUtilities.buildMessage("generating"));
@@ -3895,6 +3933,13 @@ public class CommandPanel
                 }
               }
               if (gribFileName.trim().length() > 0  && drawGRIB)
+              {
+                JOptionPane.showMessageDialog(instance, 
+                                              WWGnlUtilities.buildMessage("google-no-grib"),
+                                              "Google Map & Google Earth", 
+                                              JOptionPane.WARNING_MESSAGE);
+              }
+              if (false && gribFileName.trim().length() > 0  && drawGRIB)
               {
                 // Original config
                 int origProj = chartPanel.getProjection();
@@ -4112,9 +4157,12 @@ public class CommandPanel
                 if (os.indexOf("Windows") > -1)
                   Runtime.getRuntime().exec("cmd /k start " + kmzFileName);
                 else
-                  System.out.println("OS not supported... Start " + kmzFileName + " by hand");
+                  System.out.println("OS [" + os + "] not supported...\nStart " + kmzFileName + " by hand");
               }
               WWContext.getInstance().fireSetStatus("Ready"); 
+              chartPanel.setPositionToolTipEnabled(dpt);
+              if (displayAltTooltip)
+                repaint();
             }
             catch (Exception e)
             {
@@ -4357,6 +4405,7 @@ public class CommandPanel
               ft[i].setComment(faxImage[i].comment);
               ft[i].setShow(true);
               ft[i].setTransparent(true);
+              repaint(); // Repaint between each fax
             }
             setCheckBoxes(ft);
             if (faxes.getLength() > 0)
@@ -4754,6 +4803,7 @@ public class CommandPanel
               ft[i] = new FaxType(faxName, c, Boolean.valueOf(true), Boolean.valueOf(true), imageRotation, faxOrigin, faxName);
               ft[i].setRank(i+1);
               ft[i].setComment(faxImage[i].comment);
+              repaint();
             }
             else
               return; // Bye!
@@ -4988,7 +5038,7 @@ public class CommandPanel
       g2d = (Graphics2D)gr;
     
     // Transparency
-    float alpha = userOpacity; // ((Float) ParamPanel.data[ParamData.FAX_TRANSPARENCY][1]).floatValue();
+    float alpha = faxUserOpacity; // ((Float) ParamPanel.data[ParamData.FAX_TRANSPARENCY][1]).floatValue();
 //  System.out.println("Transparency set to " + Float.toString(alpha));
     g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
 
@@ -5177,7 +5227,8 @@ public class CommandPanel
                                           tl, 
                                           br,
                                           tr,
-                                          bl);
+                                          bl,
+                                          gribUserOpacity);
                 }
                 else
                   WWGnlUtilities.drawWind(gr, 
@@ -5190,7 +5241,8 @@ public class CommandPanel
                                         drawHeavyDot, 
                                         drawWindColorBackground, 
                                         displayWindSpeedValue,
-                                        useThickWind);
+                                        useThickWind,
+                                        gribUserOpacity); 
               }
               else if ("TEMP".equals(dataOption))
               {
@@ -5212,7 +5264,7 @@ public class CommandPanel
                   bl = chartPanel.getPanelPoint(bottomRightLat, topLeftLng);
                 }
 
-                WWGnlUtilities.drawGRIBData(gr, gp.x, gp.y, tl, br, tr, bl);
+                WWGnlUtilities.drawGRIBData(gr, gp.x, gp.y, tl, br, tr, bl, gribUserOpacity); 
               }
               else if ("500HGT".equals(dataOption))
               {
@@ -5234,7 +5286,7 @@ public class CommandPanel
                   bl = chartPanel.getPanelPoint(bottomRightLat, topLeftLng);
                 }
 
-                WWGnlUtilities.drawGRIBData(gr, gp.x, gp.y, tl, br, tr, bl);
+                WWGnlUtilities.drawGRIBData(gr, gp.x, gp.y, tl, br, tr, bl, gribUserOpacity);
               }
               else if ("WAVES".equals(dataOption))
               {
@@ -5256,7 +5308,7 @@ public class CommandPanel
                   bl = chartPanel.getPanelPoint(bottomRightLat, topLeftLng);
                 }
 
-                WWGnlUtilities.drawGRIBData(gr, gp.x, gp.y, tl, br, tr, bl);
+                WWGnlUtilities.drawGRIBData(gr, gp.x, gp.y, tl, br, tr, bl, gribUserOpacity); 
               }
               else if ("RAIN".equals(dataOption)) 
               {
@@ -5278,7 +5330,7 @@ public class CommandPanel
                   bl = chartPanel.getPanelPoint(bottomRightLat, topLeftLng);
                 }
 
-                WWGnlUtilities.drawGRIBData(gr, gp.x, gp.y, tl, br, tr, bl);
+                WWGnlUtilities.drawGRIBData(gr, gp.x, gp.y, tl, br, tr, bl, gribUserOpacity);
               }
               else if ("PRMSL".equals(dataOption))
               {
@@ -5300,7 +5352,7 @@ public class CommandPanel
                   bl = chartPanel.getPanelPoint(bottomRightLat, topLeftLng);
                 }
 
-                WWGnlUtilities.drawGRIBData(gr, gp.x, gp.y, tl, br, tr, bl);
+                WWGnlUtilities.drawGRIBData(gr, gp.x, gp.y, tl, br, tr, bl, gribUserOpacity);
               }
             }
 //          else
@@ -5314,7 +5366,7 @@ public class CommandPanel
     
     // Transparent faxes
     // Transparency
-    alpha = userOpacity; // ((Float) ParamPanel.data[ParamData.FAX_TRANSPARENCY][1]).floatValue();
+    alpha = faxUserOpacity; // ((Float) ParamPanel.data[ParamData.FAX_TRANSPARENCY][1]).floatValue();
     //  System.out.println("Transparency set to " + Float.toString(alpha));
     g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
 
@@ -5558,7 +5610,7 @@ public class CommandPanel
                 if (ancestor != null)
                 {
                   Color c = gr.getColor();
-                  gr.setColor(Color.lightGray);
+                  gr.setColor((Color) ParamPanel.data[ParamData.OLD_ISOCHRONS_COLOR][1]);
                   gr.drawLine(ancestor.x, ancestor.y, pp.x, pp.y);
                   gr.setColor(c);
                 }
@@ -5566,7 +5618,7 @@ public class CommandPanel
                 {
                   Color c = gr.getColor();
                   if (p.isGribTooOld())
-                    gr.setColor(Color.lightGray);
+                    gr.setColor((Color) ParamPanel.data[ParamData.OLD_ISOCHRONS_COLOR][1]); 
                   else
                     gr.setColor(colors[colorIndex]);
                   gr.fillOval(pp.x - 2, pp.y - 2, 4, 4);
@@ -5836,7 +5888,8 @@ public class CommandPanel
     // Draw Alternate Windows
     if (displayAltTooltip)
     {
-      displayAltWindow(gr, WWGnlUtilities.buildMessage("alt-win-title"), tooltipMess);
+//    displayAltWindow(gr, WWGnlUtilities.buildMessage("alt-win-title"), tooltipMess);
+      setDisplayAltTooltip(gr, WWGnlUtilities.buildMessage("alt-win-title"), tooltipMess);
     }    
   }
 
@@ -6120,7 +6173,10 @@ public class CommandPanel
       {
       //      System.out.println("Button:" + button);
         if (button == CLOSE_IMAGE)
+        {
           displayAltTooltip = false;
+          System.setProperty("tooltip.option", "none");
+        }
         else if (button == ZOOMEXPAND_IMAGE)
         {                                     
           altTooltipW *= 1.1;  
@@ -6179,18 +6235,28 @@ public class CommandPanel
     }
     else if (type == ChartPanel.MOUSE_MOVED)    
     {
+      int x = me.getX();
+      int y = me.getY();
+      GeoPoint gp = chartPanel.getGeoPos(x, y);
+      String header = displayAltTooltip?"":"<html>";
+      String footer = displayAltTooltip?"":"</html>";
+      String br = displayAltTooltip?"\n":"<br>";
+      String mess = header;
+      if (displayAltTooltip)
+      {
+        mess += (GeomUtil.decToSex(gp.getL(), GeomUtil.SWING, GeomUtil.NS) + "\n");
+        mess += (GeomUtil.decToSex(gp.getG(), GeomUtil.SWING, GeomUtil.EW) + "\n");
+      }
       if (wgd != null)
       {
         if (gribData == null || smoothingRequired)
         {
           gribData = wgd[gribIndex]; 
         }
-        int x = me.getX();
-        int y = me.getY();
-        GeoPoint gp = chartPanel.getGeoPos(x, y);
         GribHelper.GribCondition gribPoint = null;
         try { gribPoint = GribHelper.gribLookup(gp, wgd, gribData.getDate()); }
         catch (Exception ignore) 
+        
         {
           WWContext.getInstance().fireLogging(WWGnlUtilities.buildMessage("wind-lookup", new String[] { gribData.getDate().toString(), ignore.getMessage() }) + "\n"); }
 
@@ -6226,15 +6292,6 @@ public class CommandPanel
                                                   gribPoint.waves, 
                                                   gribPoint.temp, 
                                                   gribPoint.rain);
-            String header = displayAltTooltip?"":"<html>";
-            String footer = displayAltTooltip?"":"</html>";
-            String br = displayAltTooltip?"\n":"<br>";
-            String mess = header;
-            if (displayAltTooltip)
-            {
-              mess += (GeomUtil.decToSex(gp.getL(), GeomUtil.SWING, GeomUtil.NS) + "\n");
-              mess += (GeomUtil.decToSex(gp.getG(), GeomUtil.SWING, GeomUtil.EW) + "\n");
-            }
             mess += ("wind " + Math.round(gribPoint.windspeed) + "kts@" + gribPoint.winddir + 
                     ((gribPoint.prmsl>0)?br  + "prmsl:" + WWGnlUtilities.DF2.format((gribPoint.prmsl / 100F)) + units[PRMSL]:"") +
                     ((gribPoint.waves>0)?br  + "waves:" + WWGnlUtilities.XXX12.format((gribPoint.waves / 100F)) + units[WAVES]:"") +
@@ -6246,36 +6303,36 @@ public class CommandPanel
               mess += "<hr>" +
                       "<center><small>x:" + gribPoint.horIdx + ", y:" + gribPoint.vertIdx + "</small></center>" +
                       "<hr>" + 
-                      "<small>" + getSolarTimeTooltip(gp) + "</small>";
+                      "<small>" + WWGnlUtilities.getSolarTimeTooltip(gp) + "</small>";
             }
+            else
+              mess += ((mess.trim().length() > 0?"\n":"") + WWGnlUtilities.getSolarTimeTooltip(gp));
             mess += footer;
             tooltipMess = mess;
   //        System.out.println(mess);
   //        System.out.println("TooltipEnabled:" + chartPanel.isPositionToolTipEnabled());
-            if (displayAltTooltip)
-              chartPanel.repaint();
           }
           else
           {
-            tooltipMess = getSolarTimeTooltip(gp);
+            tooltipMess = mess.trim() + (mess.trim().length() > 0?"\n":"") + WWGnlUtilities.getSolarTimeTooltip(gp) + footer;
           }
         } 
         else
         {
           tooltipMess = null;
 //        System.out.println("No Wind");
-          tooltipMess = getSolarTimeTooltip(gp);
+          tooltipMess = mess.trim() + (mess.trim().length() > 0?"\n":"") + WWGnlUtilities.getSolarTimeTooltip(gp) + footer;
         }
       } 
       else
       {
         tooltipMess = null;        
 //      System.out.println("No GRIB Data");
-        int x = me.getX();
-        int y = me.getY();
-        GeoPoint gp = chartPanel.getGeoPos(x, y);
-        tooltipMess = getSolarTimeTooltip(gp);
+        tooltipMess = mess.trim() + (mess.trim().length() > 0?"\n":"") + WWGnlUtilities.getSolarTimeTooltip(gp) + footer;
+        // System.out.println("mess:" + mess + ", tooltip:" + tooltipMess);
       }
+      if (displayAltTooltip)
+        chartPanel.repaint();
     }
     else if (type == ChartPanel.MOUSE_DRAGGED)    
     {
@@ -6434,7 +6491,13 @@ public class CommandPanel
         GribHelper.GribCondition gribPoint = null;
         try 
         { 
-          gribPoint = GribHelper.gribLookup(gp, gribData); 
+          if (wgd != null)
+            gribPoint = GribHelper.gribLookup(gp, wgd, rp.getDate()); 
+          else
+          {
+            System.out.println("Warning:" + this.getClass().getName() + ": wgd is null.");
+            gribPoint = GribHelper.gribLookup(gp, gribData); 
+          }
           data2plot.add(gribPoint);
         }
         catch (Exception ignore) 
@@ -6452,23 +6515,6 @@ public class CommandPanel
     }
     
     jSplitPane.setLeftComponent(gsp);
-  }
-  
-  // FIXME Needs attention...
-  private static String getSolarTimeTooltip(GeoPoint gp)
-  {
-    String str = "Solar Time: XX:XX:XX";
-    try
-    {
-      Date ut = TimeUtil.getGMT();
-  //  System.out.println("UTC:" + ut.toString());
-      long longUT = ut.getTime();
-      long solarTime = longUT + (long)((gp.getG() / 15D) * (3600000D));
-      Date solarDate = new Date(solarTime);
-      str = WWGnlUtilities.buildMessage("solar") + ":" + WWGnlUtilities.SDF_SOLAR.format(solarDate);    
-    }
-    catch (Exception ignore) {}
-    return str;
   }
   
   public String getMessForTooltip()

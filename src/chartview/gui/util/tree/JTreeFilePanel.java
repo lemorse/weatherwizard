@@ -86,7 +86,7 @@ public class JTreeFilePanel
   private JTree jTree = new JTree();
 //private JButton showHideButton = new JButton();
   private CustomPanelButton showHideButton = null;
-  private final TreeSelectionListener treeMonitor = new TreeMonitor(this);
+  private final transient TreeSelectionListener treeMonitor = new TreeMonitor(this);
 
   private boolean expanded = true;
   private String path = null;
@@ -102,10 +102,12 @@ public class JTreeFilePanel
   
   private int type = -1;
   
-  public final static int SORT_BY_NAME = 1;
-  public final static int SORT_BY_DATE = 2;
+  public final static int SORT_BY_NAME_ASC  = 1;
+  public final static int SORT_BY_NAME_DESC = 2;
+  public final static int SORT_BY_DATE_DESC = 3;
+  public final static int SORT_BY_DATE_ASC  = 4;
   
-  private int sort = SORT_BY_NAME;
+  private int sort = SORT_BY_NAME_ASC;
   
   private final static String[] names = { WWGnlUtilities.buildMessage("grib-files-button"), 
                                           WWGnlUtilities.buildMessage("faxes-button"), 
@@ -120,7 +122,7 @@ public class JTreeFilePanel
                                                       new ImageIcon(JTreeFilePanel.class.getResource("col_map.png")),
                                                       new ImageIcon(JTreeFilePanel.class.getResource("col_layout.png")) };
   
-  FileTypeHolder parent = null;
+  private FileTypeHolder parent = null;
 
   public JTreeFilePanel(String path, int type, FileTypeHolder caller)
   {
@@ -134,11 +136,19 @@ public class JTreeFilePanel
       case FAX_TYPE:
       case COMPOSITE_TYPE:
 //    case COMPOSITE_ARCHIVE_TYPE:
-        this.sort = SORT_BY_DATE;
+        String sortType = System.getProperty("composite.sort", "date.desc");
+        if ("date.desc".equals(sortType))
+          this.sort = SORT_BY_DATE_DESC;
+        else if ("date.asc".equals(sortType))
+          this.sort = SORT_BY_DATE_ASC;
+        else if ("name.asc".equals(sortType))
+          this.sort = SORT_BY_NAME_ASC;
+        else if ("name.desc".equals(sortType))
+          this.sort = SORT_BY_NAME_DESC;
         break;
       case PATTERN_TYPE:
       default:
-        this.sort = SORT_BY_NAME;
+        this.sort = SORT_BY_NAME_ASC;
         break;
     }
     
@@ -478,7 +488,7 @@ public class JTreeFilePanel
   }
 
   private Pattern  pattern = null;
-  private Matcher  matcher = null;
+  private transient Matcher  matcher = null;
 
   private void drillDown(File dir, DefaultMutableTreeNode parent, final String filter, final boolean regExp)
   {
@@ -723,11 +733,15 @@ public class JTreeFilePanel
 //      File file2 = (File)f2;
 //    System.out.println("Comparing " + f1.getName() + " and " + f2.getName() + " (" + (fileType == JTreeFilePanel.PATTERN_TYPE?"pattern":"no-pattern") + ")");
 //    if (fileType == JTreeFilePanel.PATTERN_TYPE)
-      if (sort == SORT_BY_NAME)
+      if (sort == SORT_BY_NAME_ASC)
       {
         return (f1.getName().compareTo(f2.getName()));
       }
-      else
+      else if (sort == SORT_BY_NAME_DESC)
+      {
+        return (f2.getName().compareTo(f1.getName()));
+      }
+      else if (sort == SORT_BY_DATE_DESC)
       {
         // Most recent on top
         if (f1.lastModified() > f2.lastModified())
@@ -735,6 +749,16 @@ public class JTreeFilePanel
         else
           return 1;
       }
+      else if (sort == SORT_BY_DATE_ASC)
+      {
+        // Most recent on top
+        if (f2.lastModified() > f1.lastModified())
+          return -1;
+        else
+          return 1;
+      }
+      else 
+        return 0; // Should never occur
     }
   }
   
