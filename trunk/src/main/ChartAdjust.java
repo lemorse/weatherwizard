@@ -25,6 +25,10 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 
@@ -35,6 +39,7 @@ import java.net.URLEncoder;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Properties;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 
@@ -152,20 +157,42 @@ public class ChartAdjust
     
     ParamPanel.setUserValues();
 
-    final Frame frame = new AdjustFrame();
-    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-    Dimension frameSize = frame.getSize();
-    if(frameSize.height > screenSize.height)
-      frameSize.height = screenSize.height;
-    if(frameSize.width > screenSize.width)
-      frameSize.width = screenSize.width;
-    frame.setLocation((screenSize.width - frameSize.width) / 2, (screenSize.height - frameSize.height) / 2);
+    final JFrame frame = new AdjustFrame();
     
+    boolean positioned = false;
+    File propFile = new File("ww_position.properties");
+    if (propFile.exists())
+    {
+      try
+      {
+        Properties props = new Properties();
+        props.load(new FileReader(propFile));
+        int w = Integer.parseInt(props.getProperty("frame.width"));
+        int h = Integer.parseInt(props.getProperty("frame.height"));
+        int x = Integer.parseInt(props.getProperty("frame.x.pos"));
+        int y = Integer.parseInt(props.getProperty("frame.y.pos"));
+        frame.setSize(w, h);
+        frame.setLocation(x, y);
+        positioned = true;
+      }
+      catch (Exception forgetit) { }
+    }
+    
+    if (!positioned)
+    {
+      Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+      Dimension frameSize = frame.getSize();
+      if(frameSize.height > screenSize.height)
+        frameSize.height = screenSize.height;
+      if(frameSize.width > screenSize.width)
+        frameSize.width = screenSize.width;
+      frame.setLocation((screenSize.width - frameSize.width) / 2, (screenSize.height - frameSize.height) / 2);
+    }
     frame.addWindowListener(new WindowAdapter() 
       {
         public void windowClosing(WindowEvent e)
         {
-          WWGnlUtilities.doOnExit();
+          WWGnlUtilities.doOnExit(frame);
         }
       });
 //  frame.setUndecorated(true);
@@ -230,6 +257,25 @@ public class ChartAdjust
 
   public static void main(String args[])
   {
+    // Read config properties file
+    File configFile = new File(WWContext.CONFIG_PROPERTIES_FILE);
+    if (configFile.exists())
+    {
+      try
+      {
+        Properties props = new Properties();
+        props.load(new FileInputStream(configFile));
+        // Assign as System properties
+        System.setProperty("tooltip.option", props.getProperty("tooltip.option", "on-chart")); // on-chart, none, tt-window        
+        System.setProperty("composite.sort", props.getProperty("composite.sort", "date.desc")); // date, name, asc, desc
+
+      }
+      catch (Exception ex)
+      {
+        ex.printStackTrace();
+      }
+    }
+    // Start the UI
     String lnf = System.getProperty("swing.defaultlaf");
 //  System.out.println("LnF:" + lnf);
     if (lnf == null) // Let the -Dswing.defaultlaf do the job.
