@@ -115,6 +115,49 @@ public class ChartControlPane
   private SingleControlPane routingPreviewControl = null;
   private SingleControlPane longControl = null;
 
+  private transient ApplicationEventListener ael = new ApplicationEventListener()
+        {
+          public void faxLoaded()
+          {
+            imageCommandPanel.setEnabled(true);
+            selectFaxPanel.setEnabled(true);
+            rotationPanel.setEnabled(true);
+            faxControl.setEnabled(true);
+          }
+
+          public void faxUnloaded()
+          {
+            imageCommandPanel.setEnabled(false);
+            selectFaxPanel.setEnabled(false);
+            rotationPanel.setEnabled(false);
+            faxControl.setEnabled(false);
+          }
+
+          public void gribLoaded() 
+          {
+            gribControl.setEnabled(true);
+          }
+
+          public void gribUnloaded()
+          {
+            gribControl.setEnabled(false);
+            WWContext.getInstance().setGribFile(null);
+          }
+
+          public void routingAvailable(boolean b, ArrayList<RoutingPoint> bestRoute)
+          {
+//          System.out.println("Routing is " + (b?"":"not ") + "available");
+            routingPreviewControl.setEnabled(b);
+            routingPanel.setBestRoute(bestRoute, RoutingUtil.REAL_ROUTING);
+          }
+          
+          public void routingForecastAvailable(boolean b, ArrayList<RoutingPoint> route)
+          {
+            routingPreviewControl.setEnabled(b);
+            routingPanel.setBestRoute(route, RoutingUtil.WHAT_IF_ROUTING);
+          }
+        };
+  
   public ChartControlPane()
   {
     try
@@ -188,50 +231,14 @@ public class ChartControlPane
     // Done with the toolbar
     this.add(componentHolder, BorderLayout.NORTH);
     
-    WWContext.getInstance().addApplicationListener(new ApplicationEventListener()
-        {
-          public void faxLoaded()
-          {
-            imageCommandPanel.setEnabled(true);
-            selectFaxPanel.setEnabled(true);
-            rotationPanel.setEnabled(true);
-            faxControl.setEnabled(true);
-          }
-
-          public void faxUnloaded()
-          {
-            imageCommandPanel.setEnabled(false);
-            selectFaxPanel.setEnabled(false);
-            rotationPanel.setEnabled(false);
-            faxControl.setEnabled(false);
-          }
-
-          public void gribLoaded() 
-          {
-            gribControl.setEnabled(true);
-          }
-
-          public void gribUnloaded()
-          {
-            gribControl.setEnabled(false);
-            WWContext.getInstance().setGribFile(null);
-          }
-
-          public void routingAvailable(boolean b, ArrayList<RoutingPoint> bestRoute)
-          {
-//          System.out.println("Routing is " + (b?"":"not ") + "available");
-            routingPreviewControl.setEnabled(b);
-            routingPanel.setBestRoute(bestRoute, RoutingUtil.REAL_ROUTING);
-          }
-          
-          public void routingForecastAvailable(boolean b, ArrayList<RoutingPoint> route)
-          {
-            routingPreviewControl.setEnabled(b);
-            routingPanel.setBestRoute(route, RoutingUtil.WHAT_IF_ROUTING);
-          }
-        });
+    WWContext.getInstance().addApplicationListener(ael);
   }
 
+  public void removeListener()
+  {
+    WWContext.getInstance().removeApplicationListener(ael);  
+  }
+  
   public MainZoomPanel getMainZoomPanel()
   {
     return mainZoomPanel;
