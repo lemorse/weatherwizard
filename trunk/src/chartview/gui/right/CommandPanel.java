@@ -153,6 +153,7 @@ public class CommandPanel
 {
   private final static Color CUSTOM_LIGHT_BLUE = new Color(85, 115, 170);
   
+  private CompositeTabbedPane parent = null;
   private CommandPanel instance = this;
   
   private int defaultWindOption = Integer.parseInt(((ParamPanel.WindOptionList)(ParamPanel.data[ParamData.PREFERRED_WIND_DISPLAY][1])).getStringIndex());
@@ -255,6 +256,7 @@ public class CommandPanel
   
   protected transient GeoPoint from = null, to = null, closest = null;
   private transient RoutingPoint closestPoint = null;
+  private ArrayList<RoutingPoint> bestRoute = null;
   private transient GeoPoint boatPosition = null;
   private int boatHeading = -1;
   
@@ -525,8 +527,9 @@ public class CommandPanel
     return button;
   }
   
-  public CommandPanel(MainZoomPanel dp)
+  public CommandPanel(CompositeTabbedPane caller, MainZoomPanel dp)
   {
+    this.parent = caller;
     dataPanel = dp;
     borderLayout1 = new BorderLayout();
 //  borderLayout2 = new BorderLayout();
@@ -1326,6 +1329,8 @@ public class CommandPanel
   private boolean showGRIBPointPanel = false;
   private TransparentFrame gribDataPanel = null;
   
+  private transient ApplicationEventListener ael = null;
+  
   private void jbInit()
         throws Exception
   {
@@ -1346,809 +1351,777 @@ public class CommandPanel
     gribDataPanel.setVisible(showGRIBPointPanel && wgd != null);
     gribDataPanel.setAlwaysOnTop(true);
 
-    WWContext.getInstance().addApplicationListener(new ApplicationEventListener()
+    ael = new ApplicationEventListener()
       {
         public void imageUp()
         {
-          if (faxImage != null && faxImage.length > 0)
+         if (parent != null && parent.isVisible())
           {
-            try
+            if (faxImage != null && faxImage.length > 0)
             {
-              if (currentFaxIndex == -1)
+              try
               {
-                for (int i=0; faxImage!=null && i<faxImage.length; i++)
-                  faxImage[i].imageVOffset -= dataPanel.getFaxInc();
+                if (currentFaxIndex == -1)
+                {
+                  for (int i=0; faxImage!=null && i<faxImage.length; i++)
+                    faxImage[i].imageVOffset -= dataPanel.getFaxInc();
+                }
+                else
+                  faxImage[currentFaxIndex].imageVOffset -= dataPanel.getFaxInc();
               }
-              else
-                faxImage[currentFaxIndex].imageVOffset -= dataPanel.getFaxInc();
+              catch (Exception ex) 
+              {
+                WWContext.getInstance().fireExceptionLogging(ex);
+                ex.printStackTrace(); 
+              }
             }
-            catch (Exception ex) 
-            {
-              WWContext.getInstance().fireExceptionLogging(ex);
-              ex.printStackTrace(); 
-            }
+            displayStatus();
+            repaint();
           }
-          displayStatus();
-          repaint();
         }
         public void imageDown() 
         {
-          if (faxImage != null && faxImage.length > 0)
+         if (parent != null && parent.isVisible())
           {
-            try
+            if (faxImage != null && faxImage.length > 0)
             {
-              if (currentFaxIndex == -1)
+              try
               {
-                for (int i=0; faxImage!=null && i<faxImage.length; i++)
-                  faxImage[i].imageVOffset += dataPanel.getFaxInc();
+                if (currentFaxIndex == -1)
+                {
+                  for (int i=0; faxImage!=null && i<faxImage.length; i++)
+                    faxImage[i].imageVOffset += dataPanel.getFaxInc();
+                }
+                else
+                  faxImage[currentFaxIndex].imageVOffset += dataPanel.getFaxInc();
               }
-              else
-                faxImage[currentFaxIndex].imageVOffset += dataPanel.getFaxInc();
+              catch (Exception e)
+              {
+                WWContext.getInstance().fireExceptionLogging(e);
+                e.printStackTrace();
+              }
             }
-            catch (Exception e)
-            {
-              WWContext.getInstance().fireExceptionLogging(e);
-              e.printStackTrace();
-            }
+            displayStatus();
+            repaint();
           }
-          displayStatus();
-          repaint();
         }
         public void imageLeft() 
         {
-          if (faxImage != null && faxImage.length > 0)
+         if (parent != null && parent.isVisible())
           {
-            try
+            if (faxImage != null && faxImage.length > 0)
             {
-              if (currentFaxIndex == -1)
+              try
               {
-                for (int i=0; faxImage!=null && i<faxImage.length; i++)
-                  faxImage[i].imageHOffset -= dataPanel.getFaxInc();
+                if (currentFaxIndex == -1)
+                {
+                  for (int i=0; faxImage!=null && i<faxImage.length; i++)
+                    faxImage[i].imageHOffset -= dataPanel.getFaxInc();
+                }
+                else
+                  faxImage[currentFaxIndex].imageHOffset -= dataPanel.getFaxInc();
               }
-              else
-                faxImage[currentFaxIndex].imageHOffset -= dataPanel.getFaxInc();
+              catch (Exception e)
+              {
+                WWContext.getInstance().fireExceptionLogging(e);
+                e.printStackTrace();
+              }
             }
-            catch (Exception e)
-            {
-              WWContext.getInstance().fireExceptionLogging(e);
-              e.printStackTrace();
-            }
+            displayStatus();
+            repaint();
           }
-          displayStatus();
-          repaint();
         }
         public void imageRight() 
         {
-          if (faxImage != null && faxImage.length > 0)
+         if (parent != null && parent.isVisible())
           {
-            try
+            if (faxImage != null && faxImage.length > 0)
+            {
+              try
+              {
+                if (currentFaxIndex == -1)
+                {
+                  for (int i=0; faxImage!=null && i<faxImage.length; i++)
+                    faxImage[i].imageHOffset += dataPanel.getFaxInc();
+                }
+                else
+                  faxImage[currentFaxIndex].imageHOffset += dataPanel.getFaxInc();
+              }
+              catch (Exception e)
+              {
+                WWContext.getInstance().fireExceptionLogging(e);
+                e.printStackTrace();
+              }
+            }
+            displayStatus();
+            repaint();
+          }
+        }
+        public void imageZoomin() 
+        {
+         if (parent != null && parent.isVisible())
+          {
+            if (faxImage != null && faxImage.length > 0)
             {
               if (currentFaxIndex == -1)
               {
                 for (int i=0; faxImage!=null && i<faxImage.length; i++)
-                  faxImage[i].imageHOffset += dataPanel.getFaxInc();
+                  faxImage[i].imageScale *= dataPanel.getZoomFactor();
               }
               else
-                faxImage[currentFaxIndex].imageHOffset += dataPanel.getFaxInc();
+                faxImage[currentFaxIndex].imageScale *= dataPanel.getZoomFactor();
             }
-            catch (Exception e)
-            {
-              WWContext.getInstance().fireExceptionLogging(e);
-              e.printStackTrace();
-            }
+            displayStatus();
+            repaint();
           }
-          displayStatus();
-          repaint();
-        }
-        public void imageZoomin() 
-        {
-          if (faxImage != null && faxImage.length > 0)
-          {
-            if (currentFaxIndex == -1)
-            {
-              for (int i=0; faxImage!=null && i<faxImage.length; i++)
-                faxImage[i].imageScale *= dataPanel.getZoomFactor();
-            }
-            else
-              faxImage[currentFaxIndex].imageScale *= dataPanel.getZoomFactor();
-          }
-          displayStatus();
-          repaint();
         }
         public void imageZoomout() 
         {
-          if (faxImage != null && faxImage.length > 0)
+         if (parent != null && parent.isVisible())
           {
-            if (currentFaxIndex == -1)
+            if (faxImage != null && faxImage.length > 0)
             {
-              for (int i=0; faxImage!=null && i<faxImage.length; i++)
-                faxImage[i].imageScale /= dataPanel.getZoomFactor();
+              if (currentFaxIndex == -1)
+              {
+                for (int i=0; faxImage!=null && i<faxImage.length; i++)
+                  faxImage[i].imageScale /= dataPanel.getZoomFactor();
+              }
+              else
+                faxImage[currentFaxIndex].imageScale /= dataPanel.getZoomFactor();
             }
-            else
-              faxImage[currentFaxIndex].imageScale /= dataPanel.getZoomFactor();
+            displayStatus();
+            repaint();
           }
-          displayStatus();
-          repaint();
         }
 
         public void toggleGrabScroll(int cursorType)
         {
-          switch (cursorType)
+         if (parent != null && parent.isVisible())
           {
-            case ChartCommandPanelToolBar.REGULAR_CURSOR:
-              chartPanel.setMouseDraggedEnabled(false);
-              chartPanel.setMouseDraggedType(ChartPanel.MOUSE_DRAG_ZOOM);
-              break;
-            case ChartCommandPanelToolBar.DD_ZOOM:
-              chartPanel.setMouseDraggedEnabled(true);
-              chartPanel.setMouseDraggedType(ChartPanel.MOUSE_DRAG_ZOOM);
-              break;
-            case ChartCommandPanelToolBar.GRAB_SCROLL:
-              chartPanel.setMouseDraggedEnabled(true);
-              chartPanel.setMouseDraggedType(ChartPanel.MOUSE_DRAG_GRAB_SCROLL);
-              break;
-            case ChartCommandPanelToolBar.CROSS_HAIR_CURSOR:
-              chartPanel.setMouseDraggedEnabled(true);
-              chartPanel.setMouseDraggedType(ChartPanel.MOUSE_DRAW_LINE_ON_CHART);
-              break;
-            default:
-              break;
+            switch (cursorType)
+            {
+              case ChartCommandPanelToolBar.REGULAR_CURSOR:
+                chartPanel.setMouseDraggedEnabled(false);
+                chartPanel.setMouseDraggedType(ChartPanel.MOUSE_DRAG_ZOOM);
+                break;
+              case ChartCommandPanelToolBar.DD_ZOOM:
+                chartPanel.setMouseDraggedEnabled(true);
+                chartPanel.setMouseDraggedType(ChartPanel.MOUSE_DRAG_ZOOM);
+                break;
+              case ChartCommandPanelToolBar.GRAB_SCROLL:
+                chartPanel.setMouseDraggedEnabled(true);
+                chartPanel.setMouseDraggedType(ChartPanel.MOUSE_DRAG_GRAB_SCROLL);
+                break;
+              case ChartCommandPanelToolBar.CROSS_HAIR_CURSOR:
+                chartPanel.setMouseDraggedEnabled(true);
+                chartPanel.setMouseDraggedType(ChartPanel.MOUSE_DRAW_LINE_ON_CHART);
+                break;
+              default:
+                break;
+            }
           }
         }
         
         public void ddZoomConfirmChanged(boolean b) 
         {
-          chartPanel.setConfirmDDZoom(b);
+         if (parent != null && parent.isVisible())
+            chartPanel.setConfirmDDZoom(b);
         }
         
         public void rotate(double d)
         {
-          if (faxImage != null && faxImage.length > 0)
+         if (parent != null && parent.isVisible())
           {
-            if (currentFaxIndex == -1)
+            if (faxImage != null && faxImage.length > 0)
             {
-              for (int i=0; faxImage!=null && i<faxImage.length; i++)
-                faxImage[i].imageRotationAngle = d;
+              if (currentFaxIndex == -1)
+              {
+                for (int i=0; faxImage!=null && i<faxImage.length; i++)
+                  faxImage[i].imageRotationAngle = d;
+              }
+              else
+                faxImage[currentFaxIndex].imageRotationAngle = d;
             }
-            else
-              faxImage[currentFaxIndex].imageRotationAngle = d;
+            repaint();
           }
-          repaint();
         }
         
         public void chartUp()
         {
-          try
+         if (parent != null && parent.isVisible())
           {
-            if (chartPanel.getProjection() == ChartPanel.GLOBE_VIEW)
-            {
-              double foreAft = chartPanel.getGlobeViewForeAftRotation() - dataPanel.getLatLongInc();
-              chartPanel.setGlobeViewForeAftRotation(foreAft);
-              WWContext.getInstance().fireSetGlobeParameters(foreAft, 
-                                                                 chartPanel.getGlobeViewLngOffset());
-            }
-            else if (chartPanel.getProjection() == ChartPanel.SATELLITE_VIEW)
-            {
-              double satLat = chartPanel.getSatelliteLatitude() - dataPanel.getLatLongInc();
-              chartPanel.setSatelliteLatitude(satLat);
-              WWContext.getInstance().fireSetSatelliteParameters(chartPanel.getSatelliteLatitude(), chartPanel.getSatelliteLongitude(), chartPanel.getSatelliteAltitude(), !chartPanel.isTransparentGlobe());
-            }
-            else
-            {
-              nLat -= dataPanel.getLatLongInc();
-              sLat -= dataPanel.getLatLongInc();
-            }
-          }
-          catch (Exception e)
-          {
-            WWContext.getInstance().fireExceptionLogging(e);
-            e.printStackTrace();
-          }
-          if (chartPanel.getProjection() != ChartPanel.GLOBE_VIEW && 
-              chartPanel.getProjection() != ChartPanel.SATELLITE_VIEW)
-            chartPanel.setWidthFromChart(nLat, sLat, wLong, eLong);
-//        eLong = chartPanel.calculateEastG(nLat, sLat, wLong);
-          chartPanel.setEastG(eLong);
-          chartPanel.setWestG(wLong);
-          chartPanel.setNorthL(nLat);
-          chartPanel.setSouthL(sLat);
-          chartPanel.repaint();  
-          displayStatus();
-        }
-        public void chartDown()
-        {
-          try
-          {
-            if (chartPanel.getProjection() == ChartPanel.GLOBE_VIEW)
-            {
-              double foreAft = chartPanel.getGlobeViewForeAftRotation() + dataPanel.getLatLongInc();
-              chartPanel.setGlobeViewForeAftRotation(foreAft);
-              WWContext.getInstance().fireSetGlobeParameters(foreAft, 
-                                                                 chartPanel.getGlobeViewLngOffset());
-            }                                                                   
-            else if (chartPanel.getProjection() == ChartPanel.SATELLITE_VIEW)
-            {
-              double satLat = chartPanel.getSatelliteLatitude() + dataPanel.getLatLongInc();
-              chartPanel.setSatelliteLatitude(satLat);
-              WWContext.getInstance().fireSetSatelliteParameters(chartPanel.getSatelliteLatitude(), chartPanel.getSatelliteLongitude(), chartPanel.getSatelliteAltitude(), !chartPanel.isTransparentGlobe());
-            }                                                                   
-            else
-            {
-              nLat += dataPanel.getLatLongInc();
-              sLat += dataPanel.getLatLongInc();
-            }
-          }
-          catch (Exception e)
-          {
-            WWContext.getInstance().fireExceptionLogging(e);
-            e.printStackTrace();
-          }
-          if (chartPanel.getProjection() != ChartPanel.GLOBE_VIEW &&
-              chartPanel.getProjection() != ChartPanel.SATELLITE_VIEW)
-            chartPanel.setWidthFromChart(nLat, sLat, wLong, eLong);
-//        eLong = chartPanel.calculateEastG(nLat, sLat, wLong);
-          chartPanel.setEastG(eLong);
-          chartPanel.setWestG(wLong);
-          chartPanel.setNorthL(nLat);
-          chartPanel.setSouthL(sLat);
-          chartPanel.repaint();    
-          displayStatus();
-        }
-        public void chartLeft()
-        {
-          try
-          {
-            if (chartPanel.getProjection() == ChartPanel.GLOBE_VIEW)
-            {
-              double leftRight = chartPanel.getGlobeViewLngOffset() + dataPanel.getLatLongInc();
-              chartPanel.setGlobeViewLngOffset(leftRight);
-              WWContext.getInstance().fireSetGlobeParameters(chartPanel.getGlobeViewForeAftRotation(),
-                                                                 leftRight);
-            }                                                                   
-            else if (chartPanel.getProjection() == ChartPanel.SATELLITE_VIEW)
-            {
-              double satLng = chartPanel.getSatelliteLongitude() + dataPanel.getLatLongInc();
-              chartPanel.setSatelliteLongitude(satLng);
-              WWContext.getInstance().fireSetSatelliteParameters(chartPanel.getSatelliteLatitude(), chartPanel.getSatelliteLongitude(), chartPanel.getSatelliteAltitude(), !chartPanel.isTransparentGlobe());
-            }                                                                   
-            else
-            {
-              wLong += dataPanel.getLatLongInc();
-              eLong += dataPanel.getLatLongInc();
-            }
-          }
-          catch (Exception e)
-          {
-            WWContext.getInstance().fireExceptionLogging(e);
-            e.printStackTrace();
-          }
-          if (chartPanel.getProjection() != ChartPanel.GLOBE_VIEW &&
-              chartPanel.getProjection() != ChartPanel.SATELLITE_VIEW)
-            chartPanel.setWidthFromChart(nLat, sLat, wLong, eLong);
-//        eLong = chartPanel.calculateEastG(nLat, sLat, wLong);
-          chartPanel.setEastG(eLong);
-          chartPanel.setWestG(wLong);
-          chartPanel.setNorthL(nLat);
-          chartPanel.setSouthL(sLat);
-          chartPanel.repaint();     
-          displayStatus();
-        }
-        public void chartRight()
-        {
-          try
-          {
-            if (chartPanel.getProjection() == ChartPanel.GLOBE_VIEW)
-            {
-              double currOffset = chartPanel.getGlobeViewLngOffset();
-              double newOffset  = currOffset - dataPanel.getLatLongInc();
-              chartPanel.setGlobeViewLngOffset(newOffset);
-              WWContext.getInstance().fireSetGlobeParameters(chartPanel.getGlobeViewForeAftRotation(), 
-                                                                 newOffset);
-            }
-            else if (chartPanel.getProjection() == ChartPanel.SATELLITE_VIEW)
-            {
-              double satLng = chartPanel.getSatelliteLongitude() - dataPanel.getLatLongInc();
-              chartPanel.setSatelliteLongitude(satLng);
-              WWContext.getInstance().fireSetSatelliteParameters(chartPanel.getSatelliteLatitude(), chartPanel.getSatelliteLongitude(), chartPanel.getSatelliteAltitude(), !chartPanel.isTransparentGlobe());
-            }                                                                   
-            else
-            {
-              wLong -= dataPanel.getLatLongInc();
-              eLong -= dataPanel.getLatLongInc();
-            }
-          }
-          catch (Exception e)
-          {
-            WWContext.getInstance().fireExceptionLogging(e);
-            e.printStackTrace();
-          }
-//        eLong = chartPanel.calculateEastG(nLat, sLat, wLong);
-          if (chartPanel.getProjection() != ChartPanel.GLOBE_VIEW &&
-              chartPanel.getProjection() != ChartPanel.SATELLITE_VIEW)
-            chartPanel.setWidthFromChart(nLat, sLat, wLong, eLong);
-          chartPanel.setEastG(eLong);
-          chartPanel.setWestG(wLong);
-          chartPanel.setNorthL(nLat);
-          chartPanel.setSouthL(sLat);
-          chartPanel.repaint();    
-          displayStatus();
-        }
-        public void chartZoomin() 
-        {
-          chartPanel.setZoomFactor(dataPanel.getZoomFactor());
-          chartPanel.zoomIn();
-          displayStatus();
-        }
-        public void chartZoomout() 
-        {
-          chartPanel.setZoomFactor(dataPanel.getZoomFactor());
-          chartPanel.zoomOut();
-          displayStatus();
-        }
-        public void allLayerZoomIn() 
-        {
-          double f = dataPanel.getZoomFactor();
-          chartPanel.setZoomFactor(f);
-          chartPanel.zoomIn();
-          for (int i=0; faxImage!=null && i<faxImage.length; i++)
-            faxImage[i].imageScale *= f;
-          repaint();
-        }
-        public void allLayerZoomOut() 
-        {
-          double f = dataPanel.getZoomFactor();
-          chartPanel.setZoomFactor(f);
-          chartPanel.zoomOut();
-          for (int i=0; faxImage!=null && i<faxImage.length; i++)
-            faxImage[i].imageScale /= f;
-          repaint();
-        }
-        public void store() // Save, and update
-        {
-          boolean ok2go = true;
-          int nbWaz = 0;
-          boolean update = false;
-          
-          for (int i=0; faxImage!=null && i<faxImage.length; i++)
-          {
-            if (faxImage[i].fileName.startsWith(WWContext.WAZ_PROTOCOL_PREFIX))
-            {
-              nbWaz++;
-            }
-          }
-          if (faxImage != null)
-          {
-            if (nbWaz > 0 && nbWaz != faxImage.length)
-            {
-              ok2go = false; // At least one fax does not come from the archive
-            }
-            if (ok2go && nbWaz > 0)
-              update = true;
-          }
-          
-          if (ok2go)
-          {
-            // Check if file name has changed!
-            if (gribFileName != null && gribFileName.startsWith(WWContext.WAZ_PROTOCOL_PREFIX))
-            {
-              update = true;
-              if (faxImage != null && nbWaz != faxImage.length)
-                ok2go = false;
-            }
-          }
-          if (!ok2go)
-          {
-            JOptionPane.showMessageDialog(instance, 
-                                          WWGnlUtilities.buildMessage("no-save-from-archive"), 
-                                          WWGnlUtilities.buildMessage("save-composite"),
-                                          JOptionPane.WARNING_MESSAGE);
-            return;
-          }
-          if (update)
-          {
-            String compositeName = WWContext.getInstance().getCurrentComposite();
-         // JOptionPane.showMessageDialog(instance, "Update not implemented yet...", "Updating", JOptionPane.WARNING_MESSAGE);
-         // ok2go = false;
-            System.out.println("Updating " + compositeName);
-          }
-          // A comment for this composite?
-          if (ok2go && currentComment.trim().length() > 0)
-          {
-            int resp = JOptionPane.showConfirmDialog(instance, 
-                                                     WWGnlUtilities.buildMessage("confirm-comment", 
-                                                                                 new String[] { currentComment }), 
-                                                     WWGnlUtilities.buildMessage("composite-comment"), 
-                                                     JOptionPane.YES_NO_CANCEL_OPTION, 
-                                                     JOptionPane.QUESTION_MESSAGE);
-            if (resp == JOptionPane.NO_OPTION)                                                            
-              currentComment = "";
-            else if (resp == JOptionPane.CANCEL_OPTION)
-              ok2go = false;
-          }
-          if (ok2go)
-          {
-            final boolean updateComposite = update;
-            Runnable heavyRunnable = new Runnable() // Show progress bar
-            {
-//            ProgressMonitor monitor = null;
-              
-              public void run()
-              {
-                if (!updateComposite)
-                {
-                  WWContext.getInstance().setMonitor(ProgressUtil.createModalProgressMonitor(WWContext.getInstance().getMasterTopFrame(), 1, true, true));
-                  WWContext.getInstance().getMonitor().start(WWGnlUtilities.buildMessage("gathering-storing"));
-                  WWContext.getInstance().setAel4monitor(new ApplicationEventListener()
-                  {
-                    public void progressing(String mess)
-                    {
-                        WWContext.getInstance().getMonitor().setCurrent(mess, WWContext.getInstance().getMonitor().getCurrent());
-                    }
-                    
-                    public void interruptProgress()
-                    {
-                      System.out.println("Interruption requested...");
-                      ProgressMonitor monitor = WWContext.getInstance().getMonitor();
-                      synchronized (monitor)
-                      {
-                        int total = monitor.getTotal();
-                        int current = monitor.getCurrent();
-                        if (current != total)
-                            monitor.setCurrent(null, total);
-                      }
-                    }
-                  });
-                  WWContext.getInstance().addApplicationListener(WWContext.getInstance().getAel4monitor());
-                }
-                try
-                { 
-                  if (!updateComposite)
-                    runStorageThread(); 
-                  else
-                    runStorageThread(updateComposite, WWContext.getInstance().getCurrentComposite());
-                }
-                finally
-                {
-                  if (!updateComposite)
-                  {
-                    // to ensure that progress dlg is closed in case of any exception
-                    if (WWContext.getInstance().getMonitor().getCurrent() != WWContext.getInstance().getMonitor().getTotal())
-                      WWContext.getInstance().getMonitor().setCurrent(null, WWContext.getInstance().getMonitor().getTotal());
-                    WWContext.getInstance().removeApplicationListener(WWContext.getInstance().getAel4monitor());
-                    WWContext.getInstance().setAel4monitor(null);
-                    WWContext.getInstance().setMonitor(null);
-                  }
-                }
-              }
-            };
-            new Thread(heavyRunnable).start();
-          }
-        }
-        
-        public void googleMapRequested()
-        {
-          generateGoogleFiles(OPTION_MAP);
-        }
-        
-        public void googleEarthRequested()
-        {
-          generateGoogleFiles(OPTION_EARTH);
-        }
-        
-        public void generatePattern() 
-        {
-          XMLDocument pattern = new XMLDocument();
-          XMLElement root = (XMLElement)pattern.createElement("pattern");
-          pattern.appendChild(root);
-          
-          XMLElement faxcollection = (XMLElement)pattern.createElement("fax-collection");
-          root.appendChild(faxcollection);
-          // Ask for a hint for each fax
-          FaxPatternTablePanel fptp = new FaxPatternTablePanel();
-          if (faxImage == null)
-          {
-            JOptionPane.showMessageDialog(instance, WWGnlUtilities.buildMessage("no-fax-loaded"), WWGnlUtilities.buildMessage("pattern-generation"), JOptionPane.WARNING_MESSAGE);
-            return;
-          }
-          int nbGrib = (gribFileName.trim().length() == 0?0:1);
-          Object[][] data = new Object[faxImage.length + nbGrib][2];
-          for (int i=0; faxImage!=null && i<faxImage.length; i++)
-          {
-            String s = Integer.toString(i+1) + " - " + faxImage[i].fileName.substring(faxImage[i].fileName.lastIndexOf(File.separator) + 1);
-            Color c  = faxImage[i].color;
-            data[i][0] = new FaxPatternType(s, c);
-            data[i][1] = "";
-          }
-          if (nbGrib == 1)
-          {
-            data[faxImage.length][0] = "GRIB Zone";
-            data[faxImage.length][1] = "";
-          }
-          fptp.setData(data);
-          int resp = JOptionPane.showConfirmDialog(instance, fptp, WWGnlUtilities.buildMessage("pattern-generation"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
-          if (resp != JOptionPane.OK_OPTION)
-            return;
-          
-          data =  fptp.getData();
-          
-          for (int i=0; data!=null && i<data.length - nbGrib; i++)
-          {
-            XMLElement fax = (XMLElement)pattern.createElement("fax");
-            faxcollection.appendChild(fax);
-            fax.setAttribute("hint", (String)data[i][1]); // store the hint here
-            fax.setAttribute("color", WWGnlUtilities.colorToString(faxImage[i].color));
-            if (whRatio != 1D)
-              fax.setAttribute("wh-ratio", Double.toString(whRatio));
-            fax.setAttribute("transparent", Boolean.toString(faxImage[i].transparent));
-            fax.setAttribute("color-change", Boolean.toString(faxImage[i].colorChange));
-        
-            XMLElement faxScale = (XMLElement)pattern.createElement("faxScale");
-            fax.appendChild(faxScale);
-            Text faxScaleText = pattern.createTextNode("#text");
-            faxScaleText.setNodeValue(Double.toString(faxImage[i].imageScale));
-            faxScale.appendChild(faxScaleText);
-            
-            XMLElement faxXoffset = (XMLElement)pattern.createElement("faxXoffset");
-            fax.appendChild(faxXoffset);
-            Text faxXoffsetText = pattern.createTextNode("#text");
-            faxXoffsetText.setNodeValue(Integer.toString(faxImage[i].imageHOffset));
-            faxXoffset.appendChild(faxXoffsetText);
-            
-            XMLElement faxYoffset = (XMLElement)pattern.createElement("faxYoffset");
-            fax.appendChild(faxYoffset);
-            Text faxYoffsetText = pattern.createTextNode("#text");
-            faxYoffsetText.setNodeValue(Integer.toString(faxImage[i].imageVOffset));
-            faxYoffset.appendChild(faxYoffsetText);
-            
-            XMLElement faxRotation = (XMLElement)pattern.createElement("faxRotation");
-            fax.appendChild(faxRotation);
-            Text faxRotationText = pattern.createTextNode("#text");
-            faxRotationText.setNodeValue(Double.toString(faxImage[i].imageRotationAngle));
-            faxRotation.appendChild(faxRotationText);
-          }
-          XMLElement grib = (XMLElement)pattern.createElement("grib");
-
-//        grib.setAttribute("wind-only", Boolean.toString(windOnly));
-//        grib.setAttribute("with-contour", Boolean.toString(displayContourLines));
-          
-          grib.setAttribute("display-TWS-Data",    Boolean.toString(displayTws));
-          grib.setAttribute("display-PRMSL-Data",  Boolean.toString(displayPrmsl));
-          grib.setAttribute("display-500HGT-Data", Boolean.toString(display500mb));
-          grib.setAttribute("display-WAVES-Data",  Boolean.toString(displayWaves));
-          grib.setAttribute("display-TEMP-Data",   Boolean.toString(displayTemperature));
-          grib.setAttribute("display-PRATE-Data",  Boolean.toString(displayRain));
-          
-          grib.setAttribute("display-TWS-contour",    Boolean.toString(displayContourTWS));
-          grib.setAttribute("display-PRMSL-contour",  Boolean.toString(displayContourPRMSL));
-          grib.setAttribute("display-500HGT-contour", Boolean.toString(displayContour500mb));
-          grib.setAttribute("display-WAVES-contour",  Boolean.toString(displayContourWaves));
-          grib.setAttribute("display-TEMP-contour",   Boolean.toString(displayContourTemp));
-          grib.setAttribute("display-PRATE-contour",  Boolean.toString(displayContourPrate));
-
-          grib.setAttribute("display-TWS-3D",    Boolean.toString(display3DTws));
-          grib.setAttribute("display-PRMSL-3D",  Boolean.toString(display3DPrmsl));
-          grib.setAttribute("display-500HGT-3D", Boolean.toString(display3D500mb));
-          grib.setAttribute("display-WAVES-3D",  Boolean.toString(display3DWaves));
-          grib.setAttribute("display-TEMP-3D",   Boolean.toString(display3DTemperature));
-          grib.setAttribute("display-PRATE-3D",  Boolean.toString(display3DRain));
-
-          root.appendChild(grib);
-          Text gribText = pattern.createTextNode("#text");
-          String gribHint = "";
-          if (nbGrib == 1)
-            gribHint = (String)data[faxImage.length][1];
-          gribText.setNodeValue(gribHint);
-          grib.appendChild(gribText);
-         
-          XMLElement projection = (XMLElement)pattern.createElement("projection");
-          root.appendChild(projection);
-          switch (getProjection())
-          {
-            case ChartPanel.MERCATOR:
-              projection.setAttribute("type", MERCATOR);
-              break;
-            case ChartPanel.ANAXIMANDRE:
-              projection.setAttribute("type", ANAXIMANDRE);
-              break;
-            case ChartPanel.LAMBERT:
-              projection.setAttribute("type", LAMBERT);
-              projection.setAttribute("contact-parallel", Double.toString(chartPanel.getContactParallel()));
-              break;
-            case ChartPanel.CONIC_EQUIDISTANT:
-              projection.setAttribute("type", CONIC_EQU);
-              projection.setAttribute("contact-parallel", Double.toString(chartPanel.getContactParallel()));
-              break;
-            case ChartPanel.GLOBE_VIEW:
-              projection.setAttribute("type", GLOBE);
-              break;
-            case ChartPanel.SATELLITE_VIEW:
-              projection.setAttribute("type", SATELLITE);
-              projection.setAttribute("nadir-latitude", Double.toString(chartPanel.getSatelliteLatitude()));              
-              projection.setAttribute("nadir-longitude", Double.toString(chartPanel.getSatelliteLongitude()));              
-              projection.setAttribute("altitude", Double.toString(chartPanel.getSatelliteAltitude()));              
-              projection.setAttribute("opaque", Boolean.toString(!chartPanel.isTransparentGlobe()));              
-             break;
-            default:
-              projection.setAttribute("type", MERCATOR);
-              break;
-          }
-         
-          XMLElement north = (XMLElement)pattern.createElement("north");
-          root.appendChild(north);
-          Text northText = pattern.createTextNode("#text");
-          northText.setNodeValue(Double.toString(nLat));
-          north.appendChild(northText);
-
-          XMLElement south = (XMLElement)pattern.createElement("south");
-          root.appendChild(south);
-          Text southText = pattern.createTextNode("#text");
-          southText.setNodeValue(Double.toString(sLat));
-          south.appendChild(southText);
-          
-          XMLElement east = (XMLElement)pattern.createElement("east");
-          root.appendChild(east);
-          Text eastText = pattern.createTextNode("#text");
-          eastText.setNodeValue(Double.toString(eLong));
-          east.appendChild(eastText);
-         
-          XMLElement west = (XMLElement)pattern.createElement("west");
-          root.appendChild(west);
-          Text westText = pattern.createTextNode("#text");
-          westText.setNodeValue(Double.toString(wLong));
-          west.appendChild(westText);
-         
-          XMLElement chartwidth = (XMLElement)pattern.createElement("chartwidth");
-          root.appendChild(chartwidth);
-          Text chartwidthText = pattern.createTextNode("#text");
-          chartwidthText.setNodeValue(Integer.toString(chartPanel.getWidth()));
-          chartwidth.appendChild(chartwidthText);
-         
-          XMLElement chartheight = (XMLElement)pattern.createElement("chartheight");
-          root.appendChild(chartheight);
-          Text chartheightText = pattern.createTextNode("#text");
-          chartheightText.setNodeValue(Integer.toString(chartPanel.getHeight()));
-          chartheight.appendChild(chartheightText);
-          
-          String fileName = WWGnlUtilities.chooseFile(instance, 
-                                                    JFileChooser.FILES_ONLY, 
-                                                    new String[] { "ptrn" }, 
-                                                    "Patterns", 
-                                                    ParamPanel.data[ParamData.PATTERN_DIR][1].toString(), 
-                                                    "Save", 
-                                                    "Create Pattern");
-          if (fileName != null && fileName.trim().length() > 0)
-          {
-            fileName = Utilities.makeSureExtensionIsOK(fileName, ".ptrn");
             try
             {
-              // Check file existence first
-              File patt = new File(fileName);
-              boolean ok = true;
-              if (patt.exists())
+              if (chartPanel.getProjection() == ChartPanel.GLOBE_VIEW)
               {
-                int rsp = JOptionPane.showConfirmDialog(instance, WWGnlUtilities.buildMessage("pattern-already-exist", new String[] { fileName }), WWGnlUtilities.buildMessage("store-pattern"), 
-                                                        JOptionPane.YES_NO_OPTION, 
-                                                        JOptionPane.WARNING_MESSAGE);
-                if (rsp == JOptionPane.NO_OPTION)
-                  ok = false;
+                double foreAft = chartPanel.getGlobeViewForeAftRotation() - dataPanel.getLatLongInc();
+                chartPanel.setGlobeViewForeAftRotation(foreAft);
+                WWContext.getInstance().fireSetGlobeParameters(foreAft, 
+                                                                   chartPanel.getGlobeViewLngOffset());
               }
-              if (ok)
+              else if (chartPanel.getProjection() == ChartPanel.SATELLITE_VIEW)
               {
-//s              pattern.print(System.out);
-                pattern.print(new FileOutputStream(patt));
-                WWContext.getInstance().fireReloadPatternTree();
+                double satLat = chartPanel.getSatelliteLatitude() - dataPanel.getLatLongInc();
+                chartPanel.setSatelliteLatitude(satLat);
+                WWContext.getInstance().fireSetSatelliteParameters(chartPanel.getSatelliteLatitude(), chartPanel.getSatelliteLongitude(), chartPanel.getSatelliteAltitude(), !chartPanel.isTransparentGlobe());
+              }
+              else
+              {
+                nLat -= dataPanel.getLatLongInc();
+                sLat -= dataPanel.getLatLongInc();
               }
             }
             catch (Exception e)
             {
               WWContext.getInstance().fireExceptionLogging(e);
               e.printStackTrace();
+            }
+            if (chartPanel.getProjection() != ChartPanel.GLOBE_VIEW && 
+                chartPanel.getProjection() != ChartPanel.SATELLITE_VIEW)
+              chartPanel.setWidthFromChart(nLat, sLat, wLong, eLong);
+  //        eLong = chartPanel.calculateEastG(nLat, sLat, wLong);
+            chartPanel.setEastG(eLong);
+            chartPanel.setWestG(wLong);
+            chartPanel.setNorthL(nLat);
+            chartPanel.setSouthL(sLat);
+            chartPanel.repaint();  
+            displayStatus();
+          }
+        }
+        public void chartDown()
+        {
+         if (parent != null && parent.isVisible())
+          {
+            try
+            {
+              if (chartPanel.getProjection() == ChartPanel.GLOBE_VIEW)
+              {
+                double foreAft = chartPanel.getGlobeViewForeAftRotation() + dataPanel.getLatLongInc();
+                chartPanel.setGlobeViewForeAftRotation(foreAft);
+                WWContext.getInstance().fireSetGlobeParameters(foreAft, 
+                                                                   chartPanel.getGlobeViewLngOffset());
+              }                                                                   
+              else if (chartPanel.getProjection() == ChartPanel.SATELLITE_VIEW)
+              {
+                double satLat = chartPanel.getSatelliteLatitude() + dataPanel.getLatLongInc();
+                chartPanel.setSatelliteLatitude(satLat);
+                WWContext.getInstance().fireSetSatelliteParameters(chartPanel.getSatelliteLatitude(), chartPanel.getSatelliteLongitude(), chartPanel.getSatelliteAltitude(), !chartPanel.isTransparentGlobe());
+              }                                                                   
+              else
+              {
+                nLat += dataPanel.getLatLongInc();
+                sLat += dataPanel.getLatLongInc();
+              }
+            }
+            catch (Exception e)
+            {
+              WWContext.getInstance().fireExceptionLogging(e);
+              e.printStackTrace();
+            }
+            if (chartPanel.getProjection() != ChartPanel.GLOBE_VIEW &&
+                chartPanel.getProjection() != ChartPanel.SATELLITE_VIEW)
+              chartPanel.setWidthFromChart(nLat, sLat, wLong, eLong);
+  //        eLong = chartPanel.calculateEastG(nLat, sLat, wLong);
+            chartPanel.setEastG(eLong);
+            chartPanel.setWestG(wLong);
+            chartPanel.setNorthL(nLat);
+            chartPanel.setSouthL(sLat);
+            chartPanel.repaint();    
+            displayStatus();
+          }
+        }
+        public void chartLeft()
+        {
+         if (parent != null && parent.isVisible())
+          {
+            try
+            {
+              if (chartPanel.getProjection() == ChartPanel.GLOBE_VIEW)
+              {
+                double leftRight = chartPanel.getGlobeViewLngOffset() + dataPanel.getLatLongInc();
+                chartPanel.setGlobeViewLngOffset(leftRight);
+                WWContext.getInstance().fireSetGlobeParameters(chartPanel.getGlobeViewForeAftRotation(),
+                                                                   leftRight);
+              }                                                                   
+              else if (chartPanel.getProjection() == ChartPanel.SATELLITE_VIEW)
+              {
+                double satLng = chartPanel.getSatelliteLongitude() + dataPanel.getLatLongInc();
+                chartPanel.setSatelliteLongitude(satLng);
+                WWContext.getInstance().fireSetSatelliteParameters(chartPanel.getSatelliteLatitude(), chartPanel.getSatelliteLongitude(), chartPanel.getSatelliteAltitude(), !chartPanel.isTransparentGlobe());
+              }                                                                   
+              else
+              {
+                wLong += dataPanel.getLatLongInc();
+                eLong += dataPanel.getLatLongInc();
+              }
+            }
+            catch (Exception e)
+            {
+              WWContext.getInstance().fireExceptionLogging(e);
+              e.printStackTrace();
+            }
+            if (chartPanel.getProjection() != ChartPanel.GLOBE_VIEW &&
+                chartPanel.getProjection() != ChartPanel.SATELLITE_VIEW)
+              chartPanel.setWidthFromChart(nLat, sLat, wLong, eLong);
+  //        eLong = chartPanel.calculateEastG(nLat, sLat, wLong);
+            chartPanel.setEastG(eLong);
+            chartPanel.setWestG(wLong);
+            chartPanel.setNorthL(nLat);
+            chartPanel.setSouthL(sLat);
+            chartPanel.repaint();     
+            displayStatus();
+          }
+        }
+        public void chartRight()
+        {
+         if (parent != null && parent.isVisible())
+          {
+            try
+            {
+              if (chartPanel.getProjection() == ChartPanel.GLOBE_VIEW)
+              {
+                double currOffset = chartPanel.getGlobeViewLngOffset();
+                double newOffset  = currOffset - dataPanel.getLatLongInc();
+                chartPanel.setGlobeViewLngOffset(newOffset);
+                WWContext.getInstance().fireSetGlobeParameters(chartPanel.getGlobeViewForeAftRotation(), 
+                                                                   newOffset);
+              }
+              else if (chartPanel.getProjection() == ChartPanel.SATELLITE_VIEW)
+              {
+                double satLng = chartPanel.getSatelliteLongitude() - dataPanel.getLatLongInc();
+                chartPanel.setSatelliteLongitude(satLng);
+                WWContext.getInstance().fireSetSatelliteParameters(chartPanel.getSatelliteLatitude(), chartPanel.getSatelliteLongitude(), chartPanel.getSatelliteAltitude(), !chartPanel.isTransparentGlobe());
+              }                                                                   
+              else
+              {
+                wLong -= dataPanel.getLatLongInc();
+                eLong -= dataPanel.getLatLongInc();
+              }
+            }
+            catch (Exception e)
+            {
+              WWContext.getInstance().fireExceptionLogging(e);
+              e.printStackTrace();
+            }
+  //        eLong = chartPanel.calculateEastG(nLat, sLat, wLong);
+            if (chartPanel.getProjection() != ChartPanel.GLOBE_VIEW &&
+                chartPanel.getProjection() != ChartPanel.SATELLITE_VIEW)
+              chartPanel.setWidthFromChart(nLat, sLat, wLong, eLong);
+            chartPanel.setEastG(eLong);
+            chartPanel.setWestG(wLong);
+            chartPanel.setNorthL(nLat);
+            chartPanel.setSouthL(sLat);
+            chartPanel.repaint();    
+            displayStatus();
+          }
+        }
+        public void chartZoomin() 
+        {
+         if (parent != null && parent.isVisible())
+          {
+            chartPanel.setZoomFactor(dataPanel.getZoomFactor());
+            chartPanel.zoomIn();
+            displayStatus();
+          }
+        }
+        public void chartZoomout() 
+        {
+         if (parent != null && parent.isVisible())
+          {
+            chartPanel.setZoomFactor(dataPanel.getZoomFactor());
+            chartPanel.zoomOut();
+            displayStatus();
+          }
+        }
+        public void allLayerZoomIn() 
+        {
+         if (parent != null && parent.isVisible())
+          {
+            double f = dataPanel.getZoomFactor();
+            chartPanel.setZoomFactor(f);
+            chartPanel.zoomIn();
+            for (int i=0; faxImage!=null && i<faxImage.length; i++)
+              faxImage[i].imageScale *= f;
+            repaint();
+          }
+        }
+        public void allLayerZoomOut() 
+        {
+         if (parent != null && parent.isVisible())
+          {
+            double f = dataPanel.getZoomFactor();
+            chartPanel.setZoomFactor(f);
+            chartPanel.zoomOut();
+            for (int i=0; faxImage!=null && i<faxImage.length; i++)
+              faxImage[i].imageScale /= f;
+            repaint();
+          }
+        }
+        public void store() // Save, and update
+        {
+         if (parent != null && parent.isVisible())
+          {
+            boolean ok2go = true;
+            int nbWaz = 0;
+            boolean update = false;
+            
+            for (int i=0; faxImage!=null && i<faxImage.length; i++)
+            {
+              if (faxImage[i].fileName.startsWith(WWContext.WAZ_PROTOCOL_PREFIX))
+              {
+                nbWaz++;
+              }
+            }
+            if (faxImage != null)
+            {
+              if (nbWaz > 0 && nbWaz != faxImage.length)
+              {
+                ok2go = false; // At least one fax does not come from the archive
+              }
+              if (ok2go && nbWaz > 0)
+                update = true;
+            }
+            
+            if (ok2go)
+            {
+              // Check if file name has changed!
+              if (gribFileName != null && gribFileName.startsWith(WWContext.WAZ_PROTOCOL_PREFIX))
+              {
+                update = true;
+                if (faxImage != null && nbWaz != faxImage.length)
+                  ok2go = false;
+              }
+            }
+            if (!ok2go)
+            {
+              JOptionPane.showMessageDialog(instance, 
+                                            WWGnlUtilities.buildMessage("no-save-from-archive"), 
+                                            WWGnlUtilities.buildMessage("save-composite"),
+                                            JOptionPane.WARNING_MESSAGE);
+              return;
+            }
+            if (update)
+            {
+              String compositeName = WWContext.getInstance().getCurrentComposite();
+           // JOptionPane.showMessageDialog(instance, "Update not implemented yet...", "Updating", JOptionPane.WARNING_MESSAGE);
+           // ok2go = false;
+              System.out.println("Updating " + compositeName);
+            }
+            // A comment for this composite?
+            if (ok2go && currentComment.trim().length() > 0)
+            {
+              int resp = JOptionPane.showConfirmDialog(instance, 
+                                                       WWGnlUtilities.buildMessage("confirm-comment", 
+                                                                                   new String[] { currentComment }), 
+                                                       WWGnlUtilities.buildMessage("composite-comment"), 
+                                                       JOptionPane.YES_NO_CANCEL_OPTION, 
+                                                       JOptionPane.QUESTION_MESSAGE);
+              if (resp == JOptionPane.NO_OPTION)                                                            
+                currentComment = "";
+              else if (resp == JOptionPane.CANCEL_OPTION)
+                ok2go = false;
+            }
+            if (ok2go)
+            {
+              final boolean updateComposite = update;
+              Runnable heavyRunnable = new Runnable() // Show progress bar
+              {
+  //            ProgressMonitor monitor = null;
+                
+                public void run()
+                {
+                  if (!updateComposite)
+                  {
+                    WWContext.getInstance().setMonitor(ProgressUtil.createModalProgressMonitor(WWContext.getInstance().getMasterTopFrame(), 1, true, true));
+                    WWContext.getInstance().getMonitor().start(WWGnlUtilities.buildMessage("gathering-storing"));
+                    WWContext.getInstance().setAel4monitor(new ApplicationEventListener()
+                    {
+                      public void progressing(String mess)
+                      {
+                          WWContext.getInstance().getMonitor().setCurrent(mess, WWContext.getInstance().getMonitor().getCurrent());
+                      }
+                      
+                      public void interruptProgress()
+                      {
+                        System.out.println("Interruption requested...");
+                        ProgressMonitor monitor = WWContext.getInstance().getMonitor();
+                        synchronized (monitor)
+                        {
+                          int total = monitor.getTotal();
+                          int current = monitor.getCurrent();
+                          if (current != total)
+                              monitor.setCurrent(null, total);
+                        }
+                      }
+                    });
+                    WWContext.getInstance().addApplicationListener(WWContext.getInstance().getAel4monitor());
+                  }
+                  try
+                  { 
+                    if (!updateComposite)
+                      runStorageThread(); 
+                    else
+                      runStorageThread(updateComposite, WWContext.getInstance().getCurrentComposite());
+                  }
+                  finally
+                  {
+                    if (!updateComposite)
+                    {
+                      // to ensure that progress dlg is closed in case of any exception
+                      if (WWContext.getInstance().getMonitor().getCurrent() != WWContext.getInstance().getMonitor().getTotal())
+                        WWContext.getInstance().getMonitor().setCurrent(null, WWContext.getInstance().getMonitor().getTotal());
+                      WWContext.getInstance().removeApplicationListener(WWContext.getInstance().getAel4monitor());
+                      WWContext.getInstance().setAel4monitor(null);
+                      WWContext.getInstance().setMonitor(null);
+                    }
+                  }
+                }
+              };
+              new Thread(heavyRunnable).start();
+            }
+          }
+        }
+        
+        public void googleMapRequested()
+        {
+         if (parent != null && parent.isVisible())
+            generateGoogleFiles(OPTION_MAP);
+        }
+        
+        public void googleEarthRequested()
+        {
+         if (parent != null && parent.isVisible())
+            generateGoogleFiles(OPTION_EARTH);
+        }
+        
+        public void generatePattern() 
+        {
+         if (parent != null && parent.isVisible())
+          {
+            XMLDocument pattern = new XMLDocument();
+            XMLElement root = (XMLElement)pattern.createElement("pattern");
+            pattern.appendChild(root);
+            
+            XMLElement faxcollection = (XMLElement)pattern.createElement("fax-collection");
+            root.appendChild(faxcollection);
+            // Ask for a hint for each fax
+            FaxPatternTablePanel fptp = new FaxPatternTablePanel();
+            if (faxImage == null)
+            {
+              JOptionPane.showMessageDialog(instance, WWGnlUtilities.buildMessage("no-fax-loaded"), WWGnlUtilities.buildMessage("pattern-generation"), JOptionPane.WARNING_MESSAGE);
+              return;
+            }
+            int nbGrib = (gribFileName.trim().length() == 0?0:1);
+            Object[][] data = new Object[faxImage.length + nbGrib][2];
+            for (int i=0; faxImage!=null && i<faxImage.length; i++)
+            {
+              String s = Integer.toString(i+1) + " - " + faxImage[i].fileName.substring(faxImage[i].fileName.lastIndexOf(File.separator) + 1);
+              Color c  = faxImage[i].color;
+              data[i][0] = new FaxPatternType(s, c);
+              data[i][1] = "";
+            }
+            if (nbGrib == 1)
+            {
+              data[faxImage.length][0] = "GRIB Zone";
+              data[faxImage.length][1] = "";
+            }
+            fptp.setData(data);
+            int resp = JOptionPane.showConfirmDialog(instance, fptp, WWGnlUtilities.buildMessage("pattern-generation"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
+            if (resp != JOptionPane.OK_OPTION)
+              return;
+            
+            data =  fptp.getData();
+            
+            for (int i=0; data!=null && i<data.length - nbGrib; i++)
+            {
+              XMLElement fax = (XMLElement)pattern.createElement("fax");
+              faxcollection.appendChild(fax);
+              fax.setAttribute("hint", (String)data[i][1]); // store the hint here
+              fax.setAttribute("color", WWGnlUtilities.colorToString(faxImage[i].color));
+              if (whRatio != 1D)
+                fax.setAttribute("wh-ratio", Double.toString(whRatio));
+              fax.setAttribute("transparent", Boolean.toString(faxImage[i].transparent));
+              fax.setAttribute("color-change", Boolean.toString(faxImage[i].colorChange));
+          
+              XMLElement faxScale = (XMLElement)pattern.createElement("faxScale");
+              fax.appendChild(faxScale);
+              Text faxScaleText = pattern.createTextNode("#text");
+              faxScaleText.setNodeValue(Double.toString(faxImage[i].imageScale));
+              faxScale.appendChild(faxScaleText);
+              
+              XMLElement faxXoffset = (XMLElement)pattern.createElement("faxXoffset");
+              fax.appendChild(faxXoffset);
+              Text faxXoffsetText = pattern.createTextNode("#text");
+              faxXoffsetText.setNodeValue(Integer.toString(faxImage[i].imageHOffset));
+              faxXoffset.appendChild(faxXoffsetText);
+              
+              XMLElement faxYoffset = (XMLElement)pattern.createElement("faxYoffset");
+              fax.appendChild(faxYoffset);
+              Text faxYoffsetText = pattern.createTextNode("#text");
+              faxYoffsetText.setNodeValue(Integer.toString(faxImage[i].imageVOffset));
+              faxYoffset.appendChild(faxYoffsetText);
+              
+              XMLElement faxRotation = (XMLElement)pattern.createElement("faxRotation");
+              fax.appendChild(faxRotation);
+              Text faxRotationText = pattern.createTextNode("#text");
+              faxRotationText.setNodeValue(Double.toString(faxImage[i].imageRotationAngle));
+              faxRotation.appendChild(faxRotationText);
+            }
+            XMLElement grib = (XMLElement)pattern.createElement("grib");
+  
+  //        grib.setAttribute("wind-only", Boolean.toString(windOnly));
+  //        grib.setAttribute("with-contour", Boolean.toString(displayContourLines));
+            
+            grib.setAttribute("display-TWS-Data",    Boolean.toString(displayTws));
+            grib.setAttribute("display-PRMSL-Data",  Boolean.toString(displayPrmsl));
+            grib.setAttribute("display-500HGT-Data", Boolean.toString(display500mb));
+            grib.setAttribute("display-WAVES-Data",  Boolean.toString(displayWaves));
+            grib.setAttribute("display-TEMP-Data",   Boolean.toString(displayTemperature));
+            grib.setAttribute("display-PRATE-Data",  Boolean.toString(displayRain));
+            
+            grib.setAttribute("display-TWS-contour",    Boolean.toString(displayContourTWS));
+            grib.setAttribute("display-PRMSL-contour",  Boolean.toString(displayContourPRMSL));
+            grib.setAttribute("display-500HGT-contour", Boolean.toString(displayContour500mb));
+            grib.setAttribute("display-WAVES-contour",  Boolean.toString(displayContourWaves));
+            grib.setAttribute("display-TEMP-contour",   Boolean.toString(displayContourTemp));
+            grib.setAttribute("display-PRATE-contour",  Boolean.toString(displayContourPrate));
+  
+            grib.setAttribute("display-TWS-3D",    Boolean.toString(display3DTws));
+            grib.setAttribute("display-PRMSL-3D",  Boolean.toString(display3DPrmsl));
+            grib.setAttribute("display-500HGT-3D", Boolean.toString(display3D500mb));
+            grib.setAttribute("display-WAVES-3D",  Boolean.toString(display3DWaves));
+            grib.setAttribute("display-TEMP-3D",   Boolean.toString(display3DTemperature));
+            grib.setAttribute("display-PRATE-3D",  Boolean.toString(display3DRain));
+  
+            root.appendChild(grib);
+            Text gribText = pattern.createTextNode("#text");
+            String gribHint = "";
+            if (nbGrib == 1)
+              gribHint = (String)data[faxImage.length][1];
+            gribText.setNodeValue(gribHint);
+            grib.appendChild(gribText);
+           
+            XMLElement projection = (XMLElement)pattern.createElement("projection");
+            root.appendChild(projection);
+            switch (getProjection())
+            {
+              case ChartPanel.MERCATOR:
+                projection.setAttribute("type", MERCATOR);
+                break;
+              case ChartPanel.ANAXIMANDRE:
+                projection.setAttribute("type", ANAXIMANDRE);
+                break;
+              case ChartPanel.LAMBERT:
+                projection.setAttribute("type", LAMBERT);
+                projection.setAttribute("contact-parallel", Double.toString(chartPanel.getContactParallel()));
+                break;
+              case ChartPanel.CONIC_EQUIDISTANT:
+                projection.setAttribute("type", CONIC_EQU);
+                projection.setAttribute("contact-parallel", Double.toString(chartPanel.getContactParallel()));
+                break;
+              case ChartPanel.GLOBE_VIEW:
+                projection.setAttribute("type", GLOBE);
+                break;
+              case ChartPanel.SATELLITE_VIEW:
+                projection.setAttribute("type", SATELLITE);
+                projection.setAttribute("nadir-latitude", Double.toString(chartPanel.getSatelliteLatitude()));              
+                projection.setAttribute("nadir-longitude", Double.toString(chartPanel.getSatelliteLongitude()));              
+                projection.setAttribute("altitude", Double.toString(chartPanel.getSatelliteAltitude()));              
+                projection.setAttribute("opaque", Boolean.toString(!chartPanel.isTransparentGlobe()));              
+               break;
+              default:
+                projection.setAttribute("type", MERCATOR);
+                break;
+            }
+           
+            XMLElement north = (XMLElement)pattern.createElement("north");
+            root.appendChild(north);
+            Text northText = pattern.createTextNode("#text");
+            northText.setNodeValue(Double.toString(nLat));
+            north.appendChild(northText);
+  
+            XMLElement south = (XMLElement)pattern.createElement("south");
+            root.appendChild(south);
+            Text southText = pattern.createTextNode("#text");
+            southText.setNodeValue(Double.toString(sLat));
+            south.appendChild(southText);
+            
+            XMLElement east = (XMLElement)pattern.createElement("east");
+            root.appendChild(east);
+            Text eastText = pattern.createTextNode("#text");
+            eastText.setNodeValue(Double.toString(eLong));
+            east.appendChild(eastText);
+           
+            XMLElement west = (XMLElement)pattern.createElement("west");
+            root.appendChild(west);
+            Text westText = pattern.createTextNode("#text");
+            westText.setNodeValue(Double.toString(wLong));
+            west.appendChild(westText);
+           
+            XMLElement chartwidth = (XMLElement)pattern.createElement("chartwidth");
+            root.appendChild(chartwidth);
+            Text chartwidthText = pattern.createTextNode("#text");
+            chartwidthText.setNodeValue(Integer.toString(chartPanel.getWidth()));
+            chartwidth.appendChild(chartwidthText);
+           
+            XMLElement chartheight = (XMLElement)pattern.createElement("chartheight");
+            root.appendChild(chartheight);
+            Text chartheightText = pattern.createTextNode("#text");
+            chartheightText.setNodeValue(Integer.toString(chartPanel.getHeight()));
+            chartheight.appendChild(chartheightText);
+            
+            String fileName = WWGnlUtilities.chooseFile(instance, 
+                                                      JFileChooser.FILES_ONLY, 
+                                                      new String[] { "ptrn" }, 
+                                                      "Patterns", 
+                                                      ParamPanel.data[ParamData.PATTERN_DIR][1].toString(), 
+                                                      "Save", 
+                                                      "Create Pattern");
+            if (fileName != null && fileName.trim().length() > 0)
+            {
+              fileName = Utilities.makeSureExtensionIsOK(fileName, ".ptrn");
+              try
+              {
+                // Check file existence first
+                File patt = new File(fileName);
+                boolean ok = true;
+                if (patt.exists())
+                {
+                  int rsp = JOptionPane.showConfirmDialog(instance, WWGnlUtilities.buildMessage("pattern-already-exist", new String[] { fileName }), WWGnlUtilities.buildMessage("store-pattern"), 
+                                                          JOptionPane.YES_NO_OPTION, 
+                                                          JOptionPane.WARNING_MESSAGE);
+                  if (rsp == JOptionPane.NO_OPTION)
+                    ok = false;
+                }
+                if (ok)
+                {
+  //s              pattern.print(System.out);
+                  pattern.print(new FileOutputStream(patt));
+                  WWContext.getInstance().fireReloadPatternTree();
+                }
+              }
+              catch (Exception e)
+              {
+                WWContext.getInstance().fireExceptionLogging(e);
+                e.printStackTrace();
+              }
             }
           }
         }
 
         public void restore() 
         {
-          // Read data
-          final String fileName = WWGnlUtilities.chooseFile(instance, 
-                                                          JFileChooser.FILES_ONLY, 
-                                                          new String[] { "xml", "waz" }, 
-                                                          "Composites", 
-                                                          ParamPanel.data[ParamData.CTX_FILES_LOC][1].toString(),
-                                                          "Open", 
-                                                          "Open Composite");
-          if (fileName != null && fileName.trim().length() > 0)
+         if (parent != null && parent.isVisible())
           {
-            Thread loader = new Thread()
-            {
-              public void run()
-              {
-  //            System.out.println("Loader top");
-                WWContext.getInstance().fireSetLoading(true);
-                restoreComposite(fileName);
-                WWContext.getInstance().fireSetLoading(false);
-  //            System.out.println("Loader bottom");
-              }
-            };
-            loader.start();
-          }
-          // Apply values
-          if (chartPanel.getProjection() != ChartPanel.GLOBE_VIEW &&
-              chartPanel.getProjection() != ChartPanel.SATELLITE_VIEW)
-            chartPanel.setWidthFromChart(nLat, sLat, wLong, eLong);
-          chartPanel.setEastG(eLong);
-          chartPanel.setWestG(wLong);
-          chartPanel.setNorthL(nLat);
-          chartPanel.setSouthL(sLat);
-          chartPanel.repaint();    
-          displayStatus();
-        }
-        
-        public void loadWithPattern() 
-        {
-          // Read data
-          final String fileName = WWGnlUtilities.chooseFile(instance, 
+            // Read data
+            final String fileName = WWGnlUtilities.chooseFile(instance, 
                                                             JFileChooser.FILES_ONLY, 
-                                                            new String[] { "ptrn" }, 
-                                                            "Patterns", 
-                                                            ParamPanel.data[ParamData.PATTERN_DIR][1].toString(), 
+                                                            new String[] { "xml", "waz" }, 
+                                                            "Composites", 
+                                                            ParamPanel.data[ParamData.CTX_FILES_LOC][1].toString(),
                                                             "Open", 
-                                                            "Use Pattern");
-          loadWithPattern(fileName);
-        }
-
-        public void loadWithPattern(final String fileName) 
-        {
-          if (fileName != null && fileName.trim().length() > 0)
-          {
-            // Reset comment
-            currentComment = "";
-            boolean dyn = WWGnlUtilities.isPatternDynamic(fileName);
-            if (dyn)
-            {
-              Runnable heavyRunnable = new Runnable()
-              {
-//              ProgressMonitor monitor = null;
-
-                public void run()
-                {
-                  WWContext.getInstance().setMonitor(ProgressUtil.createModalProgressMonitor(WWContext.getInstance().getMasterTopFrame(), 1, true, true));
-                  WWContext.getInstance().getMonitor().start(WWGnlUtilities.buildMessage("loading-with-pattern"));
-                  WWContext.getInstance().setAel4monitor(new ApplicationEventListener()
-                    {
-                      public void progressing(String mess)
-                      {
-                        WWContext.getInstance().getMonitor().setCurrent(mess, WWContext.getInstance().getMonitor().getCurrent());
-                      }
-
-//                    public void interruptProcess()
-//                    {
-//                      System.out.println("Interrupting Pattern Loading.");
-//                    }
-                    });
-                  WWContext.getInstance().addApplicationListener(WWContext.getInstance().getAel4monitor());
-
-                  try
-                  {
-                    WWContext.getInstance().fireSetLoading(true);
-                    restoreFromPattern(fileName);
-                    WWContext.getInstance().fireSetLoading(false);
-                  }
-                  finally
-                  {
-//                  System.out.println("End of Progress Monitor");
-                    // to ensure that progress dlg is closed in case of any exception
-                    if (WWContext.getInstance().getMonitor().getCurrent() != WWContext.getInstance().getMonitor().getTotal())
-                      WWContext.getInstance().getMonitor().setCurrent(null, WWContext.getInstance().getMonitor().getTotal());
-                    WWContext.getInstance().removeApplicationListener(WWContext.getInstance().getAel4monitor());
-                    WWContext.getInstance().setAel4monitor(null);
-                    WWContext.getInstance().setMonitor(null);
-                  }
-                }
-              };
-              new Thread(heavyRunnable).start();
-            }
-            else
+                                                            "Open Composite");
+            if (fileName != null && fileName.trim().length() > 0)
             {
               Thread loader = new Thread()
               {
@@ -2156,609 +2129,786 @@ public class CommandPanel
                 {
     //            System.out.println("Loader top");
                   WWContext.getInstance().fireSetLoading(true);
-                  restoreFromPattern(fileName);
+                  restoreComposite(fileName);
                   WWContext.getInstance().fireSetLoading(false);
     //            System.out.println("Loader bottom");
                 }
               };
               loader.start();
             }
+            // Apply values
+            if (chartPanel.getProjection() != ChartPanel.GLOBE_VIEW &&
+                chartPanel.getProjection() != ChartPanel.SATELLITE_VIEW)
+              chartPanel.setWidthFromChart(nLat, sLat, wLong, eLong);
+            chartPanel.setEastG(eLong);
+            chartPanel.setWestG(wLong);
+            chartPanel.setNorthL(nLat);
+            chartPanel.setSouthL(sLat);
+            chartPanel.repaint();    
+            displayStatus();
           }
-          // Apply values
-          if (chartPanel.getProjection() != ChartPanel.GLOBE_VIEW &&
-              chartPanel.getProjection() != ChartPanel.SATELLITE_VIEW)
-            chartPanel.setWidthFromChart(nLat, sLat, wLong, eLong);
-          chartPanel.setEastG(eLong);
-          chartPanel.setWestG(wLong);
-          chartPanel.setNorthL(nLat);
-          chartPanel.setSouthL(sLat);
-          chartPanel.repaint();    
-          displayStatus();
+        }
+        
+        public void loadWithPattern() 
+        {
+         if (parent != null && parent.isVisible())
+          {
+            // Read data
+            final String fileName = WWGnlUtilities.chooseFile(instance, 
+                                                              JFileChooser.FILES_ONLY, 
+                                                              new String[] { "ptrn" }, 
+                                                              "Patterns", 
+                                                              ParamPanel.data[ParamData.PATTERN_DIR][1].toString(), 
+                                                              "Open", 
+                                                              "Use Pattern");
+            loadWithPattern(fileName);
+          }
+        }
+
+        public void loadWithPattern(final String fileName) 
+        {
+         if (parent != null && parent.isVisible())
+          {
+            if (fileName != null && fileName.trim().length() > 0)
+            {
+              // Reset comment
+              currentComment = "";
+              boolean dyn = WWGnlUtilities.isPatternDynamic(fileName);
+              if (dyn)
+              {
+                Runnable heavyRunnable = new Runnable()
+                {
+  //              ProgressMonitor monitor = null;
+  
+                  public void run()
+                  {
+                    WWContext.getInstance().setMonitor(ProgressUtil.createModalProgressMonitor(WWContext.getInstance().getMasterTopFrame(), 1, true, true));
+                    WWContext.getInstance().getMonitor().start(WWGnlUtilities.buildMessage("loading-with-pattern"));
+                    WWContext.getInstance().setAel4monitor(new ApplicationEventListener()
+                      {
+                        public void progressing(String mess)
+                        {
+                          WWContext.getInstance().getMonitor().setCurrent(mess, WWContext.getInstance().getMonitor().getCurrent());
+                        }
+  
+  //                    public void interruptProcess()
+  //                    {
+  //                      System.out.println("Interrupting Pattern Loading.");
+  //                    }
+                      });
+                    WWContext.getInstance().addApplicationListener(WWContext.getInstance().getAel4monitor());
+  
+                    try
+                    {
+                      WWContext.getInstance().fireSetLoading(true);
+                      restoreFromPattern(fileName);
+                      WWContext.getInstance().fireSetLoading(false);
+                    }
+                    finally
+                    {
+  //                  System.out.println("End of Progress Monitor");
+                      // to ensure that progress dlg is closed in case of any exception
+                      if (WWContext.getInstance().getMonitor().getCurrent() != WWContext.getInstance().getMonitor().getTotal())
+                        WWContext.getInstance().getMonitor().setCurrent(null, WWContext.getInstance().getMonitor().getTotal());
+                      WWContext.getInstance().removeApplicationListener(WWContext.getInstance().getAel4monitor());
+                      WWContext.getInstance().setAel4monitor(null);
+                      WWContext.getInstance().setMonitor(null);
+                    }
+                  }
+                };
+                new Thread(heavyRunnable).start();
+              }
+              else
+              {
+                Thread loader = new Thread()
+                {
+                  public void run()
+                  {
+      //            System.out.println("Loader top");
+                    WWContext.getInstance().fireSetLoading(true);
+                    restoreFromPattern(fileName);
+                    WWContext.getInstance().fireSetLoading(false);
+      //            System.out.println("Loader bottom");
+                  }
+                };
+                loader.start();
+              }
+            }
+            // Apply values
+            if (chartPanel.getProjection() != ChartPanel.GLOBE_VIEW &&
+                chartPanel.getProjection() != ChartPanel.SATELLITE_VIEW)
+              chartPanel.setWidthFromChart(nLat, sLat, wLong, eLong);
+            chartPanel.setEastG(eLong);
+            chartPanel.setWestG(wLong);
+            chartPanel.setNorthL(nLat);
+            chartPanel.setSouthL(sLat);
+            chartPanel.repaint();    
+            displayStatus();
+          }
         }
         
         public void setProjection(int p)
         {
-//        System.out.println("Setting projection to " + p);
-          chartPanel.setProjection(p);
-
-          if (p != ChartPanel.GLOBE_VIEW && tmpNLat != Double.MAX_VALUE &&
-                                            tmpSLat != Double.MAX_VALUE &&
-                                            tmpELong != Double.MAX_VALUE &&
-                                            tmpWLong != Double.MAX_VALUE)
+         if (parent != null && parent.isVisible())
           {
-            // Restore to where it was
-            nLat = tmpNLat;
-            sLat = tmpSLat;
-            eLong = tmpELong;
-            wLong = tmpWLong;
-            chartPanel.setNorthL(nLat);
-            chartPanel.setSouthL(sLat);
-            chartPanel.setEastG(eLong);
-            chartPanel.setWestG(wLong);
-          }
-//        if (p == ChartPanel.ANAXIMANDRE)
-//          chartPanel.setWidthFromChart(nLat, sLat, eLong, wLong);
-//        if (p != ChartPanel.LAMBERT)
+  //        System.out.println("Setting projection to " + p);
+            chartPanel.setProjection(p);
+  
+            if (p != ChartPanel.GLOBE_VIEW && tmpNLat != Double.MAX_VALUE &&
+                                              tmpSLat != Double.MAX_VALUE &&
+                                              tmpELong != Double.MAX_VALUE &&
+                                              tmpWLong != Double.MAX_VALUE)
+            {
+              // Restore to where it was
+              nLat = tmpNLat;
+              sLat = tmpSLat;
+              eLong = tmpELong;
+              wLong = tmpWLong;
+              chartPanel.setNorthL(nLat);
+              chartPanel.setSouthL(sLat);
+              chartPanel.setEastG(eLong);
+              chartPanel.setWestG(wLong);
+            }
+  //        if (p == ChartPanel.ANAXIMANDRE)
+  //          chartPanel.setWidthFromChart(nLat, sLat, eLong, wLong);
+  //        if (p != ChartPanel.LAMBERT)
+              
             chartPanel.repaint();            
+          }
         }
         
         public void setContactParallel(double d)
         {
-          chartPanel.setContactParallel(d);
-          chartPanel.repaint();
+         if (parent != null && parent.isVisible())
+          {
+            chartPanel.setContactParallel(d);
+            chartPanel.repaint();
+          }
         }
         
         public void setGlobeProjPrms(double lat, double lng, double tilt, boolean b) 
         {
-          // Temporary
-          tmpNLat = nLat;
-          tmpSLat = sLat;
-          tmpELong = eLong;
-          tmpWLong = wLong;
-          
-          nLat =  90D;
-          sLat = -90D;
-          eLong =  180D;
-          wLong = -180D;
-          chartPanel.setNorthL(nLat);
-          chartPanel.setSouthL(sLat);
-          chartPanel.setEastG(eLong);
-          chartPanel.setWestG(wLong);
-          
-          chartPanel.setGlobeViewLngOffset(lng);
-          chartPanel.setGlobeViewForeAftRotation(lat);
-          chartPanel.setGlobeViewRightLeftRotation(tilt);
-          chartPanel.setTransparentGlobe(!b);
-
-          chartPanel.repaint();
+         if (parent != null && parent.isVisible())
+          {
+            // Temporary
+            tmpNLat = nLat;
+            tmpSLat = sLat;
+            tmpELong = eLong;
+            tmpWLong = wLong;
+            
+            nLat =  90D;
+            sLat = -90D;
+            eLong =  180D;
+            wLong = -180D;
+            chartPanel.setNorthL(nLat);
+            chartPanel.setSouthL(sLat);
+            chartPanel.setEastG(eLong);
+            chartPanel.setWestG(wLong);
+            
+            chartPanel.setGlobeViewLngOffset(lng);
+            chartPanel.setGlobeViewForeAftRotation(lat);
+            chartPanel.setGlobeViewRightLeftRotation(tilt);
+            chartPanel.setTransparentGlobe(!b);
+  
+            chartPanel.repaint();
+          }
         }
         
         public void setSatelliteProjPrms(double lat, double lng, double alt, boolean b) 
         {
-          // Temporary
-          tmpNLat = nLat;
-          tmpSLat = sLat;
-          tmpELong = eLong;
-          tmpWLong = wLong;
-          
-          nLat =  90D;
-          sLat = -90D;
-          eLong =  180D;
-          wLong = -180D;
-          chartPanel.setNorthL(nLat);
-          chartPanel.setSouthL(sLat);
-          chartPanel.setEastG(eLong);
-          chartPanel.setWestG(wLong);
-          
-          chartPanel.setSatelliteAltitude(alt);
-          chartPanel.setSatelliteLatitude(lat);
-          chartPanel.setSatelliteLongitude(lng);
-          chartPanel.setTransparentGlobe(!b);
-
-          chartPanel.repaint();
+         if (parent != null && parent.isVisible())
+          {
+            // Temporary
+            tmpNLat = nLat;
+            tmpSLat = sLat;
+            tmpELong = eLong;
+            tmpWLong = wLong;
+            
+            nLat =  90D;
+            sLat = -90D;
+            eLong =  180D;
+            wLong = -180D;
+            chartPanel.setNorthL(nLat);
+            chartPanel.setSouthL(sLat);
+            chartPanel.setEastG(eLong);
+            chartPanel.setWestG(wLong);
+            
+            chartPanel.setSatelliteAltitude(alt);
+            chartPanel.setSatelliteLatitude(lat);
+            chartPanel.setSatelliteLongitude(lng);
+            chartPanel.setTransparentGlobe(!b);
+  
+            chartPanel.repaint();
+          }
         }
         
         public void gribForward()
         {
-          gribIndex++;
-          if (gribIndex > (wgd.length - 1))
-            gribIndex = 0;
-          smoothingRequired = true;
-          updateGRIBDisplay();
+         if (parent != null && parent.isVisible())
+          {
+            gribIndex++;
+            if (gribIndex > (wgd.length - 1))
+              gribIndex = 0;
+            smoothingRequired = true;
+            updateGRIBDisplay();
+          }
         }
         
         public void gribBackward()
         {
-          gribIndex--;
-          if (gribIndex < 0)
-            gribIndex = (wgd.length - 1);
-          smoothingRequired = true;
-          updateGRIBDisplay();
+         if (parent != null && parent.isVisible())
+          {
+            gribIndex--;
+            if (gribIndex < 0)
+              gribIndex = (wgd.length - 1);
+            smoothingRequired = true;
+            updateGRIBDisplay();
+          }
         }
         
         public void setGribIndex(int idx) 
         {
-          if (gribIndex != idx)
+         if (parent != null && parent.isVisible())
           {
-            gribIndex = idx;
-            smoothingRequired = true;
-            updateGRIBDisplay();
+            if (gribIndex != idx)
+            {
+              gribIndex = idx;
+              smoothingRequired = true;
+              updateGRIBDisplay();
+            }
           }
         }
 
         public void gribAnimate()
         {
-          if (animateThread == null)
+         if (parent != null && parent.isVisible())
           {
-            boolean go = true;
-            if ((instance.isDisplay3DPrmsl() && instance.isTherePrmsl())|| 
-                (instance.isDisplay3D500mb() && instance.isThere500mb()) || 
-                (instance.isDisplay3DTemperature() && instance.isThereTemperature()) ||
-                (instance.isDisplay3DWaves() && instance.isThereWaves()) /* || 
-                instance.displayContourLines */)
+            if (animateThread == null)
             {
-              int resp = JOptionPane.showConfirmDialog(instance, WWGnlUtilities.buildMessage("might-take-time"), WWGnlUtilities.buildMessage("animate"), 
-                                                       JOptionPane.YES_NO_OPTION, 
-                                                       JOptionPane.QUESTION_MESSAGE);
-              go = (resp == JOptionPane.YES_OPTION);
+              boolean go = true;
+              if ((instance.isDisplay3DPrmsl() && instance.isTherePrmsl())|| 
+                  (instance.isDisplay3D500mb() && instance.isThere500mb()) || 
+                  (instance.isDisplay3DTemperature() && instance.isThereTemperature()) ||
+                  (instance.isDisplay3DWaves() && instance.isThereWaves()) /* || 
+                  instance.displayContourLines */)
+              {
+                int resp = JOptionPane.showConfirmDialog(instance, WWGnlUtilities.buildMessage("might-take-time"), WWGnlUtilities.buildMessage("animate"), 
+                                                         JOptionPane.YES_NO_OPTION, 
+                                                         JOptionPane.QUESTION_MESSAGE);
+                go = (resp == JOptionPane.YES_OPTION);
+              }
+              if (go)
+              {
+                animateThread = new AnimateThread();
+                animateThread.start();
+                WWContext.getInstance().fireStartGRIBAnimation();
+              }
             }
-            if (go)
+            else
             {
-              animateThread = new AnimateThread();
-              animateThread.start();
-              WWContext.getInstance().fireStartGRIBAnimation();
+              animateThread.freeze();
+              animateThread = null;
+              WWContext.getInstance().fireStopGRIBAnimation();
             }
-          }
-          else
-          {
-            animateThread.freeze();
-            animateThread = null;
-            WWContext.getInstance().fireStopGRIBAnimation();
           }
         }
         
         public void showWindInGoogle()
         {
-//        System.out.println("Showing Wind in Google");  
-          GribHelper.GribConditionData gribData = null;
-          if (wgd != null)
+         if (parent != null && parent.isVisible())
           {
-            gribData = wgd[gribIndex];
-            if (gribData != null)
-            {              
-              try
-              {
-                Date gribDate = gribData.getDate(); // TimeUtil.getGMT(gribData.getDate());
-                Calendar cal = new GregorianCalendar();
-                cal.setTime(gribDate);
-                
-                int year    = cal.get(Calendar.YEAR);
-                int month   = cal.get(Calendar.MONTH);
-                int day     = cal.get(Calendar.DAY_OF_MONTH);
-                int hours   = cal.get(Calendar.HOUR_OF_DAY);
-                int minutes = cal.get(Calendar.MINUTE);
-                int seconds = cal.get(Calendar.SECOND);
-                
-                String dateStr = Integer.toString(year) + "-" + WWGnlUtilities.MONTH[month] + "-" + WWGnlUtilities.DF2.format(day) + " " + WWGnlUtilities.DF2.format(hours) + ":" + WWGnlUtilities.DF2.format(minutes) + ":" + WWGnlUtilities.DF2.format(seconds) + " GMT";
-                Utilities.makeSureTempExists();                                 
-                BufferedWriter bw = new BufferedWriter(new FileWriter("temp" + File.separator + "googlewind.js"));
-                bw.write("GRIBdate='" + dateStr + "';\n");
-                double _gRight  = gribData.getELng();
-                double _gLeft   = gribData.getWLng();
-                double _lTop    = gribData.getNLat();
-                double _lBottom = gribData.getSLat();
-                
-                if (Utilities.sign(_gLeft) != Utilities.sign(_gRight))
-                  _gLeft -= 360;
-
-                double centerLat = (_lTop + _lBottom) / 2D;
-                double centerLng = (_gRight + _gLeft) / 2D;
-                
-                bw.write("centerlatitude=" + Double.toString(centerLat) + ";\n");
-                bw.write("centerlongitude=" + Double.toString(centerLng) + ";\n\n");                
-                
-                String header = "var windpoint = new Array(\n";
-                String trailer = ");";
-                bw.write(header);
-                boolean first = true;
-                
-                // Do the job here.
-                for (int h=0; gribData.getGribPointData() != null && h<gribData.getGribPointData().length; h++)
-                {
-                  for (int w=0; w<gribData.getGribPointData()[h].length; w++)
-                  {
-                    float x = gribData.getGribPointData()[h][w].getU();
-                    float y = -gribData.getGribPointData()[h][w].getV();
-                    double lat = gribData.getGribPointData()[h][w].getLat();
-                    double lng = gribData.getGribPointData()[h][w].getLng();
-  
-                    double speed = Math.sqrt(x * x + y * y);
-                    speed *= 3.60D;
-                    speed /= 1.852D;
-                    double dir = WWGnlUtilities.getDir(x, y);
-                     
-                    // Write the data here
-                    if (!first)
-                      bw.write(",\n");
-                    else                    
-                      first = false;
-                    String str = 
-                    "{lat:" + Double.toString(lat) + ",\n" +
-                    " lng:" + Double.toString(lng) + ",\n" +
-                    " speed:" + WWGnlUtilities.XXX12.format(speed) + ",\n" +
-                    " dir:" + WWGnlUtilities.XXX12.format(resetDir(dir)) + " }\n";                    
-                    bw.write(str);
-                  }
-                }
-                bw.write(trailer);
-                bw.close();
-                // Show.
+  //        System.out.println("Showing Wind in Google");  
+            GribHelper.GribConditionData gribData = null;
+            if (wgd != null)
+            {
+              gribData = wgd[gribIndex];
+              if (gribData != null)
+              {              
                 try
                 {
-                  Utilities.openInBrowser("googlewind.html"); 
-                } 
-                catch (Exception exception) 
+                  Date gribDate = gribData.getDate(); // TimeUtil.getGMT(gribData.getDate());
+                  Calendar cal = new GregorianCalendar();
+                  cal.setTime(gribDate);
+                  
+                  int year    = cal.get(Calendar.YEAR);
+                  int month   = cal.get(Calendar.MONTH);
+                  int day     = cal.get(Calendar.DAY_OF_MONTH);
+                  int hours   = cal.get(Calendar.HOUR_OF_DAY);
+                  int minutes = cal.get(Calendar.MINUTE);
+                  int seconds = cal.get(Calendar.SECOND);
+                  
+                  String dateStr = Integer.toString(year) + "-" + WWGnlUtilities.MONTH[month] + "-" + WWGnlUtilities.DF2.format(day) + " " + WWGnlUtilities.DF2.format(hours) + ":" + WWGnlUtilities.DF2.format(minutes) + ":" + WWGnlUtilities.DF2.format(seconds) + " GMT";
+                  Utilities.makeSureTempExists();                                 
+                  BufferedWriter bw = new BufferedWriter(new FileWriter("temp" + File.separator + "googlewind.js"));
+                  bw.write("GRIBdate='" + dateStr + "';\n");
+                  double _gRight  = gribData.getELng();
+                  double _gLeft   = gribData.getWLng();
+                  double _lTop    = gribData.getNLat();
+                  double _lBottom = gribData.getSLat();
+                  
+                  if (Utilities.sign(_gLeft) != Utilities.sign(_gRight))
+                    _gLeft -= 360;
+  
+                  double centerLat = (_lTop + _lBottom) / 2D;
+                  double centerLng = (_gRight + _gLeft) / 2D;
+                  
+                  bw.write("centerlatitude=" + Double.toString(centerLat) + ";\n");
+                  bw.write("centerlongitude=" + Double.toString(centerLng) + ";\n\n");                
+                  
+                  String header = "var windpoint = new Array(\n";
+                  String trailer = ");";
+                  bw.write(header);
+                  boolean first = true;
+                  
+                  // Do the job here.
+                  for (int h=0; gribData.getGribPointData() != null && h<gribData.getGribPointData().length; h++)
+                  {
+                    for (int w=0; w<gribData.getGribPointData()[h].length; w++)
+                    {
+                      float x = gribData.getGribPointData()[h][w].getU();
+                      float y = -gribData.getGribPointData()[h][w].getV();
+                      double lat = gribData.getGribPointData()[h][w].getLat();
+                      double lng = gribData.getGribPointData()[h][w].getLng();
+    
+                      double speed = Math.sqrt(x * x + y * y);
+                      speed *= 3.60D;
+                      speed /= 1.852D;
+                      double dir = WWGnlUtilities.getDir(x, y);
+                       
+                      // Write the data here
+                      if (!first)
+                        bw.write(",\n");
+                      else                    
+                        first = false;
+                      String str = 
+                      "{lat:" + Double.toString(lat) + ",\n" +
+                      " lng:" + Double.toString(lng) + ",\n" +
+                      " speed:" + WWGnlUtilities.XXX12.format(speed) + ",\n" +
+                      " dir:" + WWGnlUtilities.XXX12.format(resetDir(dir)) + " }\n";                    
+                      bw.write(str);
+                    }
+                  }
+                  bw.write(trailer);
+                  bw.close();
+                  // Show.
+                  try
+                  {
+                    Utilities.openInBrowser("googlewind.html"); 
+                  } 
+                  catch (Exception exception) 
+                  {
+                    WWContext.getInstance().fireExceptionLogging(exception);
+                    exception.printStackTrace(); 
+                  }                
+                }
+                catch (IOException e)
                 {
-                  WWContext.getInstance().fireExceptionLogging(exception);
-                  exception.printStackTrace(); 
-                }                
+                  WWContext.getInstance().fireExceptionLogging(e);
+                  e.printStackTrace();
+                }
               }
-              catch (IOException e)
-              {
-                WWContext.getInstance().fireExceptionLogging(e);
-                e.printStackTrace();
-              }
-            }
-          }                    
+            }       
+          }
         }
 
         public void compositeFileOpen(final String fileName)
         {
-          // Progress bar
-          Runnable heavyRunnable = new Runnable()
+//          System.out.println("compositeFileOpen: parent is " + (parent==null?"":"not ") + "null");
+//          if (parent != null)
+//            System.out.println("compositeFileOpen: parent is " + (parent.isVisible()?"":"not ") + "visible");
+          if (parent != null && parent.isVisible())
           {
-//          ProgressMonitor monitor = null;
-
-            public void run()
+            // Progress bar
+            Runnable heavyRunnable = new Runnable()
             {
-              WWContext.getInstance().setMonitor(ProgressUtil.createModalProgressMonitor(WWContext.getInstance().getMasterTopFrame(), 1, true, true));
-              WWContext.getInstance().getMonitor().start(WWGnlUtilities.buildMessage("restoring-wait")); 
-              WWContext.getInstance().setAel4monitor(new ApplicationEventListener()
+  //          ProgressMonitor monitor = null;
+  
+              public void run()
+              {
+                try
                 {
-                  public void progressing(String mess)
+                  WWContext.getInstance().setMonitor(ProgressUtil.createModalProgressMonitor(WWContext.getInstance().getMasterTopFrame(), 1, true, true));
+                  WWContext.getInstance().getMonitor().start(WWGnlUtilities.buildMessage("restoring-wait")); 
+                  WWContext.getInstance().setAel4monitor(new ApplicationEventListener()
+                    {
+                      public void progressing(String mess)
+                      {
+                        try
+                        {
+                          WWContext.getInstance().getMonitor().setCurrent(mess, WWContext.getInstance().getMonitor().getCurrent());
+                        }
+                        catch (Exception ex)
+                        {
+                          System.out.println(" ... progessing:" + ex.toString());
+                        }
+                      }
+                    });
+                  WWContext.getInstance().addApplicationListener(WWContext.getInstance().getAel4monitor());
+    
+                  try
                   {
-                    WWContext.getInstance().getMonitor().setCurrent(mess, WWContext.getInstance().getMonitor().getCurrent());
+                    WWContext.getInstance().fireSetLoading(true);
+                    restoreComposite(fileName);
+                    WWContext.getInstance().fireSetLoading(false);
                   }
-                });
-              WWContext.getInstance().addApplicationListener(WWContext.getInstance().getAel4monitor());
-
-              try
-              {
-                WWContext.getInstance().fireSetLoading(true);
-                restoreComposite(fileName);
-                WWContext.getInstance().fireSetLoading(false);
+                  finally
+                  {
+                    // to ensure that progress dlg is closed in case of any exception
+                    if (WWContext.getInstance().getMonitor().getCurrent() != WWContext.getInstance().getMonitor().getTotal())
+                      WWContext.getInstance().getMonitor().setCurrent(null, WWContext.getInstance().getMonitor().getTotal());
+                    WWContext.getInstance().removeApplicationListener(WWContext.getInstance().getAel4monitor());
+                    WWContext.getInstance().setAel4monitor(null);
+                    WWContext.getInstance().setMonitor(null);
+                  }
+                }
+                catch (Exception ex)
+                {
+                  System.out.println("Monitor Exception :" + ex.toString());                
+                }
               }
-              finally
-              {
-                // to ensure that progress dlg is closed in case of any exception
-                if (WWContext.getInstance().getMonitor().getCurrent() != WWContext.getInstance().getMonitor().getTotal())
-                  WWContext.getInstance().getMonitor().setCurrent(null, WWContext.getInstance().getMonitor().getTotal());
-                WWContext.getInstance().removeApplicationListener(WWContext.getInstance().getAel4monitor());
-                WWContext.getInstance().setAel4monitor(null);
-                WWContext.getInstance().setMonitor(null);
-              }
-            }
-          };
-          new Thread(heavyRunnable).start();
-
-          // Apply values
-          if (chartPanel.getProjection() != ChartPanel.GLOBE_VIEW &&
-              chartPanel.getProjection() != ChartPanel.SATELLITE_VIEW)
-            chartPanel.setWidthFromChart(nLat, sLat, wLong, eLong);
-          chartPanel.setEastG(eLong);
-          chartPanel.setWestG(wLong);
-          chartPanel.setNorthL(nLat);
-          chartPanel.setSouthL(sLat);
-          chartPanel.repaint();    
-          displayStatus();          
+            };
+            new Thread(heavyRunnable).start();
+  
+            // Apply values
+            if (chartPanel.getProjection() != ChartPanel.GLOBE_VIEW &&
+                chartPanel.getProjection() != ChartPanel.SATELLITE_VIEW)
+              chartPanel.setWidthFromChart(nLat, sLat, wLong, eLong);
+            chartPanel.setEastG(eLong);
+            chartPanel.setWestG(wLong);
+            chartPanel.setNorthL(nLat);
+            chartPanel.setSouthL(sLat);
+            chartPanel.repaint();    
+            displayStatus();    
+          }
         }
         
         public void patternFileOpen(String str) 
         {
-          loadWithPattern(str);
+         if (parent != null && parent.isVisible())
+            loadWithPattern(str);
         }
         
         public void chartRepaintRequested()
         {
-          buildPlaces();
-          chartPanel.repaint();
+         if (parent != null && parent.isVisible())
+          {
+            buildPlaces();
+            chartPanel.repaint();
+          }
         }
         
         public void setNMEAAcquisition(boolean b)
         {
-          if (b) // Start
+         if (parent != null && parent.isVisible())
           {
-            nmeaPollingInterval = ((Integer) ParamPanel.data[ParamData.NMEA_POLLING_FREQ][1]).intValue();
-            nmeaThread = new Thread()
+            if (b) // Start
             {
-              public void run()
+              nmeaPollingInterval = ((Integer) ParamPanel.data[ParamData.NMEA_POLLING_FREQ][1]).intValue();
+              nmeaThread = new Thread()
               {
-                synchronized(this)
+                public void run()
                 {
-                    WWContext.getInstance().fireLogging("Starting NMEA Thread\n");
-                  while (goNmea)
+                  synchronized(this)
                   {
-                    // Read here
-                    try
+                      WWContext.getInstance().fireLogging("Starting NMEA Thread\n");
+                    while (goNmea)
                     {
-                      String nmeaPayload = HTTPClient.getContent((String) ParamPanel.data[ParamData.NMEA_SERVER_URL][1]);
-//                    System.out.println("Read:" + nmeaPayload);
-                      StringReader sr = new StringReader(nmeaPayload);
-                      DOMParser parser = WWContext.getInstance().getParser();
-                      XMLDocument doc = null;
-                      synchronized(parser)
-                      {
-                        parser.setValidationMode(DOMParser.NONVALIDATING);
-                        parser.parse(sr);
-                        doc = parser.getDocument();
-                      }
+                      // Read here
                       try
                       {
-                        double lat = 0d;
-                        try { lat = Double.parseDouble(doc.selectNodes("/data/lat[1]").item(0).getFirstChild().getNodeValue()); } catch (Exception ignore) {}
-                        double lng = 0d;
-                        try { lng = Double.parseDouble(doc.selectNodes("/data/lng[1]").item(0).getFirstChild().getNodeValue()); } catch (Exception ignore) {}
-                        boatPosition = new GeoPoint(lat, lng);
-                        int hdg = 0;
-                        try { hdg = (int)Math.round(Double.parseDouble(doc.selectNodes("/data/cog").item(0).getFirstChild().getNodeValue())); } catch (Exception ignore) {}
-                        boatHeading = hdg;
-                        chartPanel.repaint();
+                        String nmeaPayload = HTTPClient.getContent((String) ParamPanel.data[ParamData.NMEA_SERVER_URL][1]);
+  //                    System.out.println("Read:" + nmeaPayload);
+                        StringReader sr = new StringReader(nmeaPayload);
+                        DOMParser parser = WWContext.getInstance().getParser();
+                        XMLDocument doc = null;
+                        synchronized(parser)
+                        {
+                          parser.setValidationMode(DOMParser.NONVALIDATING);
+                          parser.parse(sr);
+                          doc = parser.getDocument();
+                        }
+                        try
+                        {
+                          double lat = 0d;
+                          try { lat = Double.parseDouble(doc.selectNodes("/data/lat[1]").item(0).getFirstChild().getNodeValue()); } catch (Exception ignore) {}
+                          double lng = 0d;
+                          try { lng = Double.parseDouble(doc.selectNodes("/data/lng[1]").item(0).getFirstChild().getNodeValue()); } catch (Exception ignore) {}
+                          boatPosition = new GeoPoint(lat, lng);
+                          int hdg = 0;
+                          try { hdg = (int)Math.round(Double.parseDouble(doc.selectNodes("/data/cog").item(0).getFirstChild().getNodeValue())); } catch (Exception ignore) {}
+                          boatHeading = hdg;
+                          chartPanel.repaint();
+                        }
+                        catch (Exception ex)
+                        {
+                            WWContext.getInstance().fireExceptionLogging(ex);
+                          ex.printStackTrace();
+                        }
                       }
-                      catch (Exception ex)
+                      catch (Exception e)
                       {
-                          WWContext.getInstance().fireExceptionLogging(ex);
-                        ex.printStackTrace();
+                        WWContext.getInstance().fireExceptionLogging(e);
+                        e.printStackTrace();
+                      }
+                      // then wait
+                      try { this.wait((long)nmeaPollingInterval * 1000L); }
+                      catch (Exception ignore)
+                      {
+                          WWContext.getInstance().fireLogging("oops\n"); 
+                        System.out.println(ignore.getMessage());
                       }
                     }
-                    catch (Exception e)
-                    {
-                      WWContext.getInstance().fireExceptionLogging(e);
-                      e.printStackTrace();
-                    }
-                    // then wait
-                    try { this.wait((long)nmeaPollingInterval * 1000L); }
-                    catch (Exception ignore)
-                    {
-                        WWContext.getInstance().fireLogging("oops\n"); 
-                      System.out.println(ignore.getMessage());
-                    }
+                      WWContext.getInstance().fireLogging("End of NMEA Thread\n");
                   }
-                    WWContext.getInstance().fireLogging("End of NMEA Thread\n");
                 }
-              }
-            };
-            goNmea = true;
-            nmeaThread.start();
-          }
-          else
-          {
-            goNmea = false;
-            boatPosition = null;
-            chartPanel.repaint();
-            synchronized (nmeaThread)
+              };
+              goNmea = true;
+              nmeaThread.start();
+            }
+            else
             {
-              nmeaThread.notify();
+              goNmea = false;
+              boatPosition = null;
+              chartPanel.repaint();
+              synchronized (nmeaThread)
+              {
+                nmeaThread.notify();
+              }
             }
           }
         }
         
         public void activeFaxChanged(FaxType ft) 
         {
-//        System.out.println("Active fax is now " + str);
-          for (int i=0; faxImage!=null && i<faxImage.length; i++)
+         if (parent != null && parent.isVisible())
           {
-            if (faxImage[i].comment.equals(ft.toString()))
+  //        System.out.println("Active fax is now " + str);
+            for (int i=0; faxImage!=null && i<faxImage.length; i++)
             {
-              currentFaxIndex = i;
-              break;
+              if (faxImage[i].comment.equals(ft.toString()))
+              {
+                currentFaxIndex = i;
+                break;
+              }
             }
           }
         }
         
         public void allFaxesSelected() 
         {
-          System.out.println("All faxes selected");
-          currentFaxIndex = -1;
+         if (parent != null && parent.isVisible())
+          {
+            System.out.println("All faxes selected");
+            currentFaxIndex = -1;
+          }
         }
         
         public void plotBoatAt(GeoPoint gp, int hdg) 
         {
-          routingPoint   = gp;
-          routingHeading = hdg;
-          chartPanel.repaint();
+         if (parent != null && parent.isVisible())
+          {
+            routingPoint   = gp;
+            routingHeading = hdg;
+            chartPanel.repaint();
+          }
         }
         
         public void manuallyEnterBoatPosition(GeoPoint gp, int hdg) 
         {
-          boatPosition = gp;
-          boatHeading = hdg;
-          chartPanel.repaint();
+         if (parent != null && parent.isVisible())
+          {
+            boatPosition = gp;
+            boatHeading = hdg;
+            chartPanel.repaint();
+          }
         }
         
         public void setGribSmoothing(int i) 
         {
-          if (smooth != i)
+         if (parent != null && parent.isVisible())
           {
-            smoothingRequired = true;
-            smooth = i;
-            if (wgd != null)
+            if (smooth != i)
             {
-              if (gribIndex == -1) gribIndex = 0;
-              gribData = wgd[gribIndex]; 
-              if (smooth > 1 && gribData != null && smoothingRequired)
+              smoothingRequired = true;
+              smooth = i;
+              if (wgd != null)
               {
-                gribData = GribHelper.smoothGribData(gribData, smooth); // Rebuilds all the GRIB Data
-                chartPanel.repaint();
-                smoothingRequired = false;
-                // Re-generate 3D?
-                generateAll3DData();
-              }              
+                if (gribIndex == -1) gribIndex = 0;
+                gribData = wgd[gribIndex]; 
+                if (smooth > 1 && gribData != null && smoothingRequired)
+                {
+                  gribData = GribHelper.smoothGribData(gribData, smooth); // Rebuilds all the GRIB Data
+                  chartPanel.repaint();
+                  smoothingRequired = false;
+                  // Re-generate 3D?
+                  generateAll3DData();
+                }              
+              }
             }
           }
         }
 
         public void setGribTimeSmoothing(int i) 
         {
-          if (i != timeSmooth)
+         if (parent != null && parent.isVisible())
           {
-            timeSmooth = i;
-            gribIndex = 0;
-            if (i == 1)
+            if (i != timeSmooth)
             {
-              if (originalWgd != null)
+              timeSmooth = i;
+              gribIndex = 0;
+              if (i == 1)
               {
-                wgd = originalWgd;
-                originalWgd = null;
+                if (originalWgd != null)
+                {
+                  wgd = originalWgd;
+                  originalWgd = null;
+                  smoothingRequired = true;
+                  updateGRIBDisplay();
+                }
+              }
+              else
+              {
+                if (originalWgd == null)
+                  originalWgd = wgd;
+                
+                wgd = GribHelper.smoothGRIBinTime(originalWgd, i);
                 smoothingRequired = true;
                 updateGRIBDisplay();
               }
-            }
-            else
-            {
-              if (originalWgd == null)
-                originalWgd = wgd;
-              
-              wgd = GribHelper.smoothGRIBinTime(originalWgd, i);
-              smoothingRequired = true;
-              updateGRIBDisplay();
             }
           }
         }
        
         public void gribLoaded()
         {
-          gribData = null; 
-          if (wgd != null)
+         if (parent != null && parent.isVisible())
           {
-            originalWgd = null;
-            gribDataPanel.setVisible(showGRIBPointPanel && wgd != null);
-            gribIndex = 0;
-//          if (gribIndex == -1) gribIndex = 0;
-            smoothingRequired = true;
-            gribData = wgd[gribIndex]; 
-            if (smooth > 1 && gribData != null && smoothingRequired)
+            gribData = null; 
+            if (wgd != null)
             {
-              gribData = GribHelper.smoothGribData(gribData, smooth); // Rebuilds all the GRIB Data
-              smoothingRequired = false;
-            }
-//            int m = 10000;
-//            
-//            int x = gribData.getGribPointData().length;
-//            int y = gribData.getGribPointData()[0].length;
-//            
-//            m = x * y * 10;
-//            
-//            System.out.println("X:" + x + ", Y:" + y);
-//            System.out.println("Chart W:" + chartPanel.getWidth() + ", chart H:" + chartPanel.getHeight());
-            
-            if (gribData != null)
-            {
-              if (displayContourLines)
+              originalWgd = null;
+              gribDataPanel.setVisible(showGRIBPointPanel && wgd != null);
+              gribIndex = 0;
+  //          if (gribIndex == -1) gribIndex = 0;
+              smoothingRequired = true;
+              gribData = wgd[gribIndex]; 
+              if (smooth > 1 && gribData != null && smoothingRequired)
               {
-                WWContext.getInstance().fireProgressing(WWGnlUtilities.buildMessage("computing-contour-lines"));
-                if (isoPointsThread != null && isoPointsThread.isAlive())
-                  isoPointsThread.interrupt();
-                isoPointsThread = new IsoPointsThread(gribData);
-                isoPointsThread.start();
+                gribData = GribHelper.smoothGribData(gribData, smooth); // Rebuilds all the GRIB Data
+                smoothingRequired = false;
               }
-              applyBoundariesChanges();
-              displayComboBox.setEnabled(true);
-              boundaries[WIND_SPEED] = GRIBDataUtil.getWindSpeedBoundaries(gribData);
+  //            int m = 10000;
+  //            
+  //            int x = gribData.getGribPointData().length;
+  //            int y = gribData.getGribPointData()[0].length;
+  //            
+  //            m = x * y * 10;
+  //            
+  //            System.out.println("X:" + x + ", Y:" + y);
+  //            System.out.println("Chart W:" + chartPanel.getWidth() + ", chart H:" + chartPanel.getHeight());
               
-              String u = units[WIND_SPEED];
-              boundariesLabel.setText(WWGnlUtilities.buildMessage("from-to", new String[] { WWGnlUtilities.XX22.format(boundaries[0][0]) + u, WWGnlUtilities.XX22.format(boundaries[0][1]) + u }));            
-              boundariesLabel.setEnabled(true);
-              
-              if (WWGnlUtilities.isIn(dataLabels[PRMSL], displayComboBox))
-                boundaries[PRMSL] = GRIBDataUtil.getPRMSLBoundaries(gribData);
-              if (WWGnlUtilities.isIn(dataLabels[HGT500], displayComboBox))
-                boundaries[HGT500] = GRIBDataUtil.get500MbBoundaries(gribData);
-              if (WWGnlUtilities.isIn(dataLabels[TEMPERATURE], displayComboBox))
-                boundaries[TEMPERATURE] = GRIBDataUtil.getTempBoundaries(gribData);
-              if (WWGnlUtilities.isIn(dataLabels[WAVES], displayComboBox))
-                boundaries[WAVES] = GRIBDataUtil.getWaveHgtBoundaries(gribData);
-              if (WWGnlUtilities.isIn(dataLabels[RAIN], displayComboBox))
-                boundaries[RAIN] = GRIBDataUtil.getRainBoundaries(gribData);
-
-              WWContext.getInstance().fireProgressing(WWGnlUtilities.buildMessage("computing-3D-data"));
-              generateAll3DData();
-      //      System.out.println(gribData.getDate().toString());
-              Date gribDate = gribData.getDate(); // TimeUtil.getGMT(gribData.getDate());
-              Calendar cal = new GregorianCalendar();
-              cal.setTime(gribDate);
-              
-              int dow     = cal.get(Calendar.DAY_OF_WEEK);
-              int year    = cal.get(Calendar.YEAR);
-              int month   = cal.get(Calendar.MONTH);
-              int day     = cal.get(Calendar.DAY_OF_MONTH);
-              int hours   = cal.get(Calendar.HOUR_OF_DAY);
-              int minutes = cal.get(Calendar.MINUTE);
-              int seconds = cal.get(Calendar.SECOND);
-                                          
-              String gribInfo2 = Integer.toString(year) + "-" + WWGnlUtilities.MONTH[month] + "-" + WWGnlUtilities.DF2.format(day) + " " + WWGnlUtilities.WEEK[dow - 1] + " " + WWGnlUtilities.DF2.format(hours) + ":" + WWGnlUtilities.DF2.format(minutes) + ":" + WWGnlUtilities.DF2.format(seconds) + " GMT";
-              String gribInfo3 = GeomUtil.decToSex(gribData.getNLat(), GeomUtil.SWING, GeomUtil.NS) + " " + 
-                                 GeomUtil.decToSex(gribData.getWLng(), GeomUtil.SWING, GeomUtil.EW);
-              String gribInfo4 = GeomUtil.decToSex(gribData.getSLat(), GeomUtil.SWING, GeomUtil.NS) + " " + 
-                                 GeomUtil.decToSex(gribData.getELng(), GeomUtil.SWING, GeomUtil.EW);
-
-              setThereIsPrmsl(GRIBDataUtil.thereIsVariation(gribData, GRIBDataUtil.TYPE_PRMSL));
-              setThereIs500mb(GRIBDataUtil.thereIsVariation(gribData, GRIBDataUtil.TYPE_500MB));
-              setThereIsTemperature(GRIBDataUtil.thereIsVariation(gribData, GRIBDataUtil.TYPE_TMP));
-              setThereIsWaves(GRIBDataUtil.thereIsVariation(gribData, GRIBDataUtil.TYPE_WAVE));
-              setThereIsRain(GRIBDataUtil.thereIsVariation(gribData, GRIBDataUtil.TYPE_RAIN));
-              WWContext.getInstance().fireGribInfo(gribIndex, 
-                                                   wgd.length, 
-                                                   gribInfo2, 
-                                                   gribInfo3, 
-                                                   gribInfo4,
-                                                   windOnly,
-                                                   gribData.wind,
-                                                   isTherePrmsl(),
-                                                   isThere500mb(),
-                                                   isThereTemperature(),
-                                                   isThereWaves(),
-                                                   isThereRain(),
-                                                   true, // Always display wind
-                                                   windOnly?false:gribData.prmsl,
-                                                   windOnly?false:gribData.hgt,
-                                                   windOnly?false:gribData.temp,
-                                                   windOnly?false:gribData.wave,
-                                                   windOnly?false:gribData.rain);
+              if (gribData != null)
+              {
+                if (displayContourLines)
+                {
+                  WWContext.getInstance().fireProgressing(WWGnlUtilities.buildMessage("computing-contour-lines"));
+                  if (isoPointsThread != null && isoPointsThread.isAlive())
+                    isoPointsThread.interrupt();
+                  isoPointsThread = new IsoPointsThread(gribData);
+                  isoPointsThread.start();
+                }
+                applyBoundariesChanges();
+                displayComboBox.setEnabled(true);
+                boundaries[WIND_SPEED] = GRIBDataUtil.getWindSpeedBoundaries(gribData);
+                
+                String u = units[WIND_SPEED];
+                boundariesLabel.setText(WWGnlUtilities.buildMessage("from-to", new String[] { WWGnlUtilities.XX22.format(boundaries[0][0]) + u, WWGnlUtilities.XX22.format(boundaries[0][1]) + u }));            
+                boundariesLabel.setEnabled(true);
+                
+                if (WWGnlUtilities.isIn(dataLabels[PRMSL], displayComboBox))
+                  boundaries[PRMSL] = GRIBDataUtil.getPRMSLBoundaries(gribData);
+                if (WWGnlUtilities.isIn(dataLabels[HGT500], displayComboBox))
+                  boundaries[HGT500] = GRIBDataUtil.get500MbBoundaries(gribData);
+                if (WWGnlUtilities.isIn(dataLabels[TEMPERATURE], displayComboBox))
+                  boundaries[TEMPERATURE] = GRIBDataUtil.getTempBoundaries(gribData);
+                if (WWGnlUtilities.isIn(dataLabels[WAVES], displayComboBox))
+                  boundaries[WAVES] = GRIBDataUtil.getWaveHgtBoundaries(gribData);
+                if (WWGnlUtilities.isIn(dataLabels[RAIN], displayComboBox))
+                  boundaries[RAIN] = GRIBDataUtil.getRainBoundaries(gribData);
+  
+                WWContext.getInstance().fireProgressing(WWGnlUtilities.buildMessage("computing-3D-data"));
+                generateAll3DData();
+        //      System.out.println(gribData.getDate().toString());
+                Date gribDate = gribData.getDate(); // TimeUtil.getGMT(gribData.getDate());
+                Calendar cal = new GregorianCalendar();
+                cal.setTime(gribDate);
+                
+                int dow     = cal.get(Calendar.DAY_OF_WEEK);
+                int year    = cal.get(Calendar.YEAR);
+                int month   = cal.get(Calendar.MONTH);
+                int day     = cal.get(Calendar.DAY_OF_MONTH);
+                int hours   = cal.get(Calendar.HOUR_OF_DAY);
+                int minutes = cal.get(Calendar.MINUTE);
+                int seconds = cal.get(Calendar.SECOND);
+                                            
+                String gribInfo2 = Integer.toString(year) + "-" + WWGnlUtilities.MONTH[month] + "-" + WWGnlUtilities.DF2.format(day) + " " + WWGnlUtilities.WEEK[dow - 1] + " " + WWGnlUtilities.DF2.format(hours) + ":" + WWGnlUtilities.DF2.format(minutes) + ":" + WWGnlUtilities.DF2.format(seconds) + " GMT";
+                String gribInfo3 = GeomUtil.decToSex(gribData.getNLat(), GeomUtil.SWING, GeomUtil.NS) + " " + 
+                                   GeomUtil.decToSex(gribData.getWLng(), GeomUtil.SWING, GeomUtil.EW);
+                String gribInfo4 = GeomUtil.decToSex(gribData.getSLat(), GeomUtil.SWING, GeomUtil.NS) + " " + 
+                                   GeomUtil.decToSex(gribData.getELng(), GeomUtil.SWING, GeomUtil.EW);
+  
+                setThereIsPrmsl(GRIBDataUtil.thereIsVariation(gribData, GRIBDataUtil.TYPE_PRMSL));
+                setThereIs500mb(GRIBDataUtil.thereIsVariation(gribData, GRIBDataUtil.TYPE_500MB));
+                setThereIsTemperature(GRIBDataUtil.thereIsVariation(gribData, GRIBDataUtil.TYPE_TMP));
+                setThereIsWaves(GRIBDataUtil.thereIsVariation(gribData, GRIBDataUtil.TYPE_WAVE));
+                setThereIsRain(GRIBDataUtil.thereIsVariation(gribData, GRIBDataUtil.TYPE_RAIN));
+                WWContext.getInstance().fireGribInfo(gribIndex, 
+                                                     wgd.length, 
+                                                     gribInfo2, 
+                                                     gribInfo3, 
+                                                     gribInfo4,
+                                                     windOnly,
+                                                     gribData.wind,
+                                                     isTherePrmsl(),
+                                                     isThere500mb(),
+                                                     isThereTemperature(),
+                                                     isThereWaves(),
+                                                     isThereRain(),
+                                                     true, // Always display wind
+                                                     windOnly?false:gribData.prmsl,
+                                                     windOnly?false:gribData.hgt,
+                                                     windOnly?false:gribData.temp,
+                                                     windOnly?false:gribData.wave,
+                                                     windOnly?false:gribData.rain);
+              }
             }
+            setCheckBoxes();
           }
-          setCheckBoxes();
         }
         
         public void gribUnloaded()
         {
-          gribDataPanel.setVisible(false);
-          gribIndex = 0;
-
-          displayComboBox.setEnabled(false);
-          boundariesLabel.setText("--- ---");
-          boundariesLabel.setEnabled(false);
-          WWContext.getInstance().fireNoTWSObj();
-          WWContext.getInstance().fireNo500mbObj();
-          WWContext.getInstance().fireNoPrmslObj();
-          WWContext.getInstance().fireNoTmpObj();
-          WWContext.getInstance().fireNoWaveObj();
-          WWContext.getInstance().fireNoRainObj();
-          WWContext.getInstance().fireGribInfo(0, 0, "", "", "", false, false, false, false, false, false, false, false, false, false, false, false, false);
-          
-          setCheckBoxes();
-          fromGRIBSlice = null;
-          toGRIBSlice   = null;
-          WWContext.getInstance().setGribFile(null);
+         if (parent != null && parent.isVisible())
+          {
+            gribDataPanel.setVisible(false);
+            gribIndex = 0;
+  
+            displayComboBox.setEnabled(false);
+            boundariesLabel.setText("--- ---");
+            boundariesLabel.setEnabled(false);
+            WWContext.getInstance().fireNoTWSObj();
+            WWContext.getInstance().fireNo500mbObj();
+            WWContext.getInstance().fireNoPrmslObj();
+            WWContext.getInstance().fireNoTmpObj();
+            WWContext.getInstance().fireNoWaveObj();
+            WWContext.getInstance().fireNoRainObj();
+            WWContext.getInstance().fireGribInfo(0, 0, "", "", "", false, false, false, false, false, false, false, false, false, false, false, false, false);
+            
+            setCheckBoxes();
+            fromGRIBSlice = null;
+            toGRIBSlice   = null;
+            WWContext.getInstance().setGribFile(null);
+          }
         }
         
         public void setGribInfo(int currentIndex, 
@@ -2780,78 +2930,84 @@ public class CommandPanel
                                 boolean display3Dwaves,
                                 boolean display3DRain) 
         {
-          settingGRIBInfo = true;
-          
-          synchronized (displayComboBox)
+         if (parent != null && parent.isVisible())
           {
-            // To keep the possible already selected option
-            String currentSelection = (String)displayComboBox.getSelectedItem();
+            settingGRIBInfo = true;
             
-            displayComboBox.removeAllItems();
-            displayComboBox.setEnabled(false);
-//          if (thereIs3D)
-            displayComboBox.addItem("- None -"); // LOCALIZE
-        /*  if (thereIsWind) */ displayComboBox.addItem(dataLabels[WIND_SPEED]); // Always keep wind
-            if (thereIsPrmsl && displayPrmsl)  displayComboBox.addItem(dataLabels[PRMSL]);
-            if (thereIsHgt500 && display500mb) displayComboBox.addItem(dataLabels[HGT500]);
-            if (thereIsTemp && displayTemperature)   displayComboBox.addItem(dataLabels[TEMPERATURE]);
-            if (thereIsWaves && displayWaves)  displayComboBox.addItem(dataLabels[WAVES]);
-            if (thereIsRain && displayRain)   displayComboBox.addItem(dataLabels[RAIN]);
-            settingGRIBInfo = false;
-            
-            displayComboBox.setEnabled((thereIsPrmsl && displayPrmsl) || 
-                                       (thereIsHgt500 && display500mb) || 
-                                       (thereIsTemp && displayTemperature) || 
-                                       (thereIsWaves && displayWaves) || 
-                                       (thereIsRain && displayRain));
-            
-            // Reset current selection if available
-            if (currentSelection != null && currentSelection.trim().length() > 0)
+            synchronized (displayComboBox)
             {
-              boolean contains = false;
-              for (int i=0; i<displayComboBox.getItemCount(); i++)
+              // To keep the possible already selected option
+              String currentSelection = (String)displayComboBox.getSelectedItem();
+              
+              displayComboBox.removeAllItems();
+              displayComboBox.setEnabled(false);
+  //          if (thereIs3D)
+              displayComboBox.addItem("- None -"); // LOCALIZE
+          /*  if (thereIsWind) */ displayComboBox.addItem(dataLabels[WIND_SPEED]); // Always keep wind
+              if (thereIsPrmsl && displayPrmsl)  displayComboBox.addItem(dataLabels[PRMSL]);
+              if (thereIsHgt500 && display500mb) displayComboBox.addItem(dataLabels[HGT500]);
+              if (thereIsTemp && displayTemperature)   displayComboBox.addItem(dataLabels[TEMPERATURE]);
+              if (thereIsWaves && displayWaves)  displayComboBox.addItem(dataLabels[WAVES]);
+              if (thereIsRain && displayRain)   displayComboBox.addItem(dataLabels[RAIN]);
+              settingGRIBInfo = false;
+              
+              displayComboBox.setEnabled((thereIsPrmsl && displayPrmsl) || 
+                                         (thereIsHgt500 && display500mb) || 
+                                         (thereIsTemp && displayTemperature) || 
+                                         (thereIsWaves && displayWaves) || 
+                                         (thereIsRain && displayRain));
+              
+              // Reset current selection if available
+              if (currentSelection != null && currentSelection.trim().length() > 0)
               {
-                if (currentSelection.equals(displayComboBox.getItemAt(i)))
+                boolean contains = false;
+                for (int i=0; i<displayComboBox.getItemCount(); i++)
                 {
-                  contains = true;
-                  break;
+                  if (currentSelection.equals(displayComboBox.getItemAt(i)))
+                  {
+                    contains = true;
+                    break;
+                  }
                 }
+                if (contains)
+                  displayComboBox.setSelectedItem(currentSelection);
               }
-              if (contains)
-                displayComboBox.setSelectedItem(currentSelection);
+              
+              setThereIsPrmsl(thereIsPrmsl);
+              setThereIs500mb(thereIsHgt500);
+              setThereIsTemperature(displayTemperature);
+              setThereIsWaves(thereIsWaves);
+              setThereIsRain(thereIsRain);
             }
-            
-            setThereIsPrmsl(thereIsPrmsl);
-            setThereIs500mb(thereIsHgt500);
-            setThereIsTemperature(displayTemperature);
-            setThereIsWaves(thereIsWaves);
-            setThereIsRain(thereIsRain);
           }
         }
 
         public void syncGribWithDate(Date date)
         {
-          System.out.println("Synchronizing with GRIB data (" + date.toString() + ")");
-          // Find the GRIB frame for the date
-          long datetime = date.getTime();
-          long smallest = Long.MAX_VALUE;
-          int closestGribIndex = 0;
-          for (int i=0; i<wgd.length; i++)
+         if (parent != null && parent.isVisible())
           {
-            long gribtime = wgd[i].getDate().getTime();
-            long diff = Math.abs(datetime - gribtime);
-            if (diff < smallest)
+            System.out.println("Synchronizing with GRIB data (" + date.toString() + ")");
+            // Find the GRIB frame for the date
+            long datetime = date.getTime();
+            long smallest = Long.MAX_VALUE;
+            int closestGribIndex = 0;
+            for (int i=0; i<wgd.length; i++)
             {
-              smallest = diff;
-              closestGribIndex = i;
+              long gribtime = wgd[i].getDate().getTime();
+              long diff = Math.abs(datetime - gribtime);
+              if (diff < smallest)
+              {
+                smallest = diff;
+                closestGribIndex = i;
+              }
+              else
+                break;
             }
-            else
-              break;
+  //        System.out.println("Closest date is " + wgd[closestGribIndex].getDate());
+            gribIndex = closestGribIndex;
+            smoothingRequired = true;
+            updateGRIBDisplay();
           }
-//        System.out.println("Closest date is " + wgd[closestGribIndex].getDate());
-          gribIndex = closestGribIndex;
-          smoothingRequired = true;
-          updateGRIBDisplay();
         }
         
         public void chartLineColorChanged(Color c) 
@@ -2881,16 +3037,24 @@ public class CommandPanel
 
         public void GRIBSliceInfoRequested(double d) 
         {
-          gribSliceInfo = d;
-          chartPanel.repaint();
+         if (parent != null && parent.isVisible())
+          {
+            gribSliceInfo = d;
+            chartPanel.repaint();
+          }
         }
 
         public void GRIBSliceInfoRequestStop() 
         {
-          gribSliceInfo = -1D;
-          chartPanel.repaint();
+         if (parent != null && parent.isVisible())
+          {
+            gribSliceInfo = -1D;
+            chartPanel.repaint();
+          }
         }
-      });
+      };
+    
+    WWContext.getInstance().addApplicationListener(ael);
     setLayout(borderLayout1);
     
 //  layer = new ScrollableLayeredPane(chartPanel.getW(), 
@@ -2987,6 +3151,11 @@ public class CommandPanel
     setCheckBoxes();
   }
 
+  public void removeListener()
+  {
+    WWContext.getInstance().removeApplicationListener(ael);  
+  }
+  
   private void runStorageThread()
   {
     runStorageThread(false, null);
@@ -5701,6 +5870,8 @@ public class CommandPanel
           g2.setStroke(strk);
           // Draw the best route..., from destination to origin.
           boolean go = drawBestRoute;
+          if (go)
+            bestRoute = new ArrayList<RoutingPoint>();
           while (go)
           {
             RoutingPoint next = thisPoint.getAncestor();
@@ -5708,6 +5879,7 @@ public class CommandPanel
               go = false;
             else
             {
+              bestRoute.add(next);
               Point toPoint = chartPanel.getPanelPoint(next.getPosition());
               // The route segment
               gr.drawLine(fromPt.x, fromPt.y, toPoint.x, toPoint.y);
@@ -5799,8 +5971,10 @@ public class CommandPanel
       {
         int infoX = f.x + (int)(gribSliceInfo * (double)(t.x - f.x));
         int infoY = f.y + (int)(gribSliceInfo * (double)(t.y - f.y));
+        g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.6f));
         g2.setColor(Color.red);
         g2.fillOval(infoX - 8, infoY - 8, 16, 16);        
+        g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
       }
       g2.setStroke(originalStroke);
     }
@@ -5810,13 +5984,38 @@ public class CommandPanel
       int[] xy = gsp.getPointFromD(gribSliceInfo);
       if (gribData != null)
       {
-        GribHelper.GribPointData gpd = gribData.getGribPointData()[xy[0]][xy[1]];
-        GeoPoint gp = new GeoPoint(gpd.getLat(), gpd.getLng());
-//      System.out.println("X:" + xy[0] + ", Y:" + xy[1] + " -> " + gp.toString());
+//      System.out.println("gribSliceInfo:" + gribSliceInfo);
+        GeoPoint gp = null;
+        if (bestRoute != null)
+        {
+          int len = bestRoute.size();
+          int index = (int)Math.round(len * (1 - gribSliceInfo)) - 1; // Last point is first in the route
+//        System.out.println("Len:" + len + ", gribSliceInfo:" + gribSliceInfo + ", index:" + index);
+          if (index < 0) index = 0;
+          if (index > len - 1) index = len - 1;
+          try
+          {
+            RoutingPoint rp = bestRoute.get(index);
+            gp = new GeoPoint(rp.getPosition().getL(), rp.getPosition().getG());
+          }
+          catch (Exception ex)
+          {
+            System.out.println(ex.toString());
+            System.out.println("Len:" + len + ", gribSliceInfo:" + gribSliceInfo + ", index:" + index);
+          }
+        }
+        else
+        {
+          GribHelper.GribPointData gpd = gribData.getGribPointData()[xy[0]][xy[1]];
+          gp = new GeoPoint(gpd.getLat(), gpd.getLng());
+  //      System.out.println("X:" + xy[0] + ", Y:" + xy[1] + " -> " + gp.toString());
+        }
         
         Point pt = chartPanel.getPanelPoint(gp);
+        ((Graphics2D)gr).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.6f));
         gr.setColor(Color.red);
         gr.fillOval(pt.x - 8, pt.y - 8, 16, 16);        
+        ((Graphics2D)gr).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
       }
     }
     
@@ -6946,6 +7145,7 @@ public class CommandPanel
     to = null;
     closest = null;
     allCalculatedIsochrons = null;
+    bestRoute = null;
     eraseRoutingBoat();
     WWContext.getInstance().fireRoutingAvailable(false, null);
 
@@ -7203,6 +7403,7 @@ public class CommandPanel
     from = null;
     to = null;
     allCalculatedIsochrons = null;
+    bestRoute = null;
     WWContext.getInstance().fireRoutingAvailable(false, null);
     setEnableGRIBSlice(false);
     eraseRoutingBoat();

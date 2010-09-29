@@ -1,6 +1,5 @@
 package chartview.gui;
 
-
 import astro.calc.GeoPoint;
 
 import chartview.ctx.ApplicationEventListener;
@@ -8,11 +7,11 @@ import chartview.ctx.WWContext;
 
 import chartview.gui.left.FileTypeHolder;
 import chartview.gui.right.CommandPanel;
-import chartview.gui.right.Panel3D;
-import chartview.gui.toolbar.controlpanels.ChartCommandPanelToolBar;
-import chartview.gui.toolbar.controlpanels.ChartControlPane;
+import chartview.gui.right.CompositeTabComponent;
+import chartview.gui.right.CompositeTabbedPane;
 import chartview.gui.toolbar.controlpanels.LoggingPanel;
 import chartview.gui.util.dialog.AutoDownloadTablePanel;
+import chartview.gui.util.dialog.CompositeDetailsInputPanel;
 import chartview.gui.util.dialog.ContactPanel;
 import chartview.gui.util.dialog.FaxType;
 import chartview.gui.util.dialog.InternetFax;
@@ -20,7 +19,6 @@ import chartview.gui.util.dialog.InternetGRIB;
 import chartview.gui.util.dialog.LoadAtStartupPanel;
 import chartview.gui.util.dialog.PositionInputPanel;
 import chartview.gui.util.dialog.PredefZonesTablePanel;
-import chartview.gui.util.dialog.CompositeDetailsInputPanel;
 import chartview.gui.util.param.CategoryPanel;
 import chartview.gui.util.param.ParamData;
 import chartview.gui.util.param.ParamPanel;
@@ -35,6 +33,8 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -51,6 +51,7 @@ import java.util.Date;
 import java.util.TimeZone;
 
 import javax.swing.AbstractAction;
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
@@ -61,7 +62,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
-import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
@@ -83,7 +83,6 @@ import org.w3c.dom.NodeList;
 
 import user.util.TimeUtil;
 
-
 public class AdjustFrame
   extends JFrame
 {
@@ -91,12 +90,9 @@ public class AdjustFrame
   private static final SimpleDateFormat SDF_FOR_TITLE = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss");
   
   private BorderLayout borderLayout;
-  private JTabbedPane tabbedPane = new JTabbedPane();
-  private CommandPanel commandPanel;
-  private JPanel commandPanelHolder;
-  private Panel3D threeDGRIBPanel;
-  
+
   private FileTypeHolder allJTrees = new FileTypeHolder();
+  private JTabbedPane masterTabPane = new JTabbedPane();
 
   private JPanel statusPanel = new JPanel();
   private JProgressBar progressBar = new JProgressBar(0, 100);
@@ -157,51 +153,15 @@ public class AdjustFrame
   private JMenuBar menuBar = new JMenuBar();
 
   private JSplitPane jSplitPane = null;
-  private ChartCommandPanelToolBar commandPanelToolbar = new ChartCommandPanelToolBar();
   
   private CompositeDetailsInputPanel inputPanel = null;
   private PositionInputPanel pip = null;
 
   protected AdjustFrame instance = this;
   
-  private JPanel chartPanelControlPaneHolder = new JPanel(new BorderLayout()); 
-  private JScrollPane controlPaneScrollPane = new JScrollPane();
-  private ChartControlPane ccp = new ChartControlPane();
-
   public AdjustFrame()
   {
     borderLayout = new BorderLayout();
-//  commandPanel = new CommandPanel(this.mainZoomPanel);
-    commandPanel = new CommandPanel(ccp.getMainZoomPanel());
-    
-    String ttOption = System.getProperty("tooltip.option", "on-chart");
-    if ("none".equals(ttOption))
-    {
-      commandPanel.getChartPanel().setPositionToolTipEnabled(false);
-      commandPanel.setDisplayAltTooltip(false);
-    }
-    else if ("on-chart".equals(ttOption))
-    {
-      commandPanel.getChartPanel().setPositionToolTipEnabled(true);
-      commandPanel.setDisplayAltTooltip(false);
-    }
-    else if ("tt-window".equals(ttOption))
-    {
-      commandPanel.getChartPanel().setPositionToolTipEnabled(true);
-      commandPanel.setDisplayAltTooltip(true);
-    }
-    
-    commandPanelHolder = new JPanel(new BorderLayout());
-    commandPanelHolder.add(commandPanel, BorderLayout.CENTER);    
-    commandPanelHolder.add(commandPanelToolbar, BorderLayout.NORTH);        
-    chartPanelControlPaneHolder.add(controlPaneScrollPane, BorderLayout.CENTER);
-    controlPaneScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-    controlPaneScrollPane.getViewport().add(ccp, null);
-    
-    commandPanelHolder.add(chartPanelControlPaneHolder, BorderLayout.EAST);    
-    chartPanelControlPaneHolder.setVisible(false);
-    threeDGRIBPanel = new Panel3D();
-
     try
     {
       jbInit();
@@ -211,10 +171,6 @@ public class AdjustFrame
       WWContext.getInstance().fireExceptionLogging(e);
       e.printStackTrace();
     }
-//    synchronized (toolBar)
-//    {
-//      WWContext.getInstance().fireToolbarElementResized();        
-//    }
     // Any composite to load at startup?
     final String compositeName = ((ParamPanel.DataFile) ParamPanel.data[ParamData.LOAD_COMPOSITE_STARTUP][1]).toString();
     if (compositeName.trim().length() > 0)
@@ -315,85 +271,102 @@ public class AdjustFrame
     this.setIconImage(new ImageIcon(this.getClass().getResource("img/paperboat.png")).getImage());
     this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
-    WWContext.getInstance().addApplicationListener(new ApplicationEventListener()
+    final CompositeTabbedPane firstTab = new CompositeTabbedPane();
+    masterTabPane.add("Composite", firstTab);  // The first tab
+//  masterTabPane.setToolTipTextAt(0, "Right-click to close");
+    masterTabPane.setTabComponentAt(0, new CompositeTabComponent("Composite", "right/remove_composite.png")
+      {
+        public void onClose()
         {
-          public void collapseExpandToolBar(boolean b) 
+          if (masterTabPane.getTabCount() > 2)
           {
-            chartPanelControlPaneHolder.setVisible(b);             
+            masterTabPane.remove(0);          
+            firstTab.removeListener();
+            int newIndex = 0 - 1;
+            while (newIndex < 0) newIndex++;
+            masterTabPane.setSelectedIndex(newIndex);
           }
-          
-          public void setCompositeRequested()
-          {
-            setupComposite();             
-          }
-          
-          public void gribUnloaded()
-          {
-            if (tabbedPane.getSelectedIndex() == 1)
-              tabbedPane.setSelectedIndex(0);
-            tabbedPane.setEnabledAt(1, false);
-            tabbedPane.setSelectedIndex(0);
-            WWContext.getInstance().setGribFile(null);
-          }
+        }
+        public boolean ok2Close()
+        {
+          return masterTabPane.getTabCount() > 2;
+        }
+      });
+    
+    Icon plus = new ImageIcon(this.getClass().getResource("img/plus.png"));
+    masterTabPane.add(new JPanel(), plus); // The tab that adds tabs   
+    masterTabPane.setToolTipTextAt(1, WWGnlUtilities.buildMessage("click-to-add"));
+    
+    masterTabPane.addMouseListener(new MouseAdapter()
+     {
+       public void mouseClicked(MouseEvent mouseEvent)
+       {
+         int mask = mouseEvent.getModifiers();       
+    //       System.out.println("Mouse clicked on the tabbedPane");
+         if (mouseEvent.isConsumed())
+         {
+           return;
+         }
+         if (mouseEvent.getClickCount() == 2)
+         {
+           System.out.println("Exploding!");
+         }
+         if ((mask & MouseEvent.BUTTON2_MASK) != 0 || (mask & MouseEvent.BUTTON3_MASK) != 0) // Right click
+         {
+           System.out.println("Right-Click on Tab " + ((JTabbedPane)mouseEvent.getSource()).getSelectedIndex());
+           mouseEvent.consume(); // Trap
+           // Remove the tab
+           if (false)
+           {
+             int selectedIndex = ((JTabbedPane)mouseEvent.getSource()).getSelectedIndex();
+             if (((JTabbedPane)mouseEvent.getSource()).getTabCount() > 2 && selectedIndex < ((JTabbedPane)mouseEvent.getSource()).getTabCount() - 1)
+             {
+               JTabbedPane tp = (JTabbedPane)mouseEvent.getSource();             
+               ((CompositeTabbedPane)tp.getSelectedComponent()).removeListener();
+               tp.remove(selectedIndex);          
+               int newIndex = selectedIndex - 1;
+               while (newIndex < 0) newIndex++;
+               tp.setSelectedIndex(newIndex);
+             }
+             else
+               ((JTabbedPane)mouseEvent.getSource()).setSelectedIndex(0);
+           }
+         }
+         else // Usual left-click
+         {
+    //     System.out.println("Click on Tab " + ((JTabbedPane)mouseEvent.getSource()).getSelectedIndex());
+           if (((JTabbedPane)mouseEvent.getSource()).getSelectedIndex() == ((JTabbedPane)mouseEvent.getSource()).getTabCount() - 1) // Last
+           {
+    //       System.out.println("Adding a Tab.");
+//           JTabbedPane tp = (JTabbedPane)mouseEvent.getSource();
+             final CompositeTabbedPane nctp = new CompositeTabbedPane();
+             masterTabPane.add(nctp, "Composite (" + masterTabPane.getTabCount() + ")", masterTabPane.getTabCount() - 1);
+             masterTabPane.setTabComponentAt(masterTabPane.getTabCount() - 2, new CompositeTabComponent("Composite (" + Integer.toString(masterTabPane.getTabCount() - 1) + ")", "right/remove_composite.png")
+               {
+                 public void onClose()
+                 {
+                   if (masterTabPane.getTabCount() > 2)
+                   {
+                     nctp.removeListener();
+                     masterTabPane.remove(nctp);          
+                     int newIndex = masterTabPane.getTabCount() - 2;
+                     while (newIndex < 0) newIndex++;
+                     masterTabPane.setSelectedIndex(newIndex);
+                   }
+                 }
+                 public boolean ok2Close()
+                 {
+                   return masterTabPane.getTabCount() > 2;
+                 }
+               });
+          // masterTabPane.setToolTipTextAt(masterTabPane.getTabCount() - 2, "Right-click to close");
+             masterTabPane.setSelectedIndex(masterTabPane.getTabCount() - 2);
 
-          public void enable3DTab(boolean b)
-          {
-            tabbedPane.setEnabledAt(1, b);
-          }
-          
-          public void gribFileOpen(String str)
-          {
-            setupComposite(null, str);
-          }
-
-          public void faxFileOpen(String str)
-          {
-            setupComposite(str, null);
-          }
-
-          public void setLoading(boolean b)
-          {
-//          System.out.println("Set loading... " + b);
-            setLoadingProgresssBar(b);
-          }
-
-          public void setLoading(boolean b, String s)
-          {
-//          System.out.println("Set loading... " + b);
-            setLoadingProgresssBar(b, s);
-          }
-          
-          public void stopAnyLoadingProgressBar()
-          {
-            stopAnyOscillatingThread();  
-          }
-          
-          public void setStatus(String s)
-          {
-            setStatusLabel(s);
-          }
-          
-          public void networkOK(boolean b)
-          {
-//          System.out.println("Network access:" + (b?"":" not") + " OK");
-            menuToolsRetryNetwork.setEnabled(!b);
-          }
-
-          public void gribForward()
-          {            
-            threeDGRIBPanel.getThreeDPanel().setPanelLabel(commandPanel.getGribData()[commandPanel.getGribIndex()].getDate().toString());
-          }
-          
-          public void gribBackward() 
-          {
-            threeDGRIBPanel.getThreeDPanel().setPanelLabel(commandPanel.getGribData()[commandPanel.getGribIndex()].getDate().toString());
-          }
-          
-          public void gribDataPanelClosed() 
-          {
-            showGRIBPointData.setSelected(false);
-          }
-        });
+           }
+         }
+       }
+     });
+    
     this.setJMenuBar(menuBar);
 //  menuFile.add(menuFileOpen);
     menuFile.add(new OpenAction()).setAccelerator(KeyStroke.getKeyStroke("ctrl O"));
@@ -607,7 +580,7 @@ public class AdjustFrame
           public void actionPerformed(ActionEvent ae)
           {
             String compositeDir = ((ParamPanel.DataDirectory)ParamPanel.data[ParamData.CTX_FILES_LOC][1]).toString();
-            WWGnlUtilities.generateImagesFromComposites(compositeDir, commandPanel);
+            WWGnlUtilities.generateImagesFromComposites(compositeDir, ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel());
           }
         });
     menuAdmin.add(menuDetectUnusedFiles);
@@ -681,12 +654,12 @@ public class AdjustFrame
     
     showGRIBPointData.setText(WWGnlUtilities.buildMessage("show-grib-datapoint"));
     showGRIBPointData.setIcon(new ImageIcon(instance.getClass().getResource("img/greydot.png")));
-    showGRIBPointData.setSelected(commandPanel.isShowGRIBPointPanel());
+    showGRIBPointData.setSelected(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().isShowGRIBPointPanel());
     showGRIBPointData.addActionListener(new ActionListener()
         {
           public void actionPerformed(ActionEvent ae)
           {
-            commandPanel.setShowGRIBPointPanel(showGRIBPointData.isSelected());
+            ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().setShowGRIBPointPanel(showGRIBPointData.isSelected());
           }
         });
 
@@ -719,14 +692,14 @@ public class AdjustFrame
         {
           public void actionPerformed(ActionEvent ae)
           {
-            if (commandPanel.getFrom() != null && 
-                commandPanel.getTo() != null && 
-                commandPanel.getGribData() != null)
+            if (((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().getFrom() != null && 
+                ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().getTo() != null && 
+                ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().getGribData() != null)
             {
   //          int resp = JOptionPane.showConfirmDialog(null, "Start routing computation?", "Routing", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
   //          if (resp == JOptionPane.OK_OPTION)
               {
-                commandPanel.calculateRouting();
+                ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().calculateRouting();
               }
             }
             else
@@ -742,14 +715,14 @@ public class AdjustFrame
         {
           public void actionPerformed(ActionEvent ae)
           {
-            if (commandPanel.getFrom() != null && 
-//              commandPanel.getTo() != null && 
-                commandPanel.getGribData() != null)
+            if (((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().getFrom() != null && 
+//              ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().getTo() != null && 
+                ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().getGribData() != null)
             {
   //          int resp = JOptionPane.showConfirmDialog(null, "Start routing computation?", "Routing", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
   //          if (resp == JOptionPane.OK_OPTION)
               {
-                commandPanel.whatIfRouting();
+                ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().whatIfRouting();
               }
             }
             else
@@ -767,11 +740,11 @@ public class AdjustFrame
         {
           public void actionPerformed(ActionEvent ae)
           {
-            if (commandPanel.getFrom() != null && 
-                commandPanel.getTo() != null)
+            if (((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().getFrom() != null && 
+                ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().getTo() != null)
             {
-              if (Math.abs(commandPanel.getFrom().getL()) < 30D || 
-                  Math.abs(commandPanel.getTo().getL()) < 30D)
+              if (Math.abs(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().getFrom().getL()) < 30D || 
+                  Math.abs(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().getTo().getL()) < 30D)
               {
                  JOptionPane.showMessageDialog(instance, WWGnlUtilities.buildMessage("under-30"), WWGnlUtilities.buildMessage("geostrophic-wind"), 
                                                JOptionPane.ERROR_MESSAGE); 
@@ -779,12 +752,12 @@ public class AdjustFrame
               else
               {
                 // Get the distance
-              WWContext.getInstance().getGreatCircle().setStart(new GeoPoint(Math.toRadians(commandPanel.getFrom().getL()), Math.toRadians(commandPanel.getFrom().getG())));
-              WWContext.getInstance().getGreatCircle().setArrival(new GeoPoint(Math.toRadians(commandPanel.getTo().getL()), Math.toRadians(commandPanel.getTo().getG())));                
+              WWContext.getInstance().getGreatCircle().setStart(new GeoPoint(Math.toRadians(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().getFrom().getL()), Math.toRadians(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().getFrom().getG())));
+              WWContext.getInstance().getGreatCircle().setArrival(new GeoPoint(Math.toRadians(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().getTo().getL()), Math.toRadians(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().getTo().getG())));                
                 double gcDist = Math.toDegrees(WWContext.getInstance().getGreatCircle().getDistance()) * 60.0;
 
                 int interval = ((Integer) ParamPanel.data[ParamData.INTERVAL_BETWEEN_ISOBARS][1]).intValue();
-                double gws = WWGnlUtilities.getGeostrophicWindSpeed(gcDist, Math.abs((commandPanel.getFrom().getL() + commandPanel.getTo().getL())/ 2D), interval);
+                double gws = WWGnlUtilities.getGeostrophicWindSpeed(gcDist, Math.abs((((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().getFrom().getL() + ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().getTo().getL())/ 2D), interval);
                 // Display result
                 String result = WWGnlUtilities.buildMessage("geostrophic-wind-speed") + WWGnlUtilities.DF2.format(gws)       + " kts.\n" +
                 WWGnlUtilities.buildMessage("with-friction") + WWGnlUtilities.DF2.format(gws * 0.7) + " kts.";
@@ -989,16 +962,15 @@ public class AdjustFrame
 //  progressBar.setStringPainted(true);
     progressBar.setEnabled(false);
 
-//  jSplitPane.setRightComponent(commandPanel);
+//  jSplitPane.setRightComponent(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel());
 //  jSplitPane.setLeftComponent(allJTrees);
-//  jSplitPane.add(commandPanel, JSplitPane.RIGHT);
+//  jSplitPane.add(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel(), JSplitPane.RIGHT);
 //  jSplitPane.add(allJTrees, JSplitPane.LEFT);
-    tabbedPane.add(WWGnlUtilities.buildMessage("chart"), commandPanelHolder);
-    tabbedPane.add("3D GRIB Data", threeDGRIBPanel);
-    tabbedPane.setEnabledAt(1, false);
 
     WWGnlUtilities.setTreeConfig(allJTrees);
-    jSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, allJTrees, tabbedPane);
+    
+//  jSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, allJTrees, tabbedPane);
+    jSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, allJTrees, masterTabPane);
     jSplitPane.setContinuousLayout(true);
     jSplitPane.setOneTouchExpandable(true);
 //  jSplitPane.setOneTouchExpandable(false);
@@ -1006,19 +978,18 @@ public class AdjustFrame
     jSplitPane.setDividerLocation(175);
 
     this.getContentPane().add(jSplitPane, BorderLayout.CENTER);
-
-    ccp.getProjectionPanel().setSelectedProjection(commandPanel.getProjection());
-    if (false) // Obsolete
-    {
-      // Look and Feel
-      String laf = ((ParamPanel.ListOfLookAndFeel)ParamPanel.data[ParamData.LOOK_AND_FEEL][1]).getCurrentValue();
-      String currentLaf = UIManager.getLookAndFeel().getName();
-      
-  //  System.out.println("Comparing " + laf + " to " + currentLaf);
-      
-      if (!currentLaf.equals(laf))
-        setLandF(laf);   
-    }
+    
+    WWContext.getInstance().addApplicationListener(new ApplicationEventListener()
+      {                                                     
+        public void compositeFileOpen(final String fileName)
+        {
+          String justFileName = fileName;
+          if (fileName.indexOf(File.separatorChar) > 0)
+            justFileName = justFileName.substring(fileName.lastIndexOf(File.separatorChar) + 1);          
+          masterTabPane.setTitleAt(masterTabPane.getSelectedIndex(), justFileName);
+          ((CompositeTabComponent)masterTabPane.getTabComponentAt(masterTabPane.getSelectedIndex())).setTabTitle(justFileName);
+        }
+      });
   }
 
   private void buildChartMenu()
@@ -1040,7 +1011,7 @@ public class AdjustFrame
             {
               public void actionPerformed(ActionEvent ae)
               {
-                commandPanel.applyBoundariesChanges(pz.top, pz.bottom, pz.left, pz.right);
+                ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().applyBoundariesChanges(pz.top, pz.bottom, pz.left, pz.right);
               }
             });
           menuCharts.add(mni);
@@ -1147,7 +1118,7 @@ public class AdjustFrame
     if (inputPanel == null)
       inputPanel = new CompositeDetailsInputPanel();
 
-    FaxType[] faxarray = commandPanel.getFaxes();
+    FaxType[] faxarray = ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().getFaxes();
 //  if (faxarray != null)
       inputPanel.setFaxes(faxarray);    
     
@@ -1163,38 +1134,38 @@ public class AdjustFrame
       File gf = new File(gribFile);
       inputPanel.setGRIBRequestSelected(!gf.exists()); // If file not found, assume GRIB Request
     }
-    inputPanel.setPRMSL(commandPanel.isDisplayPrmsl() && commandPanel.isTherePrmsl());
-    inputPanel.set500mb(commandPanel.isDisplay500mb() && commandPanel.isThere500mb());
-    inputPanel.setWaves(commandPanel.isDisplayWaves() && commandPanel.isThereWaves());
-    inputPanel.setTemp(commandPanel.isDisplayTemperature() && commandPanel.isThereTemperature());
-    inputPanel.setPrate(commandPanel.isDisplayRain() && commandPanel.isThereRain());
+    inputPanel.setPRMSL(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().isDisplayPrmsl() && ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().isTherePrmsl());
+    inputPanel.set500mb(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().isDisplay500mb() && ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().isThere500mb());
+    inputPanel.setWaves(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().isDisplayWaves() && ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().isThereWaves());
+    inputPanel.setTemp(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().isDisplayTemperature() && ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().isThereTemperature());
+    inputPanel.setPrate(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().isDisplayRain() && ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().isThereRain());
     
-    inputPanel.set3DTWS(commandPanel.isDisplay3DTws());
-    inputPanel.set3DPRMSL(commandPanel.isDisplay3DPrmsl());
-    inputPanel.set3D500hgt(commandPanel.isDisplay3D500mb());
-    inputPanel.set3DWaves(commandPanel.isDisplay3DWaves());
-    inputPanel.set3DTemp(commandPanel.isDisplay3DTemperature());
-    inputPanel.set3DRain(commandPanel.isDisplay3DRain());
+    inputPanel.set3DTWS(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().isDisplay3DTws());
+    inputPanel.set3DPRMSL(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().isDisplay3DPrmsl());
+    inputPanel.set3D500hgt(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().isDisplay3D500mb());
+    inputPanel.set3DWaves(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().isDisplay3DWaves());
+    inputPanel.set3DTemp(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().isDisplay3DTemperature());
+    inputPanel.set3DRain(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().isDisplay3DRain());
     
-    inputPanel.setPRMSLContour(commandPanel.isDisplayContourPRMSL());
-    inputPanel.set500mbContour(commandPanel.isDisplayContour500mb());
-    inputPanel.setWavesContour(commandPanel.isDisplayContourWaves());
-    inputPanel.setTempContour(commandPanel.isDisplayContourTemp());
-    inputPanel.setPrateContour(commandPanel.isDisplayContourPrate());
+    inputPanel.setPRMSLContour(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().isDisplayContourPRMSL());
+    inputPanel.set500mbContour(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().isDisplayContour500mb());
+    inputPanel.setWavesContour(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().isDisplayContourWaves());
+    inputPanel.setTempContour(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().isDisplayContourTemp());
+    inputPanel.setPrateContour(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().isDisplayContourPrate());
     
-    inputPanel.setComment(commandPanel.getCurrentComment());
+    inputPanel.setComment(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().getCurrentComment());
 
-    inputPanel.setTopLat(commandPanel.getNLat());
-    inputPanel.setBottomLat(commandPanel.getSLat());
-    inputPanel.setLeftLong(commandPanel.getWLong());
-    inputPanel.setRightLong(commandPanel.getELong());
+    inputPanel.setTopLat(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().getNLat());
+    inputPanel.setBottomLat(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().getSLat());
+    inputPanel.setLeftLong(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().getWLong());
+    inputPanel.setRightLong(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().getELong());
     int resp = JOptionPane.showConfirmDialog(this, 
                                              inputPanel, WWGnlUtilities.buildMessage("set-data-context"), 
                                              JOptionPane.OK_CANCEL_OPTION, 
                                              JOptionPane.PLAIN_MESSAGE);
     if (resp == JOptionPane.OK_OPTION)
     {
-      final boolean gribChanged =  haveGRIBOtpionsChanged(inputPanel, commandPanel);
+      final boolean gribChanged =  haveGRIBOtpionsChanged(inputPanel, ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel());
       
       boolean[] gribOptions = inputPanel.getGRIBOptions();
 
@@ -1230,39 +1201,39 @@ public class AdjustFrame
           gribOptions[CompositeDetailsInputPanel.PRATE_CONTOUR] = false;
         }
       }
-//    commandPanel.setDisplayContour(withContourLines);
-      commandPanel.setCurrentComment(inputPanel.getComment());
+//    ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().setDisplayContour(withContourLines);
+      ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().setCurrentComment(inputPanel.getComment());
       
-      commandPanel.setDisplayPrmsl(gribOptions[CompositeDetailsInputPanel.PRMSL_DATA]);
-      commandPanel.setDisplay500mb(gribOptions[CompositeDetailsInputPanel.MB500_DATA]);
-      commandPanel.setDisplayWaves(gribOptions[CompositeDetailsInputPanel.WAVES_DATA]);
-      commandPanel.setDisplayTemperature(gribOptions[CompositeDetailsInputPanel.TEMP_DATA]);
-      commandPanel.setDisplayRain(gribOptions[CompositeDetailsInputPanel.PRATE_DATA]);
+      ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().setDisplayPrmsl(gribOptions[CompositeDetailsInputPanel.PRMSL_DATA]);
+      ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().setDisplay500mb(gribOptions[CompositeDetailsInputPanel.MB500_DATA]);
+      ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().setDisplayWaves(gribOptions[CompositeDetailsInputPanel.WAVES_DATA]);
+      ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().setDisplayTemperature(gribOptions[CompositeDetailsInputPanel.TEMP_DATA]);
+      ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().setDisplayRain(gribOptions[CompositeDetailsInputPanel.PRATE_DATA]);
       
-      commandPanel.setDisplay3DTws(gribOptions[CompositeDetailsInputPanel.TWS_3D]);
-      commandPanel.setDisplay3DPrmsl(gribOptions[CompositeDetailsInputPanel.PRMSL_3D]);
-      commandPanel.setDisplay3D500mb(gribOptions[CompositeDetailsInputPanel.MB500_3D]);
-      commandPanel.setDisplay3DWaves(gribOptions[CompositeDetailsInputPanel.WAVES_3D]);
-      commandPanel.setDisplay3DTemperature(gribOptions[CompositeDetailsInputPanel.TEMP_3D]);
-      commandPanel.setDisplay3DRain(gribOptions[CompositeDetailsInputPanel.PRATE_3D]);
+      ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().setDisplay3DTws(gribOptions[CompositeDetailsInputPanel.TWS_3D]);
+      ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().setDisplay3DPrmsl(gribOptions[CompositeDetailsInputPanel.PRMSL_3D]);
+      ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().setDisplay3D500mb(gribOptions[CompositeDetailsInputPanel.MB500_3D]);
+      ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().setDisplay3DWaves(gribOptions[CompositeDetailsInputPanel.WAVES_3D]);
+      ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().setDisplay3DTemperature(gribOptions[CompositeDetailsInputPanel.TEMP_3D]);
+      ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().setDisplay3DRain(gribOptions[CompositeDetailsInputPanel.PRATE_3D]);
       if (atLeastOne3D)
       {
-        tabbedPane.setEnabledAt(1, true);  
-        if (commandPanel.getGribData() != null)
-          threeDGRIBPanel.getThreeDPanel().setPanelLabel(commandPanel.getGribData()[commandPanel.getGribIndex()].getDate().toString());
+        ((JTabbedPane)masterTabPane.getSelectedComponent()).setEnabledAt(1, true);  
+        if (((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().getGribData() != null)
+          ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getThreeDGRIBPanel().getThreeDPanel().setPanelLabel(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().getGribData()[((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().getGribIndex()].getDate().toString());
       }
       else
       {
-        if (tabbedPane.getSelectedIndex() == 1)
-          tabbedPane.setSelectedIndex(0);
-        tabbedPane.setEnabledAt(1, false);
+        if (((JTabbedPane)masterTabPane.getSelectedComponent()).getSelectedIndex() == 1)
+          ((JTabbedPane)masterTabPane.getSelectedComponent()).setSelectedIndex(0);
+        ((JTabbedPane)masterTabPane.getSelectedComponent()).setEnabledAt(1, false);
       }
-      commandPanel.setDisplayContourTWS(gribOptions[CompositeDetailsInputPanel.TWS_CONTOUR]);
-      commandPanel.setDisplayContourPRMSL(gribOptions[CompositeDetailsInputPanel.PRMSL_CONTOUR]);
-      commandPanel.setDisplayContour500mb(gribOptions[CompositeDetailsInputPanel.MB500_CONTOUR]);
-      commandPanel.setDisplayContourWaves(gribOptions[CompositeDetailsInputPanel.WAVES_CONTOUR]);
-      commandPanel.setDisplayContourTemp(gribOptions[CompositeDetailsInputPanel.TEMP_CONTOUR]);
-      commandPanel.setDisplayContourPrate(gribOptions[CompositeDetailsInputPanel.PRATE_CONTOUR]);
+      ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().setDisplayContourTWS(gribOptions[CompositeDetailsInputPanel.TWS_CONTOUR]);
+      ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().setDisplayContourPRMSL(gribOptions[CompositeDetailsInputPanel.PRMSL_CONTOUR]);
+      ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().setDisplayContour500mb(gribOptions[CompositeDetailsInputPanel.MB500_CONTOUR]);
+      ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().setDisplayContourWaves(gribOptions[CompositeDetailsInputPanel.WAVES_CONTOUR]);
+      ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().setDisplayContourTemp(gribOptions[CompositeDetailsInputPanel.TEMP_CONTOUR]);
+      ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().setDisplayContourPrate(gribOptions[CompositeDetailsInputPanel.PRATE_CONTOUR]);
 
 //    System.out.println("InputPanel OK");
       WWContext.getInstance().fireSetLoading(true);
@@ -1274,44 +1245,44 @@ public class AdjustFrame
             String grib = inputPanel.getGribFileName();
 //          if (!(grib.trim().length() > 0 && inputPanel.isSizeFromGRIB()))
             {
-              commandPanel.setNLat(inputPanel.getTopLat());
-              commandPanel.setSLat(inputPanel.getBottomLat());
-              commandPanel.setWLong(inputPanel.getLeftLong());
-              commandPanel.setELong(inputPanel.getRightLong());
-              commandPanel.applyBoundariesChanges();
+              ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().setNLat(inputPanel.getTopLat());
+              ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().setSLat(inputPanel.getBottomLat());
+              ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().setWLong(inputPanel.getLeftLong());
+              ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().setELong(inputPanel.getRightLong());
+              ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().applyBoundariesChanges();
             }
             if (grib.trim().length() > 0)
             {    
               boolean keepGoing = true;
               GribHelper.GribConditionData[] wgd = null;
-              if (commandPanel.getGribData() != null && 
+              if (((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().getGribData() != null && 
                   inputPanel.isGRIBRequestSelected() &&
-                  grib.equals(commandPanel.getGRIBDataName()))
+                  grib.equals(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().getGRIBDataName()))
               {
                 // Ask if we reload the GRIB (if the GRIB does not come from a waz)
                 String ccName = WWContext.getInstance().getCurrentComposite();
                 if (ccName != null && ccName.endsWith(WWContext.WAZ_EXTENSION) && !gribChanged)
                 {
-                  wgd = commandPanel.getGribData();
+                  wgd = ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().getGribData();
                   keepGoing = false;
                 }
                 if (keepGoing)
                 {
                   if (ccName != null && ccName.endsWith(WWContext.WAZ_EXTENSION) && gribChanged)
                   {
-                    wgd = commandPanel.getGribData();
+                    wgd = ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().getGribData();
                     keepGoing = false;
                   }
                   else
                   {
-                    int resp = JOptionPane.showConfirmDialog(commandPanel, 
+                    int resp = JOptionPane.showConfirmDialog(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel(), 
                                                              WWGnlUtilities.buildMessage("reload-grib-data"), 
                                                              WWGnlUtilities.buildMessage("grib-download"), 
                                                              JOptionPane.YES_NO_OPTION, 
                                                              JOptionPane.QUESTION_MESSAGE);
                     if (resp == JOptionPane.NO_OPTION)
                     {
-                      wgd = commandPanel.getGribData();
+                      wgd = ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().getGribData();
                       keepGoing = false;
                     }
                   }
@@ -1321,7 +1292,7 @@ public class AdjustFrame
               {
                 if (inputPanel.isGRIBRequestSelected()) // Then we assume it is to be reached through http
                 {
-                  commandPanel.setGribRequest(grib); 
+                  ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().setGribRequest(grib); 
                   String gribRequest = WWGnlUtilities.generateGRIBRequest(grib);
                   try
                   {                
@@ -1368,16 +1339,16 @@ public class AdjustFrame
               }  
               if (inputPanel.isSizeFromGRIB() && wgd != null)
               {
-                commandPanel.setNLat(wgd[0].getNLat());
-                commandPanel.setSLat(wgd[0].getSLat());
-                commandPanel.setWLong(wgd[0].getWLng());
-                commandPanel.setELong(wgd[0].getELng());
+                ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().setNLat(wgd[0].getNLat());
+                ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().setSLat(wgd[0].getSLat());
+                ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().setWLong(wgd[0].getWLng());
+                ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().setELong(wgd[0].getELng());
               }
-              commandPanel.applyBoundariesChanges();
-              commandPanel.setGribData(wgd, 
+              ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().applyBoundariesChanges();
+              ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().setGribData(wgd, 
                                        grib); // Event sent, generates obj, etc.
             }
-  //        System.out.println("Setting command panel boundaries:" + commandPanel.getNLat() + " to " + commandPanel.getSLat() + ", and " + commandPanel.getWLong() + " to " + commandPanel.getELong());
+  //        System.out.println("Setting command panel boundaries:" + ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().getNLat() + " to " + ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().getSLat() + ", and " + ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().getWLong() + " to " + ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().getELong());
 
             FaxType[] faxes = inputPanel.getFaxes();
             if (faxes != null)
@@ -1389,7 +1360,7 @@ public class AdjustFrame
                 faxes[i].setComment(comment);
                 appendFrameTitle(comment);
               }
-              commandPanel.setFaxes(faxes);
+              ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().setFaxes(faxes);
             }
 
   //        System.out.println("End of loader thread.");
@@ -1436,7 +1407,7 @@ public class AdjustFrame
 
   void filePrint_ActionPerformed(ActionEvent e)
   {
-    commandPanel.print();
+    ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().print();
   }
 
   void downloadFaxFromInternet()
@@ -1745,7 +1716,7 @@ public class AdjustFrame
   
   void genImage_actionPerformed(ActionEvent e)
   {
-    commandPanel.genImage();
+    ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().genImage();
   }
 
   void fileExit_ActionPerformed(ActionEvent e)
@@ -1843,7 +1814,7 @@ public class AdjustFrame
 
   public CommandPanel getCommandPanel()
   {
-    return commandPanel;
+    return ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel();
   }
 
   public FileTypeHolder getAllJTrees()

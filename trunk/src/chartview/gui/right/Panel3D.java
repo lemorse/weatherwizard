@@ -51,9 +51,7 @@ public class Panel3D
   private JCheckBox temperatureCheckBox = new JCheckBox();
   private JCheckBox rainCheckBox = new JCheckBox();
 
-  public Panel3D()
-  {
-    WWContext.getInstance().addApplicationListener(new ApplicationEventListener()
+  private transient ApplicationEventListener ael = new ApplicationEventListener()
         {
           public void newTWSObj(ArrayList<Point> al)
           {
@@ -115,7 +113,11 @@ public class Panel3D
             rainCheckBox.setSelected(false);
             rainCheckBox.setEnabled(false);
           }
-        });
+        };
+  
+  public Panel3D()
+  {
+    WWContext.getInstance().addApplicationListener(ael);
 
     try
     {
@@ -128,6 +130,11 @@ public class Panel3D
     }
   }
 
+  public void removeListener()
+  {
+    WWContext.getInstance().removeApplicationListener(ael);  
+  }
+  
   private void jbInit()
     throws Exception
   {

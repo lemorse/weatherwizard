@@ -122,6 +122,8 @@ public class GRIBSlicePanel
   {
     int size = data2plot.size();
     double dIdx = d * size;
+    if (dIdx < 0) dIdx = 0;
+    if (dIdx > data2plot.size() - 1) dIdx = data2plot.size() - 1;
     int x = data2plot.get((int)dIdx).vertIdx;
     int y = data2plot.get((int)dIdx).horIdx;
     
@@ -600,6 +602,8 @@ public class GRIBSlicePanel
         int dataIdx = (int)((float)infoX * (float)gribSize / (float)this.getWidth());
 //      System.out.println("GRIB Idx:" + dataIdx + " pour x:" + infoX + " / " + this.getWidth());
 //      GribHelper.GribCondition gribPoint = data2plot.get(dataIdx);
+        if (dataIdx > smoothedData.size() - 1) dataIdx = smoothedData.size() - 1;
+        if (dataIdx < 0) dataIdx = 0;
         GribHelper.GribCondition gribPoint = smoothedData.get(dataIdx);
         if (displayTWS)
         {
