@@ -7,13 +7,14 @@ import chart.components.ui.ChartPanel;
 import chartview.ctx.ApplicationEventListener;
 import chartview.ctx.WWContext;
 
-import chartview.ctx.WWContext.ToolFileFilter;
+//import chartview.ctx.WWContext.ToolFileFilter;
 
 import chartview.gui.AdjustFrame;
 import chartview.gui.left.FileTypeHolder;
 import chartview.gui.right.CommandPanel;
 import chartview.gui.util.dialog.ExitPanel;
 import chartview.gui.util.dialog.OneColumnTablePanel;
+import chartview.gui.util.dialog.PositionInputPanel;
 import chartview.gui.util.dialog.TwoFilePanel;
 import chartview.gui.util.dialog.UserExitTablePanel;
 import chartview.gui.util.dialog.WazUrlPanel;
@@ -21,11 +22,20 @@ import chartview.gui.util.dialog.places.PlacesTablePanel;
 import chartview.gui.util.param.ParamData;
 import chartview.gui.util.param.ParamPanel;
 
+//import chartview.util.WWGnlUtilities.BoatPosition;
+import chartview.util.http.HTTPClient;
 import chartview.util.local.WeatherAssistantResourceBundle;
 
-import chartview.util.progress.ProgressMonitor;
+//import chartview.util.progress.ProgressMonitor;
 
 import chartview.util.progress.ProgressUtil;
+
+import chartview.util.nmeaclient.BoatPositionSerialClient;
+//import chartview.util.serial.WWNMEAReader;
+
+import chartview.util.nmeaclient.BoatPositionTCPClient;
+
+import chartview.util.nmeaclient.BoatPositionUDPClient;
 
 import coreutilities.Utilities;
 
@@ -49,10 +59,10 @@ import java.awt.Stroke;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-import java.io.BufferedInputStream;
+//import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.ByteArrayInputStream;
+//import java.io.ByteArrayInputStream;
 import java.io.File;
 
 import java.io.FileFilter;
@@ -69,6 +79,7 @@ import java.io.OutputStream;
 
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.io.StringReader;
 import java.io.StringWriter;
 
 import java.net.URL;
@@ -95,7 +106,7 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-import java.util.zip.ZipInputStream;
+//import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import javax.swing.ImageIcon;
@@ -122,7 +133,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
-import user.util.TimeUtil;
+//import user.util.TimeUtil;
 
 public class WWGnlUtilities
 {
@@ -136,6 +147,7 @@ public class WWGnlUtilities
   public final static DecimalFormat BIG_DOUBLE = new DecimalFormat("####0.0000000000");
   
   public final static SimpleDateFormat SDF_UT   = new SimpleDateFormat("'UTC' d MMM yyyy HH:mm");
+  public final static SimpleDateFormat SDF_UT_bis = new SimpleDateFormat("'UTC' EEE d MMM yyyy HH:mm");
   public final static SimpleDateFormat SDF_UT_day = new SimpleDateFormat("'UTC' d MMM yyyy HH:mm (EEE)");
   public final static SimpleDateFormat SDF_UT_2 = new SimpleDateFormat("yy MMM d (HH:mm 'UTC')");
   public final static SimpleDateFormat SDF_UT_3 = new SimpleDateFormat("d-MMM-yyyy (HH:mm 'UTC')");
@@ -143,6 +155,7 @@ public class WWGnlUtilities
   public final static SimpleDateFormat SDF      = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss_S_z");
   public final static SimpleDateFormat SDF_2    = new SimpleDateFormat("yyyy MMM d (HH:mm z)");
   public final static SimpleDateFormat SDF_SOLAR = new SimpleDateFormat("d MMM yyyy HH:mm");
+  public final static SimpleDateFormat SDF_DMY  = new SimpleDateFormat("d MMM yyyy");
 
   public final static Color PURPLE = new Color(165, 0, 165);
   
@@ -545,6 +558,7 @@ public class WWGnlUtilities
     String fileNameOne = "";
     String fileNameTwo = "";
     String displayOpt = null;
+    String withBoatStr = "true";
 
     if (twoFilePanel == null)
     {
@@ -606,11 +620,20 @@ public class WWGnlUtilities
       fileNameTwo = twoFilePanel.getRightChooser().getSelectedFile().toString();
       regExp = twoFilePanel.getRegExprPatternTextField().getText();
       displayOpt = twoFilePanel.getDisplayOption();
+      withBoatStr = (twoFilePanel.withBoatAndTrack()?"true":"false");
     }
-    return new String[] { fileNameOne, fileNameTwo, regExp, displayOpt, twoFilePanel.getPDFTitle() };
+    return new String[] { fileNameOne, fileNameTwo, regExp, displayOpt, twoFilePanel.getPDFTitle(), withBoatStr };
   }
-
+  
+  public final static int NOTHING  = 0;
+  public final static int CIRCLE   = 1;
+  public final static int RETICULE = 2;
+  
   public static void drawBoat(Graphics2D g2, Color c, Point pt, int boatLength, int trueHeading, float alpha)
+  {
+    drawBoat(g2, c, pt, boatLength, trueHeading, alpha, NOTHING);
+  }
+  public static void drawBoat(Graphics2D g2, Color c, Point pt, int boatLength, int trueHeading, float alpha, int option)
   {
     // Transparency
     g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
@@ -647,6 +670,20 @@ public class WWGnlUtilities
     for (int i = 0; i < x.length-1; i++)
       g2.drawLine(xpoints[i], ypoints[i], xpoints[i+1], ypoints[i+1]);
     g2.drawLine(xpoints[x.length-1], ypoints[x.length-1], xpoints[0], ypoints[0]);
+    
+    // option ?
+    switch (option)
+    {
+      case CIRCLE:
+        int radius = ((3 * boatLength) / 7) / 2;
+        g2.drawOval(pt.x - radius, pt.y - radius, 2 * radius, 2 * radius);
+        g2.drawLine(pt.x, pt.y, pt.x, pt.y);
+        break;
+      case RETICULE:
+        break;
+      default:
+        break;
+    }
     
     g2.setColor(before);
   }
@@ -1450,7 +1487,8 @@ public class WWGnlUtilities
                                                final Pattern pattern, 
                                                boolean countOnly,
                                                String displayOption,
-                                               BufferedWriter corellation)
+                                               BufferedWriter corellation,
+                                               boolean withBoatAndTrack)
   {
     int howMany = 0;
     
@@ -1482,7 +1520,7 @@ public class WWGnlUtilities
       for (int i=0; i<flist.length && keepWorking.valueOf(); i++)
       {
         if (flist[i].isDirectory())
-          howMany += drillDownAndGenerateImage(flist[i], imgDir, cp, pattern, countOnly, displayOption, corellation);
+          howMany += drillDownAndGenerateImage(flist[i], imgDir, cp, pattern, countOnly, displayOption, corellation, withBoatAndTrack);
         else
         {
           String fName = flist[i].getAbsolutePath();
@@ -1490,7 +1528,7 @@ public class WWGnlUtilities
           {
             System.out.println("Generating Image for Composite [" + fName + "]");
             // That's here !!
-            cp.restoreComposite(flist[i].getAbsolutePath(), displayOption);
+            cp.restoreComposite(flist[i].getAbsolutePath(), displayOption, withBoatAndTrack);
             String compositeComment = cp.getCurrentComment();            
             String imgfName = fName.substring(fName.lastIndexOf(File.separator) + 1) + ".png"; 
             if (corellation != null)
@@ -1723,6 +1761,9 @@ public class WWGnlUtilities
                 filesToDelete.add(gribName);
             }
           }
+          // c - GPX Data file
+          // TODO GPX Data File
+          
           // 3 - Spit out new XML Doc
           composite.print(new FileOutputStream(new File(tempDir, "composite.xml")));      
           // 4 - Archive all temp dir
@@ -2314,6 +2355,7 @@ public class WWGnlUtilities
     String regExpPattern    = fromTo[2]; 
     final String displayOpt = fromTo[3];
     final String pdfTitle   = fromTo[4];
+    final boolean withBoatAndTrack = "true".equals(fromTo[5]);
     
     Pattern pattern = null;
     if (startFrom.trim().length() > 0 && generateIn.trim().length() > 0)
@@ -2342,7 +2384,8 @@ public class WWGnlUtilities
       if (ok2go) // Means pattern validated
       {
         // 1 - Count
-        final int howMany = drillDownAndGenerateImage(new File(startFrom), new File(generateIn), cp, pattern, true, displayOpt, null);       
+        
+        final int howMany = drillDownAndGenerateImage(new File(startFrom), new File(generateIn), cp, pattern, true, displayOpt, null, withBoatAndTrack);       
         int resp = JOptionPane.showConfirmDialog(cp, 
                                                  WWGnlUtilities.buildMessage("image-gen-prompt", 
                                                                              new String[] { Integer.toString(howMany) }), 
@@ -2362,8 +2405,17 @@ public class WWGnlUtilities
               WWContext.getInstance().setMonitor(ProgressUtil.createModalProgressMonitor(WWContext.getInstance().getMasterTopFrame(), howMany, false));
               WWContext.getInstance().getMonitor().start(WWGnlUtilities.buildMessage("generating-image", new String[] { "1", Integer.toString(howMany)}));
 
+              if (WWContext.getInstance().getAel4monitor() != null)
+              {
+                System.out.println("Warning!!! AELMonitor != null !! (1, in " + this.getClass().getName() + ")" );  
+              }
+              
               WWContext.getInstance().setAel4monitor(new ApplicationEventListener()
                 {
+                  public String toString()
+                  {
+                    return "from Runnable in WWGnlUtilities (1).";
+                  }
                   public void progressing() 
                   {
                     int newValue = WWContext.getInstance().getMonitor().getCurrent() + 1;
@@ -2392,7 +2444,8 @@ public class WWGnlUtilities
                                                         ptrn, 
                                                         false,
                                                         displayOpt,
-                                                        xc); 
+                                                        xc,
+                                                        withBoatAndTrack); 
                 xc.write("</root>\n");
                 xc.close();
                 if (howMuch > 0 && pdfTitle != null && pdfTitle.trim().length() > 0)
@@ -2778,8 +2831,17 @@ public class WWGnlUtilities
         {
           WWContext.getInstance().setMonitor(ProgressUtil.createModalProgressMonitor(WWContext.getInstance().getMasterTopFrame(), 1, true, true));
           WWContext.getInstance().getMonitor().start(WWGnlUtilities.buildMessage("reading-from-web"));
+          if (WWContext.getInstance().getAel4monitor() != null)
+          {
+            System.out.println("Warning!!! AELMonitor != null !! (2, in " + this.getClass().getName() + ")" );  
+          }
+          
           WWContext.getInstance().setAel4monitor(new ApplicationEventListener()
             {
+              public String toString()
+              {
+                return "from Runnable in WWGnlUtilities (2).";
+              }
               public void progressing(String mess)
               {
                 WWContext.getInstance().getMonitor().setCurrent(mess, WWContext.getInstance().getMonitor().getCurrent());
@@ -2804,7 +2866,7 @@ public class WWGnlUtilities
             // to ensure that progress dlg is closed in case of any exception
             if (WWContext.getInstance().getMonitor().getCurrent() != WWContext.getInstance().getMonitor().getTotal())
               WWContext.getInstance().getMonitor().setCurrent(null, WWContext.getInstance().getMonitor().getTotal());
-            WWContext.getInstance().removeApplicationListener(WWContext.getInstance().getAel4monitor());
+//          WWContext.getInstance().removeApplicationListener(WWContext.getInstance().getAel4monitor());
             WWContext.getInstance().setAel4monitor(null);
             WWContext.getInstance().setMonitor(null);
           }
@@ -2861,7 +2923,18 @@ public class WWGnlUtilities
     return str;
   }
   
-
+  public static int nbOccurs(String in, char of)
+  {
+    int nb = 0;
+    char[] ca = in.toCharArray();
+    for (int i=0; i<ca.length; i++)
+    {
+      if (ca[i] == of)
+        nb++;
+    }
+    return nb;
+  }
+  
   public static class FilePreviewer
               extends JComponent
            implements PropertyChangeListener
@@ -3010,6 +3083,150 @@ public class WWGnlUtilities
     return new Color(c.getRed(), c.getGreen(), c.getBlue(), transpency);
   }
   
+  // TODO Implement...
+  public static void drawBigBubble(Graphics gr,
+                                   Color bgColor,
+                                   Color fgColor,
+                                   Point pt,
+                                   String text)
+  {
+    String[] line = text.split("\n");
+  }
+  
+  public static BoatPosition getSerialBoatPosition() throws Exception
+  {
+    BoatPositionSerialClient bpsc = new BoatPositionSerialClient();
+    while (bpsc.getBoatPosition() == null && bpsc.allIsOk())
+    {
+      try { Thread.sleep(1000L); } catch (Exception ex) {} 
+    }
+    if (bpsc.allIsOk())
+      return bpsc.getBoatPosition();
+    else
+      throw new RuntimeException(bpsc.getProblemCause());
+  }
+  
+  public static BoatPosition getTCPBoatPosition() throws Exception
+  {
+    BoatPositionTCPClient bptc = new BoatPositionTCPClient();
+    while (bptc.getBoatPosition() == null && bptc.allIsOk())
+    {
+      try { Thread.sleep(1000L); } catch (Exception ex) {}
+    }
+    if (bptc.allIsOk())
+      return bptc.getBoatPosition();
+    else
+      throw new RuntimeException(bptc.getProblemCause());
+  }
+  
+  public static BoatPosition getUDPBoatPosition() throws Exception
+  {
+    BoatPositionUDPClient bpuc = new BoatPositionUDPClient();
+    while (bpuc.getBoatPosition() == null && bpuc.allIsOk())
+    {
+      try { Thread.sleep(1000L); } catch (Exception ex) {}
+    }
+    if (bpuc.allIsOk())
+      return bpuc.getBoatPosition();
+    else
+      throw new RuntimeException(bpuc.getProblemCause());
+  }
+  
+  public static BoatPosition getHTTPBoatPosition() throws Exception
+  {
+    BoatPosition bp = null;
+    try
+    {
+      String nmeaPayload = HTTPClient.getContent((String) ParamPanel.data[ParamData.NMEA_SERVER_URL][1]);
+      StringReader sr = new StringReader(nmeaPayload);
+      DOMParser parser = WWContext.getInstance().getParser();
+      XMLDocument doc = null;
+      synchronized (parser)
+      {
+        parser.setValidationMode(DOMParser.NONVALIDATING);
+        parser.parse(sr);
+        doc = parser.getDocument();
+      }
+      try
+      {
+        double lat = 0d;
+        try { lat = Double.parseDouble(doc.selectNodes("/data/lat[1]").item(0).getFirstChild().getNodeValue()); } catch (Exception ignore) {}
+        double lng = 0d;
+        try { lng = Double.parseDouble(doc.selectNodes("/data/lng[1]").item(0).getFirstChild().getNodeValue()); } catch (Exception ignore) {}
+        GeoPoint gp = new GeoPoint(lat, lng);
+        int hdg = 0;
+        try { hdg = (int)Math.round(Double.parseDouble(doc.selectNodes("/data/cog").item(0).getFirstChild().getNodeValue())); } catch (Exception ignore) {}
+        bp = new BoatPosition(gp, hdg);
+      }
+      catch (Exception ex)
+      {
+        WWContext.getInstance().fireExceptionLogging(ex);
+        ex.printStackTrace();
+      }
+    }
+    catch (HTTPClient.NMEAServerException nse)
+    {
+      throw nse;
+    }
+    catch (Exception e)
+    {
+      WWContext.getInstance().fireExceptionLogging(e);
+      e.printStackTrace();
+      throw e;
+    }
+    return bp;
+  }
+  
+  public static void storeBoatPosAndHeading(double l, double g, int heading, File manualPositionFile)
+  {
+    // Write to file for next time
+    XMLDocument doc = new XMLDocument();
+    XMLElement root = (XMLElement)doc.createElement("root");
+    doc.appendChild(root);
+    root.setAttribute("latitude", Double.toString(l));
+    root.setAttribute("longitude", Double.toString(g));
+    root.setAttribute("heading", Integer.toString(heading));
+    try { doc.print(new FileOutputStream(manualPositionFile)); } catch (Exception ioe) { ioe.printStackTrace(); }    
+  }
+  
+  public static void getManualBoatPosition()
+  {
+    File manualPositionFile = new File("." + File.separator + "config" + File.separator + WWContext.MANUAL_POSITION_FILE);
+    PositionInputPanel pip = new PositionInputPanel();
+    // Manual position already exist?
+    if (manualPositionFile.exists())
+    {
+      // Read and feed
+       DOMParser parser = WWContext.getInstance().getParser();
+       try
+       {
+         XMLDocument doc = null;
+         synchronized(parser)
+         {
+           parser.parse(manualPositionFile.toURI().toURL());
+           doc = parser.getDocument();
+         }
+         double lat = Double.parseDouble(((XMLElement)doc.getDocumentElement()).getAttribute("latitude"));
+         double lng = Double.parseDouble(((XMLElement)doc.getDocumentElement()).getAttribute("longitude"));
+         int hdg = Integer.parseInt(((XMLElement)doc.getDocumentElement()).getAttribute("heading"));
+         pip.setData(lat, lng, hdg);
+       }
+       catch (Exception ex)
+       {
+         ex.printStackTrace();
+       }
+    }
+    int resp = JOptionPane.showConfirmDialog(WWContext.getInstance().getMasterTopFrame(), pip, WWGnlUtilities.buildMessage("position-manual-entry"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
+    if (resp == JOptionPane.OK_OPTION)
+    {
+      double l = pip.getL();
+      double g = pip.getG();
+      int heading = pip.getHeading();
+      WWContext.getInstance().fireManuallyEnterBoatPosition(new GeoPoint(l, g), heading);
+      WWGnlUtilities.storeBoatPosAndHeading(l, g, heading, manualPositionFile);
+    }
+  }
+  
   public static void main2(String[] args)
   {
     String before = "\r\r\n  Akeu coucou  \r\n  \n";
@@ -3046,6 +3263,7 @@ public class WWGnlUtilities
     System.out.println("Before:" + comment);
     System.out.println("After:" + comment.replace('\n', ' ').replace('\r', ' ').replaceAll("&", "&amp;"));
   }
+  
   
   public static class SailMailStation
   {
@@ -3107,6 +3325,42 @@ public class WWGnlUtilities
     public String getStationName()
     {
       return stationName;
+    }
+  }
+  
+  public static class BoatPosition
+  {
+    GeoPoint pos = null;
+    int heading = -1;
+    
+    public BoatPosition()
+    {
+    }
+
+    public BoatPosition(GeoPoint gp, int h)
+    {
+      pos = gp;
+      heading = h;
+    }
+
+    public void setPos(GeoPoint pos)
+    {
+      this.pos = pos;
+    }
+
+    public GeoPoint getPos()
+    {
+      return pos;
+    }
+
+    public void setHeading(int heading)
+    {
+      this.heading = heading;
+    }
+
+    public int getHeading()
+    {
+      return heading;
     }
   }
 }

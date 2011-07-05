@@ -53,6 +53,10 @@ public class Panel3D
 
   private transient ApplicationEventListener ael = new ApplicationEventListener()
         {
+          public String toString()
+          {
+            return "from Panel3D.";
+          }
           public void newTWSObj(ArrayList<Point> al)
           {
             twsCheckBox.setEnabled(true);
