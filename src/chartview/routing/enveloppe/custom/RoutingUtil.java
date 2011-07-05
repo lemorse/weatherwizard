@@ -333,6 +333,8 @@ public class RoutingUtil
           currentDate = arrivalDate;
         }
         WWContext.getInstance().fireLogging("Isochrone # " + Integer.toString(allIsochrons.size()) + ", smallest distance:" + WWGnlUtilities.XXXX12.format(smallestDist) + ". Processing:" + keepLooping + "\n");          
+        WWContext.getInstance().fireProgressing("Isochrone # " + Integer.toString(allIsochrons.size()) + "...");
+
         caller.routingNotification(allIsochrons, finalClosest);
 //      timer = logDiffTime(timer, "Milestone 13");
       }

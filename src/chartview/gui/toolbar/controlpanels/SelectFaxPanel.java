@@ -69,6 +69,10 @@ public class SelectFaxPanel
   {
     WWContext.getInstance().addApplicationListener(new ApplicationEventListener()
       {
+        public String toString()
+        {
+          return "from SelectFaxPanel.";
+        }
         public void faxesLoaded(FaxType[] ft) 
         {
           // Reset poplist
