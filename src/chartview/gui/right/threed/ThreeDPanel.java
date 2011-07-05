@@ -122,6 +122,10 @@ public class ThreeDPanel
 
     WWContext.getInstance().addApplicationListener(new ApplicationEventListener()
         {
+          public String toString()
+          {
+            return "from ThreeDPanel.";
+          }
           public void newTWSObj(ArrayList<Point> al)
           {
             if (md == null)
