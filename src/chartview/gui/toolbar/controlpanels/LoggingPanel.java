@@ -97,6 +97,10 @@ public class LoggingPanel
 
     WWContext.getInstance().addApplicationListener(new ApplicationEventListener()
       {
+        public String toString()
+        {
+          return "from LoggingPanel.";
+        }
         public void log(String str) 
         {
           String content = loggingTextZone.getText();
