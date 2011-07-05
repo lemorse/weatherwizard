@@ -80,6 +80,10 @@ public class GribPanel
   {
     WWContext.getInstance().addApplicationListener(new ApplicationEventListener()
       {
+        public String toString()
+        {
+          return "from GribPanel.";
+        }
         public void gribLoaded()
         {
           googleButton.setEnabled(true);
@@ -253,7 +257,7 @@ public class GribPanel
               if (sv != sliderValue)
               {
                 sliderValue = sv;
-                System.out.println("Slider Value:" + sliderValue);
+//              System.out.println("Slider Value:" + sliderValue);
                 updateSliderData();
               }
               slider.setToolTipText("Frame #" + Integer.toString(sv));
