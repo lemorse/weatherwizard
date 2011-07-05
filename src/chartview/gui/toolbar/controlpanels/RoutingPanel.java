@@ -17,6 +17,8 @@ import chartview.ctx.WWContext;
 
 import chartview.routing.enveloppe.custom.RoutingUtil;
 
+import coreutilities.Utilities;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 
@@ -35,11 +37,13 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.TimeZone;
 
+import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JSeparator;
 import javax.swing.JSlider;
 import javax.swing.JTabbedPane;
@@ -63,6 +67,11 @@ public class RoutingPanel extends JPanel
   private GridBagLayout gridBagLayoutOne    = new GridBagLayout();
   private GridBagLayout gridBagLayoutTwo    = new GridBagLayout();
 
+  private JRadioButton trueWindRadioButton  = new JRadioButton("True");  // LOCALIZE
+  private JRadioButton appWindRadioButton   = new JRadioButton("App.");  // LOCALIZE
+  private JPanel trueAppPanel               = new JPanel();
+  private ButtonGroup group                 = new ButtonGroup();
+  
   private WindVanePanel windVanePanel       = new WindVanePanel();
   private WindGaugePanel windGaugePanel     = new WindGaugePanel();
   private StationDataPanel stationDataPanel = new StationDataPanel();
@@ -129,6 +138,27 @@ public class RoutingPanel extends JPanel
     stepPanel.setSize(new Dimension(395, 300));
     stepPanel.setPreferredSize(new Dimension(190, 300));
     summaryPanel.setLayout(gridBagLayoutTwo);
+
+    group.add(trueWindRadioButton);
+    group.add(appWindRadioButton);
+    trueWindRadioButton.setSelected(true);
+    trueWindRadioButton.addActionListener(new ActionListener()
+      {
+        public void actionPerformed(ActionEvent e)
+        {
+          trueWindRadioButton_actionPerformed(e);
+        }
+      });
+    appWindRadioButton.setSelected(false);
+    appWindRadioButton.addActionListener(new ActionListener()
+      {
+        public void actionPerformed(ActionEvent e)
+        {
+          appWindRadioButton_actionPerformed(e);
+        }
+      });
+    trueAppPanel.add(trueWindRadioButton);
+    trueAppPanel.add(appWindRadioButton);
 
     windVanePanel.setPreferredSize(new Dimension(80, 80));
     windGaugePanel.setPreferredSize(new Dimension(30, 100));
@@ -213,23 +243,23 @@ public class RoutingPanel extends JPanel
         });
     bottomPanel.setLayout(gridBagLayout1);
     elapsedLabel.setText("ELapsed: 0");
-    stepPanel.add(windVanePanel, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.NORTH, GridBagConstraints.NONE,
+    stepPanel.add(windVanePanel, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.NORTH, GridBagConstraints.NONE,
           new Insets(0, 2, 0, 0), 0, 0));
-    stepPanel.add(bspDisplay, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.SOUTH, GridBagConstraints.HORIZONTAL,
+    stepPanel.add(bspDisplay, new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0, GridBagConstraints.SOUTH, GridBagConstraints.HORIZONTAL,
           new Insets(0, 2, 0, 0), 0, 0));
-    stepPanel.add(windGaugePanel, new GridBagConstraints(1, 0, 1, 2, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+    stepPanel.add(windGaugePanel, new GridBagConstraints(1, 1, 1, 2, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH,
           new Insets(0, 5, 0, 0), 0, 0));
 
-    stepPanel.add(stationDataPanel, new GridBagConstraints(2, 0, 1, 2, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
+    stepPanel.add(stationDataPanel, new GridBagConstraints(2, 1, 1, 2, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
           new Insets(0, 5, 0, 0), 0, 0));
 
-    stepPanel.add(headingPanel, new GridBagConstraints(0, 2, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+    stepPanel.add(headingPanel, new GridBagConstraints(0, 3, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH,
           new Insets(2, 0, 0, 0), 0, 0));
-    stepPanel.add(dateLabel, new GridBagConstraints(0, 3, 3, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
+    stepPanel.add(dateLabel, new GridBagConstraints(0, 4, 3, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
           new Insets(2, 0, 0, 0), 0, 0));
-    stepPanel.add(positionLabel, new GridBagConstraints(0, 4, 3, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
+    stepPanel.add(positionLabel, new GridBagConstraints(0, 5, 3, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
           new Insets(0, 0, 0, 0), 0, 0));
-    stepPanel.add(routeSlider, new GridBagConstraints(0, 6, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
+    stepPanel.add(routeSlider, new GridBagConstraints(0, 7, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
           new Insets(0, 0, 0, 0), 0, 0));
 
     bottomPanel.add(prevButton, 
@@ -243,9 +273,11 @@ public class RoutingPanel extends JPanel
                                            new Insets(0, 0, 0, 2), 0, 0));
     bottomPanel.add(autoSyncCheckBox, new GridBagConstraints(3, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, 
           new Insets(0, 0, 0, 0), 0, 0));
-    stepPanel.add(bottomPanel, new GridBagConstraints(0, 8, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
+    stepPanel.add(bottomPanel, new GridBagConstraints(0, 9, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
           new Insets(0, 0, 0, 0), 0, 0));
-    stepPanel.add(elapsedLabel, new GridBagConstraints(0, 5, 3, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
+    stepPanel.add(elapsedLabel, new GridBagConstraints(0, 6, 3, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
+          new Insets(0, 0, 0, 0), 0, 0));
+    stepPanel.add(trueAppPanel, new GridBagConstraints(0, 0, 2, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
           new Insets(0, 0, 0, 0), 0, 0));
     summaryPanel.add(new JLabel(WWGnlUtilities.buildMessage("from")),
                      new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
@@ -342,11 +374,26 @@ public class RoutingPanel extends JPanel
       syncGribButton_actionPerformed(null);
   }
   
+  public void setAwa(int awa)
+  {
+    if (appWindRadioButton.isSelected())
+      windVanePanel.setWindDir(awa);
+    stationDataPanel.setAWA(awa);     
+  }
+  
+  public void setAws(float aws)
+  {
+    if (appWindRadioButton.isSelected())
+      windGaugePanel.setTws(aws);
+    stationDataPanel.setAWS(aws);
+  }
+
   public void setTwa(int twa)
   {
     this.twa = twa;
-    windVanePanel.setWindDir(twa);
-    stationDataPanel.setTWA(twa);
+    if (trueWindRadioButton.isSelected())
+      windVanePanel.setWindDir(twa);
+    stationDataPanel.setTWA(twa);     
   }
 
   public int getTwa()
@@ -368,7 +415,8 @@ public class RoutingPanel extends JPanel
   public void setTws(float tws)
   {
     this.tws = tws;
-    windGaugePanel.setTws(tws);
+    if (trueWindRadioButton.isSelected())
+      windGaugePanel.setTws(tws);
     stationDataPanel.setTWS(tws);
   }
 
@@ -394,7 +442,7 @@ public class RoutingPanel extends JPanel
     if (date != null)
     {
       WWGnlUtilities.SDF_UT.setTimeZone(TimeZone.getTimeZone("127"));
-      dateLabel.setText(WWGnlUtilities.SDF_UT.format(date));
+      dateLabel.setText(WWGnlUtilities.SDF_UT_bis.format(date));
       int[] elapsed = evaluateDaysHours(fromDate, date);
       String mess = "";
       if (elapsed[1] > 0)
@@ -547,8 +595,44 @@ public class RoutingPanel extends JPanel
       double tws        = (routingType == RoutingUtil.REAL_ROUTING ? center.getTws() : rp.getTws()); 
       int twd           = (routingType == RoutingUtil.REAL_ROUTING ? center.getTwd() : rp.getTwd());
       int hdg           = (routingType == RoutingUtil.REAL_ROUTING ? center.getHdg() : rp.getHdg());
+      // AW Calculation
+      int awa    = 0;
+      double aws = 0D;
       
-//    System.out.println("TWA:" + twa);
+      double base    = bsp + (tws * Math.cos(Math.toRadians(twa)));
+      double hauteur = tws * Math.sin(Math.toRadians(twa));
+      aws = Math.sqrt((base * base) + (hauteur * hauteur));
+      int _twa = twa;
+      if (_twa < -180)
+        _twa += 360;
+      if (_twa > 180)
+        _twa -= 360;
+      
+      setAws((float)aws);
+      if (base != 0)
+      {
+        int _awa = (int)Math.toDegrees(Math.atan(hauteur / base));
+        awa = _awa;
+        if (base < 0)
+        {
+          awa = 180 - _awa;
+        }
+      }
+      else
+      {
+        awa = 90; 
+        if (Math.sin(Math.toRadians(twa)) < 0)
+          awa = -90;
+      }
+      if (awa > 180)
+        awa = awa - 360;
+      if (Utilities.sign(_twa) != Utilities.sign(awa))
+        awa = -awa;
+      setAwa(awa);
+      
+//    System.out.println("TWA:" + twa + ", TWS:" + tws + " (_twa:" + _twa + ")");
+//    System.out.println("AWA:" + awa + ", AWS:" + aws);
+//    System.out.println("=======================");
       setBsp((float)bsp);
       setPosition(position);
       setTwa(twa);
@@ -556,6 +640,8 @@ public class RoutingPanel extends JPanel
       setTws((float)tws);
       setDate(date);
       setHdg(hdg);
+      setAwa(awa);
+      setAws((float)aws);
       WWContext.getInstance().firePlotBoatAt(position, hdg);
       
       repaint();
@@ -598,5 +684,15 @@ public class RoutingPanel extends JPanel
   private void autoSyncCheckBox_actionPerformed(ActionEvent e)
   {
     syncGribButton.setEnabled(!autoSyncCheckBox.isSelected());
+  }
+
+  private void trueWindRadioButton_actionPerformed(ActionEvent e)
+  {
+    updateData();
+  }
+
+  private void appWindRadioButton_actionPerformed(ActionEvent e)
+  {
+    updateData();
   }
 }
