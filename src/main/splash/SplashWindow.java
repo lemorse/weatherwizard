@@ -32,7 +32,7 @@ import javax.swing.JWindow;
 public class SplashWindow extends JWindow
 {
   private static SplashWindow instance;
-  private Image image;
+  private transient Image image;
   private boolean paintCalled = false;
 
 //private JLabel jLabel1 = new JLabel();
@@ -54,6 +54,8 @@ public class SplashWindow extends JWindow
   
   private final static int H = 300;
   private final static int W = 325;
+  
+  private transient static ApplicationEventListener ael = null;
   
   /**
    * Creates a new instance.
@@ -173,14 +175,19 @@ public class SplashWindow extends JWindow
         {
           SplashWindow.this.paintCalled = true;
           SplashWindow.this.notifyAll();
+          WWContext.getInstance().removeApplicationListener(ael);
         }
         dispose();
       }
     };
     addMouseListener(disposeOnClick);
 
-    WWContext.getInstance().addApplicationListener(new ApplicationEventListener()
+    ael = new ApplicationEventListener()
       {
+        public String toString()
+        {
+          return "from SplashWindow.";
+        }
         public void readFax() 
         {
           nbFaxes.setText(Integer.toString(++loadedFaxes));
@@ -197,7 +204,8 @@ public class SplashWindow extends JWindow
         {
           nbComposites.setText(Integer.toString(++loadedComposites));
         }          
-      });
+      };
+    WWContext.getInstance().addApplicationListener(ael);
   }
 
   /**
@@ -289,6 +297,7 @@ public class SplashWindow extends JWindow
     {
       instance.getOwner().dispose();
       instance = null;
+      WWContext.getInstance().removeApplicationListener(ael);
     }
   }
   
