@@ -211,7 +211,23 @@ public class DataFilePopup
     else if (event.getActionCommand().equals(GRIB_DETAILS))
     {
       JTreeFilePanel.DataFileTreeNode grib = (JTreeFilePanel.DataFileTreeNode)dtn;
-      GribHelper.displayGRIBDetails(grib.getFullFileName());
+      try
+      {
+        GribHelper.displayGRIBDetails(grib.getFullFileName());
+      }
+      catch (RuntimeException rte)
+      {
+        String mess = rte.getMessage();
+//      System.out.println("RuntimeException getMessage(): [" + mess + "]");
+        if (mess.startsWith("DataArray (width) size mismatch"))
+          System.out.println(mess);
+        else
+          throw rte;
+      }      
+      catch (Exception e)
+      {
+        e.printStackTrace();
+      }
     }
     else if (event.getActionCommand().equals(EDIT))
     {
