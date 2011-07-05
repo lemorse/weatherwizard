@@ -117,6 +117,10 @@ public class ChartControlPane
 
   private transient ApplicationEventListener ael = new ApplicationEventListener()
         {
+          public String toString()
+          {
+            return "from ChartControlPane.";
+          }
           public void faxLoaded()
           {
             imageCommandPanel.setEnabled(true);
