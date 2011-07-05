@@ -144,7 +144,7 @@ public class StartRoutingPanel
     minTextField.setHorizontalAlignment(JTextField.CENTER);
     secTextField.setPreferredSize(new Dimension(30, 20));
     secTextField.setHorizontalAlignment(JTextField.CENTER);
-    gmtLabel.setText("GMT");
+    gmtLabel.setText("UTC");
     sepLabel1.setText(":");
     sepLabel2.setText(":");
     startDateLabel.setText(WWGnlUtilities.buildMessage("set-start-date"));
@@ -344,6 +344,8 @@ public class StartRoutingPanel
   {
     maxTWSTextField.setText(Integer.toString(maxTWS));
     this.maxTWS = maxTWS;
+    maxTWSTextField.setEnabled(maxTWS > -1);
+    avoidTWSCheckBox.setSelected(maxTWS > -1);
   }
 
   public int getMaxTWS()
@@ -356,6 +358,8 @@ public class StartRoutingPanel
   {
     minTWATextField.setText(Integer.toString(minTWA));
     this.minTWA = minTWA;
+    minTWATextField.setEnabled(minTWA > -1);
+    avoidTWACheckBox.setSelected(minTWA > -1);
   }
 
   public int getMinTWA()
