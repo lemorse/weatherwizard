@@ -32,32 +32,36 @@ import javax.swing.JToolBar;
 public class ChartCommandPanelToolBar
   extends JToolBar
 {
-  private JButton zoomInButton = new JButton();
+  private JButton zoomInButton  = new JButton();
   private JButton zoomOutButton = new JButton();
-  private JButton reloadButton = new JButton();
+  private JButton reloadButton  = new JButton();
 
   private JPanel extraComponentHolder = new JPanel(new BorderLayout());
-  private JPanel radioButtonHolder = new JPanel(new FlowLayout());
+  private JPanel radioButtonHolder    = new JPanel(new FlowLayout());
   private JPanel expandCollapseHolder = new JPanel(new FlowLayout());
   
-  private ButtonGroup buttonGroup = new ButtonGroup();
-  private JRadioButton ddRadioButton = new JRadioButton();
-  private JRadioButton grabRadioButton = new JRadioButton();
+  private ButtonGroup buttonGroup       = new ButtonGroup();
+  private JRadioButton ddRadioButton    = new JRadioButton();
+  private JRadioButton grabRadioButton  = new JRadioButton();
   private JRadioButton crossRadioButton = new JRadioButton();
   private JRadioButton arrowRadioButton = new JRadioButton();
   
   private JButton expandCollapseControlButton = new JButton();
   private boolean controlExpanded = false;
 
-  public static final int DD_ZOOM = 0;
-  public static final int GRAB_SCROLL = 1;
+  public static final int DD_ZOOM           = 0;
+  public static final int GRAB_SCROLL       = 1;
   public static final int CROSS_HAIR_CURSOR = 2;
-  public static final int REGULAR_CURSOR = 3; // Keep this one the last one
+  public static final int REGULAR_CURSOR    = 3; // Keep this one the last one
 
   private int grab = DD_ZOOM;
 
   private transient ApplicationEventListener ael = new ApplicationEventListener()
      {
+       public String toString()
+       {
+         return "from ChartCommandPanelToolBar.";
+       }
        public void toggleGrabScroll(int shape) 
        {
          grab = shape;
