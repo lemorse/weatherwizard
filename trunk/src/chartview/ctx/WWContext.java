@@ -40,6 +40,11 @@ import oracle.xml.parser.v2.XMLParser;
  */
 public class WWContext
 {
+  public final static String VERSION_NUMBER = "0.9.0.5";
+  public final static String PRODUCT_ID     = "weather_assistant.0.9.0.5";
+  
+  private static int debugLevel = 0;
+  
   public final static String WAZ_PROTOCOL_PREFIX = "waz://";
   public final static String WAZ_EXTENSION       = ".waz";
   
@@ -47,6 +52,8 @@ public class WWContext
   public final static String NOAA_STATIONS     = "noaa-stations.xml";
   
   public final static String CONFIG_PROPERTIES_FILE = "ww-config.properties";
+  
+  public final static String MANUAL_POSITION_FILE   = "manualposition.xml";
   
   private static WWContext context = null;
 
@@ -104,13 +111,14 @@ public class WWContext
     if (!this.getListeners().contains(l))
     {      
       this.getListeners().add(l);
-//    System.out.println("Now having " + Integer.toString(this.getListeners().size()) + " listener(s)");
+//    System.out.println("Now having " + Integer.toString(this.getListeners().size()) + " listener(s) - Just added [" + l.toString() + "]");
     }
   }
 
   public synchronized void removeApplicationListener(ApplicationEventListener l)
   {
     this.getListeners().remove(l);
+//  System.out.println("Now having " + Integer.toString(this.getListeners().size()) + " listener(s) - Just removed [" + l.toString() + "]");
   }
 
   public void fireLoadDynamicComposite(String compositeName)
@@ -1065,24 +1073,36 @@ public class WWContext
     this.applicationListeners = applicationListeners;
   }
 
-  public void setMonitor(ProgressMonitor monitor)
+  public /* synchronized */ void setMonitor(ProgressMonitor monitor)
   {
-    this.monitor = monitor;
+    synchronized (this)
+    {
+      this.monitor = monitor;
+    }
   }
 
-  public ProgressMonitor getMonitor()
+  public /* synchronized */ ProgressMonitor getMonitor()
   {
-    return monitor;
+    synchronized (this)
+    {
+      return monitor;
+    }
   }
 
-  public void setAel4monitor(ApplicationEventListener ael4monitor)
+  public synchronized void setAel4monitor(ApplicationEventListener ael4monitor)
   {
-    this.ael4monitor = ael4monitor;
+    synchronized (this)
+    {
+      this.ael4monitor = ael4monitor;
+    }
   }
 
-  public ApplicationEventListener getAel4monitor()
+  public synchronized ApplicationEventListener getAel4monitor()
   {
-    return ael4monitor;
+    synchronized (this)
+    {    
+      return ael4monitor;
+    }
   }
 
   public void setLookAndFeel(String lookAndFeel)
@@ -1135,6 +1155,16 @@ public class WWContext
   public Date getCurrentUTC()
   {
     return currentUTC;
+  }
+
+  public static void setDebugLevel(int debugLevel)
+  {
+    WWContext.debugLevel = debugLevel;
+  }
+
+  public static int getDebugLevel()
+  {
+    return debugLevel;
   }
 
   public static class ToolFileFilter extends FileFilter
