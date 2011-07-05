@@ -1,20 +1,36 @@
 package chartview.util.progress;
 
-import java.util.Vector;
+import chartview.ctx.WWContext;
+
+import java.io.Serializable;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.ConcurrentModificationException;
+
+import java.util.List;
 
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-public class ProgressMonitor
+public class ProgressMonitor implements Serializable
 {
-  int total, current = -1;
-  boolean indeterminate;
-  String status;
+  // current is not used for now.
+  private int total, current = -1;
+  private boolean indeterminate;
+  private String status;
+
+//private transient Vector<ChangeListener> listeners = new Vector<ChangeListener>();
+  private transient List<ChangeListener> listeners = new ArrayList<ChangeListener>();
+  private transient List<ChangeListener> cll = Collections.synchronizedList(listeners);
+  private ChangeEvent ce; // = new ChangeEvent(this);
 
   public ProgressMonitor(int total, boolean indeterminate)
   {
+//  System.out.println("ProgressMonitor Constructor, total:" + total);
     this.total = total;
     this.indeterminate = indeterminate;
+    this.ce = new ChangeEvent(this);
   }
 
   public int getTotal()
@@ -28,7 +44,14 @@ public class ProgressMonitor
       throw new IllegalStateException("not started yet");
     this.status = status;
     current = 0;
-    fireChangeEvent();
+    synchronized (this)
+    {
+//    cll = Collections.synchronizedList(listeners);
+//    synchronized (cll)
+      {
+        fireChangeEvent();
+      }
+    }
   }
 
   public int getCurrent()
@@ -50,35 +73,116 @@ public class ProgressMonitor
   {
     if (current == -1)
       throw new IllegalStateException("not started yet");
-    this.current = current;
-    if (status != null)
-      this.status = status;
-    synchronized (this) { fireChangeEvent(); }
-  }
-
-  private Vector<ChangeListener> listeners = new Vector<ChangeListener>();
-  private ChangeEvent ce = new ChangeEvent(this);
-
-  public void addChangeListener(ChangeListener listener)
-  {
-    listeners.add(listener);
-  }
-
-  public void removeChangeListener(ChangeListener listener)
-  {
-    listeners.remove(listener);
-  }
-
-  private void fireChangeEvent() 
-  {
-    synchronized (listeners)
-    {
-      synchronized (this)
+    else
+      if (WWContext.getDebugLevel() >= 3) System.out.println("Setting current to " + current);
+    
+    synchronized (this) 
+    { 
+      this.current = current;
+      if (status != null)
+        this.status = status;
+//    cll = Collections.synchronizedList(listeners);
+//    synchronized (cll)
       {
-        for (ChangeListener cl : listeners)
-          cl.stateChanged(ce);
+        fireChangeEvent(); 
       }
-    }      
+    }
+  }
+
+  public synchronized void addChangeListener(final ChangeListener listener)
+  {
+    Thread t = new Thread()
+      {
+        public void run()
+        {
+          if (WWContext.getDebugLevel() >= 3) System.out.println("*** in ProgressMonitor: Adding a " + listener.getClass().getName() + " (" + listener.toString() + ") " + "...addChangeListeners   :" + listeners.size() + " item(s)");
+          synchronized (cll)
+          {
+            cll = Collections.synchronizedList(listeners);
+      //    listeners.add(listener);
+            cll.add(listener);
+      //    System.out.println("in ProgressMonitor: Adding a " + listener.getClass().getName() + " (" + listener.toString() + ") " + "...addChangeListeners   :" + listeners.size() + " item(s)");
+          }
+        }
+      };
+    t.start();
+  }
+
+  public synchronized void removeChangeListener(final ChangeListener listener)
+  {
+    Thread t = new Thread()
+      {
+        public void run()
+        {
+          if (WWContext.getDebugLevel() >= 3) System.out.println("*** in ProgressMonitor: Remove request a " + listener.getClass().getName() + " (" + listener.toString() + ") ...removeChangeListeners:" + listeners.size() + " item(s)");
+          synchronized (cll)
+          {
+            cll = Collections.synchronizedList(listeners);
+            cll.remove(listener);
+          //    System.out.println("in ProgressMonitor: Removing a " + listener.getClass().getName() + " (" + listener.toString() + ") ...removeChangeListeners:" + listeners.size() + " item(s)");
+          }
+          if (WWContext.getDebugLevel() >= 3) System.out.println("*** RemoveChangeListener completed");
+        }
+      };
+    t.start();
+  }
+  
+  public synchronized void removeAllListeners()
+  {
+    Thread t = new Thread()
+      {
+        public void run()
+        {
+          synchronized (cll)
+          {
+            cll = Collections.synchronizedList(listeners);
+            while (cll.size() > 0)
+              cll.remove(0);
+          }
+        }
+      };
+    t.start();
+  }
+
+  private synchronized void fireChangeEvent() 
+  {
+    /* Java bug? (ConcurrentModificationException) */
+    
+    Thread t = new Thread()
+      {
+        public void run()
+        {
+          int index = 0;
+          int lsnrSize = 0;
+          cll = Collections.synchronizedList(listeners);
+          synchronized (cll)
+          {
+            lsnrSize = cll.size();
+            if (WWContext.getDebugLevel() >= 3) System.out.println("---- fireChangeEvent requested on " + lsnrSize + " ChangeListener(s)");
+            try
+            {
+              for (ChangeListener cl : cll)
+              {
+                if (WWContext.getDebugLevel() >= 3) System.out.println("       ChangeListener[" + index + "] is " + (cl!=null?"not ":"") + "null");
+                if (cl != null)
+                {
+                  cl.stateChanged(ce);
+                  if (WWContext.getDebugLevel() >= 3) System.out.println("     ... stateChanged on ChangeListener[" + index + "] OK.");
+                }
+                index++;
+              }
+              if (WWContext.getDebugLevel() >= 3) System.out.println("---- fireChangeEvent Completed on " + lsnrSize + " listener(s).");
+            }
+            catch (ConcurrentModificationException cme)
+            {
+              System.err.println("!! Index " + index + "/" + lsnrSize + ", ConcurrentModificationException (2) in ProgressMonitor, Ooops!");
+              System.err.println("-------------------------");
+              cme.printStackTrace();
+              System.err.println("-------------------------");
+            }
+          }
+        }
+      };
+    t.start();
   }
 }
-
