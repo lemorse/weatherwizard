@@ -39,7 +39,7 @@ import javax.swing.table.TableModel;
 public class AboutBox
   extends JPanel
 {
-  private Border border = BorderFactory.createEtchedBorder();
+  private transient Border border = BorderFactory.createEtchedBorder();
   private GridBagLayout layoutMain = new GridBagLayout();
   private JLabel labelCompany = new JLabel();
   private JLabel labelCopyright = new JLabel();
@@ -50,15 +50,15 @@ public class AboutBox
 
   private JTabbedPane tabbedPane = new JTabbedPane();
 
-  final static String KEY = "Name";
-  final static String VALUE = "Value";
+  private final static String KEY   = "Name";
+  private final static String VALUE = "Value";
 
-  final static String[] names =
+  private final static String[] names =
   { KEY, VALUE };
 
-  TableModel dataModel;
+  private transient TableModel dataModel;
 
-  private Object[][] data = new Object[0][names.length];
+  private transient Object[][] data = new Object[0][names.length];
 
   JTable table;
   JScrollPane scrollPane;
@@ -111,7 +111,7 @@ public class AboutBox
     labelTitle.setText("GRIB, Weather Faxes, Charts");
     jLabel1.setIcon(new ImageIcon(this.getClass().getResource("onecameltranspsmall.png")));
     contactLabel.setText("Contact: olivier@lediouris.net");
-    labelAuthor.setText("version 0.9.0.3");
+    labelAuthor.setText("version " + WWContext.VERSION_NUMBER);
     labelCopyright.setText("Copyright 2007 and beyond");
     labelCompany.setText("<html><u>The Don Pedro Project</u></html>");
     labelCompany.setForeground(Color.blue);
@@ -157,6 +157,7 @@ public class AboutBox
     }
     catch (Exception ignore)
     {
+      System.err.println(ignore.toString());
     }
   }
 
