@@ -38,9 +38,27 @@ import javax.swing.JTextField;
 public class GRIBSlicePanel
      extends JPanel
 {
+  public final static int GRIB_SLICE_OPTION = 0;
+  public final static int ROUTING_OPTION    = 1;
+  
+  private int dataOption = -1;
+  private ArrayList<Double> bsp = null;
+  private ArrayList<Double> smoothedBsp = null;
+  private double bspMini = Double.MAX_VALUE;
+  private double bspMaxi = Double.MIN_VALUE;
+  
   private transient ArrayList<GribHelper.GribCondition> data2plot;
   private transient ArrayList<GribHelper.GribCondition> smoothedData;
-  private JPanel checkBoxPanel = new JPanel();
+  
+  private JPanel checkBoxPanel = new JPanel()
+  {
+    @Override
+    protected void paintComponent(Graphics g)
+    {
+      super.paintComponent(g);
+      bspCheckBox.setVisible(dataOption == ROUTING_OPTION);
+    }
+  };
   private JPanel checkBoxTopPanel = new JPanel();
   private JPanel smoothFactorPanel = new JPanel();
   
@@ -51,41 +69,49 @@ public class GRIBSlicePanel
   
   private GridBagLayout gridBagLayout1 = new GridBagLayout();
   private JLabel dataLabel = new JLabel();
+  
   private JCheckBox prmslCheckBox = new JCheckBox();
   private JCheckBox hgt500CheckBox = new JCheckBox();
   private JCheckBox twsCheckBox = new JCheckBox();
   private JCheckBox wavesCheckBox = new JCheckBox();
   private JCheckBox tempCheckBox = new JCheckBox();
   private JCheckBox rainCheckBox = new JCheckBox();
+  private JCheckBox bspCheckBox  = new JCheckBox();
   
   private boolean displayTWS = true,
                   displayPRMSL = false,
                   displayHGT500 = false,
                   displayWAVES = false,
                   displayTEMP = false,
-                  displayRAIN = false;
-  private JLabel jLabel1 = new JLabel();
+                  displayRAIN = false,
+                  displayBSP  = false;
+  
+  private JLabel smoothLabel = new JLabel();
   private GridBagLayout gridBagLayout2 = new GridBagLayout();
   private JTextField smoothTextField = new JTextField();
 
-  private DecimalFormat twsFormat    = new DecimalFormat("##0.0 'kts'");
+  private DecimalFormat speedFormat  = new DecimalFormat("##0.0 'kts'");
   private DecimalFormat prmslFormat  = new DecimalFormat("##0.0 'mb'");
   private DecimalFormat hgt500Format = new DecimalFormat("##0 'm'");
   private DecimalFormat wavesFormat  = new DecimalFormat("##0.0 'm'"); 
   private DecimalFormat tempFormat   = new DecimalFormat("##0'°C'");
   private DecimalFormat prateFormat  = new DecimalFormat("##0.00 'mm/h'");
 
-  public GRIBSlicePanel(ArrayList<GribHelper.GribCondition> data, int fw)
+  public GRIBSlicePanel(ArrayList<GribHelper.GribCondition> data, ArrayList<Double> bsp, int opt, int fw)
   {
     if (fw % 2 == 0)
     {
    // throw new RuntimeException("Fork Width must be odd");
+      // LOCALIZE
       JOptionPane.showMessageDialog(this, "Fork width must be odd.\nUsing " + Integer.toString(fw + 1) + " instead of " + Integer.toString(fw), "Smoothing", JOptionPane.ERROR_MESSAGE);    
       forkWidth = fw + 1;
     }
     else
       forkWidth = fw;
     data2plot = data;
+    this.bsp = bsp;
+    dataOption = opt;
+    
     try
     {
       jbInit();
@@ -109,9 +135,21 @@ public class GRIBSlicePanel
     }
   }
 
+  /**
+   * @depracated
+   * @param data
+   */
   public void setData(ArrayList<GribHelper.GribCondition> data)
   {
-    data2plot = data;
+    data2plot = data;    
+    computeData();
+  }
+  
+  public void setData(ArrayList<GribHelper.GribCondition> data, ArrayList<Double> bsp, int opt)
+  {
+    data2plot = data;   
+    this.bsp = bsp;
+    dataOption = opt;
     computeData();
   }
   
@@ -198,14 +236,25 @@ public class GRIBSlicePanel
         }
       });
     
+    bspCheckBox.setText("BSP");
+    bspCheckBox.setBackground(Color.orange);
+    bspCheckBox.addActionListener(new ActionListener()
+      {
+        public void actionPerformed(ActionEvent e)
+        {
+          bspCheckBox_actionPerformed(e);
+        }
+      });
+
     twsCheckBox.setSelected(displayTWS);
     prmslCheckBox.setSelected(displayPRMSL);
     hgt500CheckBox.setSelected(displayHGT500);
     wavesCheckBox.setSelected(displayWAVES);
     tempCheckBox.setSelected(displayTEMP);
     rainCheckBox.setSelected(displayRAIN);
+    bspCheckBox.setSelected(displayBSP);
 
-    jLabel1.setText("Smooth");
+    smoothLabel.setText("Smooth");
     smoothTextField.setSize(new Dimension(30, 20));
     smoothTextField.setText(Integer.toString(forkWidth));
     smoothTextField.setPreferredSize(new Dimension(30, 20));
@@ -221,7 +270,7 @@ public class GRIBSlicePanel
     checkBoxTopPanel.setLayout(gridBagLayout1);
     smoothFactorPanel.setLayout(gridBagLayout2);
     checkBoxPanel.add(checkBoxTopPanel, BorderLayout.NORTH);
-    smoothFactorPanel.add(jLabel1, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
+    smoothFactorPanel.add(smoothLabel, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
           new Insets(0, 0, 0, 0), 0, 0));
     smoothFactorPanel.add(smoothTextField, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
           new Insets(0, 0, 0, 0), 0, 0));
@@ -245,12 +294,26 @@ public class GRIBSlicePanel
           new Insets(0, 3, 0, 0), 0, 0));
     checkBoxTopPanel.add(rainCheckBox, new GridBagConstraints(0, 6, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL,
           new Insets(0, 3, 0, 0), 0, 0));
-    
+    checkBoxTopPanel.add(bspCheckBox, new GridBagConstraints(0, 7, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL,
+          new Insets(0, 3, 0, 0), 0, 0));
+
     computeData();
   }
 
   private void computeData()
   {
+    // Is smoothing possible here (enough points in the array) ? 
+    if (data2plot.size() < 100) // Generate new points, and smooth
+    {
+      // Generate new points in data2smooth    
+      data2plot = expandArray(data2plot, 75);
+      forkWidth = DEFAULT_FORK_WIDTH;
+      smoothTextField.setText(Integer.toString(forkWidth));
+      
+      if (dataOption == ROUTING_OPTION)
+        bsp = expandBSPArray(bsp, 75);
+    }
+    
     // Detect mini maxi
     gribMini = new GribHelper.GribCondition();
     gribMaxi = new GribHelper.GribCondition();
@@ -285,6 +348,14 @@ public class GRIBSlicePanel
       else
         nbNull++;
     }
+    if (bsp != null)
+    {
+      for (Double d : bsp)
+      {
+        if (d.doubleValue() < bspMini) bspMini = d.doubleValue();
+        if (d.doubleValue() > bspMaxi) bspMaxi = d.doubleValue();
+      }
+    }
     //  System.out.println("Will plot " + data2plot.size() + " point(s), " + nbNull + " null(s).");
     smooth(forkWidth); 
   }
@@ -293,12 +364,16 @@ public class GRIBSlicePanel
   {
     if ((fork % 2) != 1)
     {
-      JOptionPane.showMessageDialog(this, "Fork width must be odd", "Smoothing", JOptionPane.ERROR_MESSAGE);      
+      JOptionPane.showMessageDialog(this, "Fork width must be odd", "Smoothing", JOptionPane.ERROR_MESSAGE); // LOCALIZE     
       throw new RuntimeException("Fork must be odd.");
     }
-    smoothedData = new ArrayList<GribHelper.GribCondition>(data2plot.size());
-
-    for (GribHelper.GribCondition cond : data2plot) // Clone the array
+    
+    ArrayList<GribHelper.GribCondition> data2smooth = data2plot; // Clone array
+    
+    // New ArrayList
+    smoothedData = new ArrayList<GribHelper.GribCondition>(data2smooth.size());
+      
+    for (GribHelper.GribCondition cond : data2smooth) // Clone the array
     {
       smoothedData.add(new GribHelper.GribCondition(cond.windspeed,
                                                     cond.winddir,
@@ -310,8 +385,14 @@ public class GRIBSlicePanel
                                                     cond.temp,
                                                     cond.rain));
     }
+    if (dataOption == ROUTING_OPTION)
+    {
+      smoothedBsp = new ArrayList<Double>(bsp.size());
+      for (Double d : bsp)
+        smoothedBsp.add(new Double(d.doubleValue()));
+    }
     int halfFork = ((fork-1) / 2);
-    for (int i=0; i<data2plot.size(); i++)    
+    for (int i=0; i<data2smooth.size(); i++)    
     {
       double tws    = 0D;      
       double hgt500 = 0D;
@@ -319,19 +400,25 @@ public class GRIBSlicePanel
       double waves  = 0D;
       double temp   = 0D;
       double rain   = 0D;
+      
+      double boatSpeed = 0D;
+      
       for (int j=(i-halfFork); j<=(i+halfFork); j++)
       {
         int _j = j;
         if (_j<0) 
           _j = 0;
-        if (_j>=data2plot.size()) 
-          _j = data2plot.size() - 1;
-        tws    += data2plot.get(_j).windspeed;
-        hgt500 += data2plot.get(_j).hgt500;
-        prmsl  += data2plot.get(_j).prmsl;
-        waves  += data2plot.get(_j).waves;
-        temp   += data2plot.get(_j).temp;
-        rain   += data2plot.get(_j).rain;
+        if (_j>=data2smooth.size()) 
+          _j = data2smooth.size() - 1;
+        tws    += data2smooth.get(_j).windspeed;
+        hgt500 += data2smooth.get(_j).hgt500;
+        prmsl  += data2smooth.get(_j).prmsl;
+        waves  += data2smooth.get(_j).waves;
+        temp   += data2smooth.get(_j).temp;
+        rain   += data2smooth.get(_j).rain;
+        
+        if (dataOption == ROUTING_OPTION)
+          boatSpeed += bsp.get(_j).doubleValue();
       }
       tws = tws / fork;
       hgt500 = hgt500 / fork;
@@ -339,6 +426,10 @@ public class GRIBSlicePanel
       waves = waves / fork;
       temp = temp / fork;
       rain = rain / fork;
+      
+      boatSpeed = boatSpeed / fork;
+      if (dataOption == ROUTING_OPTION)
+        smoothedBsp.set(i, new Double(boatSpeed)); 
 
       smoothedData.get(i).windspeed = (float)tws;      
       smoothedData.get(i).hgt500    = (float)hgt500;      
@@ -348,6 +439,61 @@ public class GRIBSlicePanel
       smoothedData.get(i).rain      = (float)rain;      
     }
 //  return smoothed;    
+  }
+  
+  private ArrayList<GribHelper.GribCondition> expandArray(ArrayList<GribHelper.GribCondition> origData,
+                                                          int smoothFactor)
+  {
+    ArrayList<GribHelper.GribCondition> expanded = new ArrayList<GribHelper.GribCondition>(origData.size() * smoothFactor);
+      // Add points
+    for (int i=0; i<origData.size() - 1; i++)
+    {
+      double windspeedDeltaValue = origData.get(i + 1).windspeed - origData.get(i).windspeed;
+      double hgt500dDeltaValue   = origData.get(i + 1).hgt500 - origData.get(i).hgt500;
+      double prmslDeltaValue     = origData.get(i + 1).prmsl - origData.get(i).prmsl;
+      double wavesDeltaValue     = origData.get(i + 1).waves - origData.get(i).waves;
+      double tempDeltaValue      = origData.get(i + 1).temp - origData.get(i).temp;
+      double rainDeltaValue      = origData.get(i + 1).rain - origData.get(i).rain;
+      
+      for (int j=0; j<smoothFactor; j++)
+      {
+        double windSpeedValue = origData.get(i).windspeed + (windspeedDeltaValue * ((double)j / (double)smoothFactor));
+        double hgt500Value    = origData.get(i).hgt500 + (hgt500dDeltaValue * ((double)j / (double)smoothFactor));
+        double prmslValue     = origData.get(i).prmsl + (prmslDeltaValue * ((double)j / (double)smoothFactor));
+        double wavesValue     = origData.get(i).waves + (wavesDeltaValue * ((double)j / (double)smoothFactor));
+        double tempValue      = origData.get(i).temp + (tempDeltaValue * ((double)j / (double)smoothFactor));
+        double rainValue      = origData.get(i).rain + (rainDeltaValue * ((double)j / (double)smoothFactor));
+        
+        expanded.add(new GribHelper.GribCondition((float)windSpeedValue,
+                                                  origData.get(i + 1).winddir, // No smooth
+                                                  (float)hgt500Value,
+                                                  origData.get(i + 1).horIdx,  // no smooth
+                                                  origData.get(i + 1).vertIdx, // no smooth
+                                                  (float)prmslValue,
+                                                  (float)wavesValue,
+                                                  (float)tempValue,
+                                                  (float)rainValue));
+      }
+    }
+    return expanded;
+  }
+  
+  private ArrayList<Double> expandBSPArray(ArrayList<Double> origData,
+                                           int smoothFactor)
+  {
+    ArrayList<Double> expanded = new ArrayList<Double>(origData.size() * smoothFactor);
+      // Add points
+    for (int i=0; i<origData.size() - 1; i++)
+    {
+      double bspDeltaValue = origData.get(i + 1).doubleValue() - origData.get(i).doubleValue();
+      
+      for (int j=0; j<smoothFactor; j++)
+      {
+        double bspValue = origData.get(i).doubleValue() + (bspDeltaValue * ((double)j / (double)smoothFactor));
+        expanded.add(new Double(bspValue));
+      }
+    }
+    return expanded;
   }
   
   private void twsCheckBox_actionPerformed(ActionEvent e)
@@ -383,6 +529,12 @@ public class GRIBSlicePanel
   private void rainCheckBox_actionPerformed(ActionEvent e)
   {
     displayRAIN = rainCheckBox.isSelected();
+    repaint();
+  }
+  
+  private void bspCheckBox_actionPerformed(ActionEvent e)
+  {
+    displayBSP = bspCheckBox.isSelected();
     repaint();
   }
 
@@ -424,6 +576,16 @@ public class GRIBSlicePanel
     }
     smoothTextField.setText(Integer.toString(this.forkWidth));
     smoothTextField.repaint();
+  }
+
+  public void setDataOption(int dataOption)
+  {
+    this.dataOption = dataOption;
+  }
+
+  public void setBsp(ArrayList<Double> bsp)
+  {
+    this.bsp = bsp;
   }
 
   class GRIBSliceDataPanel extends JPanel
@@ -490,6 +652,37 @@ public class GRIBSlicePanel
         gr.drawLine(0, i, this.getWidth(), i);
 
       Stroke origStroke = null;
+
+      // Calculate Data scales...
+      float windscale   = (float)this.getHeight() / gribMaxi.windspeed;
+      float prmslscale  = (float)this.getHeight() / ((gribMaxi.prmsl / 100f) - (gribMini.prmsl / 100f));
+      float hgt500scale = (float)this.getHeight() / ((gribMaxi.hgt500) - (gribMini.hgt500));
+      float wavescale   = (float)this.getHeight() / (gribMaxi.waves / 100f);
+      float tempscale   = (float)this.getHeight() / ((gribMaxi.temp) - (gribMini.temp));
+      float rainscale   = (float)this.getHeight() / (gribMaxi.rain * 3600f);
+      
+      float bspscale    = 1f;
+      if (dataOption == ROUTING_OPTION)
+        bspscale = (float)this.getHeight() / (float)bspMaxi;
+      
+      // Plot
+      int gribSize = data2plot.size();
+      
+      // Display Raw data
+      if (gr instanceof Graphics2D)
+      {
+        Graphics2D g2d = (Graphics2D)gr;
+        origStroke = g2d.getStroke();
+        Stroke stroke =  new BasicStroke(1, 
+                                         BasicStroke.CAP_BUTT,
+                                         BasicStroke.JOIN_BEVEL);
+        g2d.setStroke(stroke);  
+      }
+      drawDataArray(gr, data2plot, windscale, prmslscale, hgt500scale, wavescale, tempscale, rainscale);
+      if (dataOption == ROUTING_OPTION)
+        drawBoatSpeed(gr, bsp, bspscale);
+      
+      // Display smoothed data
       if (gr instanceof Graphics2D)
       {
         Graphics2D g2d = (Graphics2D)gr;
@@ -499,16 +692,75 @@ public class GRIBSlicePanel
                                          BasicStroke.JOIN_BEVEL);
         g2d.setStroke(stroke);  
       }
-      // Calculate scales...
-      float windscale   = (float)this.getHeight() / gribMaxi.windspeed;
-      float prmslscale  = (float)this.getHeight() / ((gribMaxi.prmsl / 100f) - (gribMini.prmsl / 100f));
-      float hgt500scale = (float)this.getHeight() / ((gribMaxi.hgt500) - (gribMini.hgt500));
-      float wavescale   = (float)this.getHeight() / (gribMaxi.waves / 100f);
-      float tempscale   = (float)this.getHeight() / ((gribMaxi.temp) - (gribMini.temp));
-      float rainscale   = (float)this.getHeight() / (gribMaxi.rain * 3600f);
+      drawDataArray(gr, smoothedData, windscale, prmslscale, hgt500scale, wavescale, tempscale, rainscale);
+      if (dataOption == ROUTING_OPTION)
+        drawBoatSpeed(gr, smoothedBsp, bspscale);
       
-      // Plot
-      int gribIdx = 0, gribSize = data2plot.size();
+      if (infoX != -1)
+      {
+        gr.setColor(Color.gray);
+        gr.drawLine(infoX, 0, infoX, this.getHeight());
+
+        int dataIdx = (int)((float)infoX * (float)gribSize / (float)this.getWidth());
+//      System.out.println("GRIB Idx:" + dataIdx + " pour x:" + infoX + " / " + this.getWidth());
+//      GribHelper.GribCondition gribPoint = data2plot.get(dataIdx);
+        if (dataIdx > smoothedData.size() - 1) dataIdx = smoothedData.size() - 1;
+        if (dataIdx < 0) dataIdx = 0;
+        GribHelper.GribCondition gribPoint = smoothedData.get(dataIdx);
+        Double boatSpeed = null;
+        if (dataOption == ROUTING_OPTION)
+          boatSpeed = smoothedBsp.get(dataIdx);
+        if (displayTWS)
+        {
+          int y = (int)(this.getHeight() - (gribPoint.windspeed * windscale));
+          postit(gr, " " + speedFormat.format(gribPoint.windspeed), infoX, y, Color.yellow, Color.blue, 0.75f);
+        }
+        if (displayPRMSL)
+        {
+          int y = (int)(this.getHeight() - (((gribPoint.prmsl / 100f) - (gribMini.prmsl / 100f))* prmslscale));
+          postit(gr, " " + prmslFormat.format(gribPoint.prmsl / 100f), infoX, y, Color.yellow, Color.red, 0.75f);
+        }
+        if (displayHGT500)
+        {
+          int y = (int)(this.getHeight() - ((gribPoint.hgt500 - (gribMini.hgt500))* hgt500scale));
+          postit(gr, " " + hgt500Format.format(gribPoint.hgt500), infoX, y, Color.yellow, Color.cyan, 0.75f);
+        }
+        if (displayWAVES)
+        {
+          int y = (int)(this.getHeight() - ((gribPoint.waves / 100f) * wavescale));
+          postit(gr, " " + wavesFormat.format(gribPoint.waves / 100f), infoX, y, Color.yellow, Color.green, 0.75f);
+        }
+        if (displayTEMP)
+        {
+          int y = (int)(this.getHeight() - (((gribPoint.temp - 273) - (gribMini.temp - 273))* tempscale));
+          postit(gr, " " + tempFormat.format(gribPoint.temp - 273), infoX, y, Color.yellow, Color.black, 0.75f);
+        }
+        if (displayRAIN)
+        {
+          int y = (int)(this.getHeight() - (((gribPoint.rain * 3600f) - (gribMini.rain * 3600f))* rainscale));
+          postit(gr, " " + prateFormat.format(gribPoint.rain * 3600f), infoX, y, Color.yellow, Color.gray, 0.75f);
+        }
+        if (displayBSP)
+        {
+          int y = (int)(this.getHeight() - (boatSpeed.doubleValue() * bspscale));
+          postit(gr, " " + speedFormat.format(boatSpeed.doubleValue()), infoX, y, Color.yellow, Color.blue, 0.75f);
+        }
+      }
+
+      if (origStroke != null)
+        ((Graphics2D)gr).setStroke(origStroke);  
+    }
+
+    private void drawDataArray(Graphics gr,
+                               ArrayList<GribHelper.GribCondition> data,
+                               float windscale,
+                               float prmslscale,
+                               float hgt500scale,
+                               float wavescale,
+                               float tempscale,
+                               float rainscale)
+    {
+      int gribIdx = 0, gribSize = data.size();
       
       int prevXtws    = -1, prevYtws    = -1;
       int prevXprmsl  = -1, prevYprmsl  = -1;
@@ -516,15 +768,14 @@ public class GRIBSlicePanel
       int prevXwaves  = -1, prevYwaves  = -1;
       int prevXtemp   = -1, prevYtemp   = -1;
       int prevXrain   = -1, prevYrain   = -1;    
-      
-      for (GribHelper.GribCondition gribPoint : smoothedData)
+      for (GribHelper.GribCondition gribPoint : data)
       {
         if (gribPoint != null)
         {
           float tws   = gribPoint.windspeed;
           int twd     = gribPoint.winddir;
           float prmsl = gribPoint.prmsl / 100f; // hPa
-          float hgt500  = gribPoint.hgt500; // m
+          float hgt500  = gribPoint.hgt500;     // m
           float waves = gribPoint.waves / 100F; // m
           float temp    = gribPoint.temp - 273; // Celcius
           float rain  = gribPoint.rain * 3600f; // kg/m^2/h => mm/h
@@ -593,54 +844,40 @@ public class GRIBSlicePanel
           }
         }            
         gribIdx++;
-      }   
-      if (infoX != -1)
-      {
-        gr.setColor(Color.gray);
-        gr.drawLine(infoX, 0, infoX, this.getHeight());
-
-        int dataIdx = (int)((float)infoX * (float)gribSize / (float)this.getWidth());
-//      System.out.println("GRIB Idx:" + dataIdx + " pour x:" + infoX + " / " + this.getWidth());
-//      GribHelper.GribCondition gribPoint = data2plot.get(dataIdx);
-        if (dataIdx > smoothedData.size() - 1) dataIdx = smoothedData.size() - 1;
-        if (dataIdx < 0) dataIdx = 0;
-        GribHelper.GribCondition gribPoint = smoothedData.get(dataIdx);
-        if (displayTWS)
-        {
-          int y = (int)(this.getHeight() - (gribPoint.windspeed * windscale));
-          postit(gr, " " + twsFormat.format(gribPoint.windspeed), infoX, y, Color.yellow, Color.blue, 0.75f);
-        }
-        if (displayPRMSL)
-        {
-          int y = (int)(this.getHeight() - (((gribPoint.prmsl / 100f) - (gribMini.prmsl / 100f))* prmslscale));
-          postit(gr, " " + prmslFormat.format(gribPoint.prmsl / 100f), infoX, y, Color.yellow, Color.red, 0.75f);
-        }
-        if (displayHGT500)
-        {
-          int y = (int)(this.getHeight() - ((gribPoint.hgt500 - (gribMini.hgt500))* hgt500scale));
-          postit(gr, " " + hgt500Format.format(gribPoint.hgt500), infoX, y, Color.yellow, Color.cyan, 0.75f);
-        }
-        if (displayWAVES)
-        {
-          int y = (int)(this.getHeight() - ((gribPoint.waves / 100f) * wavescale));
-          postit(gr, " " + wavesFormat.format(gribPoint.waves / 100f), infoX, y, Color.yellow, Color.green, 0.75f);
-        }
-        if (displayTEMP)
-        {
-          int y = (int)(this.getHeight() - (((gribPoint.temp - 273) - (gribMini.temp - 273))* tempscale));
-          postit(gr, " " + tempFormat.format(gribPoint.temp - 273), infoX, y, Color.yellow, Color.black, 0.75f);
-        }
-        if (displayRAIN)
-        {
-          int y = (int)(this.getHeight() - (((gribPoint.rain * 3600f) - (gribMini.rain * 3600f))* rainscale));
-          postit(gr, " " + prateFormat.format(gribPoint.rain * 3600f), infoX, y, Color.yellow, Color.gray, 0.75f);
-        }
-      }
-
-      if (origStroke != null)
-        ((Graphics2D)gr).setStroke(origStroke);  
+      }         
     }
-
+    
+    private void drawBoatSpeed(Graphics gr,
+                               ArrayList<Double> data,
+                               float bspscale)
+    {
+      int bspIdx = 0, bspSize = data.size();
+      
+      int prevXbsp    = -1, 
+          prevYbsp    = -1;
+      for (Double d : data)
+      {
+        if (d != null)
+        {
+          float bsp   = (float)d.doubleValue();
+          int x, y;
+          x = (int)((float)bspIdx * (float)this.getWidth() / (float)bspSize);
+          // BSP
+          if (displayBSP)
+          {
+      //    System.out.println("Idx:" + gribIdx + ", x:" + x + " for w:" + this.getWidth() + " and gSize:" + gribSize);
+            y = (int)(this.getHeight() - (bsp * bspscale));
+            gr.setColor(Color.orange);
+            if (prevXbsp > -1 && prevYbsp > -1)
+              gr.drawLine(prevXbsp, prevYbsp, x, y);
+            prevXbsp = x;
+            prevYbsp = y;
+          }
+        }            
+        bspIdx++;
+      }         
+    }
+    
     public void postit(Graphics g, String s, int x, int y, Color bgcolor, Color fgcolor, Float transp)
     {
       int bevel = 2;
