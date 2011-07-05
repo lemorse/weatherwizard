@@ -3,6 +3,8 @@ package chartview.gui.util.tree;
 import chartview.ctx.WWContext;
 import chartview.ctx.ApplicationEventListener;
 
+import chartview.gui.AdjustFrame;
+
 import chartview.util.grib.GribHelper;
 
 import chartview.gui.left.FileTypeHolder;
@@ -762,7 +764,7 @@ public class JTreeFilePanel
     }
   }
   
-  private synchronized String getCompositeBubble(String fName, String fPath)
+  public static synchronized String getCompositeBubble(String fName, String fPath)
   {
     String bubble = fName;
     try
@@ -788,6 +790,8 @@ public class JTreeFilePanel
         if (comment.getLength() > 0)
         {
           String commentStr = Utilities.superTrim(comment.item(0).getFirstChild().getNodeValue());
+          if (commentStr.trim().length() > 200)
+            commentStr = commentStr.trim().substring(0, 200) + " ...";
           str += commentStr.replaceAll("\n", "<br>");
           str += "<br>";
         }
@@ -798,7 +802,11 @@ public class JTreeFilePanel
           for (int i=0; i<faxes.getLength(); i++)
           {
             XMLElement fax = (XMLElement)faxes.item(i);
-            String faxName = fax.getAttribute("file");            
+            String faxName = fax.getAttribute("file"); 
+            XMLElement faxTtl = null;
+            try { faxTtl = (XMLElement)fax.selectNodes("./faxTitle").item(0); } catch (Exception ignore) {}
+            if (faxTtl != null)
+              str += (faxTtl.getTextContent() + " - ");             
             str += (WWGnlUtilities.truncateBigFileName(faxName) + "<br>");
           }
         }
@@ -884,27 +892,39 @@ public class JTreeFilePanel
 
   protected void fireFileOpen(String fName)
   {
+    if (type ==  JTreeFilePanel.COMPOSITE_TYPE)
+    {
+      if (((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getCommandPanel().isBusy())
+        ((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).addCompositeTab();
+    }
+    
     for (int i=0; i < WWContext.getInstance().getListeners().size(); i++)
     {
       ApplicationEventListener l = WWContext.getInstance().getListeners().get(i);
-      switch (type)
+      File f = new File(fName);
+      if (!f.isDirectory() && f.exists())
       {
-        case JTreeFilePanel.GRIB_TYPE:
-          l.gribFileOpen(fName);
-          break;
-        case JTreeFilePanel.FAX_TYPE:
-          l.faxFileOpen(fName);
-          break;
-        case JTreeFilePanel.COMPOSITE_TYPE:
-          l.compositeFileOpen(fName);
-          break;
-//        case JTreeFilePanel.COMPOSITE_ARCHIVE_TYPE:
-//          l.compositeFileOpen(fName);
-//          break;
-        case JTreeFilePanel.PATTERN_TYPE:
-          l.patternFileOpen(fName);
-          break;
+        switch (type)
+        {
+          case JTreeFilePanel.GRIB_TYPE:
+            l.gribFileOpen(fName);
+            break;
+          case JTreeFilePanel.FAX_TYPE:
+            l.faxFileOpen(fName);
+            break;
+          case JTreeFilePanel.COMPOSITE_TYPE:
+            l.compositeFileOpen(fName);
+            break;
+  //        case JTreeFilePanel.COMPOSITE_ARCHIVE_TYPE:
+  //          l.compositeFileOpen(fName);
+  //          break;
+          case JTreeFilePanel.PATTERN_TYPE:
+            l.patternFileOpen(fName);
+            break;
+        }
       }
+//    else // DEBUG
+//      System.out.println("Not doing anything for [" + fName + "]");
     }    
   }
 
@@ -1040,6 +1060,7 @@ public class JTreeFilePanel
           setIcon(new ImageIcon(this.getClass().getResource("page.png")));
         else 
           setIcon(new ImageIcon(this.getClass().getResource("note.png")));
+        
         setToolTipText(((DataFileTreeNode)value).getBubble());
       }
       return this;
