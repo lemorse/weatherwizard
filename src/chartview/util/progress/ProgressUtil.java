@@ -22,12 +22,22 @@ public class ProgressUtil
     Window owner;
     Timer timer;
     boolean showInterruptButton = true;
+    String buttonLabel = null;
 
     public MonitorListener(Window owner, ProgressMonitor monitor, boolean showButton)
     {
-      this.owner = owner;
-      this.monitor = monitor;
-      this.showInterruptButton = showButton;
+      this(owner, monitor, showButton, "hide");
+    }
+    
+    public MonitorListener(Window owner, ProgressMonitor monitor, boolean showButton, String label)
+    {
+//    synchronized (monitor)
+      {
+        this.owner = owner;
+        this.monitor = monitor;
+        this.showInterruptButton = showButton;
+        this.buttonLabel = label;
+      }
     }
 
     public MonitorListener(Window owner, ProgressMonitor monitor)
@@ -35,36 +45,48 @@ public class ProgressUtil
       this(owner, monitor, true);
     }
 
+    public String toString()
+    {
+      return "from ProgressUtil, MonitorListener";
+    }
+    
     public void stateChanged(ChangeEvent ce)
     {
-      ProgressMonitor monitor = (ProgressMonitor) ce.getSource();
-      if (monitor.getCurrent() != monitor.getTotal())
+      ProgressMonitor monitor = (ProgressMonitor)ce.getSource();
+      synchronized (monitor)
       {
-        if (timer == null)
+        if (monitor.getCurrent() != monitor.getTotal())
         {
-          int millisecondToWait = 500;
-          timer = new Timer(millisecondToWait, this);
-          timer.setRepeats(false);
-          timer.start();
+          if (timer == null)
+          {
+//          System.out.println("... Creating Timer.");
+            int millisecondToWait = 500; // Will show the dialog after this amount of time, if not completed...
+            timer = new Timer(millisecondToWait, this);
+            timer.setRepeats(false);
+            timer.start();
+          }
         }
-      }
-      else
-      {
-        if (timer != null && timer.isRunning())
-          timer.stop();
-        monitor.removeChangeListener(this);
+        else
+        {
+          if (timer != null && timer.isRunning())
+            timer.stop();
+          monitor.removeChangeListener(this);
+        }
       }
     }
 
     public void actionPerformed(ActionEvent e)
     {
-      monitor.removeChangeListener(this);
-      ProgressDialog dlg = owner instanceof Frame ? 
-                              new ProgressDialog((Frame) owner, monitor, showInterruptButton) : 
-                              new ProgressDialog((Dialog) owner, monitor, showInterruptButton);
-      dlg.pack();
-      dlg.setLocationRelativeTo(null);
-      dlg.setVisible(true);
+//    synchronized (monitor) // That one generate some kind of dead lock...
+      {
+        monitor.removeChangeListener(this);
+        ProgressDialog dlg = owner instanceof Frame ? 
+                                new ProgressDialog((Frame) owner, monitor, showInterruptButton, buttonLabel) : 
+                                new ProgressDialog((Dialog) owner, monitor, showInterruptButton, buttonLabel);
+        dlg.pack();
+        dlg.setLocationRelativeTo(null);
+        dlg.setVisible(true);
+      }
     }
   }
 
@@ -75,9 +97,14 @@ public class ProgressUtil
   
   public static ProgressMonitor createModalProgressMonitor(Component owner, int total, boolean indeterminate, boolean showInterrupt)
   {
+    return createModalProgressMonitor(owner, total, indeterminate, showInterrupt, "hide");
+  }
+
+  public static ProgressMonitor createModalProgressMonitor(Component owner, int total, boolean indeterminate, boolean showInterrupt, String buttonLabel)
+  {
     ProgressMonitor monitor = new ProgressMonitor(total, indeterminate);
     Window window = owner instanceof Window ? (Window) owner : SwingUtilities.getWindowAncestor(owner);
-    monitor.addChangeListener(new MonitorListener(window, monitor, showInterrupt));
+    monitor.addChangeListener(new MonitorListener(window, monitor, showInterrupt, buttonLabel));
     return monitor;
   }
 }
