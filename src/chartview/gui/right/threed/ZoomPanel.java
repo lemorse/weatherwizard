@@ -52,6 +52,10 @@ public class ZoomPanel
 
     WWContext.getInstance().addApplicationListener(new ApplicationEventListener()
       {
+        public String toString()
+        {
+          return "from ZoomPanel.";
+        }
         public void setZoom3D(double d) 
         {
           zoomTextField.setText(Double.toString(d));
