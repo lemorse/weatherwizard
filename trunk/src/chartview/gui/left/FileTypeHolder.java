@@ -87,6 +87,11 @@ public class FileTypeHolder
         });
     WWContext.getInstance().addApplicationListener(new ApplicationEventListener()
       {
+        public String toString()
+        {
+          return "from FileTypeHolder.";
+        }
+        
         public void reloadFaxTree() 
         { 
           System.out.println("Reloading Fax Tree"); 
