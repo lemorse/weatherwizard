@@ -65,6 +65,10 @@ public class ProjectionPanel
 
     WWContext.getInstance().addApplicationListener(new ApplicationEventListener()
       {
+        public String toString()
+        {
+          return "from ProjectionPanel.";
+        }
         public void setProjection(int p) 
         {
           switch (p)
