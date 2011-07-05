@@ -45,6 +45,10 @@ public class RotationPanel
   {
     WWContext.getInstance().addApplicationListener(new ApplicationEventListener()
       {
+        public String toString()
+        {
+          return "from RotationPanel.";
+        }
         public void activeFaxChanged(FaxType ft) 
         {
           rotationTextField.setText(Double.toString(ft.getRotation()));
