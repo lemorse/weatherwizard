@@ -207,7 +207,7 @@ public class ChartAdjust
     // Checking for update
     proceed = ((Boolean)ParamPanel.data[ParamData.AUTO_UPDATES][1]).booleanValue();
     Thread checkForUpdate = // new CheckForUpdateThread("weather_assistant");
-      new CheckForUpdateThread("weather_assistant", 
+      new CheckForUpdateThread(WWContext.PRODUCT_ID, 
                                WWContext.getInstance().getParser(), 
                                WWGnlUtilities.STRUCTURE_FILE_NAME, 
                                proceed);
@@ -257,6 +257,28 @@ public class ChartAdjust
 
   public static void main(String args[])
   {
+    System.out.println("=======\nIn the main, " + args.length + " arguments:");
+    String displayComposite = "";
+    for (int i=0; i<args.length; i++)
+    {
+      System.out.println("arg[" + i + "]=" + args[i]);
+      if ("-display-composite".equals(args[i]))
+        displayComposite = args[i+1];
+      if ("-debug-level".equals(args[i]))
+      {
+        int debugLevel = Integer.parseInt(args[i+1]);
+        if (debugLevel < 0 || debugLevel > 5)
+          throw new RuntimeException("Debug Level must be in [0, 5]");
+        else
+          WWContext.setDebugLevel(debugLevel);
+      }
+    }
+    System.out.println("=======");
+    if (displayComposite.trim().length() > 0)
+    {
+      System.out.println("Composite to display:" + displayComposite);
+      System.setProperty("display.composite", displayComposite);
+    }
     // Read config properties file
     File configFile = new File(WWContext.CONFIG_PROPERTIES_FILE);
     if (configFile.exists())
