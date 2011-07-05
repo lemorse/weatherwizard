@@ -55,7 +55,7 @@ public class HeadingPanel
       int roseToDisplay = rose;
       while (roseToDisplay >= 360) roseToDisplay -= 360;
       while (roseToDisplay < 0) roseToDisplay += 360;
-      int abscisse = (int)Math.round((float)(rose + 30 - hdg) * oneDegree);
+      int abscisse = Math.round((float)(rose + 30 - hdg) * oneDegree);
 //    System.out.println("(w=" + w + ") Abscisse for " + rose + "=" + abscisse);
       gr.drawLine(abscisse, 0, abscisse, 2);
       gr.drawLine(abscisse, h - 2, abscisse, h);
@@ -68,7 +68,7 @@ public class HeadingPanel
       {
         Font f = gr.getFont();
         gr.setFont(new Font("Arial", Font.BOLD, FONT_SIZE));
-        String roseStr = Integer.toString((int)Math.round(roseToDisplay));
+        String roseStr = Integer.toString(Math.round(roseToDisplay));
         if (roseToDisplay == 0)
           roseStr = "N";
         else if (roseToDisplay == 180)
@@ -93,6 +93,8 @@ public class HeadingPanel
     }    
     gr.setColor(Color.red);
     gr.drawLine(w/2, 0, w/2, h);
+
+    this.setToolTipText(Integer.toString(hdg) + "\272");
   }
 
   public void setHdg(int hdg)
