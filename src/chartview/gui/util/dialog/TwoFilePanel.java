@@ -52,6 +52,7 @@ public class TwoFilePanel
   private JCheckBox pdfCheckBox = new JCheckBox();
   private JLabel pdfTitleLabel = new JLabel("A title for the pdf:");
   private JTextField pdfTitle = new JTextField();
+  private JCheckBox boatAndTrackCheckBox = new JCheckBox();
 
   public TwoFilePanel()
   {
@@ -121,6 +122,7 @@ public class TwoFilePanel
         }                                    
       });
     pdfTitle.setPreferredSize(new Dimension(200, 24));
+    boatAndTrackCheckBox.setText("Boat & Track");
     this.add(leftLabel, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
     this.add(rightLabel, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
     this.add(leftChooser, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
@@ -131,11 +133,14 @@ public class TwoFilePanel
     gribOptionPanel.add(allRadioButton, null);
     gribOptionPanel.add(justFaxesRadioButton, null);
     gribOptionPanel.add(justGRIBRadioButton, null);
+    gribOptionPanel.add(boatAndTrackCheckBox, null);
     gribOptionPanel.add(pdfCheckBox, null);
     gribOptionPanel.add(pdfTitleLabel, null);
     gribOptionPanel.add(pdfTitle, null);
-    this.add(gribOptionPanel, new GridBagConstraints(0, 4, 2, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
-          new Insets(10, 10, 0, 0), 0, 0));
+    this.add(gribOptionPanel,
+             new GridBagConstraints(0, 4, 2, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(10, 10,
+                                                                                                                       0, 0),
+                                    0, 0));
   }
 
   public JLabel getLeftLabel()
@@ -177,6 +182,11 @@ public class TwoFilePanel
     else if (justGRIBRadioButton.isSelected())
       return JUST_GRIBS;
     return null;
+  }
+  
+  public boolean withBoatAndTrack()
+  {
+    return boatAndTrackCheckBox.isSelected();
   }
   
   public String getPDFTitle()
