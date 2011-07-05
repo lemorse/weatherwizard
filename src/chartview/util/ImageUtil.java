@@ -751,6 +751,13 @@ public class ImageUtil
   
   public static BufferedImage makeColorTransparent(Image img, Color color, int option) 
   {
+    return makeColorTransparent(img, color, option, null);
+  }
+  
+  public static BufferedImage makeColorTransparent(Image img, Color color, int option, String[] messElements) 
+  {
+    if (messElements != null)
+      WWContext.getInstance().fireProgressing(WWGnlUtilities.buildMessage("processing-image", messElements));
     BufferedImage image = toBufferedImage(img);
     BufferedImage dimg = new BufferedImage(image.getWidth(), 
                                            image.getHeight(), 
@@ -783,12 +790,24 @@ public class ImageUtil
   {
     return switchColorAndMakeColorTransparent(img, turnThis, intoThat, colorToTransparent, NO_CHANGE);
   }
+
   public static BufferedImage switchColorAndMakeColorTransparent(Image img, 
                                                                  Color turnThis,
                                                                  Color intoThat,
                                                                  Color colorToTransparent,
                                                                  int option) 
   {
+    return switchColorAndMakeColorTransparent(img, turnThis, intoThat, colorToTransparent, option, null);
+  }
+  public static BufferedImage switchColorAndMakeColorTransparent(Image img, 
+                                                                 Color turnThis,
+                                                                 Color intoThat,
+                                                                 Color colorToTransparent,
+                                                                 int option,
+                                                                 String[] messElements) 
+  {
+    if (messElements != null)
+      WWContext.getInstance().fireProgressing(WWGnlUtilities.buildMessage("processing-image", messElements));
     BufferedImage image = toBufferedImage(img);
     BufferedImage dimg = new BufferedImage(image.getWidth(), 
                                            image.getHeight(), 

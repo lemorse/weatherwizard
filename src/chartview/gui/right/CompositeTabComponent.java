@@ -1,25 +1,19 @@
 package chartview.gui.right;
 
+
 import chartview.util.WWGnlUtilities;
 
 import java.awt.BorderLayout;
-
 import java.awt.Dimension;
-
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
 import java.awt.event.MouseAdapter;
-
 import java.awt.event.MouseEvent;
 
 import java.net.URL;
 
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+
 
 public abstract class CompositeTabComponent
   extends JPanel

@@ -23,6 +23,9 @@ import chartview.gui.util.param.CategoryPanel;
 import chartview.gui.util.param.ParamData;
 import chartview.gui.util.param.ParamPanel;
 
+import chartview.gui.util.tree.JTreeFilePanel;
+
+import chartview.util.GPXUtil;
 import chartview.util.WWGnlUtilities;
 import chartview.util.grib.GribHelper;
 import chartview.util.http.HTTPClient;
@@ -142,7 +145,8 @@ public class AdjustFrame
   private JMenuItem menuManageUE = new JMenuItem();
   
   private JMenu nmeaMenu = new JMenu();
-  private JCheckBoxMenuItem menuStartNMEA = new JCheckBoxMenuItem();
+//private JCheckBoxMenuItem menuStartNMEA = new JCheckBoxMenuItem();
+  private JMenuItem menuStartNMEA = new JMenuItem();
   private JMenuItem manualNMEA = new JMenuItem();
 
   private JMenu menuHelp = new JMenu();
@@ -172,10 +176,19 @@ public class AdjustFrame
       e.printStackTrace();
     }
     // Any composite to load at startup?
-    final String compositeName = ((ParamPanel.DataFile) ParamPanel.data[ParamData.LOAD_COMPOSITE_STARTUP][1]).toString();
-    if (compositeName.trim().length() > 0)
+    String displayComposite = System.getProperty("display.composite", "");
+    if (displayComposite.trim().length() == 0)
     {
-      askAndWaitForLoadAtStartup(compositeName, 30); //  TODO, the 30 as a preference
+      final String compositeName = ((ParamPanel.DataFile) ParamPanel.data[ParamData.LOAD_COMPOSITE_STARTUP][1]).toString();
+      if (compositeName.trim().length() > 0)
+      {
+        askAndWaitForLoadAtStartup(compositeName, 30); //  TODO, the 30 as a preference
+      }
+    }
+    else
+    {
+      // Display Composite from File System
+      ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().restoreComposite(displayComposite);
     }
   }
 
@@ -337,31 +350,7 @@ public class AdjustFrame
     //     System.out.println("Click on Tab " + ((JTabbedPane)mouseEvent.getSource()).getSelectedIndex());
            if (((JTabbedPane)mouseEvent.getSource()).getSelectedIndex() == ((JTabbedPane)mouseEvent.getSource()).getTabCount() - 1) // Last
            {
-    //       System.out.println("Adding a Tab.");
-//           JTabbedPane tp = (JTabbedPane)mouseEvent.getSource();
-             final CompositeTabbedPane nctp = new CompositeTabbedPane();
-             masterTabPane.add(nctp, "Composite (" + masterTabPane.getTabCount() + ")", masterTabPane.getTabCount() - 1);
-             masterTabPane.setTabComponentAt(masterTabPane.getTabCount() - 2, new CompositeTabComponent("Composite (" + Integer.toString(masterTabPane.getTabCount() - 1) + ")", "right/remove_composite.png")
-               {
-                 public void onClose()
-                 {
-                   if (masterTabPane.getTabCount() > 2)
-                   {
-                     nctp.removeListener();
-                     masterTabPane.remove(nctp);          
-                     int newIndex = masterTabPane.getTabCount() - 2;
-                     while (newIndex < 0) newIndex++;
-                     masterTabPane.setSelectedIndex(newIndex);
-                   }
-                 }
-                 public boolean ok2Close()
-                 {
-                   return masterTabPane.getTabCount() > 2;
-                 }
-               });
-          // masterTabPane.setToolTipTextAt(masterTabPane.getTabCount() - 2, "Right-click to close");
-             masterTabPane.setSelectedIndex(masterTabPane.getTabCount() - 2);
-
+             addCompositeTab();
            }
          }
        }
@@ -595,10 +584,10 @@ public class AdjustFrame
                 public void run()
                 {
               WWGnlUtilities.detectUnusedDocuments();
-              WWContext.getInstance().fireSetLoading(false, "Detecting...");
+              WWContext.getInstance().fireSetLoading(false, "Detecting..."); // LOCALIZE
                 }
               };
-          WWContext.getInstance().fireSetLoading(true, "Detecting...");
+          WWContext.getInstance().fireSetLoading(true, "Detecting..."); // LOCALIZE
             t.start();
           }
         });
@@ -752,8 +741,8 @@ public class AdjustFrame
               else
               {
                 // Get the distance
-              WWContext.getInstance().getGreatCircle().setStart(new GeoPoint(Math.toRadians(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().getFrom().getL()), Math.toRadians(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().getFrom().getG())));
-              WWContext.getInstance().getGreatCircle().setArrival(new GeoPoint(Math.toRadians(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().getTo().getL()), Math.toRadians(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().getTo().getG())));                
+                WWContext.getInstance().getGreatCircle().setStart(new GeoPoint(Math.toRadians(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().getFrom().getL()), Math.toRadians(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().getFrom().getG())));
+                WWContext.getInstance().getGreatCircle().setArrival(new GeoPoint(Math.toRadians(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().getTo().getL()), Math.toRadians(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().getTo().getG())));                
                 double gcDist = Math.toDegrees(WWContext.getInstance().getGreatCircle().getDistance()) * 60.0;
 
                 int interval = ((Integer) ParamPanel.data[ParamData.INTERVAL_BETWEEN_ISOBARS][1]).intValue();
@@ -783,58 +772,17 @@ public class AdjustFrame
         {
           public void actionPerformed(ActionEvent ae)
           {
-          WWContext.getInstance().fireNMEAAcquisition(menuStartNMEA.isSelected());
+//          WWContext.getInstance().fireNMEAAcquisition(menuStartNMEA.isSelected());
+            WWContext.getInstance().fireNMEAAcquisition(true);
           }
         });
     manualNMEA.setText(WWGnlUtilities.buildMessage("manual"));       
     manualNMEA.setIcon(new ImageIcon(this.getClass().getResource("img/grab.png")));
     manualNMEA.addActionListener(new ActionListener()
         {
-          File manualPositionFile = new File("." + File.separator + "config" + File.separator + "manualposition.xml");
-
           public void actionPerformed(ActionEvent ae)
           {
-            if (pip == null)
-              pip = new PositionInputPanel();
-            // Manual position already exist?
-            if (manualPositionFile.exists())
-            {
-              // Read and feed
-               DOMParser parser = WWContext.getInstance().getParser();
-               try
-               {
-                 XMLDocument doc = null;
-                 synchronized(parser)
-                 {
-                   parser.parse(manualPositionFile.toURI().toURL());
-                   doc = parser.getDocument();
-                 }
-                 double lat = Double.parseDouble(((XMLElement)doc.getDocumentElement()).getAttribute("latitude"));
-                 double lng = Double.parseDouble(((XMLElement)doc.getDocumentElement()).getAttribute("longitude"));
-                 int hdg = Integer.parseInt(((XMLElement)doc.getDocumentElement()).getAttribute("heading"));
-                 pip.setData(lat, lng, hdg);
-               }
-               catch (Exception ex)
-               {
-                 ex.printStackTrace();
-               }
-            }
-            int resp = JOptionPane.showConfirmDialog(WWContext.getInstance().getMasterTopFrame(), pip, WWGnlUtilities.buildMessage("position-manual-entry"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
-            if (resp == JOptionPane.OK_OPTION)
-            {
-              double l = pip.getL();
-              double g = pip.getG();
-              int heading = pip.getHeading();
-            WWContext.getInstance().fireManuallyEnterBoatPosition(new GeoPoint(l, g), heading);
-              // Write to file for next time
-              XMLDocument doc = new XMLDocument();
-              XMLElement root = (XMLElement)doc.createElement("root");
-              doc.appendChild(root);
-              root.setAttribute("latitude", Double.toString(l));
-              root.setAttribute("longitude", Double.toString(g));
-              root.setAttribute("heading", Integer.toString(heading));
-              try { doc.print(new FileOutputStream(manualPositionFile)); } catch (Exception ioe) { ioe.printStackTrace(); }
-            }
+            WWGnlUtilities.getManualBoatPosition();
           }
         });
 
@@ -981,17 +929,62 @@ public class AdjustFrame
     
     WWContext.getInstance().addApplicationListener(new ApplicationEventListener()
       {                                                     
-        public void compositeFileOpen(final String fileName)
+        public String toString()
         {
-          String justFileName = fileName;
-          if (fileName.indexOf(File.separatorChar) > 0)
-            justFileName = justFileName.substring(fileName.lastIndexOf(File.separatorChar) + 1);          
+          return "from AdjustFrame.";
+        }
+        public void compositeFileOpen(final String fileName) // fileName : full path to the file
+        {
+          String justFileName = fileName; 
+          if (fileName.lastIndexOf(File.separatorChar) > 0)
+            justFileName = justFileName.substring(fileName.lastIndexOf(File.separatorChar) + 1);        
+//        System.out.println("JustFileName:" + justFileName + " (idx:" + fileName.lastIndexOf(File.separatorChar) + ")");
           masterTabPane.setTitleAt(masterTabPane.getSelectedIndex(), justFileName);
           ((CompositeTabComponent)masterTabPane.getTabComponentAt(masterTabPane.getSelectedIndex())).setTabTitle(justFileName);
+//        ((CompositeTabComponent)masterTabPane.getTabComponentAt(masterTabPane.getSelectedIndex())).setToolTipText(JTreeFilePanel.getCompositeBubble(justFileName, fileName));
+          masterTabPane.setToolTipTextAt(masterTabPane.getSelectedIndex(), JTreeFilePanel.getCompositeBubble(justFileName, fileName));
+        }
+
+        @Override
+        public void setStatus(String str)
+        {
+          setStatusLabel(str);
+        }
+
+        @Override
+        public void setLoading(boolean b, String mess)
+        {
+          setLoadingProgresssBar(b, mess);
         }
       });
   }
 
+  public void addCompositeTab()
+  {
+    final CompositeTabbedPane nctp = new CompositeTabbedPane();
+    masterTabPane.add(nctp, "Composite (" + masterTabPane.getTabCount() + ")", masterTabPane.getTabCount() - 1);
+    masterTabPane.setTabComponentAt(masterTabPane.getTabCount() - 2, new CompositeTabComponent("Composite (" + Integer.toString(masterTabPane.getTabCount() - 1) + ")", "right/remove_composite.png")
+      {
+        public void onClose()
+        {
+          if (masterTabPane.getTabCount() > 2)
+          {
+            nctp.removeListener();
+            masterTabPane.remove(nctp);          
+            int newIndex = masterTabPane.getTabCount() - 2;
+            while (newIndex < 0) newIndex++;
+            masterTabPane.setSelectedIndex(newIndex);
+          }
+        }
+        public boolean ok2Close()
+        {
+          return masterTabPane.getTabCount() > 2;
+        }
+      });
+    // masterTabPane.setToolTipTextAt(masterTabPane.getTabCount() - 2, "Right-click to close");
+    masterTabPane.setSelectedIndex(masterTabPane.getTabCount() - 2);    
+  }
+  
   private void buildChartMenu()
   {
     menuCharts.removeAll();
@@ -1113,6 +1106,7 @@ public class AdjustFrame
     setupComposite(null, WWContext.getInstance().getCurrentGribFileName());
   }
 
+  // TODO Merge that one with the same method in CompositeTabbedPane
   private void setupComposite(String faxFile, String gribFile)
   {
     if (inputPanel == null)
@@ -1235,6 +1229,26 @@ public class AdjustFrame
       ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().setDisplayContourTemp(gribOptions[CompositeDetailsInputPanel.TEMP_CONTOUR]);
       ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().setDisplayContourPrate(gribOptions[CompositeDetailsInputPanel.PRATE_CONTOUR]);
 
+      // GPX Data?
+      if (inputPanel.thereIsGPXData())
+      {
+        try
+        {
+          String gpxDataFileName = inputPanel.getGPXFileName();
+          long to = -1L;
+          Date date = inputPanel.getUpToDate();
+          if (date != null)
+            to = date.getTime();
+          ArrayList<GeoPoint> algp = GPXUtil.parseGPXData(new File(gpxDataFileName).toURI().toURL(), -1L, to);
+          ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().setGPXData(algp);
+        }
+        catch (Exception ex)
+        {
+          ex.printStackTrace();
+        }
+      }
+      else
+        ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().setGPXData(null);
 //    System.out.println("InputPanel OK");
       WWContext.getInstance().fireSetLoading(true);
       Thread loader = new Thread()
@@ -1335,7 +1349,25 @@ public class AdjustFrame
                   }
                 }
                 else
-                  wgd = GribHelper.getGribData(grib);  // From a File
+                {
+                  try
+                  {
+                    wgd = GribHelper.getGribData(grib);  // From a File
+                  }
+                  catch (RuntimeException rte)
+                  {
+                    String mess = rte.getMessage();
+//                  System.out.println("RuntimeException getMessage(): [" + mess + "]");
+                    if (mess.startsWith("DataArray (width) size mismatch"))
+                      System.out.println(mess);
+                    else
+                      throw rte;
+                  }
+                  catch (Exception e)
+                  {
+                    e.printStackTrace();
+                  }
+                }
               }  
               if (inputPanel.isSizeFromGRIB() && wgd != null)
               {

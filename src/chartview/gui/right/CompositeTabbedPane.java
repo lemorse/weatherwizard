@@ -1,6 +1,8 @@
 package chartview.gui.right;
 
 
+import astro.calc.GeoPoint;
+
 import chartview.ctx.ApplicationEventListener;
 import chartview.ctx.WWContext;
 
@@ -14,6 +16,7 @@ import chartview.gui.util.dialog.InternetFax;
 import chartview.gui.util.dialog.InternetGRIB;
 import chartview.gui.util.param.ParamPanel;
 
+import chartview.util.GPXUtil;
 import chartview.util.WWGnlUtilities;
 import chartview.util.grib.GribHelper;
 import chartview.util.http.HTTPClient;
@@ -33,6 +36,7 @@ import java.net.URLConnection;
 
 import java.text.SimpleDateFormat;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 import javax.swing.JOptionPane;
@@ -71,6 +75,10 @@ public class CompositeTabbedPane
 
   private transient ApplicationEventListener ael = new ApplicationEventListener()
         {
+          public String toString()
+          {
+            return "from CompositeTabbedPane.";
+          }
           public void collapseExpandToolBar(boolean b) 
           {
             if (instance.isVisible())
@@ -290,6 +298,7 @@ public class CompositeTabbedPane
     setupComposite(null, WWContext.getInstance().getCurrentGribFileName());
   }
 
+  // TODO Merge that one with the same method in AdjsutFrame
   private void setupComposite(String faxFile, String gribFile)
   {
     if (inputPanel == null)
@@ -412,6 +421,27 @@ public class CompositeTabbedPane
       commandPanel.setDisplayContourTemp(gribOptions[CompositeDetailsInputPanel.TEMP_CONTOUR]);
       commandPanel.setDisplayContourPrate(gribOptions[CompositeDetailsInputPanel.PRATE_CONTOUR]);
 
+      // GPX Data?
+      if (inputPanel.thereIsGPXData())
+      {
+        try
+        {
+          String gpxDataFileName = inputPanel.getGPXFileName();
+          long to = -1L;
+          Date date = inputPanel.getUpToDate();
+          if (date != null)
+            to = date.getTime();
+          ArrayList<GeoPoint> algp = GPXUtil.parseGPXData(new File(gpxDataFileName).toURI().toURL(), -1L, to);
+          commandPanel.setGPXData(algp);
+        }
+        catch (Exception ex)
+        {
+          ex.printStackTrace();
+        }
+      }
+      else
+        commandPanel.setGPXData(null);
+
 //    System.out.println("InputPanel OK");
       WWContext.getInstance().fireSetLoading(true);
       Thread loader = new Thread()
@@ -512,7 +542,25 @@ public class CompositeTabbedPane
                   }
                 }
                 else
-                  wgd = GribHelper.getGribData(grib);  // From a File
+                {
+                  try
+                  {
+                    wgd = GribHelper.getGribData(grib);  // From a File
+                  }
+                  catch (RuntimeException rte)
+                  {
+                    String mess = rte.getMessage();
+//                  System.out.println("RuntimeException getMessage(): [" + mess + "]");
+                    if (mess.startsWith("DataArray (width) size mismatch"))
+                      System.out.println(mess);
+                    else
+                      throw rte;
+                  }
+                  catch (Exception e)
+                  {
+                    e.printStackTrace();
+                  } 
+                }
               }  
               if (inputPanel.isSizeFromGRIB() && wgd != null)
               {

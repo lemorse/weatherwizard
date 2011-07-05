@@ -39,6 +39,7 @@ import chartview.ctx.WWContext;
 import chartview.gui.toolbar.controlpanels.ChartCommandPanelToolBar;
 import chartview.gui.util.dialog.GRIBSlicePanel;
 import chartview.gui.util.dialog.PrintOptionsPanel;
+import chartview.gui.util.dialog.RoutingOutputFlavorPanel;
 import chartview.gui.util.dialog.TwoFilePanel;
 import chartview.gui.util.dialog.places.PlacesTablePanel;
 
@@ -58,6 +59,7 @@ import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GradientPaint;
 import java.awt.Graphics;
@@ -129,6 +131,7 @@ import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JSplitPane;
+import javax.swing.JTextArea;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -144,13 +147,13 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
 import user.util.GeomUtil;
-import user.util.TimeUtil;
 
 public class CommandPanel 
      extends JPanel
   implements ChartPanelParentInterface_II, 
              RoutingClientInterface
 {
+  private long id = 0L;
   private final static Color CUSTOM_LIGHT_BLUE = new Color(85, 115, 170);
   
   private CompositeTabbedPane parent = null;
@@ -166,7 +169,7 @@ public class CommandPanel
 //private JLabel imgHolder;
   protected ChartPanel chartPanel;
   
-  protected transient FaxImage[] faxImage;
+  protected transient FaxImage[] faxImage = null;
   private int currentFaxIndex = -1;
   
   private String currentComment = "";
@@ -239,7 +242,7 @@ public class CommandPanel
   
   private boolean drawChart = true;
   private boolean drawIsochrons = ((Boolean)ParamPanel.data[ParamData.SHOW_ISOCHRONS][1]).booleanValue();
-;
+
   private boolean drawBestRoute = true;
   private boolean drawGRIB = true;
   private boolean enableGRIBSlice = false;
@@ -277,7 +280,7 @@ public class CommandPanel
   
   private boolean displayPageSize = false;
   
-  private transient GeoPoint routingPoint = null;
+  private transient GeoPoint routingPoint = null; // Routing Boat position
   private int routingHeading    = -1;
   
   protected double whRatio = 1D;
@@ -377,6 +380,13 @@ public class CommandPanel
   private final static int CLOSE_IMAGE       = 1;
   private final static int ZOOMEXPAND_IMAGE  = 2;
   private final static int ZOOMSHRINK_IMAGE  = 3;
+  
+  private ArrayList<GeoPoint> gpxData = null;
+  
+  public boolean isBusy() // Is there a Composite in the panel?
+  {
+    return (wgd != null || faxImage != null);
+  }
   
   private void setDisplayAltTooltip(Graphics graphics, String winTitle, String dataString)
   {
@@ -527,8 +537,15 @@ public class CommandPanel
     return button;
   }
   
+  public long getID()
+  {
+    return id;
+  }
+  
   public CommandPanel(CompositeTabbedPane caller, MainZoomPanel dp)
   {
+    this.id = (long)(Math.random() + Long.MAX_VALUE);
+    
     this.parent = caller;
     dataPanel = dp;
     borderLayout1 = new BorderLayout();
@@ -910,6 +927,17 @@ public class CommandPanel
   {
     routingPoint = null;
     chartPanel.repaint();  
+  }
+  
+  public boolean isBoatPositionDisplayed()
+  {
+    return (boatPosition != null);  
+  }
+  
+  public void resetBoatPosition()
+  {
+    boatPosition = null;
+    boatHeading = -1;
   }
   
   public void interruptRouting()
@@ -1353,6 +1381,10 @@ public class CommandPanel
 
     ael = new ApplicationEventListener()
       {
+        public String toString()
+        {
+          return "{" + Long.toString(id) + "} from CommandPanel.";
+        }
         public void imageUp()
         {
          if (parent != null && parent.isVisible())
@@ -1745,6 +1777,7 @@ public class CommandPanel
             repaint();
           }
         }
+
         public void allLayerZoomOut() 
         {
          if (parent != null && parent.isVisible())
@@ -1757,6 +1790,7 @@ public class CommandPanel
             repaint();
           }
         }
+        
         public void store() // Save, and update
         {
          if (parent != null && parent.isVisible())
@@ -1810,10 +1844,23 @@ public class CommandPanel
             // A comment for this composite?
             if (ok2go && currentComment.trim().length() > 0)
             {
+              Object message = WWGnlUtilities.buildMessage("confirm-comment", 
+                                                           new String[] { currentComment });
+              String title = WWGnlUtilities.buildMessage("composite-comment");
+              int nbCR = WWGnlUtilities.nbOccurs(currentComment.trim(), '\n');
+              if (nbCR > 5) // then create an editor pane
+              {
+                JScrollPane jScrollPane = new JScrollPane();
+                JTextArea jta = new JTextArea(currentComment.trim());
+                jta.setEditable(false);
+                jScrollPane.getViewport().add(jta, null);
+                jScrollPane.setPreferredSize(new Dimension(400, 200));
+                message = jScrollPane;
+                title = WWGnlUtilities.buildMessage("confirm-comment-2");
+              }
               int resp = JOptionPane.showConfirmDialog(instance, 
-                                                       WWGnlUtilities.buildMessage("confirm-comment", 
-                                                                                   new String[] { currentComment }), 
-                                                       WWGnlUtilities.buildMessage("composite-comment"), 
+                                                       message, 
+                                                       title,
                                                        JOptionPane.YES_NO_CANCEL_OPTION, 
                                                        JOptionPane.QUESTION_MESSAGE);
               if (resp == JOptionPane.NO_OPTION)                                                            
@@ -1824,33 +1871,54 @@ public class CommandPanel
             if (ok2go)
             {
               final boolean updateComposite = update;
-              Runnable heavyRunnable = new Runnable() // Show progress bar
+//            Runnable heavyRunnable = new Runnable() // Show progress bar
+              Thread heavyRunnable = new Thread() // Show progress bar
               {
   //            ProgressMonitor monitor = null;
                 
                 public void run()
                 {
                   if (!updateComposite)
-                  {
+                  {                    
                     WWContext.getInstance().setMonitor(ProgressUtil.createModalProgressMonitor(WWContext.getInstance().getMasterTopFrame(), 1, true, true));
-                    WWContext.getInstance().getMonitor().start(WWGnlUtilities.buildMessage("gathering-storing"));
+                    ProgressMonitor monitor = WWContext.getInstance().getMonitor();
+                    if (monitor != null)
+                    {
+                      synchronized (monitor)
+                      {
+                        monitor.start(WWGnlUtilities.buildMessage("gathering-storing"));
+                      }
+                    }
                     WWContext.getInstance().setAel4monitor(new ApplicationEventListener()
                     {
+                      public String toString()
+                      {
+                        return "{" + Long.toString(id) + "} from Runnable in CommandPanel (1).";
+                      }
                       public void progressing(String mess)
                       {
-                          WWContext.getInstance().getMonitor().setCurrent(mess, WWContext.getInstance().getMonitor().getCurrent());
-                      }
-                      
+                        ProgressMonitor monitor = WWContext.getInstance().getMonitor();
+                        if (monitor != null)
+                        {
+                          synchronized (monitor)
+                          {
+                            monitor.setCurrent(mess, WWContext.getInstance().getMonitor().getCurrent());
+                          }
+                        }
+                      }                      
                       public void interruptProgress()
                       {
-                        System.out.println("Interruption requested...");
+                        System.out.println("Interruption requested (1)...");
                         ProgressMonitor monitor = WWContext.getInstance().getMonitor();
-                        synchronized (monitor)
+                        if (monitor != null)
                         {
-                          int total = monitor.getTotal();
-                          int current = monitor.getCurrent();
-                          if (current != total)
-                              monitor.setCurrent(null, total);
+                          synchronized (monitor)
+                          {
+                            int total = monitor.getTotal();
+                            int current = monitor.getCurrent();
+                            if (current != total)
+                                monitor.setCurrent(null, total);
+                          }
                         }
                       }
                     });
@@ -1868,16 +1936,31 @@ public class CommandPanel
                     if (!updateComposite)
                     {
                       // to ensure that progress dlg is closed in case of any exception
-                      if (WWContext.getInstance().getMonitor().getCurrent() != WWContext.getInstance().getMonitor().getTotal())
-                        WWContext.getInstance().getMonitor().setCurrent(null, WWContext.getInstance().getMonitor().getTotal());
-                      WWContext.getInstance().removeApplicationListener(WWContext.getInstance().getAel4monitor());
-                      WWContext.getInstance().setAel4monitor(null);
-                      WWContext.getInstance().setMonitor(null);
+                      ProgressMonitor monitor = WWContext.getInstance().getMonitor();
+                      if (monitor != null)
+                      {
+                        synchronized (monitor)
+                        {
+                          try
+                          {
+                            if (monitor.getCurrent() != monitor.getTotal())
+                              monitor.setCurrent(null, monitor.getTotal());
+                            WWContext.getInstance().removeApplicationListener(WWContext.getInstance().getAel4monitor());
+                            WWContext.getInstance().setAel4monitor(null);
+                            WWContext.getInstance().setMonitor(null);
+                          }
+                          catch (Exception ex)
+                          {
+                            ex.printStackTrace();
+                          }
+                        }
+                      }
                     }
                   }
                 }
               };
-              new Thread(heavyRunnable).start();
+//            new Thread(heavyRunnable).start();
+              heavyRunnable.start();
             }
           }
         }
@@ -2176,19 +2259,42 @@ public class CommandPanel
               boolean dyn = WWGnlUtilities.isPatternDynamic(fileName);
               if (dyn)
               {
-                Runnable heavyRunnable = new Runnable()
+//              Runnable heavyRunnable = new Runnable()
+                Thread heavyRunnable = new Thread()
                 {
   //              ProgressMonitor monitor = null;
   
                   public void run()
                   {
                     WWContext.getInstance().setMonitor(ProgressUtil.createModalProgressMonitor(WWContext.getInstance().getMasterTopFrame(), 1, true, true));
-                    WWContext.getInstance().getMonitor().start(WWGnlUtilities.buildMessage("loading-with-pattern"));
+                    ProgressMonitor monitor = WWContext.getInstance().getMonitor();
+                    if (monitor != null)
+                    {
+                      synchronized (monitor)
+                      {
+                        monitor.start(WWGnlUtilities.buildMessage("loading-with-pattern"));
+                      }
+                    }
+                    if (WWContext.getInstance().getAel4monitor() != null)
+                    {
+                      System.out.println("Warning!!! AELMonitor != null !! (2, in " + this.getClass().getName() + ")" );  
+                    }
                     WWContext.getInstance().setAel4monitor(new ApplicationEventListener()
                       {
+                        public String toString()
+                        {
+                          return "{" + Long.toString(id) + "} from Runnable in CommandPanel (2).";
+                        }
                         public void progressing(String mess)
                         {
-                          WWContext.getInstance().getMonitor().setCurrent(mess, WWContext.getInstance().getMonitor().getCurrent());
+                          ProgressMonitor monitor = WWContext.getInstance().getMonitor();
+                          if (monitor != null)
+                          {
+                            synchronized (monitor)
+                            {
+                              monitor.setCurrent(mess, monitor.getCurrent());
+                            }
+                          }
                         }
   
   //                    public void interruptProcess()
@@ -2208,15 +2314,30 @@ public class CommandPanel
                     {
   //                  System.out.println("End of Progress Monitor");
                       // to ensure that progress dlg is closed in case of any exception
-                      if (WWContext.getInstance().getMonitor().getCurrent() != WWContext.getInstance().getMonitor().getTotal())
-                        WWContext.getInstance().getMonitor().setCurrent(null, WWContext.getInstance().getMonitor().getTotal());
-                      WWContext.getInstance().removeApplicationListener(WWContext.getInstance().getAel4monitor());
-                      WWContext.getInstance().setAel4monitor(null);
-                      WWContext.getInstance().setMonitor(null);
+                   // ProgressMonitor pm = WWContext.getInstance().getMonitor();
+                      if (WWContext.getInstance().getMonitor() != null)
+                      {
+                        synchronized (WWContext.getInstance().getMonitor())
+                        {
+                          try
+                          {
+                            if (WWContext.getInstance().getMonitor().getCurrent() != WWContext.getInstance().getMonitor().getTotal())
+                              WWContext.getInstance().getMonitor().setCurrent(null, WWContext.getInstance().getMonitor().getTotal());
+  //                        WWContext.getInstance().removeApplicationListener(WWContext.getInstance().getAel4monitor());
+                            WWContext.getInstance().setAel4monitor(null);
+                            WWContext.getInstance().setMonitor(null);
+                          }
+                          catch (Exception ex)
+                          {
+                            ex.printStackTrace();
+                          }
+                        }
+                      }
                     }
                   }
                 };
-                new Thread(heavyRunnable).start();
+//              new Thread(heavyRunnable).start();
+                heavyRunnable.start();
               }
               else
               {
@@ -2520,51 +2641,95 @@ public class CommandPanel
           {
             // Progress bar
             Runnable heavyRunnable = new Runnable()
-            {
-  //          ProgressMonitor monitor = null;
-  
+            {              
               public void run()
               {
-                try
+                WWContext.getInstance().setMonitor(ProgressUtil.createModalProgressMonitor(WWContext.getInstance().getMasterTopFrame(), 1, true, true));
+                ProgressMonitor pm = WWContext.getInstance().getMonitor();
+                synchronized (pm)
                 {
-                  WWContext.getInstance().setMonitor(ProgressUtil.createModalProgressMonitor(WWContext.getInstance().getMasterTopFrame(), 1, true, true));
-                  WWContext.getInstance().getMonitor().start(WWGnlUtilities.buildMessage("restoring-wait")); 
-                  WWContext.getInstance().setAel4monitor(new ApplicationEventListener()
+                  pm.start(WWGnlUtilities.buildMessage("restoring-wait")); 
+                }
+                WWContext.getInstance ().setAel4monitor(new ApplicationEventListener()
+                  {
+                    public String toString()
                     {
-                      public void progressing(String mess)
+                      return "{" + Long.toString(id) + "} from Runnable in CommandPanel (3).";
+                    }
+                    public void progressing(String mess)
+                    {
+                      try
                       {
-                        try
+                        ProgressMonitor pm = WWContext.getInstance().getMonitor();
+                        synchronized (pm)
                         {
-                          WWContext.getInstance().getMonitor().setCurrent(mess, WWContext.getInstance().getMonitor().getCurrent());
-                        }
-                        catch (Exception ex)
-                        {
-                          System.out.println(" ... progessing:" + ex.toString());
+                          pm.setCurrent(mess, WWContext.getInstance().getMonitor().getCurrent());
                         }
                       }
-                    });
-                  WWContext.getInstance().addApplicationListener(WWContext.getInstance().getAel4monitor());
-    
-                  try
-                  {
-                    WWContext.getInstance().fireSetLoading(true);
-                    restoreComposite(fileName);
-                    WWContext.getInstance().fireSetLoading(false);
-                  }
-                  finally
-                  {
-                    // to ensure that progress dlg is closed in case of any exception
-                    if (WWContext.getInstance().getMonitor().getCurrent() != WWContext.getInstance().getMonitor().getTotal())
-                      WWContext.getInstance().getMonitor().setCurrent(null, WWContext.getInstance().getMonitor().getTotal());
-                    WWContext.getInstance().removeApplicationListener(WWContext.getInstance().getAel4monitor());
-                    WWContext.getInstance().setAel4monitor(null);
-                    WWContext.getInstance().setMonitor(null);
-                  }
-                }
-                catch (Exception ex)
+                      catch (Exception ex)
+                      {
+                        System.out.println(" ... progessing:" + ex.toString());
+                        ex.printStackTrace();
+                      }
+                    }
+                    public void interruptProgress()
+                    {
+                      System.out.println("Interruption requested (3)...");
+                      ProgressMonitor monitor = WWContext.getInstance().getMonitor();
+                      if (monitor != null)
+                      {
+                        synchronized (monitor)
+                        {
+                          int total = monitor.getTotal();
+                          int current = monitor.getCurrent();
+                          if (current != total)
+                              monitor.setCurrent(null, total);
+                        }
+                      }
+                    }
+                  });
+                WWContext.getInstance().addApplicationListener(WWContext.getInstance().getAel4monitor());
+                WWContext.getInstance().fireSetLoading(true);
+                try
                 {
-                  System.out.println("Monitor Exception :" + ex.toString());                
+                  restoreComposite(fileName); 
                 }
+                catch (ConcurrentModificationException cme)
+                {
+                  System.err.println("...ConcurrentModificationException");    
+                  System.err.println("===================");
+                  cme.printStackTrace();
+                  System.err.println("===================");
+                  WWContext.getInstance().fireInterruptProcess();
+                }
+                catch (RuntimeException rte)
+                {
+                  String mess = rte.getMessage();
+                  if (mess.startsWith("DataArray (width) size mismatch"))
+                    if (WWContext.getDebugLevel() >= 1) System.out.println(mess);
+                  else
+                    throw rte;
+                }
+                finally
+                {
+//                ProgressMonitor pm = WWContext.getInstance().getMonitor();
+                  synchronized (pm)
+                  {
+                    try
+                    {
+                      if (pm.getCurrent() != pm.getTotal())
+                        pm.setCurrent(null, pm.getTotal());
+                      WWContext.getInstance().removeApplicationListener(WWContext.getInstance().getAel4monitor());
+                      WWContext.getInstance().setAel4monitor(null);
+                      WWContext.getInstance().setMonitor(null);
+                    }
+                    catch (Exception ex)
+                    {
+                      ex.printStackTrace();
+                    }
+                  }
+                }
+                WWContext.getInstance().fireSetLoading(false);
               }
             };
             new Thread(heavyRunnable).start();
@@ -2604,44 +2769,59 @@ public class CommandPanel
             if (b) // Start
             {
               nmeaPollingInterval = ((Integer) ParamPanel.data[ParamData.NMEA_POLLING_FREQ][1]).intValue();
+              final boolean KEEP_LOOPING = false;
               nmeaThread = new Thread()
               {
                 public void run()
                 {
                   synchronized(this)
                   {
-                      WWContext.getInstance().fireLogging("Starting NMEA Thread\n");
+                    WWContext.getInstance().fireLogging("Starting NMEA Thread\n");
                     while (goNmea)
                     {
+                      WWGnlUtilities.BoatPosition bp = null;
                       // Read here
                       try
                       {
-                        String nmeaPayload = HTTPClient.getContent((String) ParamPanel.data[ParamData.NMEA_SERVER_URL][1]);
-  //                    System.out.println("Read:" + nmeaPayload);
-                        StringReader sr = new StringReader(nmeaPayload);
-                        DOMParser parser = WWContext.getInstance().getParser();
-                        XMLDocument doc = null;
-                        synchronized(parser)
-                        {
-                          parser.setValidationMode(DOMParser.NONVALIDATING);
-                          parser.parse(sr);
-                          doc = parser.getDocument();
-                        }
                         try
                         {
-                          double lat = 0d;
-                          try { lat = Double.parseDouble(doc.selectNodes("/data/lat[1]").item(0).getFirstChild().getNodeValue()); } catch (Exception ignore) {}
-                          double lng = 0d;
-                          try { lng = Double.parseDouble(doc.selectNodes("/data/lng[1]").item(0).getFirstChild().getNodeValue()); } catch (Exception ignore) {}
-                          boatPosition = new GeoPoint(lat, lng);
-                          int hdg = 0;
-                          try { hdg = (int)Math.round(Double.parseDouble(doc.selectNodes("/data/cog").item(0).getFirstChild().getNodeValue())); } catch (Exception ignore) {}
-                          boatHeading = hdg;
-                          chartPanel.repaint();
+                          bp = WWGnlUtilities.getHTTPBoatPosition(); // Try HTTP port
+                        }
+                        catch (HTTPClient.NMEAServerException nse)
+                        {
+                          System.out.println("NMEA HTTP Server must be down...");   
+                          try
+                          {
+                            bp = WWGnlUtilities.getSerialBoatPosition(); // Try Serial port
+                          }
+                          catch (Exception serialEx)
+                          {
+                            System.err.println("Cannot read Serial port either.\nStopping Serial Port reading, trying TCP");
+                            try
+                            {
+                              bp = WWGnlUtilities.getTCPBoatPosition(); // Try TCP
+                            }
+                            catch (Exception tcpEx)
+                            {
+                              System.err.println("Cannot read TCP port either.\nStopping TCP Port reading, trying UDP");
+                              try
+                              {
+                                bp = WWGnlUtilities.getUDPBoatPosition(); // Try UDP
+                              }
+                              catch (Exception udpEx)
+                              {
+                                String mess = "Cannot read UDP port either.\nStopping UDP Port reading, switch to manual entry";
+                                System.err.println(mess);
+//                              mess = "HTTP, Serial, TCP, UDP ports are not responding.\nSwitching to manual entry.";
+//                              JOptionPane.showMessageDialog(null, mess, "Position Acquisition", JOptionPane.WARNING_MESSAGE);
+                                WWGnlUtilities.getManualBoatPosition();
+                              }
+                            }
+                          }                        
                         }
                         catch (Exception ex)
                         {
-                            WWContext.getInstance().fireExceptionLogging(ex);
+                          WWContext.getInstance().fireExceptionLogging(ex);
                           ex.printStackTrace();
                         }
                       }
@@ -2650,15 +2830,36 @@ public class CommandPanel
                         WWContext.getInstance().fireExceptionLogging(e);
                         e.printStackTrace();
                       }
-                      // then wait
-                      try { this.wait((long)nmeaPollingInterval * 1000L); }
-                      catch (Exception ignore)
+                      if (bp != null)
                       {
-                          WWContext.getInstance().fireLogging("oops\n"); 
-                        System.out.println(ignore.getMessage());
+                        boatPosition = bp.getPos();
+                        boatHeading = bp.getHeading();
+                        chartPanel.repaint();
+                        WWGnlUtilities.storeBoatPosAndHeading(boatPosition.getL(), 
+                                                              boatPosition.getG(), 
+                                                              boatHeading, 
+                                                              new File("." + File.separator + "config" + File.separator + WWContext.MANUAL_POSITION_FILE));                        
                       }
+                      else
+                      {
+                        // TODO If everything has failed, switch to Manual input
+                        System.out.println("Manual Position Input");
+                      }
+                      
+                      if (KEEP_LOOPING) // Wait and re-read
+                      {
+                        try { this.wait((long)nmeaPollingInterval * 1000L); }
+                        catch (Exception ignore)
+                        {
+                          WWContext.getInstance().fireLogging("oops\n"); 
+                          System.out.println(ignore.getMessage());
+                        }
+                      }
+                      else
+                        goNmea = false; // then exit, instead of re-looping
+
                     }
-                      WWContext.getInstance().fireLogging("End of NMEA Thread\n");
+                    WWContext.getInstance().fireLogging("End of NMEA Thread\n");
                   }
                 }
               };
@@ -2696,7 +2897,7 @@ public class CommandPanel
         
         public void allFaxesSelected() 
         {
-         if (parent != null && parent.isVisible())
+          if (parent != null && parent.isVisible())
           {
             System.out.println("All faxes selected");
             currentFaxIndex = -1;
@@ -2705,7 +2906,7 @@ public class CommandPanel
         
         public void plotBoatAt(GeoPoint gp, int hdg) 
         {
-         if (parent != null && parent.isVisible())
+          if (parent != null && parent.isVisible())
           {
             routingPoint   = gp;
             routingHeading = hdg;
@@ -2715,11 +2916,11 @@ public class CommandPanel
         
         public void manuallyEnterBoatPosition(GeoPoint gp, int hdg) 
         {
-         if (parent != null && parent.isVisible())
+          if (parent != null && parent.isVisible())
           {
             boatPosition = gp;
             boatHeading = hdg;
-            chartPanel.repaint();
+            chartPanel.repaint(); 
           }
         }
         
@@ -2836,8 +3037,14 @@ public class CommandPanel
                 if (WWGnlUtilities.isIn(dataLabels[RAIN], displayComboBox))
                   boundaries[RAIN] = GRIBDataUtil.getRainBoundaries(gribData);
   
-                WWContext.getInstance().fireProgressing(WWGnlUtilities.buildMessage("computing-3D-data"));
-                generateAll3DData();
+                boolean displaySomething = display3DTws || display3DPrmsl || display3D500mb || display3DWaves || display3DTemperature || display3DRain;
+                if (displaySomething)
+                {
+                  WWContext.getInstance().fireProgressing(WWGnlUtilities.buildMessage("computing-3D-data"));
+                  WWContext.getInstance().fireSetLoading(true, WWGnlUtilities.buildMessage("computing-3D-data"));
+                  generateAll3DData();
+                  WWContext.getInstance().fireSetLoading(false, WWGnlUtilities.buildMessage("computing-3D-data"));
+                }
         //      System.out.println(gribData.getDate().toString());
                 Date gribDate = gribData.getDate(); // TimeUtil.getGMT(gribData.getDate());
                 Calendar cal = new GregorianCalendar();
@@ -3300,7 +3507,7 @@ public class CommandPanel
             StringReader sr = new StringReader(gribContent);              
             DOMParser parser = WWContext.getInstance().getParser();
             XMLDocument doc = null;
-            synchronized(parser)
+            synchronized (parser)
             {
               parser.setValidationMode(DOMParser.NONVALIDATING);
               parser.parse(sr);
@@ -3340,7 +3547,22 @@ public class CommandPanel
         try { Thread.sleep(1000L); } catch (Exception ignore) {}
       }
     }
-   
+    if (gpxData != null)
+    {
+      XMLElement gpxDataNode = (XMLElement)storage.createElement("gpx-data");
+      root.appendChild(gpxDataNode);  
+      // Loop on the GPX Data content
+      for (GeoPoint gpxPoint : gpxData)
+      {
+        double l = gpxPoint.getL();
+        double g = gpxPoint.getG();
+        XMLElement gpxNode = (XMLElement)storage.createElement("gpx-point");
+        gpxNode.setAttribute("lat", Double.toString(l));
+        gpxNode.setAttribute("lng", Double.toString(g));
+        gpxDataNode.appendChild(gpxNode);              
+      }
+    }
+    
     XMLElement projection = (XMLElement)storage.createElement("projection");
     root.appendChild(projection);
     switch (getProjection())
@@ -3409,6 +3631,16 @@ public class CommandPanel
     Text chartheightText = storage.createTextNode("#text");
     chartheightText.setNodeValue(Integer.toString(chartPanel.getHeight()));
     chartheight.appendChild(chartheightText);
+    
+    // Boat position?
+    if (boatPosition != null)
+    {
+      XMLElement boatLocation = (XMLElement)storage.createElement("boat-position");
+      root.appendChild(boatLocation);
+      boatLocation.setAttribute("lat", Double.toString(boatPosition.getL()));
+      boatLocation.setAttribute("lng", Double.toString(boatPosition.getG()));
+      boatLocation.setAttribute("hdg", Integer.toString(boatHeading));
+    }
     
     String fileName = "";    
     if (!update)
@@ -4354,10 +4586,10 @@ public class CommandPanel
   
   public void restoreComposite(String fileName)
   {
-    restoreComposite(fileName, TwoFilePanel.EVERY_THING);
+    restoreComposite(fileName, TwoFilePanel.EVERY_THING, true);
   }
   
-  public void restoreComposite(String fileName, String option)
+  public void restoreComposite(String fileName, String option, boolean withBoatAndTrack)
   {
     boolean fromArchive = false;
     ZipFile waz = null;
@@ -4453,12 +4685,25 @@ public class CommandPanel
           chartPanel.setTransparentGlobe(!opaque);
           WWContext.getInstance().fireSetSatelliteParameters(nl, ng, alt, opaque);
         }
-        nLat = Double.parseDouble(doc.selectNodes("//north").item(0).getFirstChild().getNodeValue());
-        sLat = Double.parseDouble(doc.selectNodes("//south").item(0).getFirstChild().getNodeValue());
-        wLong = Double.parseDouble(doc.selectNodes("//west").item(0).getFirstChild().getNodeValue());
-        eLong = Double.parseDouble(doc.selectNodes("//east").item(0).getFirstChild().getNodeValue());
-        int w = Integer.parseInt(doc.selectNodes("//chartwidth").item(0).getFirstChild().getNodeValue());
-        int h = Integer.parseInt(doc.selectNodes("//chartheight").item(0).getFirstChild().getNodeValue());
+        try { nLat = Double.parseDouble(doc.selectNodes("//north").item(0).getFirstChild().getNodeValue()); } catch (Exception ex) {}
+        try { sLat = Double.parseDouble(doc.selectNodes("//south").item(0).getFirstChild().getNodeValue()); } catch (Exception ex) {}
+        try { wLong = Double.parseDouble(doc.selectNodes("//west").item(0).getFirstChild().getNodeValue()); } catch (Exception ex) {}
+        try { eLong = Double.parseDouble(doc.selectNodes("//east").item(0).getFirstChild().getNodeValue()); } catch (Exception ex) {}
+        int w = 0;
+        try { w = Integer.parseInt(doc.selectNodes("//chartwidth").item(0).getFirstChild().getNodeValue()); } catch (Exception ex) {}
+        int h = 0;
+        try { h = Integer.parseInt(doc.selectNodes("//chartheight").item(0).getFirstChild().getNodeValue()); } catch (Exception ex) {}
+        
+        // Boat Position?
+        if ((withBoatAndTrack || option.equals(TwoFilePanel.EVERY_THING)) && doc.selectNodes("//boat-position").getLength() == 1)
+        {
+          XMLElement bp = (XMLElement)doc.selectNodes("//boat-position").item(0);
+          double l   = Double.parseDouble(bp.getAttribute("lat"));
+          double g   = Double.parseDouble(bp.getAttribute("lng"));
+          int hdg    = Integer.parseInt(bp.getAttribute("hdg"));
+          boatPosition = new GeoPoint(l, g);
+          boatHeading  = hdg;
+        }
         
         if (chartPanel.getProjection() != ChartPanel.GLOBE_VIEW && 
             chartPanel.getProjection() != ChartPanel.SATELLITE_VIEW)
@@ -4471,7 +4716,7 @@ public class CommandPanel
 
         chartPanel.setW(w);
         chartPanel.setH(h);
-        chartPanel.setBounds(0,0,w,h);
+        chartPanel.setBounds(0, 0, w, h);
 
         chartPanel.repaint();  
   
@@ -4484,7 +4729,8 @@ public class CommandPanel
             FaxType[] ft = new FaxType[faxes.getLength()];
             for (int i=0; i<faxes.getLength(); i++)
             {
-              WWContext.getInstance().fireProgressing(WWGnlUtilities.buildMessage("restoring-fax", new String[] {Integer.toString(i+1)}));
+              WWContext.getInstance().fireProgressing(WWGnlUtilities.buildMessage("restoring-fax", new String[] {Integer.toString(i+1),
+                                                                                                                 Integer.toString(faxes.getLength())}));
               XMLElement fax = (XMLElement)faxes.item(i);
               String faxName = fax.getAttribute("file");
               Color c = WWGnlUtilities.buildColor(fax.getAttribute("color"));
@@ -4543,9 +4789,19 @@ public class CommandPanel
                   {
                     if (faxImage[i].colorChange)
                 //    faxImage[i].faxImage = ImageUtil.makeTransparentImage(this, ImageUtil.readImage(is, tif), c);
-                      faxImage[i].faxImage = ImageUtil.switchColorAndMakeColorTransparent(ImageUtil.readImage(is, tif), Color.black, c, Color.white, blurSharpOption);
+                      faxImage[i].faxImage = ImageUtil.switchColorAndMakeColorTransparent(ImageUtil.readImage(is, tif), 
+                                                                                          Color.black, 
+                                                                                          c, 
+                                                                                          Color.white, 
+                                                                                          blurSharpOption, 
+                                                                                          new String[] {Integer.toString(i+1),
+                                                                                                        Integer.toString(faxes.getLength())});
                     else
-                      faxImage[i].faxImage = ImageUtil.makeColorTransparent(ImageUtil.readImage(is, tif), Color.white, blurSharpOption);
+                      faxImage[i].faxImage = ImageUtil.makeColorTransparent(ImageUtil.readImage(is, tif), 
+                                                                            Color.white, 
+                                                                            blurSharpOption, 
+                                                                            new String[] {Integer.toString(i+1),
+                                                                                          Integer.toString(faxes.getLength())});
                   }
                   else
                     faxImage[i].faxImage = ImageUtil.readImage(is, tif);     
@@ -4557,9 +4813,19 @@ public class CommandPanel
                   {
                     if (faxImage[i].colorChange)
                   //  faxImage[i].faxImage = ImageUtil.makeTransparentImage(this, ImageUtil.readImage(faxName), c);
-                      faxImage[i].faxImage = ImageUtil.switchColorAndMakeColorTransparent(ImageUtil.readImage(faxName), Color.black, c, Color.white, blurSharpOption);
+                      faxImage[i].faxImage = ImageUtil.switchColorAndMakeColorTransparent(ImageUtil.readImage(faxName), 
+                                                                                          Color.black, 
+                                                                                          c, 
+                                                                                          Color.white, 
+                                                                                          blurSharpOption, 
+                                                                                          new String[] {Integer.toString(i+1),
+                                                                                                        Integer.toString(faxes.getLength())});
                     else
-                      faxImage[i].faxImage = ImageUtil.makeColorTransparent(ImageUtil.readImage(faxName), Color.white, blurSharpOption);
+                      faxImage[i].faxImage = ImageUtil.makeColorTransparent(ImageUtil.readImage(faxName), 
+                                                                            Color.white, 
+                                                                            blurSharpOption, 
+                                                                            new String[] {Integer.toString(i+1),
+                                                                                          Integer.toString(faxes.getLength())});
                   }
                   else
                     faxImage[i].faxImage = ImageUtil.readImage(faxName);
@@ -4597,7 +4863,6 @@ public class CommandPanel
           try 
           { 
             XMLElement gribNode = (XMLElement)doc.selectNodes("//grib").item(0);
-            WWContext.getInstance().fireProgressing(WWGnlUtilities.buildMessage("restoring-grib"));
 
             String twsData = gribNode.getAttribute("display-TWS-Data");
             if (twsData.trim().length() > 0) // New version
@@ -4640,6 +4905,7 @@ public class CommandPanel
     //        gribContent.print(sw);
               
               gribFileName = gribNode.getFirstChild().getNodeValue(); 
+              WWContext.getInstance().fireProgressing(WWGnlUtilities.buildMessage("restoring-grib"));
               String displayFileName = gribFileName;
               InputStream is = null;
               if (fromArchive)
@@ -4672,15 +4938,31 @@ public class CommandPanel
             else
             {
               gribFileName = gribNode.getFirstChild().getNodeValue(); 
+              WWContext.getInstance().fireProgressing(WWGnlUtilities.buildMessage("restoring-grib"));
               String displayFileName = gribFileName;
               GribHelper.GribConditionData wgd[] = null;
               if (fromArchive)
               {
                 if (gribFileName.startsWith(WWContext.WAZ_PROTOCOL_PREFIX))
                   gribFileName = gribFileName.substring(WWContext.WAZ_PROTOCOL_PREFIX.length());
-                InputStream is = waz.getInputStream(waz.getEntry(gribFileName));
-                wgd = GribHelper.getGribData(is, gribFileName);
-                is.close();           
+                synchronized (this)
+                {
+                  InputStream is = waz.getInputStream(waz.getEntry(gribFileName));       
+                  try
+                  {
+                    wgd = GribHelper.getGribData(is, gribFileName);
+                  }
+                  catch (RuntimeException rte)
+                  {
+                    String mess = rte.getMessage();
+//                  System.out.println("RuntimeException getMessage(): [" + mess + "]");
+                    if (mess.startsWith("DataArray (width) size mismatch"))
+                      System.out.println(mess);
+                    else
+                      throw rte;
+                  }
+                  is.close();           
+                }
               }
               else
                 wgd = GribHelper.getGribData(gribFileName);
@@ -4699,6 +4981,33 @@ public class CommandPanel
 //        chartPanel.setW(w);
 //        chartPanel.setH(h);
 //        chartPanel.setBounds(0,0,w,h);
+        
+        // GPX Data?
+        if (withBoatAndTrack || option.equals(TwoFilePanel.EVERY_THING))
+        {
+          try 
+          { 
+            NodeList gpxList = doc.selectNodes("//gpx-data/gpx-point");
+            int nl = gpxList.getLength();
+            if (nl == 0)
+              gpxData = null;
+            else
+            {
+              gpxData = new ArrayList<GeoPoint>(nl);
+              for (int i=0; i<nl; i++)
+              {
+                XMLElement gpx = (XMLElement)gpxList.item(i);
+                GeoPoint gp = new GeoPoint(Double.parseDouble(gpx.getAttribute("lat")),
+                                           Double.parseDouble(gpx.getAttribute("lng")));
+                gpxData.add(gp);
+              }
+            }            
+          }
+          catch (Exception ex)
+          {
+            ex.printStackTrace();   
+          }
+        }
       }
       catch (Exception e)
       {
@@ -4956,9 +5265,19 @@ public class CommandPanel
                 {
                   if (faxImage[i].colorChange)
                //   faxImage[i].faxImage = ImageUtil.makeTransparentImage(this, ImageUtil.readImage(faxName), c);
-                    faxImage[i].faxImage = ImageUtil.switchColorAndMakeColorTransparent(ImageUtil.readImage(faxName), Color.black, c, Color.white, blurSharpOption);
+                    faxImage[i].faxImage = ImageUtil.switchColorAndMakeColorTransparent(ImageUtil.readImage(faxName), 
+                                                                                        Color.black, 
+                                                                                        c, 
+                                                                                        Color.white,
+                                                                                        blurSharpOption,                                                                                           
+                                                                                        new String[] {Integer.toString(i+1),
+                                                                                                      Integer.toString(faxes.getLength())});
                   else
-                    faxImage[i].faxImage = ImageUtil.makeColorTransparent(ImageUtil.readImage(faxName), Color.white, blurSharpOption);
+                    faxImage[i].faxImage = ImageUtil.makeColorTransparent(ImageUtil.readImage(faxName), 
+                                                                          Color.white, 
+                                                                          blurSharpOption,                                                                                           
+                                                                          new String[] {Integer.toString(i+1),
+                                                                                        Integer.toString(faxes.getLength())});
                 }
                 else
                   faxImage[i].faxImage = ImageUtil.readImage(faxName);
@@ -5730,8 +6049,7 @@ public class CommandPanel
         gr.drawOval(pt.x - 3, pt.y - 3, 6, 6);
         gr.setColor(orig);
       }
-    }
-    
+    }    
     // Routing
     if (from != null && 
         wgd != null && 
@@ -5825,7 +6143,7 @@ public class CommandPanel
           }
           catch (ConcurrentModificationException cme)
           {
-            System.out.println("ConcurrentModificationException ...");
+            System.out.println("ConcurrentModificationException (A)...");
           }
         }        
         if (closestPoint != null && drawBestRoute)
@@ -5920,8 +6238,7 @@ public class CommandPanel
               thisPoint = next;
             }
           }
-          // TODO Wind for last point (origin)
-          
+          // TODO Wind for last point (origin)          
           alpha = 1f;
           g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
           g2.setStroke(originalStroke);
@@ -5933,7 +6250,23 @@ public class CommandPanel
         if (routingMode) System.out.println("No isochron yet");
     } // End Of Routing
     
-    if (boatPosition != null)
+    // GPX ?
+    if (gpxData != null)
+    {
+      GeoPoint previous = null;
+      for (GeoPoint gp : gpxData)
+      {
+        if (previous != null)
+        {
+          Point _from = chartPanel.getPanelPoint(previous);          
+          Point _to   = chartPanel.getPanelPoint(gp);
+          gr.drawLine(_from.x, _from.y, _to.x, _to.y);
+        }
+        previous = gp;
+      }
+    }
+    
+    if (boatPosition != null) 
     {
       WWGnlUtilities.drawBoat((Graphics2D)gr, 
                             (Color)ParamPanel.data[ParamData.GPS_BOAT_COLOR][1], 
@@ -5941,19 +6274,59 @@ public class CommandPanel
                                                      boatPosition.getG()), 
                             30, 
                             boatHeading,
-                            0.50f);
+                            0.50f,
+                            WWGnlUtilities.CIRCLE);
     }
     
     // Routing Element
     if (routingPoint != null)
-    {
+    {      
       WWGnlUtilities.drawBoat((Graphics2D)gr, 
                              Color.red, // TODO Set as preference
                              chartPanel.getPanelPoint(routingPoint.getL(), 
                                                       routingPoint.getG()), 
                              30, 
                              routingHeading,
-                             0.50f);
+                             0.50f);      
+      // Add big bubble here 
+      // Find routing point for routing boat position.
+      RoutingPoint thisPoint = closestPoint; // LAST point of the route
+//    System.out.println("Searching " + routingPoint.toString());
+      boolean go = true;
+      RoutingPoint furtherDown = null;
+      while (go)
+      {
+        if (thisPoint.getPosition().equals(routingPoint))
+        {
+          go = false;
+          if (furtherDown != null)
+            thisPoint = furtherDown;
+//        System.out.println("Found match at " + thisPoint.getPosition().toString());
+        }
+        else
+        {
+          furtherDown = thisPoint;
+          RoutingPoint next = thisPoint.getAncestor();
+          if (next == null)
+            go = false;
+          else
+            thisPoint = next;
+//        System.out.println("ThisPoint now " + thisPoint.getPosition().toString());
+        }
+      }      
+      String postit = WWGnlUtilities.SDF_UT_3.format(thisPoint.getDate());
+      postit += ("\nWind:" + WWGnlUtilities.XXX12.format(thisPoint.getTws()) + " kts @ " + Integer.toString(thisPoint.getTwd()) + "\272t");
+      postit += ("\nBSP :" + WWGnlUtilities.XXX12.format(thisPoint.getBsp()) + " kts");
+      postit += ("\nHDG :" + Integer.toString(thisPoint.getHdg()) + "\272t");
+      chartPanel.bubble(gr, 
+                        postit, 
+                        chartPanel.getPanelPoint(routingPoint.getL(), 
+                                                 routingPoint.getG()).x,                              
+                        chartPanel.getPanelPoint(routingPoint.getL(), 
+                                                 routingPoint.getG()).y, 
+                        Color.cyan, 
+                        Color.blue, 
+                        0.40f);
     }
     
     if (fromGRIBSlice != null && toGRIBSlice != null)
@@ -6227,11 +6600,68 @@ public class CommandPanel
     Thread isochronThread = null;
 //  if (isoFrom == null || from != isoFrom || isoTo == null || isoTo != to)
     {
+      final boolean showProgressMonitor = true;
       // the Routing
       isochronThread = new Thread()
       {
         public void run()
         {
+          ProgressMonitor pm = null;
+          if (showProgressMonitor)
+          {
+            WWContext.getInstance().setMonitor(ProgressUtil.createModalProgressMonitor(WWContext.getInstance().getMasterTopFrame(), 1, true, true, "interrupt-routing"));
+            pm = WWContext.getInstance().getMonitor();
+            if (pm != null)
+            {
+              synchronized (pm)
+              {
+                pm.start(WWGnlUtilities.buildMessage("routing-dot")); 
+              }
+            }
+            WWContext.getInstance ().setAel4monitor(new ApplicationEventListener()
+              {
+                public String toString()
+                {
+                  return "{" + Long.toString(id) + "} from Runnable in CommandPanel (4).";
+                }
+                public void progressing(String mess)
+                {
+                  try
+                  {
+                    ProgressMonitor pm = WWContext.getInstance().getMonitor();
+                    if (pm != null)
+                    {
+                      synchronized (pm)
+                      {
+                        pm.setCurrent(mess, WWContext.getInstance().getMonitor().getCurrent());
+                      }
+                    }
+                  }
+                  catch (Exception ex)
+                  {
+                    System.out.println(" ... progessing:" + ex.toString());
+                    ex.printStackTrace();
+                  }
+                }
+                public void interruptProgress()
+                {
+                  System.out.println("Interruption requested (4)...");
+                  RoutingUtil.interruptRoutingCalculation();
+                  ProgressMonitor monitor = WWContext.getInstance().getMonitor();
+                  if (monitor != null)
+                  {
+                    synchronized (monitor)
+                    {
+                      int total = monitor.getTotal();
+                      int current = monitor.getCurrent();
+                      if (current != total)
+                          monitor.setCurrent(null, total);
+                    }
+                  }
+                }
+              });
+            WWContext.getInstance().addApplicationListener(WWContext.getInstance().getAel4monitor());
+          }
           WWContext.getInstance().fireLogging(WWGnlUtilities.buildMessage("computing-isochrones") + "\n");
           WWContext.getInstance().fireSetLoading(true, WWGnlUtilities.buildMessage("routing"));
           boolean stopIfTooOld = stopGRIB;
@@ -6261,13 +6691,54 @@ public class CommandPanel
                                                                   limitTWA,
                                                                   stopIfTooOld,
                                                                   pf);
+          
+          int clipboardOption = Integer.parseInt(((ParamPanel.RoutingOutputList)(ParamPanel.data[ParamData.ROUTING_OUTPUT_FLAVOR][1])).getStringIndex());
+          String fileOutput = null;
+          
+          if (clipboardOption == ParamPanel.RoutingOutputList.ASK)
+          {
+            RoutingOutputFlavorPanel rofp = new RoutingOutputFlavorPanel();              
+            JOptionPane.showMessageDialog(instance, rofp, "Routing output", JOptionPane.QUESTION_MESSAGE);
+            clipboardOption = rofp.getSelectedOption();
+            fileOutput = rofp.getFileOutput();
+          }
+
           i = allCalculatedIsochrons.size();
           long after = System.currentTimeMillis();
           routingOnItsWay = false;
           WWContext.getInstance().fireSetLoading(false, WWGnlUtilities.buildMessage("routing"));
           WWContext.getInstance().fireLogging(WWGnlUtilities.buildMessage("isochrones-calculated", new String[] { Integer.toString(i), Long.toString(after - before) }) + "\n");          
           // Reverse, for the clipboard
-          String clipboardContent = "L;(dec L);G;(dec G);Date;UTC;TWS;TWD;BSP;HDG\n";
+          boolean generateGPXRoute = true;
+          String clipboardContent = "";
+          if (clipboardOption == ParamPanel.RoutingOutputList.CSV)
+            clipboardContent = "L;(dec L);G;(dec G);Date;UTC;TWS;TWD;BSP;HDG\n";
+          else if (clipboardOption == ParamPanel.RoutingOutputList.GPX)
+          {
+            clipboardContent = 
+            "<?xml version=\"1.0\" encoding=\"utf-8\" ?>\n" + 
+            "<gpx version=\"1.1\" \n" + 
+            "     creator=\"OpenCPN\" \n" + 
+            "	 xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" \n" + 
+            "	 xmlns=\"http://www.topografix.com/GPX/1/1\" \n" + 
+            "	 xsi:schemaLocation=\"http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd\" \n" + 
+            "	 xmlns:opencpn=\"http://www.opencpn.org\">\n";
+            if (generateGPXRoute)
+            {
+              Date d = new Date();
+              clipboardContent += ("  <rte>\n" +
+                                   "    <name>Weather Wizard route (" + WWGnlUtilities.SDF_DMY.format(d) + ")</name>\n" + 
+                                   "    <type>Routing</type>\n" +
+                                   "    <desc>Routing from Weather Wizard (generated " + d.toString() + ")</desc>\n" +
+                                   "    <number>" + (d.getTime()) + "</number>\n");
+            }
+          }
+          else if (clipboardOption == ParamPanel.RoutingOutputList.TXT)
+          {
+            Date d = new Date();
+            clipboardContent += ("Weather Wizard route (" + WWGnlUtilities.SDF_DMY.format(d) + ") generated " + d.toString() + ")\n");
+          }
+
           if (closestPoint != null && allCalculatedIsochrons != null)
           {
             Calendar cal = new GregorianCalendar();
@@ -6290,7 +6761,8 @@ public class CommandPanel
             String date = "", time = "";
             RoutingPoint rp = null;
             RoutingPoint ic = null; // Isochron Center
-            for (int r=0; r<routesize; r++) // 0 is the closest point, the last calculated
+//          for (int r=0; r<routesize; r++) // 0 is the closest point, the last calculated
+            for (int r=routesize - 1; r>=0; r--) // 0 is the closest point, the last calculated
             {
               rp = bestRoute.get(r);
               if (r == 0) // Last one
@@ -6309,39 +6781,145 @@ public class CommandPanel
                 int day     = cal.get(Calendar.DAY_OF_MONTH);
                 int hours   = cal.get(Calendar.HOUR_OF_DAY);
                 int minutes = cal.get(Calendar.MINUTE);
-             // int seconds = cal.get(Calendar.SECOND);
-              
-                date = WWGnlUtilities.DF2.format(month + 1) + "/" + WWGnlUtilities.DF2.format(day) + "/" + Integer.toString(year);
-                time = WWGnlUtilities.DF2.format(hours) + ":" + WWGnlUtilities.DF2.format(minutes);
+                int seconds = cal.get(Calendar.SECOND);
+                if (clipboardOption == ParamPanel.RoutingOutputList.CSV)
+                {
+                  date = WWGnlUtilities.DF2.format(month + 1) + "/" + WWGnlUtilities.DF2.format(day) + "/" + Integer.toString(year);
+                  time = WWGnlUtilities.DF2.format(hours) + ":" + WWGnlUtilities.DF2.format(minutes);
+                }
+                else if (clipboardOption == ParamPanel.RoutingOutputList.GPX)
+                {
+                  date = Integer.toString(year) + "-" + 
+                         WWGnlUtilities.DF2.format(month + 1) + "-" + 
+                         WWGnlUtilities.DF2.format(day) + "T" +
+                         WWGnlUtilities.DF2.format(hours) + ":" + 
+                         WWGnlUtilities.DF2.format(minutes) + ":" +
+                         WWGnlUtilities.DF2.format(seconds) + "Z";
+                }
+                else if (clipboardOption == ParamPanel.RoutingOutputList.TXT)
+                {
+                  date = rp.getDate().toString();
+                }
               }    
-              String lat = GeomUtil.decToSex(rp.getPosition().getL(), GeomUtil.SWING, GeomUtil.NS);
-              String lng = GeomUtil.decToSex(rp.getPosition().getG(), GeomUtil.SWING, GeomUtil.EW);
-              String tws = WWGnlUtilities.XX22.format(ic.getTws());
-              String twd = Integer.toString(ic.getTwd());
-              String bsp = WWGnlUtilities.XX22.format(ic.getBsp());
-              String hdg = Integer.toString(ic.getHdg());
-                  
-              clipboardContent += (lat + ";" + 
-                                   Double.toString(rp.getPosition().getL()) + ";" +
-                                   lng + ";" + 
-                                   Double.toString(rp.getPosition().getG()) + ";" +
-                                   date + ";" + 
-                                   time + ";" + 
-                                   tws + ";" +
-                                   twd + ";" + 
-                                   bsp + ";" + 
-                                   hdg + "\n");
+              if (clipboardOption == ParamPanel.RoutingOutputList.CSV)
+              {
+                String lat = GeomUtil.decToSex(rp.getPosition().getL(), GeomUtil.SWING, GeomUtil.NS);
+                String lng = GeomUtil.decToSex(rp.getPosition().getG(), GeomUtil.SWING, GeomUtil.EW);
+                String tws = WWGnlUtilities.XX22.format(ic.getTws());
+                String twd = Integer.toString(ic.getTwd());
+                String bsp = WWGnlUtilities.XX22.format(ic.getBsp());
+                String hdg = Integer.toString(ic.getHdg());
+                    
+                clipboardContent += (lat + ";" + 
+                                     Double.toString(rp.getPosition().getL()) + ";" +
+                                     lng + ";" + 
+                                     Double.toString(rp.getPosition().getG()) + ";" +
+                                     date + ";" + 
+                                     time + ";" + 
+                                     tws + ";" +
+                                     twd + ";" + 
+                                     bsp + ";" + 
+                                     hdg + "\n");
+              }
+              else if (clipboardOption == ParamPanel.RoutingOutputList.GPX)
+              {
+                if (generateGPXRoute)
+                {
+                  clipboardContent +=
+                    ("       <rtept lat=\"" + rp.getPosition().getL() + "\" lon=\"" + rp.getPosition().getG() + "\">\n" + 
+                    "            <name>" + WWGnlUtilities.DF3.format(routesize - r) + "_WW</name>\n" + 
+                    "            <sym>triangle</sym>\n" + 
+                    "            <type>WPT</type>\n" + 
+                    "            <extensions>\n" + 
+                    "                <opencpn:prop>A,0,1,1,1</opencpn:prop>\n" + 
+                    "            </extensions>\n" + 
+                    "        </rtept>\n");
+                }
+                else
+                {
+                  clipboardContent +=
+                    ("  <wpt lat=\"" + rp.getPosition().getL() + "\" lon=\"" + rp.getPosition().getG() + "\">\n" + 
+                     "    <time>" + date + "</time>\n" + 
+                     "    <name>" + WWGnlUtilities.DF3.format(r) + "_WW</name>\n" + 
+                     "    <sym>triangle</sym>\n" + 
+                     "    <type>WPT</type>\n" + 
+                     "    <extensions>\n" + 
+                     "            <opencpn:guid>142646-1706866-1264115693</opencpn:guid>\n" + 
+                     "            <opencpn:viz>1</opencpn:viz>\n" + 
+                     "            <opencpn:viz_name>1</opencpn:viz_name>\n" + 
+                     "            <opencpn:shared>1</opencpn:shared>\n" + 
+                     "    </extensions>\n" +
+                     "  </wpt>\n");
+                }
+              }
+              else if (clipboardOption == ParamPanel.RoutingOutputList.TXT)
+              {
+                String tws = WWGnlUtilities.XX22.format(ic.getTws());
+                String twd = Integer.toString(ic.getTwd());
+                String bsp = WWGnlUtilities.XX22.format(ic.getBsp());
+                String hdg = Integer.toString(ic.getHdg());
+                clipboardContent +=
+                  (rp.getPosition().toString() + " : " + date + ", tws:" + tws + ", twd:" + twd + ", bsp:" + bsp + ", hdg:" + hdg + "\n");
+              }
             }
+            if (clipboardOption == ParamPanel.RoutingOutputList.GPX)
+            {
+              if (generateGPXRoute)
+                clipboardContent += "  </rte>\n";
+              clipboardContent +=
+               ("</gpx>");
+            }
+
 //          commandPanelInstance.repaint();
-                        
-            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-            StringSelection stringSelection = new StringSelection(clipboardContent);
-            clipboard.setContents(stringSelection, null);    
-//          JOptionPane.showMessageDialog(null, "Routing is in the clipboard\n(Ctrl+V in any editor...)", "Routing completed", JOptionPane.INFORMATION_MESSAGE);
-            WWContext.getInstance().fireSetStatus(WWGnlUtilities.buildMessage("routing-in-clip"));
-            WWContext.getInstance().fireRoutingAvailable(true, bestRoute);
-            
+            if (fileOutput != null && fileOutput.trim().length() > 0)            
+            {
+              try
+              {
+                BufferedWriter bw = new BufferedWriter(new FileWriter(fileOutput));              
+                bw.write(clipboardContent + "\n");
+                bw.close();
+              }
+              catch (Exception ex)
+              {
+                ex.printStackTrace();
+              }
+              WWContext.getInstance().fireSetStatus(WWGnlUtilities.buildMessage("routing-in-file", new String[] { fileOutput }));
+            }
+            else
+            {
+              Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+              StringSelection stringSelection = new StringSelection(clipboardContent);
+              clipboard.setContents(stringSelection, null);    
+  //          JOptionPane.showMessageDialog(null, "Routing is in the clipboard\n(Ctrl+V in any editor...)", "Routing completed", JOptionPane.INFORMATION_MESSAGE);
+              WWContext.getInstance().fireSetStatus(WWGnlUtilities.buildMessage("routing-in-clip"));
+            }
+
+            if (showProgressMonitor)
+            {
+              if (pm != null)
+              {
+                synchronized (pm)
+                {
+                  try
+                  {
+                    if (pm.getCurrent() != pm.getTotal())
+                      pm.setCurrent(null, pm.getTotal());
+                    WWContext.getInstance().removeApplicationListener(WWContext.getInstance().getAel4monitor());
+                    WWContext.getInstance().setAel4monitor(null);
+                    WWContext.getInstance().setMonitor(null);
+                  }
+                  catch (Exception ex)
+                  {
+                    ex.printStackTrace();
+                  }
+                }
+              }
+            }
+
+            WWContext.getInstance().fireRoutingAvailable(true, bestRoute);                        
             displayGRIBSlice(bestRoute);
+            
+            // End of the Routing.
             
   //        routingMode = false;
   //        JOptionPane.showMessageDialog(null, "Isochron Calculation completed", "Routing", 1);
@@ -6651,9 +7229,11 @@ public class CommandPanel
   
   private void displayGRIBSlice(ArrayList<RoutingPoint> bestRoute)
   {
-//  System.out.println("displayGRIBSlice...");
+    System.out.println("displayGRIBSlice...");
     ArrayList<GribHelper.GribCondition> data2plot = new ArrayList<GribHelper.GribCondition>();
+    ArrayList<Double> bsp = null;
     int fw = 1; // That's for routing
+    int dataOption = GRIBSlicePanel.GRIB_SLICE_OPTION;
     if (fromGRIBSlice != null && toGRIBSlice != null) // GRIB Slice
     {
       fw = GRIBSlicePanel.DEFAULT_FORK_WIDTH;
@@ -6680,7 +7260,9 @@ public class CommandPanel
     }
     else // This is a routing
     {
-      // Route is upside down
+      dataOption = GRIBSlicePanel.ROUTING_OPTION;
+      bsp = new ArrayList<Double>();
+      // Route is upside down, reverse it.
       int routeSize = bestRoute.size();
 //    for (RoutingPoint rp : bestRoute)
       for (int i=routeSize - 1; i >= 0; i--)
@@ -6698,6 +7280,7 @@ public class CommandPanel
             gribPoint = GribHelper.gribLookup(gp, gribData); 
           }
           data2plot.add(gribPoint);
+          bsp.add((i==(routeSize - 1))?new Double(bestRoute.get(i-1).getBsp()):new Double(rp.getBsp()));
         }
         catch (Exception ignore) 
         {
@@ -6706,12 +7289,14 @@ public class CommandPanel
       }
     }
     if (gsp == null)
-      gsp = new GRIBSlicePanel(data2plot, fw);
+      gsp = new GRIBSlicePanel(data2plot, bsp, dataOption, fw);
     else
     {
-      gsp.setData(data2plot);
+      gsp.setData(data2plot, bsp, dataOption);
       gsp.setForkWidth(fw);
     }
+//  gsp.setDataOption(dataOption);
+//  gsp.setBsp(bsp);
     
     jSplitPane.setLeftComponent(gsp);
   }
@@ -7404,9 +7989,28 @@ public class CommandPanel
     to = null;
     allCalculatedIsochrons = null;
     bestRoute = null;
+    fromGRIBSlice = null;
+    toGRIBSlice = null;
     WWContext.getInstance().fireRoutingAvailable(false, null);
     setEnableGRIBSlice(false);
     eraseRoutingBoat();
+    jSplitPane.setLeftComponent(dummyGribSlicePlaceHolder);
+    jSplitPane.setDividerLocation(0);
+  }
+
+  public void setGPXData(ArrayList<GeoPoint> gpxData)
+  {
+    this.gpxData = gpxData;
+  }
+
+  public ArrayList<GeoPoint> getGPXData()
+  {
+    return gpxData;
+  }
+
+  public int getBlurSharpOption()
+  {
+    return blurSharpOption;
   }
 
   public class FaxImage

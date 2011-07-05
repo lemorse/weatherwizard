@@ -100,6 +100,7 @@ public class CommandPanelPopup
   private JCheckBoxMenuItem showRoutingLabels;
   private JMenuItem interruptRouting;
   private JMenuItem eraseRoutingBoat;
+  private JMenuItem erasePositionBoat;
   private JMenuItem removeRouting;
   
   private JMenuItem eraseFlags;
@@ -157,6 +158,7 @@ public class CommandPanelPopup
   private final String INTERRUPT_ROUTING = WWGnlUtilities.buildMessage("interrupt-routing");
   private final String REMOVE_ROUTING = WWGnlUtilities.buildMessage("remove-routing");
   private final String ERASE_ROUTING_BOAT = WWGnlUtilities.buildMessage("erase-routing-boat");
+  private final String ERASE_POSITION_BOAT = WWGnlUtilities.buildMessage("erase-position-boat");
   private final String CLICK_SCROLL = WWGnlUtilities.buildMessage("click-scroll");
 
   private final String DROP_FLAGS = WWGnlUtilities.buildMessage("drop-flags");
@@ -443,6 +445,12 @@ public class CommandPanelPopup
     eraseRoutingBoat.setEnabled(parent.isRoutingBoatDisplayed());
     eraseRoutingBoat.setBackground(Color.white);
     eraseRoutingBoat.addActionListener(this);
+        
+    erasePositionBoat = new JMenuItem(ERASE_POSITION_BOAT);
+    this.add(erasePositionBoat);
+    erasePositionBoat.setEnabled(parent.isBoatPositionDisplayed());
+    erasePositionBoat.setBackground(Color.white);
+    erasePositionBoat.addActionListener(this);
 
     removeRouting = new JMenuItem(REMOVE_ROUTING);
     removeRouting.setIcon(new ImageIcon(this.getClass().getResource("remove_file.png")));
@@ -756,7 +764,13 @@ public class CommandPanelPopup
     else if (event.getActionCommand().equals(ERASE_ROUTING_BOAT))
     {
       parent.eraseRoutingBoat();
-    }
+      parent.chartPanel.repaint();
+    } 
+    else if (event.getActionCommand().equals(ERASE_POSITION_BOAT))
+    {
+      parent.resetBoatPosition();
+      parent.chartPanel.repaint();
+    } 
     else if (event.getActionCommand().equals(REMOVE_ROUTING))
     {
       parent.shutOffRouting();
