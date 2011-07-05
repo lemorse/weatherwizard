@@ -7,6 +7,8 @@ import chartview.gui.util.dialog.FaxType;
 
 import chartview.routing.enveloppe.custom.RoutingPoint;
 
+import chartview.util.WWGnlUtilities;
+
 import java.awt.Color;
 import java.awt.Point;
 
@@ -116,7 +118,7 @@ public abstract class ApplicationEventListener implements EventListener
   public void plotBoatAt(GeoPoint gp, int hdg) {}
   public void manuallyEnterBoatPosition(GeoPoint gp, int hdg) {}
   
-  public void setLoading(boolean b) {}
+  public void setLoading(boolean b) { setLoading(b, WWGnlUtilities.buildMessage("loading")); }
   public void setLoading(boolean b, String mess) {}
   public void stopAnyLoadingProgressBar() {}
   public void setStatus(String str) {}
