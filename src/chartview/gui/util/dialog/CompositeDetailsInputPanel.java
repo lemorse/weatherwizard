@@ -7,8 +7,10 @@ import chartview.gui.util.param.ParamPanel;
 
 import chartview.gui.util.tree.JTreeGRIBRequestPanel;
 
+import chartview.util.GPXUtil;
 import chartview.util.WWGnlUtilities;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -18,10 +20,18 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import java.awt.event.KeyEvent;
+
 import java.io.File;
+
+import java.net.URL;
 
 import java.util.ArrayList;
 import java.util.Collections;
+
+import java.util.Date;
+
+import java.util.TimeZone;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -32,13 +42,13 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
+import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 public class CompositeDetailsInputPanel
      extends JPanel
 {
-  private GridBagLayout gridBagLayout1 = new GridBagLayout();
   private JTextField topLatTextField = new JTextField();
   private JLabel jLabel1 = new JLabel();
   private JComboBox topLatComboBox = new JComboBox();
@@ -58,6 +68,8 @@ public class CompositeDetailsInputPanel
   private JCheckBox gribSizeCheckBox = new JCheckBox();
   private FaxTablePanel faxTablePanel = new FaxTablePanel();
   private JCheckBox justWindCheckBox = new JCheckBox();
+  private JCheckBox contourCheckBox  = new JCheckBox();
+  private JCheckBox threeDCheckBox   = new JCheckBox();
   
   private JPanel gribDataOptionPanel = new JPanel();
 //private JPanel grib3DOptionPanel = new JPanel();
@@ -89,7 +101,6 @@ public class CompositeDetailsInputPanel
   private JCheckBox gribCheckBox = new JCheckBox();
   private JSeparator jSeparator1 = new JSeparator();
   private JSeparator jSeparator2 = new JSeparator();
-  private JSeparator jSeparator3 = new JSeparator();
 
   public final static int PRMSL_DATA    =  0;
   public final static int MB500_DATA    =  1;
@@ -111,6 +122,20 @@ public class CompositeDetailsInputPanel
   public final static int PRATE_CONTOUR = 15;
   public final static int TWS_CONTOUR   = 16;
   
+  private JPanel compositeOne   = new JPanel();
+  private JPanel compositeTwo   = new JPanel();
+  private JTabbedPane compositeTabbedPane = new JTabbedPane();
+  private JPanel gpxPanel = new JPanel();
+  private GridBagLayout gridBagLayout2 = new GridBagLayout();
+  private JCheckBox gpxCheckBox = new JCheckBox();
+  private JLabel gpxLabel = new JLabel();
+  private JTextField gpxFileNameTextField = new JTextField();
+  private JButton gpxBrowseButton = new JButton();
+  private JCheckBox upToCheckBox = new JCheckBox();
+  private DateTimePanel dtPanel = new DateTimePanel();
+  private JLabel fromGPXLabel = new JLabel();
+  private JCheckBox jCheckBox1 = new JCheckBox();
+
   public CompositeDetailsInputPanel()
   {
     try
@@ -127,9 +152,53 @@ public class CompositeDetailsInputPanel
   private void jbInit()
     throws Exception
   {
-    this.setLayout(gridBagLayout1);
+//  this.setLayout(gridBagLayout1);
+    this.setLayout(new BorderLayout());
     this.setSize(new Dimension(505, 502));
+    
+    compositeOne.setLayout(new GridBagLayout());
+    compositeOne.setSize(new Dimension(532, 371));
+    compositeTwo.setLayout(new GridBagLayout());
+
 //  this.setToolTipText("null");
+    gpxPanel.setLayout(gridBagLayout2);
+    gpxCheckBox.setText("GPX Data"); // LOCALIZE
+    gpxCheckBox.setToolTipText("Get GPX Data from a GPX File"); // LOCALIZE
+    gpxCheckBox.addActionListener(new ActionListener()
+      {
+        public void actionPerformed(ActionEvent e)
+        {
+          gpxCheckBox_actionPerformed(e);
+        }
+      });
+    gpxLabel.setText("GPX File Name:"); // LOCALIZE
+    gpxLabel.setEnabled(false);
+    gpxFileNameTextField.setMinimumSize(new Dimension(200, 19));
+    gpxFileNameTextField.setPreferredSize(new Dimension(200, 19));
+    gpxFileNameTextField.setEnabled(false);
+    gpxBrowseButton.setText("Browse..."); // LOCALIZE
+    gpxBrowseButton.setEnabled(false);
+    gpxBrowseButton.addActionListener(new ActionListener()
+      {
+        public void actionPerformed(ActionEvent e)
+        {
+          gpxBrowseButton_actionPerformed(e);
+        }
+      });
+    upToCheckBox.setText("Up to...");
+    upToCheckBox.setEnabled(false);
+    upToCheckBox.addActionListener(new ActionListener()
+      {
+        public void actionPerformed(ActionEvent e)
+        {
+          upToCheckBox_actionPerformed(e);
+        }
+      });
+    dtPanel.setEnabled(false);
+
+    fromGPXLabel.setText("From...");
+    fromGPXLabel.setEnabled(false);
+    jCheckBox1.setText("jCheckBox1");
     topLatTextField.setPreferredSize(new Dimension(60, 20));
     topLatTextField.setHorizontalAlignment(JTextField.RIGHT);
     jLabel1.setText("N Lat");
@@ -189,6 +258,28 @@ public class CompositeDetailsInputPanel
           public void actionPerformed(ActionEvent e)
           {
             justWindCheckBox_actionPerformed(e);
+          }
+        });
+    contourCheckBox.setText(WWGnlUtilities.buildMessage("contours"));
+    contourCheckBox.setActionCommand("contourCheckBox");
+    contourCheckBox.setToolTipText(WWGnlUtilities.buildMessage("contours-tooltip"));
+    contourCheckBox.setSelected(true);
+    contourCheckBox.addActionListener(new ActionListener()
+        {
+          public void actionPerformed(ActionEvent e)
+          {
+            contourCheckBox_actionPerformed(e);
+          }
+        });
+    threeDCheckBox.setText(WWGnlUtilities.buildMessage("3D"));
+    threeDCheckBox.setActionCommand("threeDCheckBox");
+    threeDCheckBox.setToolTipText(WWGnlUtilities.buildMessage("threeD-tooltip"));
+    threeDCheckBox.setSelected(true);
+    threeDCheckBox.addActionListener(new ActionListener()
+        {
+          public void actionPerformed(ActionEvent e)
+          {
+            threeDCheckBox_actionPerformed(e);
           }
         });
 
@@ -271,9 +362,9 @@ public class CompositeDetailsInputPanel
     commentLabel.setText(WWGnlUtilities.buildMessage("composite-comment"));
     commentLabel.setFont(new Font("Tahoma", 3, 11));
     
-    jScrollPane1.setSize(new Dimension(300, 100));
-    jScrollPane1.setMinimumSize(new Dimension(300, 100));
-    jScrollPane1.setPreferredSize(new Dimension(300, 100));
+    jScrollPane1.setSize(new Dimension(400, 100));
+    jScrollPane1.setMinimumSize(new Dimension(400, 100));
+    jScrollPane1.setPreferredSize(new Dimension(400, 100));
 //  jScrollPane1.setToolTipText("null");
     gribCheckBox.setText(WWGnlUtilities.buildMessage("grib-request-2"));
     gribCheckBox.setActionCommand("gribCheckBox");
@@ -286,25 +377,44 @@ public class CompositeDetailsInputPanel
           }
         });
 
-    this.add(gribFileLabel, new GridBagConstraints(0, 2, 6, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-    this.add(gribFileTextField, new GridBagConstraints(1, 3, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
-    this.add(gribButton, new GridBagConstraints(4, 3, 2, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-    this.add(topLatTextField, new GridBagConstraints(1, 11, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-    this.add(jLabel1, new GridBagConstraints(0, 11, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 0, 5), 0, 0));
-    this.add(topLatComboBox, new GridBagConstraints(2, 11, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-    this.add(jLabel2, new GridBagConstraints(3, 11, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 0, 5), 0, 0));
-    this.add(bottomLatTextField, new GridBagConstraints(4, 11, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-    this.add(bottomLatComboBox, new GridBagConstraints(5, 11, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-    this.add(jLabel3, new GridBagConstraints(0, 12, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 0, 5), 0, 0));
-    this.add(jLabel4, new GridBagConstraints(3, 12, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 0, 5), 0, 0));
-    this.add(leftLongComboBox, new GridBagConstraints(2, 12, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-    this.add(rightLongComboBox, new GridBagConstraints(5, 12, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-    this.add(leftLongTextField, new GridBagConstraints(1, 12, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-    this.add(rightLongTextField, new GridBagConstraints(4, 12, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-    this.add(jLabel7, new GridBagConstraints(0, 10, 6, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-    this.add(gribSizeCheckBox, new GridBagConstraints(0, 4, 4, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 10, 0), 0, 0));
-    this.add(faxTablePanel, new GridBagConstraints(0, 0, 6, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
-    this.add(justWindCheckBox, new GridBagConstraints(4, 4, 2, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 10, 0), 0, 0));
+    compositeOne.add(gribFileLabel, new GridBagConstraints(0, 2, 6, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+    compositeOne.add(gribFileTextField, new GridBagConstraints(1, 3, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
+    compositeOne.add(gribButton, new GridBagConstraints(4, 3, 2, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+    compositeOne.add(topLatTextField, new GridBagConstraints(1, 8, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
+          new Insets(0, 0, 0, 0), 0, 0));
+    compositeOne.add(jLabel1, new GridBagConstraints(0, 8, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE,
+          new Insets(0, 0, 0, 5), 0, 0));
+    compositeOne.add(topLatComboBox, new GridBagConstraints(2, 8, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
+          new Insets(0, 0, 0, 0), 0, 0));
+    compositeOne.add(jLabel2, new GridBagConstraints(3, 8, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE,
+          new Insets(0, 0, 0, 5), 0, 0));
+    compositeOne.add(bottomLatTextField, new GridBagConstraints(4, 8, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
+          new Insets(0, 0, 0, 0), 0, 0));
+    compositeOne.add(bottomLatComboBox, new GridBagConstraints(5, 8, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
+          new Insets(0, 0, 0, 0), 0, 0));
+    compositeOne.add(jLabel3, new GridBagConstraints(0, 9, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE,
+          new Insets(0, 0, 0, 5), 0, 0));
+    compositeOne.add(jLabel4, new GridBagConstraints(3, 9, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE,
+          new Insets(0, 0, 0, 5), 0, 0));
+    compositeOne.add(leftLongComboBox, new GridBagConstraints(2, 9, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
+          new Insets(0, 0, 0, 0), 0, 0));
+    compositeOne.add(rightLongComboBox, new GridBagConstraints(5, 9, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
+          new Insets(0, 0, 0, 0), 0, 0));
+    compositeOne.add(leftLongTextField, new GridBagConstraints(1, 9, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
+          new Insets(0, 0, 0, 0), 0, 0));
+    compositeOne.add(rightLongTextField, new GridBagConstraints(4, 9, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
+          new Insets(0, 0, 0, 0), 0, 0));
+    compositeOne.add(jLabel7, new GridBagConstraints(0, 7, 6, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
+          new Insets(0, 0, 0, 0), 0, 0));
+    compositeOne.add(gribSizeCheckBox, new GridBagConstraints(0, 4, 3, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
+          new Insets(0, 0, 10, 0), 0, 0));
+    compositeOne.add(faxTablePanel, new GridBagConstraints(0, 0, 6, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+    compositeOne.add(justWindCheckBox, new GridBagConstraints(3, 4, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
+          new Insets(0, 0, 10, 0), 0, 0));
+    compositeOne.add(contourCheckBox, new GridBagConstraints(4, 4, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
+          new Insets(0, 0, 10, 0), 0, 0));
+    compositeOne.add(threeDCheckBox, new GridBagConstraints(5, 4, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
+          new Insets(0, 0, 10, 0), 0, 0));
     
     gribDataOptionPanel.setLayout(new GridBagLayout());
     
@@ -328,21 +438,55 @@ public class CompositeDetailsInputPanel
     gribDataOptionPanel.add(contourPrateCheckBox, new GridBagConstraints(5, 2, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
 
     gribDataOptionPanel.add(contourTWSCheckBox, new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-    this.add(gribDataOptionPanel, new GridBagConstraints(0, 5, 6, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
+    compositeOne.add(gribDataOptionPanel, new GridBagConstraints(0, 5, 6, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
     //  this.add(grib3DOptionPanel, new GridBagConstraints(0, 6, 6, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
     //  this.add(gribContourOptionPanel, new GridBagConstraints(0, 7, 6, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
 
     //  this.add(contourPRMSLCheckBox, new GridBagConstraints(0, 8, 6, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 5, 0), 0, 0));
-    this.add(commentLabel, new GridBagConstraints(0, 14, 6, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+    compositeTwo.add(commentLabel, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
+          new Insets(0, 0, 0, 0), 0, 0));
     jScrollPane1.getViewport().add(commentTextArea, null);
-    this.add(jScrollPane1, new GridBagConstraints(0, 15, 6, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+    compositeTwo.add(jScrollPane1, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+          new Insets(0, 0, 0, 0), 0, 0));
     // Just Wind by default
-    this.add(gribCheckBox, new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-    this.add(jSeparator1, new GridBagConstraints(0, 1, 6, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(5, 0, 0, 0), 0, 0));
-    this.add(jSeparator2, new GridBagConstraints(0, 9, 7, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(10, 0, 0, 0), 0, 0));
-    this.add(jSeparator3, new GridBagConstraints(0, 13, 6, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(10, 0, 0, 0), 0, 0));
+    gpxPanel.add(gpxCheckBox, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
+          new Insets(0, 0, 0, 0), 0, 0));
+    gpxPanel.add(gpxLabel, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
+          new Insets(0, 0, 0, 0), 0, 0));
+    gpxPanel.add(gpxFileNameTextField, new GridBagConstraints(1, 1, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
+          new Insets(0, 0, 0, 0), 0, 0));
+    gpxPanel.add(gpxBrowseButton, new GridBagConstraints(2, 1, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
+          new Insets(0, 2, 0, 0), 0, 0));
+    gpxPanel.add(upToCheckBox, new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
+          new Insets(0, 0, 0, 0), 0, 0));
+    gpxPanel.add(dtPanel, new GridBagConstraints(0, 4, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+          new Insets(0, 0, 0, 0), 0, 0));
+    gpxPanel.add(fromGPXLabel, new GridBagConstraints(0, 2, 3, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
+          new Insets(0, 0, 0, 0), 0, 0));
+    compositeTwo.add(gpxPanel,
+                     new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(10,
+                                                                                                                               0,
+                                                                                                                               0,
+                                                                                                                               0),
+                                            0, 0));
+    compositeOne.add(gribCheckBox,
+                     new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
+                                            new Insets(0, 0, 0, 0), 0, 0));
+    compositeOne.add(jSeparator1,
+                     new GridBagConstraints(0, 1, 6, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                                            new Insets(5, 0, 0, 0), 0, 0));
+    compositeOne.add(jSeparator2,
+                     new GridBagConstraints(0, 6, 7, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                                            new Insets(10, 0, 0, 0), 0, 0));
 
     //  justWind(true);
+    this.add(compositeTabbedPane, BorderLayout.CENTER);
+    compositeTabbedPane.add("Dimensions & Documents", compositeOne); // LOCALIZE
+    compositeTabbedPane.add("Comments & GPX", compositeTwo); // LOCALIZE
+    int keyCodeDimension = KeyEvent.VK_D;
+    int keyCodeComments  = KeyEvent.VK_C;
+    compositeTabbedPane.setMnemonicAt(0, keyCodeDimension);
+    compositeTabbedPane.setMnemonicAt(1, keyCodeComments);
   }
 
   public void setFaxes(FaxType[] ft)
@@ -734,7 +878,7 @@ public class CompositeDetailsInputPanel
   
   public boolean isGRIBRequestSelected()
   {
-    return gribCheckBox.isSelected();
+    return gribCheckBox.isSelected() && gribCheckBox.isEnabled();
   }
   
   public void setGRIBRequestSelected(boolean b)
@@ -787,7 +931,7 @@ public class CompositeDetailsInputPanel
 
   private void justWindCheckBox_actionPerformed(ActionEvent e)
   {
-    tws3DCheckBox.setEnabled(!justWindCheckBox.isSelected());
+    tws3DCheckBox.setEnabled(!justWindCheckBox.isSelected() && threeDCheckBox.isSelected());
     prmslDataCheckBox.setEnabled(!justWindCheckBox.isSelected());
     mb500DataCheckBox.setEnabled(!justWindCheckBox.isSelected());
     wavesDataCheckBox.setEnabled(!justWindCheckBox.isSelected());
@@ -808,6 +952,26 @@ public class CompositeDetailsInputPanel
     contourPrateCheckBox.setEnabled(!justWindCheckBox.isSelected() && prateDataCheckBox.isSelected());
   }
 
+  private void contourCheckBox_actionPerformed(ActionEvent e)
+  {
+    contourTWSCheckBox.setEnabled(!justWindCheckBox.isSelected() && contourCheckBox.isSelected());
+    contourPRMSLCheckBox.setEnabled(!justWindCheckBox.isSelected() && prmslDataCheckBox.isSelected() && contourCheckBox.isSelected());
+    contourMB500CheckBox.setEnabled(!justWindCheckBox.isSelected() && mb500DataCheckBox.isSelected() && contourCheckBox.isSelected());
+    contourWavesCheckBox.setEnabled(!justWindCheckBox.isSelected() && wavesDataCheckBox.isSelected() && contourCheckBox.isSelected());
+    contourTemperatureCheckBox.setEnabled(!justWindCheckBox.isSelected() && temperatureDataCheckBox.isSelected() && contourCheckBox.isSelected());
+    contourPrateCheckBox.setEnabled(!justWindCheckBox.isSelected() && prateDataCheckBox.isSelected() && contourCheckBox.isSelected());
+  }
+  
+  private void threeDCheckBox_actionPerformed(ActionEvent e)
+  {
+    tws3DCheckBox.setEnabled(!justWindCheckBox.isSelected() && threeDCheckBox.isSelected());
+    prmsl3DCheckBox.setEnabled(!justWindCheckBox.isSelected() && prmslDataCheckBox.isSelected() && threeDCheckBox.isSelected());
+    mb5003DCheckBox.setEnabled(!justWindCheckBox.isSelected() && mb500DataCheckBox.isSelected() && threeDCheckBox.isSelected());
+    waves3DCheckBox.setEnabled(!justWindCheckBox.isSelected() && wavesDataCheckBox.isSelected() && threeDCheckBox.isSelected());
+    temperature3DCheckBox.setEnabled(!justWindCheckBox.isSelected() && temperatureDataCheckBox.isSelected() && threeDCheckBox.isSelected());
+    prate3DCheckBox.setEnabled(!justWindCheckBox.isSelected() && prateDataCheckBox.isSelected() && threeDCheckBox.isSelected());
+  }
+  
   private void gribCheckBox_actionPerformed(ActionEvent e)
   {
     boolean grib = gribCheckBox.isSelected();
@@ -817,5 +981,61 @@ public class CompositeDetailsInputPanel
     else
       gribFileTextField.setToolTipText(WWGnlUtilities.buildMessage("grib-file-tooltip-file"));
   }
+
+  private void gpxCheckBox_actionPerformed(ActionEvent e)
+  {
+    gpxLabel.setEnabled(gpxCheckBox.isSelected());
+    gpxFileNameTextField.setEnabled(gpxCheckBox.isSelected());
+    gpxBrowseButton.setEnabled(gpxCheckBox.isSelected());
+    upToCheckBox.setEnabled(gpxCheckBox.isSelected());
+    dtPanel.setEnabled(gpxCheckBox.isSelected() && upToCheckBox.isSelected());
+    fromGPXLabel.setEnabled(gpxCheckBox.isSelected());
+  }
+
+  private void gpxBrowseButton_actionPerformed(ActionEvent e)
+  {
+    String gpxFileName = WWGnlUtilities.chooseFile(JFileChooser.FILES_ONLY, new String[] { "gpx" }, "GPX Data Files", ".");
+    if (gpxFileName != null && gpxFileName.trim().length() > 0)
+    {
+      gpxFileNameTextField.setText(gpxFileName);
+      try
+      {
+        URL gpxURL = new File(gpxFileName).toURI().toURL();
+        TimeZone tz = TimeZone.getDefault();
+        TimeZone.setDefault(TimeZone.getTimeZone("127"));
+        Date date = GPXUtil.getLastDate(gpxURL);
+        dtPanel.setDate(date);
+        date = GPXUtil.getFirstDate(gpxURL);
+        fromGPXLabel.setText("From " + date.toString());
+        TimeZone.setDefault(tz); // Reset      
+      }
+      catch (Exception ex)
+      {
+        ex.printStackTrace();
+      }
+    }
+  }
   
+  public boolean thereIsGPXData()
+  {
+    return (gpxFileNameTextField.getText().trim().length() > 0 && gpxCheckBox.isSelected());
+  }
+  
+  public String getGPXFileName()
+  {
+    return (gpxFileNameTextField.getText().trim());
+  }
+
+  private void upToCheckBox_actionPerformed(ActionEvent e)
+  {
+    dtPanel.setEnabled(gpxCheckBox.isSelected() && upToCheckBox.isSelected());
+  }
+  
+  public Date getUpToDate()
+  {
+    Date d = null;
+    if (gpxCheckBox.isSelected() && upToCheckBox.isSelected())
+      d = dtPanel.getDate();
+    return d;
+  }
 }
