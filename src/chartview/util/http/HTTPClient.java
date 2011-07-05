@@ -46,6 +46,10 @@ public class HTTPClient
     try
     {
       byte content[] = readURL(new URL(url));
+      if (content == null)
+      {
+        throw new NMEAServerException("NMEA HTTP Server not found.");
+      }
       ret = new String(content);
     }
     catch(Exception e)
@@ -266,5 +270,28 @@ public class HTTPClient
       e.printStackTrace();
     }
     return content;
+  }
+  
+  public static class NMEAServerException extends Exception
+  {
+    public NMEAServerException(Throwable cause)
+    {
+      super(cause);
+    }
+
+    public NMEAServerException(String message, Throwable cause)
+    {
+      super(message, cause);
+    }
+
+    public NMEAServerException(String message)
+    {
+      super(message);
+    }
+
+    public NMEAServerException()
+    {
+      super();
+    }
   }
 }
