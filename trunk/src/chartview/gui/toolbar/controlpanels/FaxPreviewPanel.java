@@ -58,6 +58,10 @@ public class FaxPreviewPanel
 
     WWContext.getInstance().addApplicationListener(new ApplicationEventListener()
         {
+          public String toString()
+          {
+            return "from FaxPreviewPanel.";
+          }
           public void faxSelectedForPreview(String faxname) 
           {
             imgName = faxname;
