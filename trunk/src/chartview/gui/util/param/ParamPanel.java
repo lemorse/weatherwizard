@@ -280,6 +280,18 @@ public final class ParamPanel
       case ParamData.SHOW_ISOCHRONS:
         it = Boolean.TRUE;
         break;
+      case ParamData.SERIAL_PORT:
+        it = new ListOfSerialPorts("COM1");
+        break;
+      case ParamData.TCP_PORT:
+        it = "7001";
+        break;
+      case ParamData.UDP_PORT:
+        it = "8001";
+        break;
+      case ParamData.ROUTING_OUTPUT_FLAVOR:
+        it = new RoutingOutputList(0);
+        break;
       default:
         break;
     }
@@ -378,6 +390,10 @@ public final class ParamPanel
                 data[i][1] = new ContourLinesList(s);      
               else if (i == ParamData.DEFAULT_FAX_BLUR)
                 data[i][1] = new FaxBlurList(Integer.parseInt(s));
+              else if (i == ParamData.SERIAL_PORT)
+                data[i][1] = new ListOfSerialPorts(s);
+              else if (i == ParamData.ROUTING_OUTPUT_FLAVOR)
+                data[i][1] = new RoutingOutputList(Integer.parseInt(s));
               else                                                 // Strings
                 data[i][1] = s;
             }
@@ -433,6 +449,9 @@ public final class ParamPanel
         ParamData.CLICK_SCROLL }, 
       new int[] // Routing
       { ParamData.NMEA_SERVER_URL, 
+        ParamData.SERIAL_PORT,
+        ParamData.TCP_PORT,
+        ParamData.UDP_PORT,
         ParamData.NMEA_POLLING_FREQ, 
         ParamData.POLAR_FILE_LOC, 
         ParamData.ROUTING_STEP, 
@@ -444,7 +463,8 @@ public final class ParamPanel
         ParamData.STOP_ROUTING_ON_EXHAUSTED_GRIB, 
         ParamData.POLAR_SPEED_FACTOR,
         ParamData.SHOW_ROUTING_LABELS,
-        ParamData.SHOW_ISOCHRONS}, 
+        ParamData.SHOW_ISOCHRONS,
+        ParamData.ROUTING_OUTPUT_FLAVOR}, 
       new int[] // Misc
       { ParamData.GRIB_FILES_LOC, 
         ParamData.FAX_FILES_LOC, 
@@ -535,7 +555,7 @@ public final class ParamPanel
     currentCategoryIndex = ROUTING_PRM;
   }
   
-  public void  setMiscPrm()
+  public void setMiscPrm()
   {
     setObject(mkDataArray(MISC_PRM));
     currentCategoryIndex = MISC_PRM;
@@ -862,7 +882,9 @@ public final class ParamPanel
     JComboBox lnfList = new JComboBox(lnfValues); // Should not be used
     WindOptionComboBox wdoCombo   = new WindOptionComboBox();
     FaxBlurListComboBox blurCombo = new FaxBlurListComboBox();
-    
+    JComboBox serialPortList      = new JComboBox(SerialPortList.listSerialPorts());
+    RoutingOptionComboBox roCombo = new RoutingOptionComboBox();
+        
     public ParamEditor()
     {
       super();
@@ -922,10 +944,20 @@ public final class ParamPanel
         componentToApply = wdoCombo;
         wdoCombo.setSelectedItem(((WindOptionList)value).getCurrentValue());
       }
+      else if (column == 1 && value instanceof RoutingOutputList)
+      {
+        componentToApply = roCombo;
+        roCombo.setSelectedItem(((RoutingOutputList)value).getCurrentValue());
+      }
       else if (column == 1 && value instanceof FaxBlurList)
       {
         componentToApply = blurCombo;
         blurCombo.setSelectedItem(((FaxBlurList)value).getCurrentValue());
+      }
+      else if (column == 1 && value instanceof ListOfSerialPorts)
+      {
+        componentToApply = serialPortList;
+        serialPortList.setSelectedItem(value);
       }
       else
       {
@@ -1026,10 +1058,29 @@ public final class ParamPanel
           idx = 0;
         return (new WindOptionList(idx));
       }
+      else if (componentToApply instanceof RoutingOptionComboBox)
+      {
+        String s = (String)((RoutingOptionComboBox)componentToApply).getSelectedItem();
+        int idx = -1;
+        for (int i=0; i<RoutingOutputList.getMap().length; i++)
+        {
+          if (RoutingOutputList.getMap()[i].equals(s))
+          {
+            idx = i;
+            break;
+          }
+        }
+        // Legacy
+        if (idx == -1)
+          idx = 0;
+        return (new RoutingOutputList(idx));
+      }
       else if (componentToApply instanceof JComboBox) // Too vague...
       {
-        // Assume Look and Feel... Not granted
-        return (new ListOfLookAndFeel((String)((JComboBox)componentToApply).getSelectedItem()));
+        if (originalValue instanceof ListOfSerialPorts) 
+          return new ListOfSerialPorts((String)((JComboBox)componentToApply).getSelectedItem());
+        else // Assume Look and Feel... Not granted
+          return (new ListOfLookAndFeel((String)((JComboBox)componentToApply).getSelectedItem()));
       }
       else
       {
@@ -1135,6 +1186,11 @@ public final class ParamPanel
         {
           FaxBlurList fbl = (FaxBlurList)valueObject;
           val.setNodeValue(fbl.getStringIndex());
+        }
+        else if (valueObject instanceof RoutingOutputList)
+        {
+          RoutingOutputList rol = (RoutingOutputList)valueObject;
+          val.setNodeValue(rol.getStringIndex());
         }
         else if (valueObject instanceof WindOptionList)
         {
@@ -1347,6 +1403,44 @@ public final class ParamPanel
     }
   }
   
+  public static class RoutingOutputList extends ListOfValues
+  {
+    private static String[] map = { "CSV", 
+                                    "GPX",
+                                    "Text",
+                                    WWGnlUtilities.buildMessage("ask-user-every-time")};
+
+    public final static int CSV = 0;
+    public final static int GPX = 1;
+    public final static int TXT = 2;
+    public final static int ASK = 3;
+    
+    public RoutingOutputList(int key)
+    { 
+      super.setCurrentValue(map[key]);
+    }
+    
+    public static String[] getMap()
+    {
+      return map;
+    }
+    
+    public String getStringIndex()
+    {
+      String str = "";
+      String s = super.getCurrentValue();
+      for (int i=0; i<map.length; i++)
+      {
+        if (map[i].equals(s))
+        {
+          str = Integer.toString(i);
+          break;
+        }
+      }
+      return str;
+    }
+  }
+  
   public static class FaxBlurList extends ListOfValues
   {
     private static HashMap<Integer, String> map = new HashMap<Integer, String>(3);
@@ -1463,4 +1557,16 @@ public final class ParamPanel
     }
   }
   
+  private static class RoutingOptionComboBox extends JComboBox
+  {
+    public RoutingOptionComboBox()
+    {
+      super();
+      this.removeAllItems();
+      for (int i=0; i<RoutingOutputList.getMap().length; i++)
+      {
+        this.addItem(RoutingOutputList.getMap()[i]);
+      }
+    }
+  }
 }
