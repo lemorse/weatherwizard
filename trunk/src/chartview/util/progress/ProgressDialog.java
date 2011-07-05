@@ -29,17 +29,22 @@ public class ProgressDialog
   extends JDialog
   implements ChangeListener
 {
-  JLabel statusLabel = new JLabel();
-  JProgressBar progressBar = new JProgressBar();
-  ProgressMonitor monitor;
-  boolean showButton = true;
+  private JLabel statusLabel = new JLabel();
+  private JProgressBar progressBar = new JProgressBar();
+  private ProgressMonitor monitor;
+  private boolean showButton = true;
 
   public ProgressDialog(Frame owner, ProgressMonitor monitor, boolean showButton)
     throws HeadlessException
   {
+    this(owner, monitor, showButton, "hide");
+  }
+  public ProgressDialog(Frame owner, ProgressMonitor monitor, boolean showButton, String bcl)
+    throws HeadlessException
+  {
     super(owner, "Progress", true);
     this.showButton = showButton;
-    init(monitor);
+    init(monitor, bcl);
   }
 
   public ProgressDialog(Frame owner, ProgressMonitor monitor)
@@ -58,49 +63,79 @@ public class ProgressDialog
   public ProgressDialog(Dialog owner, ProgressMonitor monitor, boolean showButton)
     throws HeadlessException
   {
+    this(owner, monitor, showButton, "hide");
+  }
+  
+  public ProgressDialog(Dialog owner, ProgressMonitor monitor, boolean showButton, String bcl)
+    throws HeadlessException
+  {
     super(owner);
     this.showButton = showButton;
-    init(monitor);
+    init(monitor, bcl);
   }
 
+  public String toString()
+  {
+    return "JDialog ProgressDialog"; 
+  }
+  
   private void init(ProgressMonitor monitor)
   {
-    this.monitor = monitor;
-
-    progressBar = new JProgressBar(0, monitor.getTotal());
-    progressBar.setPreferredSize(new Dimension(300, 20));
-    if (monitor.isIndeterminate())
-      progressBar.setIndeterminate(true);
-    else
-      progressBar.setValue(monitor.getCurrent());
-    statusLabel.setText(monitor.getStatus());
-
-    JPanel contents = (JPanel) getContentPane();
-    contents.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-    contents.setLayout(new BorderLayout());
-    contents.add(statusLabel, BorderLayout.NORTH);
-    contents.add(progressBar, BorderLayout.CENTER);
-    if (showButton)
+    init(monitor, "hide");
+  }
+  private void init(ProgressMonitor monitor, String buttonCodeLabel)
+  {
+    synchronized (this)
     {
-      JPanel bottomPanel = new JPanel();
-      JButton interruptButton = new JButton(WWGnlUtilities.buildMessage("hide"));
-      bottomPanel.add(interruptButton, null);
-      contents.add(bottomPanel, BorderLayout.SOUTH);
-      interruptButton.addActionListener(new ActionListener()
-       {
-          public void actionPerformed(ActionEvent e)
-          {
-  //        System.out.println("Canceling");
-            WWContext.getInstance().fireInterruptProcess();
-            dispose();
-          }
-        });
+      this.monitor = monitor;
+  
+      progressBar = new JProgressBar(0, monitor.getTotal());
+      progressBar.setPreferredSize(new Dimension(300, 20));
+      if (monitor.isIndeterminate())
+        progressBar.setIndeterminate(true);
+      else
+        progressBar.setValue(monitor.getCurrent());
+      statusLabel.setText(monitor.getStatus());
+  
+      JPanel contents = (JPanel) getContentPane();
+      contents.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+      contents.setLayout(new BorderLayout());
+      contents.add(statusLabel, BorderLayout.NORTH);
+      contents.add(progressBar, BorderLayout.CENTER);
+      if (showButton)
+      {
+        JPanel bottomPanel = new JPanel();
+        JButton interruptButton = new JButton(WWGnlUtilities.buildMessage(buttonCodeLabel));
+        bottomPanel.add(interruptButton, null);
+        contents.add(bottomPanel, BorderLayout.SOUTH);
+        interruptButton.addActionListener(new ActionListener()
+         {
+            public void actionPerformed(ActionEvent e)
+            {
+    //        System.out.println("Canceling");
+              WWContext.getInstance().fireInterruptProcess();
+              removeMe();
+              WWContext.getInstance().removeApplicationListener(WWContext.getInstance().getAel4monitor());
+              dispose();
+            }
+          });
+      }
+      setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+      synchronized (this)
+      {
+//      synchronized (this.monitor)
+        {
+          this.monitor.addChangeListener(this);
+        }
+      }
     }
-
-    setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-    monitor.addChangeListener(this);
   }
 
+  private void removeMe()
+  {
+    this.monitor.removeChangeListener(this);
+  }
+  
   public void stateChanged(final ChangeEvent ce)
   {
     // to ensure EDT thread
@@ -123,7 +158,10 @@ public class ProgressDialog
         progressBar.setValue(monitor.getCurrent());
     }
     else
+    {
+      this.monitor.removeChangeListener(this); // Finished
+      WWContext.getInstance().removeApplicationListener(WWContext.getInstance().getAel4monitor());
       dispose();
+    }
   }
 }
-
