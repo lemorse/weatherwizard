@@ -302,19 +302,28 @@ public class GribHelper
           for (int h=0; h<gpd.length; h++)
           {
             for (int w=0; w<gpd[h].length; w++)
-            {
-              gpd[h][w] = new GribPointData();
-              gpd[h][w].setLat(gpd1[h][w].getLat());
-              gpd[h][w].setLng(gpd1[h][w].getLng());
-              gpd[h][w].setHgt((float)getIntermediateValue(gpd1[h][w].getHgt(), gpd2[h][w].getHgt(), nbsteps, j));
-              gpd[h][w].setPrmsl((float)getIntermediateValue(gpd1[h][w].getPrmsl(), gpd2[h][w].getPrmsl(), nbsteps, j));
-              gpd[h][w].setRain((float)getIntermediateValue(gpd1[h][w].getRain(), gpd2[h][w].getRain(), nbsteps, j));
-              gpd[h][w].setTmp((float)getIntermediateValue(gpd1[h][w].getTmp(), gpd2[h][w].getTmp(), nbsteps, j));
-              gpd[h][w].setTwd(getIntermediateValue(gpd1[h][w].getTwd(), gpd2[h][w].getTwd(), nbsteps, j));
-              gpd[h][w].setTws(getIntermediateValue(gpd1[h][w].getTws(), gpd2[h][w].getTws(), nbsteps, j));
-              gpd[h][w].setU((float)getIntermediateValue(gpd1[h][w].getU(), gpd2[h][w].getU(), nbsteps, j));
-              gpd[h][w].setV((float)getIntermediateValue(gpd1[h][w].getV(), gpd2[h][w].getV(), nbsteps, j));
-              gpd[h][w].setWHgt((float)getIntermediateValue(gpd1[h][w].getWHgt(), gpd2[h][w].getWHgt(), nbsteps, j));
+            {              
+              try
+              {
+//              System.out.println("h=" + h + ", w=" + w + ", gpd[h].length=" + gpd[h].length);
+                gpd[h][w] = new GribPointData();
+                gpd[h][w].setLat(gpd1[h][w].getLat());
+                gpd[h][w].setLng(gpd1[h][w].getLng());
+                gpd[h][w].setHgt((float)getIntermediateValue(gpd1[h][w].getHgt(), gpd2[h][w].getHgt(), nbsteps, j));
+                gpd[h][w].setPrmsl((float)getIntermediateValue(gpd1[h][w].getPrmsl(), gpd2[h][w].getPrmsl(), nbsteps, j));
+                gpd[h][w].setRain((float)getIntermediateValue(gpd1[h][w].getRain(), gpd2[h][w].getRain(), nbsteps, j));
+                gpd[h][w].setTmp((float)getIntermediateValue(gpd1[h][w].getTmp(), gpd2[h][w].getTmp(), nbsteps, j));
+                gpd[h][w].setTwd(getIntermediateValue(gpd1[h][w].getTwd(), gpd2[h][w].getTwd(), nbsteps, j));
+                gpd[h][w].setTws(getIntermediateValue(gpd1[h][w].getTws(), gpd2[h][w].getTws(), nbsteps, j));
+                gpd[h][w].setU((float)getIntermediateValue(gpd1[h][w].getU(), gpd2[h][w].getU(), nbsteps, j));
+                gpd[h][w].setV((float)getIntermediateValue(gpd1[h][w].getV(), gpd2[h][w].getV(), nbsteps, j));
+                gpd[h][w].setWHgt((float)getIntermediateValue(gpd1[h][w].getWHgt(), gpd2[h][w].getWHgt(), nbsteps, j));
+              }
+              catch (ArrayIndexOutOfBoundsException aioobe)
+              {
+                System.out.println("GribHelper.smoothGRIBinTime:" + aioobe.toString());
+//              aioobe.printStackTrace();
+              }
             }
           }
           newData[idx].setGribPointData(gpd);
@@ -334,7 +343,7 @@ public class GribHelper
     return d;
   }
     
-  public static void displayGRIBDetails(String gribName)
+  public static void displayGRIBDetails(String gribName) throws Exception
   {    
     try
     {
@@ -752,7 +761,7 @@ public class GribHelper
   {
   }
 
-  public static GribConditionData[] getGribData(InputStream stream, String name)
+  public static GribConditionData[] getGribData(InputStream stream, String name) throws Exception
   {
     ArrayList<GribConditionData> wgd = null;
     try
@@ -791,13 +800,17 @@ public class GribHelper
       System.err.println("For [" + name + "], NotSupportedException : " + noSupport);
       JOptionPane.showMessageDialog(null, noSupport.toString(), "For [" + name + "]", JOptionPane.ERROR_MESSAGE);
     }
+    catch (Exception e)
+    {
+      throw e;
+    }
     GribConditionData[] gcd = null;
     if (wgd != null)
       gcd = new GribConditionData[wgd.size()];
     return (gcd!=null?wgd.toArray(gcd):null);
   }
 
-  public static GribConditionData[] getGribData(String fileName)
+  public static GribConditionData[] getGribData(String fileName) throws Exception
   {
     ArrayList<GribConditionData> wgd = null;
     try
@@ -847,7 +860,7 @@ public class GribHelper
     return (gcd!=null?wgd.toArray(gcd):null);
   }
 
-  public static ArrayList<GribConditionData> dumper(GribFile gribFile, String fileName)
+  public static ArrayList<GribConditionData> dumper(GribFile gribFile, String fileName) throws Exception
   {
     ArrayList<String> unrecognized = new ArrayList<String>();
 
@@ -1001,13 +1014,13 @@ public class GribHelper
 //            System.out.println("GribPointData array already exists.");
             if (wpd.length != arrayH)
             {
-              throw new RuntimeException("DataArray (height) size mismatch in " + fileName);
+              throw new RuntimeException("DataArray (height) size mismatch in " + fileName + ", wpd.length=" + wpd.length + ", arrayH=" + arrayH);
             }
             else
             {
               if (wpd[0].length != arrayW)
               {
-                throw new RuntimeException("DataArray (width) size mismatch in " + fileName);
+                throw new RuntimeException("DataArray (width) size mismatch in " + fileName + ", wpd[0].length=" + wpd[0].length + ", arrayW=" + arrayW);
               }
             }
           }
@@ -1079,9 +1092,20 @@ public class GribHelper
             }
           }
         }
+        catch (RuntimeException rte)
+        {
+          String mess = rte.getMessage();
+          //                      System.out.println("RuntimeException getMessage(): [" + mess + "]");
+          if (mess.startsWith("DataArray (width) size mismatch") ||
+              mess.startsWith("DataArray (height) size mismatch"))
+            System.out.println(mess);
+          else
+            throw rte;
+        }
         catch (Exception ex)
         {
-          ex.printStackTrace();
+       // ex.printStackTrace();
+          throw ex;
         }
       }
     } 
@@ -1139,7 +1163,6 @@ public class GribHelper
     double stepx = wgd.getStepX();
     double stepy = wgd.getStepY();
     GribPointData wpd[][] = wgd.getGribPointData();
-    // TODO smoothing, space and time... 
     // Use the isBetween function
     for (int l=0; l<wpd.length; l++)
     {
@@ -1259,5 +1282,6 @@ public class GribHelper
     System.out.println("123 is" + (isBetween(123,    0,  200)?" ":" not") + " between " + 0 + " and " + 200);
     System.out.println("123 is" + (isBetween(123,    0, -200)?" ":" not") + " between " + 0 + " and " + -200);
     System.out.println("123 is" + (isBetween(123, -100,  200)?" ":" not") + " between " + -100 + " and " + 200);
-  }  
+  }
+  
 }

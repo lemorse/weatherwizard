@@ -45,6 +45,10 @@ public class GRIBVisualPanel extends TransparentPanel
 
     WWContext.getInstance().addApplicationListener(new ApplicationEventListener()
      {
+        public String toString()
+        {
+          return "from GribVisualPanel.";
+        }
         public void setGRIBWindValue(int twd, float tws)
         {
           truewindspeed = tws;
