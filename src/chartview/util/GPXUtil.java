@@ -139,9 +139,9 @@ public class GPXUtil
               return GPX_NS;
             }
           };
-        String xpath = "//gpx:trkpt[position() = last()]/gpx:time";
+        String xpath = "//gpx:trkseg[position() = last()]//gpx:trkpt[position() = last()]/gpx:time";
         if (opt == FIRST)
-          xpath = "//gpx:trkpt[position() = 1]/gpx:time";
+          xpath = "//gpx:trkseg[position() = 1]//gpx:trkpt[position() = 1]/gpx:time";
         
         NodeList nl = gpx.selectNodes(xpath, nsr);
         String strDate = ((XMLElement)nl.item(0)).getTextContent();
