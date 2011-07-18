@@ -44,8 +44,6 @@ public class WindVanePanel
     this.setSize(new Dimension(224, 224));
   }
   
-  private final static int KNOB_DIAMETER = 10; // Make it even
-  
   public void paintComponent(Graphics g)
   {
     Point center = new Point(this.getWidth() / 2, this.getWidth() / 2);
@@ -67,38 +65,10 @@ public class WindVanePanel
                            boatLength, 
                            0,
                            1.0f);
-    
-    // Hand shadow
-    g2d.setColor(Color.gray);
-    float alpha = 0.3f;
-    g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
-    Stroke originalStroke = g2d.getStroke();
-    Stroke stroke =  new BasicStroke(5, 
-                                     BasicStroke.CAP_ROUND,
-                                     BasicStroke.JOIN_BEVEL);
-    g2d.setStroke(stroke);  
-    int handLength = (this.getWidth() / 2) - 10;
-    int shadowOffset = 5;
-    g2d.drawLine(center.x + shadowOffset, 
-                 center.y + shadowOffset, 
-                 center.x + shadowOffset + (int)(handLength * Math.sin(Math.toRadians((double)windDir))),
-                 center.y + shadowOffset - (int)(handLength * Math.cos(Math.toRadians((double)windDir))));
-    g2d.fillOval(center.x + shadowOffset - (KNOB_DIAMETER / 2),
-                 center.y + shadowOffset - (KNOB_DIAMETER / 2),
-                 KNOB_DIAMETER, KNOB_DIAMETER);                 
-    // Reset Transparency
-    alpha = 1.0f;
-    g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));      
-    // Hand
-    g2d.drawLine(center.x, 
-                 center.y, 
-                 center.x + (int)(handLength * Math.sin(Math.toRadians((double)windDir))),
-                 center.y - (int)(handLength * Math.cos(Math.toRadians((double)windDir))));
-    g2d.fillOval(center.x - (KNOB_DIAMETER / 2),
-                 center.y - (KNOB_DIAMETER / 2),
-                 KNOB_DIAMETER, KNOB_DIAMETER);                 
-    
-    g2d.setStroke(originalStroke);  
+    WWGnlUtilities.drawTWAOverBoat(g2d, 
+                                   (this.getWidth() / 2) - 10, 
+                                   center,
+                                   windDir);
   }
 
   public void setWindDir(int windDir)

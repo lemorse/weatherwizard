@@ -3065,11 +3065,18 @@ public class CommandPanel
                 String gribInfo4 = GeomUtil.decToSex(gribData.getSLat(), GeomUtil.SWING, GeomUtil.NS) + " " + 
                                    GeomUtil.decToSex(gribData.getELng(), GeomUtil.SWING, GeomUtil.EW);
   
-                setThereIsPrmsl(GRIBDataUtil.thereIsVariation(gribData, GRIBDataUtil.TYPE_PRMSL));
-                setThereIs500mb(GRIBDataUtil.thereIsVariation(gribData, GRIBDataUtil.TYPE_500MB));
-                setThereIsTemperature(GRIBDataUtil.thereIsVariation(gribData, GRIBDataUtil.TYPE_TMP));
-                setThereIsWaves(GRIBDataUtil.thereIsVariation(gribData, GRIBDataUtil.TYPE_WAVE));
-                setThereIsRain(GRIBDataUtil.thereIsVariation(gribData, GRIBDataUtil.TYPE_RAIN));
+                // Proceed for variation with gribFile
+                GribFile gf = WWContext.getInstance().getGribFile();
+//              setThereIsPrmsl(GRIBDataUtil.thereIsVariation(gribData, GRIBDataUtil.TYPE_PRMSL));
+                setThereIsPrmsl(GRIBDataUtil.thereIsVariation(gf, GRIBDataUtil.TYPE_PRMSL));
+//              setThereIs500mb(GRIBDataUtil.thereIsVariation(gribData, GRIBDataUtil.TYPE_500MB));
+                setThereIs500mb(GRIBDataUtil.thereIsVariation(gf, GRIBDataUtil.TYPE_500MB));
+//              setThereIsTemperature(GRIBDataUtil.thereIsVariation(gribData, GRIBDataUtil.TYPE_TMP));
+                setThereIsTemperature(GRIBDataUtil.thereIsVariation(gf, GRIBDataUtil.TYPE_TMP));
+//              setThereIsWaves(GRIBDataUtil.thereIsVariation(gribData, GRIBDataUtil.TYPE_WAVE));
+                setThereIsWaves(GRIBDataUtil.thereIsVariation(gf, GRIBDataUtil.TYPE_WAVE));
+//              setThereIsRain(GRIBDataUtil.thereIsVariation(gribData, GRIBDataUtil.TYPE_RAIN));
+                setThereIsRain(GRIBDataUtil.thereIsVariation(gf, GRIBDataUtil.TYPE_RAIN));
                 WWContext.getInstance().fireGribInfo(gribIndex, 
                                                      wgd.length, 
                                                      gribInfo2, 
@@ -3152,11 +3159,11 @@ public class CommandPanel
   //          if (thereIs3D)
               displayComboBox.addItem("- None -"); // LOCALIZE
           /*  if (thereIsWind) */ displayComboBox.addItem(dataLabels[WIND_SPEED]); // Always keep wind
-              if (thereIsPrmsl && displayPrmsl)  displayComboBox.addItem(dataLabels[PRMSL]);
-              if (thereIsHgt500 && display500mb) displayComboBox.addItem(dataLabels[HGT500]);
-              if (thereIsTemp && displayTemperature)   displayComboBox.addItem(dataLabels[TEMPERATURE]);
-              if (thereIsWaves && displayWaves)  displayComboBox.addItem(dataLabels[WAVES]);
-              if (thereIsRain && displayRain)   displayComboBox.addItem(dataLabels[RAIN]);
+              if (thereIsPrmsl && displayPrmsl)      displayComboBox.addItem(dataLabels[PRMSL]);
+              if (thereIsHgt500 && display500mb)     displayComboBox.addItem(dataLabels[HGT500]);
+              if (thereIsTemp && displayTemperature) displayComboBox.addItem(dataLabels[TEMPERATURE]);
+              if (thereIsWaves && displayWaves)      displayComboBox.addItem(dataLabels[WAVES]);
+              if (thereIsRain && displayRain)        displayComboBox.addItem(dataLabels[RAIN]);
               settingGRIBInfo = false;
               
               displayComboBox.setEnabled((thereIsPrmsl && displayPrmsl) || 
@@ -4093,14 +4100,20 @@ public class CommandPanel
         String gribInfo4 = GeomUtil.decToSex(gribData.getSLat(), GeomUtil.SWING, GeomUtil.NS) + " " + 
                            GeomUtil.decToSex(gribData.getELng(), GeomUtil.SWING, GeomUtil.EW);
 
+        GribFile gf = WWContext.getInstance().getGribFile();
 //      setThereIsPrmsl((gribData.getGribPointData()[0][0].getPrmsl() > 0));
-        setThereIsPrmsl(GRIBDataUtil.thereIsVariation(gribData, GRIBDataUtil.TYPE_PRMSL));
+//      setThereIsPrmsl(GRIBDataUtil.thereIsVariation(gribData, GRIBDataUtil.TYPE_PRMSL));
+        setThereIsPrmsl(GRIBDataUtil.thereIsVariation(gf, GRIBDataUtil.TYPE_PRMSL));
 //      setThereIs500mb((gribData.getGribPointData()[0][0].getHgt() > 0));
-        setThereIs500mb(GRIBDataUtil.thereIsVariation(gribData, GRIBDataUtil.TYPE_500MB));
+//      setThereIs500mb(GRIBDataUtil.thereIsVariation(gribData, GRIBDataUtil.TYPE_500MB));
+        setThereIs500mb(GRIBDataUtil.thereIsVariation(gf, GRIBDataUtil.TYPE_500MB));
 //      setThereIsTemperature((gribData.getGribPointData()[0][0].getTmp() > 0));
-        setThereIsTemperature(GRIBDataUtil.thereIsVariation(gribData, GRIBDataUtil.TYPE_TMP));
-        setThereIsWaves(GRIBDataUtil.thereIsVariation(gribData, GRIBDataUtil.TYPE_WAVE));
-        setThereIsRain(GRIBDataUtil.thereIsVariation(gribData, GRIBDataUtil.TYPE_RAIN));
+//      setThereIsTemperature(GRIBDataUtil.thereIsVariation(gribData, GRIBDataUtil.TYPE_TMP));
+        setThereIsTemperature(GRIBDataUtil.thereIsVariation(gf, GRIBDataUtil.TYPE_TMP));
+//      setThereIsWaves(GRIBDataUtil.thereIsVariation(gribData, GRIBDataUtil.TYPE_WAVE));
+        setThereIsWaves(GRIBDataUtil.thereIsVariation(gf, GRIBDataUtil.TYPE_WAVE));
+//      setThereIsRain(GRIBDataUtil.thereIsVariation(gribData, GRIBDataUtil.TYPE_RAIN));
+        setThereIsRain(GRIBDataUtil.thereIsVariation(gf, GRIBDataUtil.TYPE_RAIN));
 
         WWContext.getInstance().fireGribInfo(gribIndex, 
                                              wgd.length, 
@@ -5333,6 +5346,7 @@ public class CommandPanel
               }
               else if ("WAVES".equals(dataOption))
               {
+                // TASK What if array size is noyte is not the same?
                 double height = /*(double)*/(gribData.getGribPointData()[h][w].getWHgt());
                 gr.setColor(WWGnlUtilities.getWavesColor(height / 100D, boundaries[WAVES][1], boundaries[WAVES][0]));
                 // 
@@ -6787,11 +6801,12 @@ public class CommandPanel
     System.out.println("displayGRIBSlice...");
     ArrayList<GribHelper.GribCondition> data2plot = new ArrayList<GribHelper.GribCondition>();
     ArrayList<Double> bsp = null;
-    int fw = 1; // That's for routing
+    ArrayList<Integer> twa = null;
+    int fw = GRIBSlicePanel.DEFAULT_FORK_WIDTH; // That's for routing
     int dataOption = GRIBSlicePanel.GRIB_SLICE_OPTION;
     if (fromGRIBSlice != null && toGRIBSlice != null) // GRIB Slice
     {
-      fw = GRIBSlicePanel.DEFAULT_FORK_WIDTH;
+//    fw = GRIBSlicePanel.DEFAULT_FORK_WIDTH;
       int nbSteps = 1000;
       for (int idx=0; idx <= nbSteps; idx++)
       {
@@ -6817,6 +6832,7 @@ public class CommandPanel
     {
       dataOption = GRIBSlicePanel.ROUTING_OPTION;
       bsp = new ArrayList<Double>();
+      twa = new ArrayList<Integer>();
       // Route is upside down, reverse it.
       int routeSize = bestRoute.size();
 //    for (RoutingPoint rp : bestRoute)
@@ -6836,6 +6852,7 @@ public class CommandPanel
           }
           data2plot.add(gribPoint);
           bsp.add((i==(routeSize - 1))?new Double(bestRoute.get(i-1).getBsp()):new Double(rp.getBsp()));
+          twa.add((i==(routeSize - 1))?new Integer(bestRoute.get(i-1).getTwa()):new Integer(rp.getTwa()));
         }
         catch (Exception ignore) 
         {
@@ -6844,10 +6861,10 @@ public class CommandPanel
       }
     }
     if (gsp == null)
-      gsp = new GRIBSlicePanel(data2plot, bsp, dataOption, fw);
+      gsp = new GRIBSlicePanel(data2plot, bsp, twa, dataOption, fw);
     else
     {
-      gsp.setData(data2plot, bsp, dataOption);
+      gsp.setData(data2plot, bsp, twa, dataOption);
       gsp.setForkWidth(fw);
     }
 //  gsp.setDataOption(dataOption);

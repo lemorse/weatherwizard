@@ -3,6 +3,7 @@ package chartview.gui.util.dialog;
 
 import chartview.ctx.WWContext;
 
+import chartview.util.WWGnlUtilities;
 import chartview.util.grib.GribHelper;
 
 import java.awt.AlphaComposite;
@@ -43,7 +44,9 @@ public class GRIBSlicePanel
   
   private int dataOption = -1;
   private ArrayList<Double> bsp = null;
+  private ArrayList<Integer> twa = null;
   private ArrayList<Double> smoothedBsp = null;
+  private ArrayList<Integer> smoothedTwa = null;
   private double bspMini = Double.MAX_VALUE;
   private double bspMaxi = Double.MIN_VALUE;
   
@@ -97,7 +100,11 @@ public class GRIBSlicePanel
   private DecimalFormat tempFormat   = new DecimalFormat("##0'°C'");
   private DecimalFormat prateFormat  = new DecimalFormat("##0.00 'mm/h'");
 
-  public GRIBSlicePanel(ArrayList<GribHelper.GribCondition> data, ArrayList<Double> bsp, int opt, int fw)
+  public GRIBSlicePanel(ArrayList<GribHelper.GribCondition> data, 
+                        ArrayList<Double> bsp, 
+                        ArrayList<Integer> twa, 
+                        int opt, 
+                        int fw)
   {
     if (fw % 2 == 0)
     {
@@ -110,6 +117,7 @@ public class GRIBSlicePanel
       forkWidth = fw;
     data2plot = data;
     this.bsp = bsp;
+    this.twa = twa;
     dataOption = opt;
     
     try
@@ -145,10 +153,14 @@ public class GRIBSlicePanel
     computeData();
   }
   
-  public void setData(ArrayList<GribHelper.GribCondition> data, ArrayList<Double> bsp, int opt)
+  public void setData(ArrayList<GribHelper.GribCondition> data, 
+                      ArrayList<Double> bsp, 
+                      ArrayList<Integer> twa,
+                      int opt)
   {
     data2plot = data;   
     this.bsp = bsp;
+    this.twa = twa;
     dataOption = opt;
     computeData();
   }
@@ -311,7 +323,10 @@ public class GRIBSlicePanel
       smoothTextField.setText(Integer.toString(forkWidth));
       
       if (dataOption == ROUTING_OPTION)
+      {
         bsp = expandBSPArray(bsp, 75);
+        twa = expandTWAArray(twa, 75);
+      }
     }
     
     // Detect mini maxi
@@ -388,8 +403,11 @@ public class GRIBSlicePanel
     if (dataOption == ROUTING_OPTION)
     {
       smoothedBsp = new ArrayList<Double>(bsp.size());
+      smoothedTwa = new ArrayList<Integer>(twa.size());
       for (Double d : bsp)
         smoothedBsp.add(new Double(d.doubleValue()));
+      for (Integer i : twa)
+        smoothedTwa.add(new Integer(i.intValue()));
     }
     int halfFork = ((fork-1) / 2);
     for (int i=0; i<data2smooth.size(); i++)    
@@ -402,6 +420,7 @@ public class GRIBSlicePanel
       double rain   = 0D;
       
       double boatSpeed = 0D;
+      double windAngle = 0D;
       
       for (int j=(i-halfFork); j<=(i+halfFork); j++)
       {
@@ -418,7 +437,10 @@ public class GRIBSlicePanel
         rain   += data2smooth.get(_j).rain;
         
         if (dataOption == ROUTING_OPTION)
+        {
           boatSpeed += bsp.get(_j).doubleValue();
+          windAngle += twa.get(_j).intValue();
+        }
       }
       tws = tws / fork;
       hgt500 = hgt500 / fork;
@@ -428,9 +450,12 @@ public class GRIBSlicePanel
       rain = rain / fork;
       
       boatSpeed = boatSpeed / fork;
+      windAngle = windAngle / fork;
       if (dataOption == ROUTING_OPTION)
+      {
         smoothedBsp.set(i, new Double(boatSpeed)); 
-
+        smoothedTwa.set(i, new Integer((int)windAngle));
+      }
       smoothedData.get(i).windspeed = (float)tws;      
       smoothedData.get(i).hgt500    = (float)hgt500;      
       smoothedData.get(i).prmsl     = (int)prmsl;      
@@ -491,6 +516,24 @@ public class GRIBSlicePanel
       {
         double bspValue = origData.get(i).doubleValue() + (bspDeltaValue * ((double)j / (double)smoothFactor));
         expanded.add(new Double(bspValue));
+      }
+    }
+    return expanded;
+  }
+  
+  private ArrayList<Integer> expandTWAArray(ArrayList<Integer> origData,
+                                           int smoothFactor)
+  {
+    ArrayList<Integer> expanded = new ArrayList<Integer>(origData.size() * smoothFactor);
+      // Add points
+    for (int i=0; i<origData.size() - 1; i++)
+    {
+      double twaDeltaValue = origData.get(i + 1).doubleValue() - origData.get(i).doubleValue();
+      
+      for (int j=0; j<smoothFactor; j++)
+      {
+        double twaValue = origData.get(i).doubleValue() + (twaDeltaValue * ((double)j / (double)smoothFactor));
+        expanded.add(new Integer((int)twaValue));
       }
     }
     return expanded;
@@ -696,7 +739,7 @@ public class GRIBSlicePanel
       if (dataOption == ROUTING_OPTION)
         drawBoatSpeed(gr, smoothedBsp, bspscale);
       
-      if (infoX != -1)
+      if (infoX != -1) // Mouse is pressed
       {
         gr.setColor(Color.gray);
         gr.drawLine(infoX, 0, infoX, this.getHeight());
@@ -708,8 +751,12 @@ public class GRIBSlicePanel
         if (dataIdx < 0) dataIdx = 0;
         GribHelper.GribCondition gribPoint = smoothedData.get(dataIdx);
         Double boatSpeed = null;
+        Integer windAngle = null;
         if (dataOption == ROUTING_OPTION)
+        {
           boatSpeed = smoothedBsp.get(dataIdx);
+          windAngle = smoothedTwa.get(dataIdx);
+        }
         if (displayTWS)
         {
           int y = (int)(this.getHeight() - (gribPoint.windspeed * windscale));
@@ -744,6 +791,22 @@ public class GRIBSlicePanel
         {
           int y = (int)(this.getHeight() - (boatSpeed.doubleValue() * bspscale));
           postit(gr, " " + speedFormat.format(boatSpeed.doubleValue()), infoX, y, Color.yellow, Color.blue, 0.75f);
+        }
+        if (dataOption == ROUTING_OPTION && displayTWS)
+        {
+          // Draw the boat with TWA
+          Point boatCenter = new Point(infoX, (this.getHeight() / 2));
+          WWGnlUtilities.drawBoat((Graphics2D)gr, 
+                                  Color.CYAN, 
+                                  boatCenter,             // Pos on the Panel
+                                  (this.getHeight() / 3), // Boat Length
+                                  0,                      // Heading
+                                  0.5f);                  // Alpha
+          // Now, the wind
+          WWGnlUtilities.drawTWAOverBoat((Graphics2D)gr, 
+                                         (this.getHeight() / 6), // Hand Length
+                                         boatCenter, 
+                                         -windAngle); // TODO See why -windAngle
         }
       }
 
