@@ -36,6 +36,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -358,6 +359,7 @@ public class AdjustFrame
     
     this.setJMenuBar(menuBar);
 //  menuFile.add(menuFileOpen);
+    
     menuFile.add(new OpenAction()).setAccelerator(KeyStroke.getKeyStroke("ctrl O"));
     menuFile.add(new JSeparator());
     menuFile.add(menuDownload);
@@ -385,10 +387,12 @@ public class AdjustFrame
 //  menuFile.add(menuFileExit);
     menuFile.add(new ExitAction()).setAccelerator(KeyStroke.getKeyStroke("alt F4"));
     
-    menuFile.setMnemonic('F'); // TODO Same for everyone
-    
     menuBar.add(menuFile);
-    menuFile.setText(WWGnlUtilities.buildMessage("file"));
+    WWGnlUtilities.setLabelAndMnemonic("file", menuFile);
+//  String label = WWGnlUtilities.buildMessage("file");
+//  menuFile.setText(label);
+//  menuFile.setMnemonic('F');
+    
 //    menuFileOpen.setText(WWGnlUtilities.buildMessage("set-composite"));
 //    menuFileOpen.setToolTipText(WWGnlUtilities.buildMessage("fax-grib-charts"));
 //    menuFileOpen.setIcon(new ImageIcon(this.getClass().getResource("img/composite.png")));
@@ -399,7 +403,9 @@ public class AdjustFrame
 //            fileOpen_ActionPerformed(ae);
 //          }
 //        });
-    menuDownload.setText(WWGnlUtilities.buildMessage("download"));
+    
+//  menuDownload.setText(WWGnlUtilities.buildMessage("download"));
+    WWGnlUtilities.setLabelAndMnemonic("download", menuDownload);
     menuDownload.setIcon(new ImageIcon(this.getClass().getResource("img/download.png")));
     menuDownloadFaxFromNet.setText(WWGnlUtilities.buildMessage("download-fax-from-internet"));
     menuDownloadFaxFromNet.setToolTipText(WWGnlUtilities.buildMessage("from-predefined"));
@@ -543,7 +549,8 @@ public class AdjustFrame
 //        });
 
     menuBar.add(menuTools);
-    menuTools.setText(WWGnlUtilities.buildMessage("tools"));
+//  menuTools.setText(WWGnlUtilities.buildMessage("tools"));
+    WWGnlUtilities.setLabelAndMnemonic("tools", menuTools);
     menuTools.add(showGRIBPointData);
     menuTools.add(new JSeparator());
     menuTools.add(menuCharts); // Externalized
@@ -787,9 +794,11 @@ public class AdjustFrame
         });
 
     menuBar.add(menuHelp);
-    menuHelp.setText(WWGnlUtilities.buildMessage("help"));
+//  menuHelp.setText(WWGnlUtilities.buildMessage("help"));
+    WWGnlUtilities.setLabelAndMnemonic("help", menuHelp);
     menuHelp.add(menuHelpAbout);
-    menuHelpAbout.setText(WWGnlUtilities.buildMessage("about"));
+//  menuHelpAbout.setText(WWGnlUtilities.buildMessage("about"));
+    WWGnlUtilities.setLabelAndMnemonic("about", menuHelpAbout);
     menuHelpAbout.setIcon(new ImageIcon(this.getClass().getResource("img/help.png")));
     menuHelpAbout.addActionListener(new ActionListener()
         {
@@ -1872,8 +1881,7 @@ public class AdjustFrame
   {
     public ExitAction()
     {
-      super(WWGnlUtilities.buildMessage("exit"),
-            new ImageIcon(instance.getClass().getResource("img/dummy.png")));
+      super(WWGnlUtilities.buildMessage("exit"), new ImageIcon(instance.getClass().getResource("img/dummy.png")));      
     }
 
     public void actionPerformed(ActionEvent ae)

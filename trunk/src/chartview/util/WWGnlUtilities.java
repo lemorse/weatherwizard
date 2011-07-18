@@ -114,6 +114,7 @@ import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
@@ -247,7 +248,9 @@ public class WWGnlUtilities
   
   public static String truncateBigFileName(String orig)
   {
-    String trunc = orig.substring(0, 6);
+    String trunc = orig;
+    if (orig != null && orig.length() > 6)
+      trunc = orig.substring(0, 6);
     trunc += "...";
     if (orig.indexOf(File.separator) > -1)
       trunc += (orig.substring(orig.lastIndexOf(File.separator)));
@@ -408,6 +411,19 @@ public class WWGnlUtilities
       ex.printStackTrace();
     }
     return mess;
+  }
+  
+  public static void setLabelAndMnemonic(String labelKey, JMenuItem mi)
+  {
+    String s = buildMessage(labelKey);
+    int ampIdx = s.indexOf('&');
+    if (ampIdx > -1)
+    {
+      char m = s.charAt(ampIdx + 1);
+      mi.setMnemonic(m);
+      s = s.replace(new String(new char[] { s.charAt(ampIdx) }), "");
+    }    
+    mi.setText(s);
   }
     
   /**
@@ -688,6 +704,42 @@ public class WWGnlUtilities
     g2.setColor(before);
   }
 
+  private final static int KNOB_DIAMETER = 10; // Make it even
+  public static void drawTWAOverBoat(Graphics2D g2d, int hLength, Point center, int twa)
+  {
+    // Hand shadow
+    g2d.setColor(Color.gray);
+    float alpha = 0.3f;
+    g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
+    Stroke originalStroke = g2d.getStroke();
+    Stroke stroke =  new BasicStroke(5, 
+                                     BasicStroke.CAP_ROUND,
+                                     BasicStroke.JOIN_BEVEL);
+    g2d.setStroke(stroke);  
+    int handLength = hLength;
+    int shadowOffset = 5;
+    g2d.drawLine(center.x + shadowOffset, 
+                 center.y + shadowOffset, 
+                 center.x + shadowOffset + (int)(handLength * Math.sin(Math.toRadians((double)twa))),
+                 center.y + shadowOffset - (int)(handLength * Math.cos(Math.toRadians((double)twa))));
+    g2d.fillOval(center.x + shadowOffset - (KNOB_DIAMETER / 2),
+                 center.y + shadowOffset - (KNOB_DIAMETER / 2),
+                 KNOB_DIAMETER, KNOB_DIAMETER);                 
+    // Reset Transparency
+    alpha = 1.0f;
+    g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));      
+    // Hand
+    g2d.drawLine(center.x, 
+                 center.y, 
+                 center.x + (int)(handLength * Math.sin(Math.toRadians((double)twa))),
+                 center.y - (int)(handLength * Math.cos(Math.toRadians((double)twa))));
+    g2d.fillOval(center.x - (KNOB_DIAMETER / 2),
+                 center.y - (KNOB_DIAMETER / 2),
+                 KNOB_DIAMETER, KNOB_DIAMETER);                 
+    
+    g2d.setStroke(originalStroke);      
+  }
+  
   public static void drawWind(Graphics gr, 
                               int x, 
                               int y, 
