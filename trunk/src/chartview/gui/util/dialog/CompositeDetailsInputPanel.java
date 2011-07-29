@@ -313,7 +313,7 @@ public class CompositeDetailsInputPanel
             contourWavesCheckBox.setEnabled(wavesDataCheckBox.isSelected());
           }
         });
-    temperatureDataCheckBox.setText("Temp");
+    temperatureDataCheckBox.setText("AirTemp");
     temperatureDataCheckBox.setSelected(true);
     temperatureDataCheckBox.addActionListener(new ActionListener()
         {
@@ -1006,7 +1006,7 @@ public class CompositeDetailsInputPanel
         Date date = GPXUtil.getLastDate(gpxURL);
         dtPanel.setDate(date);
         date = GPXUtil.getFirstDate(gpxURL);
-        fromGPXLabel.setText("From " + date.toString());
+        fromGPXLabel.setText("From " + date.toString()); //  + " to " + GPXUtil.getLastDate(gpxURL).toString());
         TimeZone.setDefault(tz); // Reset      
       }
       catch (Exception ex)
