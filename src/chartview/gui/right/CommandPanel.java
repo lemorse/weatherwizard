@@ -218,8 +218,8 @@ public class CommandPanel
   private final static int WAVES       = 4;
   private final static int RAIN        = 5;
   
-  private final static String[] dataLabels = { "WIND", "PRMSL", "500HGT", "TEMP", "WAVES", "RAIN" };
-  private final static String[] units      = { " kts", " mb",   " m",     "°C",   " m",    " mm/h" };
+  private final static String[] dataLabels = { "WIND", "PRMSL", "500HGT", "AIRTMP", "WAVES", "RAIN" };
+  private final static String[] units      = { " kts", " mb",   " m",     "°C",     " m",    " mm/h" };
   private double[][] boundaries = new double[dataLabels.length][2];
   
   private JLabel statusLabel = new JLabel("");
@@ -3032,7 +3032,7 @@ public class CommandPanel
                 if (WWGnlUtilities.isIn(dataLabels[HGT500], displayComboBox))
                   boundaries[HGT500] = GRIBDataUtil.get500MbBoundaries(gribData);
                 if (WWGnlUtilities.isIn(dataLabels[TEMPERATURE], displayComboBox))
-                  boundaries[TEMPERATURE] = GRIBDataUtil.getTempBoundaries(gribData);
+                  boundaries[TEMPERATURE] = GRIBDataUtil.getAirTempBoundaries(gribData);
                 if (WWGnlUtilities.isIn(dataLabels[WAVES], displayComboBox))
                   boundaries[WAVES] = GRIBDataUtil.getWaveHgtBoundaries(gribData);
                 if (WWGnlUtilities.isIn(dataLabels[RAIN], displayComboBox))
@@ -3320,7 +3320,7 @@ public class CommandPanel
     displayComboBox.addItem("WIND");
     displayComboBox.addItem("PRMSL");
     displayComboBox.addItem("500HGT");
-    displayComboBox.addItem("TEMP");
+    displayComboBox.addItem("AIRTMP");
     displayComboBox.addItem("WAVES");
     displayComboBox.addItem("RAIN");
     
@@ -5300,9 +5300,9 @@ public class CommandPanel
                                         useThickWind,
                                         gribUserOpacity); 
               }
-              else if ("TEMP".equals(dataOption))
+              else if ("AIRTMP".equals(dataOption))
               {
-                double temperature = /*(double)*/(gribData.getGribPointData()[h][w].getTmp() - 273D);
+                double temperature = /*(double)*/(gribData.getGribPointData()[h][w].getAirtmp() - 273D);
                 gr.setColor(WWGnlUtilities.getTemperatureColor(temperature, boundaries[TEMPERATURE][1], boundaries[TEMPERATURE][0]));
                 // 
                 double topLeftLat = lat + (gribStepY / 2D);
@@ -6632,13 +6632,13 @@ public class CommandPanel
 //          Context.getInstance().fireGRIBprate(gribPoint.rain);
 
             WWContext.getInstance().fireSetGRIBData(gribPoint.winddir, 
-                                                  gribPoint.windspeed, 
-                                                  gribPoint.prmsl, 
-                                                  gribPoint.hgt500, 
-                                                  gribPoint.waves, 
-                                                  gribPoint.temp, 
-                                                  gribPoint.rain);
-            mess += ("wind " + Math.round(gribPoint.windspeed) + "kts@" + gribPoint.winddir + 
+                                                    gribPoint.windspeed, 
+                                                    gribPoint.prmsl, 
+                                                    gribPoint.hgt500, 
+                                                    gribPoint.waves, 
+                                                    gribPoint.temp, 
+                                                    gribPoint.rain);
+            mess += ("wind " + Math.round(gribPoint.windspeed) + "kts@" + gribPoint.winddir + " (F " + WWGnlUtilities.getBeaufort(gribPoint.windspeed) + ")" +
                     ((gribPoint.prmsl>0)?br  + "prmsl:" + WWGnlUtilities.DF2.format((gribPoint.prmsl / 100F)) + units[PRMSL]:"") +
                     ((gribPoint.waves>0)?br  + "waves:" + WWGnlUtilities.XXX12.format((gribPoint.waves / 100F)) + units[WAVES]:"") +
                     ((gribPoint.temp>0)?br   + "temp:" + WWGnlUtilities.XX22.format(gribPoint.temp - 273) + units[TEMPERATURE]:"") + // Originally in Kelvin
