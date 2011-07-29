@@ -313,7 +313,7 @@ public class GribRecordBDS
    public String toString()
    {
       return "    BDS section:" + '\n' +
-            "        min/max value: " + this.minvalue + " " + this.maxvalue + "\n" +
+            "        min/max value: " + this.minvalue + " / " + this.maxvalue + "\n" +
             "        ref. value: " + this.refvalue + "\n" +
             "        is a constant: " + this.isConstant + "\n" +
             "        bin. scale: " + this.binscale + "\n" +

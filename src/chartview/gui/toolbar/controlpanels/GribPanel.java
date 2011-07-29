@@ -49,7 +49,7 @@ public class GribPanel
   private JLabel windLabel  = new JLabel("WIND");
   private JLabel prmslLabel = new JLabel("PRMSL");
   private JLabel hgtLabel   = new JLabel("HGT");
-  private JLabel tmpLabel   = new JLabel("TEMP");
+  private JLabel tmpLabel   = new JLabel("AIRTMP");
   private JLabel waveLabel  = new JLabel("WAVES");
   private JLabel rainLabel  = new JLabel("RAIN");
   private JButton googleButton = new JButton();
