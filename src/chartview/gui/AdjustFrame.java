@@ -1881,7 +1881,7 @@ public class AdjustFrame
   {
     public ExitAction()
     {
-      super(WWGnlUtilities.buildMessage("exit"), new ImageIcon(instance.getClass().getResource("img/dummy.png")));      
+      super(WWGnlUtilities.buildMessage("exit-no-acc"), new ImageIcon(instance.getClass().getResource("img/dummy.png")));      
     }
 
     public void actionPerformed(ActionEvent ae)
