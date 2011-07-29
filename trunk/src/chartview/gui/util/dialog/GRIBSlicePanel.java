@@ -230,7 +230,7 @@ public class GRIBSlicePanel
           wavesCheckBox_actionPerformed(e);
         }
       });
-    tempCheckBox.setText("TEMP");
+    tempCheckBox.setText("AIRTMP");
     tempCheckBox.addActionListener(new ActionListener()
       {
         public void actionPerformed(ActionEvent e)

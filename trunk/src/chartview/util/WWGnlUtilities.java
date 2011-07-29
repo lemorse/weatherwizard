@@ -1340,7 +1340,7 @@ public class WWGnlUtilities
     {
       ExitPanel exitPanel = new ExitPanel();      
       int resp = JOptionPane.showConfirmDialog(WWContext.getInstance().getMasterTopFrame(), 
-                                               exitPanel, WWGnlUtilities.buildMessage("exit"), 
+                                               exitPanel, WWGnlUtilities.buildMessage("exit-no-acc"), 
                                                JOptionPane.YES_NO_OPTION, 
                                                JOptionPane.QUESTION_MESSAGE);
       if (resp == JOptionPane.YES_OPTION)
@@ -3277,6 +3277,23 @@ public class WWGnlUtilities
       WWContext.getInstance().fireManuallyEnterBoatPosition(new GeoPoint(l, g), heading);
       WWGnlUtilities.storeBoatPosAndHeading(l, g, heading, manualPositionFile);
     }
+  }
+
+  // Beaufort Scale                               0   1   2   3    4    5    6    7    8    9   10   11   12
+  public final static double[] BEAUFORT_SCALE = { 0d, 1d, 4d, 7d, 11d, 16d, 22d, 28d, 34d, 41d, 48d, 56d, 64d };
+
+  public static int getBeaufort(double d)
+  {
+    int b = 0;
+    for (int i=0; i<BEAUFORT_SCALE.length; i++)
+    {
+      if (d < BEAUFORT_SCALE[i])
+      {
+        b = i - 1;
+        break;
+      }
+    }
+    return b;
   }
   
   public static void main2(String[] args)

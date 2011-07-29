@@ -174,7 +174,7 @@ public class FileTypeHolder
     }
     
     this.validate();
-    this.validateTree();
+//  this.validateTree();
   }
   
   public void refreshFaxTree()

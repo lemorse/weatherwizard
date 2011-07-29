@@ -292,7 +292,7 @@ public class GoogleUtil
           String dataOption = (String)displayComboBox.getSelectedItem();
           if (dataOption == null) dataOption = "WIND";
           String currentOption = dataOption;
-          dataOption = "TEMP";
+          dataOption = "AIRTMP";
           displayComboBox.setSelectedItem(dataOption);
           chartPanel.repaint();
           chartPanel.genImage("temp" + File.separator + "temp", "png");

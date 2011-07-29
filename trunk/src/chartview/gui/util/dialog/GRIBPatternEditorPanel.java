@@ -185,7 +185,7 @@ public final class GRIBPatternEditorPanel
             contourWavesCheckBox.setEnabled(wavesDataCheckBox.isSelected());
           }
         });
-    temperatureDataCheckBox.setText("Temp");
+    temperatureDataCheckBox.setText("AirTmp");
     temperatureDataCheckBox.setSelected(true);
     temperatureDataCheckBox.addActionListener(new ActionListener()
         {

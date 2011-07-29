@@ -224,7 +224,7 @@ public class JTreeGRIBRequestPanel
             hgt500CheckBox_actionPerformed(e);
           }
         });
-    tempCheckBox.setText("TEMP");
+    tempCheckBox.setText("AIRTMP");
     tempCheckBox.addActionListener(new ActionListener()
         {
           public void actionPerformed(ActionEvent e)
@@ -993,7 +993,7 @@ public class JTreeGRIBRequestPanel
     }
     if (tempCheckBox.isSelected())
     {
-      gribRequest += ((nbData>0?",":"") + "TEMP");
+      gribRequest += ((nbData>0?",":"") + "AIRTMP");
       nbData++;
     }
     if (wavesCheckBox.isSelected())

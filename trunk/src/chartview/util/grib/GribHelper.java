@@ -53,7 +53,7 @@ public class GribHelper
   }
 
   /**
-   * 2D smoothing (area, no time0
+   * 2D smoothing (area, no time)
    * 
    * @param gribData Original GRIB Data
    * @param smooth   smooth factor.
@@ -116,7 +116,7 @@ public class GribHelper
             double dir = WWGnlUtilities.getDir(u, v);
             double prmsl  = gribData.getGribPointData()[yIdx][xIdx].getPrmsl();
             double hgt500 = gribData.getGribPointData()[yIdx][xIdx].getHgt();
-            double temp   = gribData.getGribPointData()[yIdx][xIdx].getTmp();
+            double temp   = gribData.getGribPointData()[yIdx][xIdx].getAirtmp(); // TODO seatmp
             double whgt   = gribData.getGribPointData()[yIdx][xIdx].getWHgt();
             double rain   = gribData.getGribPointData()[yIdx][xIdx].getRain();
             
@@ -138,7 +138,7 @@ public class GribHelper
             dir = WWGnlUtilities.getDir(u, v);
             prmsl  = gribData.getGribPointData()[yIdx][xIdx + 1].getPrmsl();
             hgt500 = gribData.getGribPointData()[yIdx][xIdx + 1].getHgt();
-            temp   = gribData.getGribPointData()[yIdx][xIdx + 1].getTmp();
+            temp   = gribData.getGribPointData()[yIdx][xIdx + 1].getAirtmp();
             whgt   = gribData.getGribPointData()[yIdx][xIdx + 1].getWHgt();
             rain   = gribData.getGribPointData()[yIdx][xIdx + 1].getRain();
     
@@ -159,7 +159,7 @@ public class GribHelper
             dir = WWGnlUtilities.getDir(u, v);
             prmsl  = gribData.getGribPointData()[yIdx + 1][xIdx].getPrmsl();
             hgt500 = gribData.getGribPointData()[yIdx + 1][xIdx].getHgt();
-            temp   = gribData.getGribPointData()[yIdx + 1][xIdx].getTmp();
+            temp   = gribData.getGribPointData()[yIdx + 1][xIdx].getAirtmp();
             whgt   = gribData.getGribPointData()[yIdx + 1][xIdx].getWHgt();
             rain   = gribData.getGribPointData()[yIdx + 1][xIdx].getRain();
     
@@ -180,7 +180,7 @@ public class GribHelper
             dir = WWGnlUtilities.getDir(u, v);
             prmsl  = gribData.getGribPointData()[yIdx + 1][xIdx + 1].getPrmsl();
             hgt500 = gribData.getGribPointData()[yIdx + 1][xIdx + 1].getHgt();
-            temp   = gribData.getGribPointData()[yIdx + 1][xIdx + 1].getTmp();
+            temp   = gribData.getGribPointData()[yIdx + 1][xIdx + 1].getAirtmp();
             whgt   = gribData.getGribPointData()[yIdx + 1][xIdx + 1].getWHgt();
             rain   = gribData.getGribPointData()[yIdx + 1][xIdx + 1].getRain();
     
@@ -234,7 +234,7 @@ public class GribHelper
               }
               gpd.setLng(newLng);
               gpd.setPrmsl((int)_prmsl);
-              gpd.setTmp((int)_temp);
+              gpd.setAirtmp((int)_temp);
               gpd.setRain((float)_rain);
               gpd.setWHgt((int)_whgt);
               gpd.setTwd(_dir);
@@ -312,7 +312,7 @@ public class GribHelper
                 gpd[h][w].setHgt((float)getIntermediateValue(gpd1[h][w].getHgt(), gpd2[h][w].getHgt(), nbsteps, j));
                 gpd[h][w].setPrmsl((float)getIntermediateValue(gpd1[h][w].getPrmsl(), gpd2[h][w].getPrmsl(), nbsteps, j));
                 gpd[h][w].setRain((float)getIntermediateValue(gpd1[h][w].getRain(), gpd2[h][w].getRain(), nbsteps, j));
-                gpd[h][w].setTmp((float)getIntermediateValue(gpd1[h][w].getTmp(), gpd2[h][w].getTmp(), nbsteps, j));
+                gpd[h][w].setAirtmp((float)getIntermediateValue(gpd1[h][w].getAirtmp(), gpd2[h][w].getAirtmp(), nbsteps, j)); // TODO seatmp
                 gpd[h][w].setTwd(getIntermediateValue(gpd1[h][w].getTwd(), gpd2[h][w].getTwd(), nbsteps, j));
                 gpd[h][w].setTws(getIntermediateValue(gpd1[h][w].getTws(), gpd2[h][w].getTws(), nbsteps, j));
                 gpd[h][w].setU((float)getIntermediateValue(gpd1[h][w].getU(), gpd2[h][w].getU(), nbsteps, j));
@@ -618,7 +618,8 @@ public class GribHelper
     private float v;
     private float hgt;
     private float prmsl;
-    private float tmp;
+    private float airtmp;
+    private float seatmp;
     private float whgt;
     private float rain;
     
@@ -660,9 +661,9 @@ public class GribHelper
       prmsl = i;
     }
 
-    public void setTmp(float i)
+    public void setAirtmp(float i)
     {
-      tmp = i;
+      airtmp = i;
     }
 
     public void setWHgt(float i)
@@ -705,9 +706,9 @@ public class GribHelper
       return prmsl;
     }
 
-    public float getTmp()
+    public float getAirtmp()
     {
-      return tmp;
+      return airtmp;
     }
 
     public float getWHgt()
@@ -743,6 +744,16 @@ public class GribHelper
     public double getTwd()
     {
       return twd;
+    }
+
+    public void setSeatmp(float seatmp)
+    {
+      this.seatmp = seatmp;
+    }
+
+    public float getSeatmp()
+    {
+      return seatmp;
     }
   }
 
@@ -871,6 +882,7 @@ public class GribHelper
 //  TimeZone.setDefault(tz);
     WWGnlUtilities.SDF.setTimeZone(tz);
   
+    
     for (int i = 0; i < gribFile.getLightRecords().length; i++)
     {        
       try
@@ -881,50 +893,97 @@ public class GribHelper
         GribRecordGDS grgds = gr.getGDS(); // Boundaries and Steps
         GribRecordBDS grbds = gr.getBDS(); // Min/Max TASK Use those ones
 
-         TempGribData tgd = new TempGribData();
-         tgd.date = grpds.getGMTForecastTime().getTime(); 
-         tgd.width = grgds.getGridNX();
-         tgd.height = grgds.getGridNY();
-         tgd.stepX = grgds.getGridDX();
-         tgd.stepY = grgds.getGridDY();
-         tgd.top = Math.max(grgds.getGridLat1(), grgds.getGridLat2());
-         tgd.bottom = Math.min(grgds.getGridLat1(), grgds.getGridLat2());
-         tgd.left = Math.min(grgds.getGridLon1(), grgds.getGridLon2());
-         tgd.right = Math.max(grgds.getGridLon1(), grgds.getGridLon2());
+        TempGribData tgd = new TempGribData(); 
+        tgd.date = grpds.getGMTForecastTime().getTime(); 
+        tgd.width = grgds.getGridNX();
+        tgd.height = grgds.getGridNY();
+        tgd.stepX = grgds.getGridDX();
+        tgd.stepY = grgds.getGridDY();
+        tgd.top = Math.max(grgds.getGridLat1(), grgds.getGridLat2());
+        tgd.bottom = Math.min(grgds.getGridLat1(), grgds.getGridLat2());
+        tgd.left = Math.min(grgds.getGridLon1()>180d?grgds.getGridLon1()-360:grgds.getGridLon1(), 
+                            grgds.getGridLon2()>180?grgds.getGridLon2()-360:grgds.getGridLon2());
+        tgd.right = Math.max(grgds.getGridLon1()>180d?grgds.getGridLon1()-360:grgds.getGridLon1(), 
+                             grgds.getGridLon2()>180?grgds.getGridLon2()-360:grgds.getGridLon2());
          
-         tgd.type = grpds.getType();
-         tgd.description = grpds.getDescription();
+        tgd.type = grpds.getType();
+        tgd.description = grpds.getDescription();
         
-         tgd.data = new float[tgd.height][tgd.width];
-         float val = 0F;
-         for (int col=0; col<tgd.width; col++)
-         {
-           for (int row=0; row<tgd.height; row++)
-           {
-             try
-             {
-               val = gr.getValue(col, row);
-               if (val > 200000F)
-                 val = 0.0F;
-               if (tgd.type.equals("htsgw"))
-                 val *= 100F;
-                                   
-               tgd.data[row][col] = val;
-             }
-             catch (Exception ex)
-             {
-               ex.printStackTrace();
-             }
-           }
-         }
-         Map<Date, TempGribData> mapForType = map.get(tgd.type);
-         if (mapForType == null)
-         {
-           mapForType = new TreeMap<Date, TempGribData>();
-           map.put(tgd.type, mapForType);
-         }
-         mapForType.put(tgd.date, tgd);
-         
+        float[][] airTmpData = null;
+        float[][] seaTmpData = null;        
+        
+        float val = 0F;
+        for (int col=0; col<tgd.width; col++)
+        {
+          for (int row=0; row<tgd.height; row++)
+          {
+            try
+            {
+              val = gr.getValue(col, row);
+              if (val > 200000F)
+                val = 0.0F;
+              if (tgd.type.equals("htsgw"))
+                val *= 100F;     
+              if (tgd.type.equals("tmp"))
+              {
+                if (grpds.getLevel().equals("2.0m"))
+                {
+                  if (airTmpData == null)
+                    airTmpData = new float[tgd.height][tgd.width];
+                  airTmpData[row][col] = val;
+                }
+                else if (grpds.getLevel().equals("surface"))
+                {
+                  if (seaTmpData == null)
+                    seaTmpData = new float[tgd.height][tgd.width];
+                  seaTmpData[row][col] = val;
+                }
+              }
+              else
+              {
+                if (tgd.data == null)
+                  tgd.data = new float[tgd.height][tgd.width];
+                tgd.data[row][col] = val; 
+              }
+            }
+            catch (Exception ex)
+            {
+              ex.printStackTrace();
+            }
+          }
+        }
+        String type = tgd.type;
+        boolean typeLoop = true;
+        int nbTmpChecked = 0;
+        while (typeLoop)
+        {
+          if (tgd.type.equals("tmp"))
+          {
+            nbTmpChecked++;
+            if (nbTmpChecked == 1 && airTmpData != null)
+            {
+              type = "airtmp";
+              tgd.data = airTmpData;
+              if (seaTmpData == null)
+                typeLoop = false;
+            }
+            else if (seaTmpData != null)
+            {
+              type = "seatmp";
+              tgd.data = seaTmpData;
+              typeLoop = false;
+            }
+          }
+          else
+            typeLoop = false;
+          Map<Date, TempGribData> mapForType = map.get(type);
+          if (mapForType == null)
+          {
+            mapForType = new TreeMap<Date, TempGribData>();
+            map.put(type, mapForType); 
+          }
+          mapForType.put(tgd.date, tgd);         
+        }
       }
       catch (NoValidGribException e)
       {
@@ -999,10 +1058,16 @@ public class GribHelper
         }
 //        else
 //          System.out.println("Found the GribConditionData from the map");
+
+     // gcd.setStepX(tgd2.stepX);
+     // gcd.setStepY(tgd2.stepY);
+
+        boolean resizeNeeded = false;
         try
         {
           int arrayW = tgd2.width;
-          int arrayH = tgd2.height;
+          int arrayH = tgd2.height;                    
+          
           GribPointData wpd[][] = gcd.getGribPointData();
           if (wpd == null)
           {
@@ -1011,18 +1076,33 @@ public class GribHelper
           }
           else
           {
-//            System.out.println("GribPointData array already exists.");
-            if (wpd.length != arrayH)
+//          System.out.println("GribPointData array already exists.");
+            if (wpd.length != arrayH) // was != instead of <
             {
-              throw new RuntimeException("DataArray (height) size mismatch in " + fileName + ", wpd.length=" + wpd.length + ", arrayH=" + arrayH);
+//            String mess = "For" + key + ": DataArray (height) size mismatch in " + fileName + ", wpd.length=" + wpd.length + ", arrayH=" + arrayH;
+////          throw new RuntimeException(mess);
+//            System.out.println(mess);
+              resizeNeeded = true;
             }
             else
             {
-              if (wpd[0].length != arrayW)
+              if (wpd[0].length != arrayW) // was != instead of <
               {
-                throw new RuntimeException("DataArray (width) size mismatch in " + fileName + ", wpd[0].length=" + wpd[0].length + ", arrayW=" + arrayW);
+//              String mess = "For " + key + ": DataArray (width) size mismatch in " + fileName + ", wpd[0].length=" + wpd[0].length + ", arrayW=" + arrayW;
+////            throw new RuntimeException(mess);
+//              System.out.println(mess);
+                resizeNeeded = true;
               }
             }
+          }
+          if (resizeNeeded)
+          {
+//          System.out.println("Resize needed for [" + key + "], " + arrayH + "x" + arrayW + " to turn into " + wpd.length + "x" + wpd[0].length);
+            float[][] newData = expandDataArray(tgd2.data, wpd.length, wpd[0].length);            
+            tgd2.data = newData;
+            
+            arrayH = wpd.length;
+            arrayW = wpd[0].length;
           }
           // Good to go
           for (int i = 0; i < arrayH; i++)
@@ -1032,8 +1112,8 @@ public class GribHelper
               if (wpd[i][j] == null)
               {
                 wpd[i][j] = new GribPointData();
-                double l = gcd.getSLat() + (gcd.stepY / (double)2 + (double)i * gcd.stepY);
-                double g = gcd.getWLng() + (gcd.stepX / (double)2 + (double)j * gcd.stepX);
+                double l = gcd.getSLat() + (gcd.stepY / 2d + (double)i * gcd.stepY);
+                double g = gcd.getWLng() + (gcd.stepX / 2d + (double)j * gcd.stepX);
                 if(g > 180D)
                   g -= 360;
                 wpd[i][j].setLat(l);
@@ -1043,8 +1123,7 @@ public class GribHelper
 //              System.out.println("Point[" + i + "][" + j + "] already exists");
                 
               try
-              {
-                // FIXME All data are float
+              {                
                 if (key.equals("ugrd"))
                 {
 //                wpd[i][j].setX((int)Math.round(tgd2.data[i][j]));
@@ -1066,9 +1145,13 @@ public class GribHelper
                 {
                   wpd[i][j].setWHgt(tgd2.data[i][j]);
                 }
-                else if (key.equals("tmp"))
+                else if (key.equals("airtmp")) // Air Temperature
                 {
-                  wpd[i][j].setTmp(tgd2.data[i][j]);  
+                  wpd[i][j].setAirtmp(tgd2.data[i][j]);  
+                }
+                else if (key.equals("seatmp")) // Sea Temperature
+                {
+                  wpd[i][j].setSeatmp(tgd2.data[i][j]);  
                 }
                 else if (key.equals("prate"))
                 {
@@ -1096,8 +1179,8 @@ public class GribHelper
         {
           String mess = rte.getMessage();
           //                      System.out.println("RuntimeException getMessage(): [" + mess + "]");
-          if (mess.startsWith("DataArray (width) size mismatch") ||
-              mess.startsWith("DataArray (height) size mismatch"))
+          if (mess.contains("DataArray (width) size mismatch") ||
+              mess.contains("DataArray (height) size mismatch"))
             System.out.println(mess);
           else
             throw rte;
@@ -1120,6 +1203,36 @@ public class GribHelper
       wgd.add(cd);
     }
     return wgd;
+  }
+  
+  private static float[][] expandDataArray(float[][] original, int newHeight, int newWidth)
+  {
+    float[][] newArray = new float[newHeight][newWidth];
+    int origHeight = original.length;
+    int origWidth = original[0].length;
+    for (int i = 0; i < newHeight; i++)
+    {
+      for (int j = 0; j < newWidth; j++)
+      {
+        float floatWidth = (float)origWidth * (float)j / (float)newWidth;
+        float floatHeight = (float)origHeight * (float)i / (float)newHeight;
+        int origI = (int)Math.floor(floatHeight);
+        int origJ = (int)Math.floor(floatWidth);
+        try
+        {
+          // C'est un petit peu gonflé...
+          newArray[i][j] = original[origI][origJ];
+        }
+        catch (ArrayIndexOutOfBoundsException aioobe)
+        {
+          System.err.println("newArray[" + newHeight +  "][" + newWidth +  "] for i=" + i + " j=" + j + 
+                           ", original[" + origHeight + "][" + origWidth + "] for i=" + origI + " j=" + origJ);
+          System.err.println(aioobe.toString());
+        }
+//      System.out.println("For i:" + i + ", j:" + j + " w:" + floatWidth + ", h:" + floatHeight);
+      }
+    }
+    return newArray;
   }
   
   public static boolean isBetween(double value, double one, double two)
@@ -1189,7 +1302,7 @@ public class GribHelper
           gribCond.vertIdx = l;
           gribCond.prmsl = wpd[l][g].getPrmsl();
           gribCond.waves = wpd[l][g].getWHgt();
-          gribCond.temp = wpd[l][g].getTmp();
+          gribCond.temp = wpd[l][g].getAirtmp(); // TODO seatmp
           gribCond.rain = wpd[l][g].getRain();
           if (alreadySaidTooOld) 
             gribCond.comment = "TOO_OLD";
@@ -1249,7 +1362,7 @@ public class GribHelper
             gribCond.vertIdx = l;
             gribCond.prmsl = wpd[l][g].getPrmsl();
             gribCond.waves = wpd[l][g].getWHgt();
-            gribCond.temp = wpd[l][g].getTmp();
+            gribCond.temp = wpd[l][g].getAirtmp();
             gribCond.rain = wpd[l][g].getRain();
             return gribCond;
           }

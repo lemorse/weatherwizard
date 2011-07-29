@@ -21,6 +21,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import jgrib.GribFile;
+
+import jgrib.GribRecord;
+import jgrib.GribRecordBDS;
+import jgrib.GribRecordGDS;
+import jgrib.GribRecordPDS;
+
 import oracle.xml.parser.v2.XMLDocument;
 import oracle.xml.parser.v2.XMLElement;
 
@@ -117,7 +124,7 @@ public class GRIBDataUtil
     return new double[] { minValue, maxValue };
   }
   
-  public final static double[] getTempBoundaries(GribHelper.GribConditionData gribData)
+  public final static double[] getAirTempBoundaries(GribHelper.GribConditionData gribData)
   {
     double minValue = Integer.MAX_VALUE;
     double maxValue = Integer.MIN_VALUE;
@@ -127,7 +134,7 @@ public class GRIBDataUtil
       {
         if (gribData.getGribPointData()[h][w] != null)
         {
-          double val = gribData.getGribPointData()[h][w].getTmp() - 273D;
+          double val = gribData.getGribPointData()[h][w].getAirtmp() - 273D;
   
           if (val < minValue) minValue = val;
           if (val > maxValue) maxValue = val;
@@ -310,10 +317,10 @@ public class GRIBDataUtil
         nextValue3 = gribData.getGribPointData()[h+1][w].getRain();
         break;
       case TYPE_TMP:
-        value = gribData.getGribPointData()[h][w].getTmp() - 273D;          
-        nextValue1 = gribData.getGribPointData()[h][w+1].getTmp() - 273D;
-        nextValue2 = gribData.getGribPointData()[h+1][w+1].getTmp() - 273D;
-        nextValue3 = gribData.getGribPointData()[h+1][w].getTmp() - 273D;
+        value = gribData.getGribPointData()[h][w].getAirtmp() - 273D;          
+        nextValue1 = gribData.getGribPointData()[h][w+1].getAirtmp() - 273D;
+        nextValue2 = gribData.getGribPointData()[h+1][w+1].getAirtmp() - 273D;
+        nextValue3 = gribData.getGribPointData()[h+1][w].getAirtmp() - 273D;
         break;
       case TYPE_WAVE:
         value = gribData.getGribPointData()[h][w].getWHgt() / 100D;          
@@ -420,13 +427,71 @@ public class GRIBDataUtil
 //                   ((a.getL() - b.getL()) * (a.getL() - b.getL())));
   }
   
-  // TODO Replace with the isConstant from the GRIB file itself
+  public final static boolean thereIsVariation(GribFile gribFile, int option)
+  {
+    boolean ok = false;
+    for (int i = 0; !ok && i < gribFile.getLightRecords().length; i++)
+    {        
+      try
+      {
+        GribRecord gr = new GribRecord(gribFile.getLightRecords()[i]);
+        GribRecordPDS grpds = gr.getPDS(); // Headers and Data
+        GribRecordBDS grbds = gr.getBDS(); 
+        String type = grpds.getType();
+//      System.out.println("type:" + type);
+        if (option == TYPE_TWS)
+          throw new RuntimeException("Type TWS Not supported in this method");
+        else if (option == TYPE_500MB && type.equals("hgt"))
+        {
+          // float min = grbds.getMinValue();
+          // float max = grbds.getMaxValue();
+          // ok = (max - min) > 0f;
+          ok = !grbds.getIsConstant();
+        }
+        else if (option == TYPE_PRMSL && type.equals("prmsl"))
+        {
+          // float min = grbds.getMinValue();
+          // float max = grbds.getMaxValue();
+          // ok = (max - min) > 0f;
+          ok = !grbds.getIsConstant();
+        }
+        else if (option == TYPE_TMP && type.equals("tmp"))
+        {
+          // float min = grbds.getMinValue();
+          // float max = grbds.getMaxValue();
+          // ok = (max - min) > 0f;
+          ok = !grbds.getIsConstant();
+        }
+        else if (option == TYPE_WAVE && type.equals("htsgw"))
+        {
+          // float min = grbds.getMinValue();
+          // float max = grbds.getMaxValue();
+          // ok = (max - min) > 0f;
+          ok = !grbds.getIsConstant();
+        }
+        else if (option == TYPE_RAIN && type.equals("prate"))
+        {
+          // float min = grbds.getMinValue();
+          // float max = grbds.getMaxValue();
+          // ok = (max - min) > 0f;
+          ok = !grbds.getIsConstant();
+        }
+      }
+      catch (Exception ex)
+      {
+        ex.printStackTrace();
+      }
+    }
+    return ok;
+  }
+  
   public final static boolean thereIsVariation(GribHelper.GribConditionData gribData, int option)
   {
     boolean ok = false;
     double prevVal = 0D;
     double value   = 0D;
     boolean first = true;
+    
     for (int h=0; !ok && gribData.getGribPointData() != null && h<gribData.getGribPointData().length; h++)
     {
       for (int w=0; !ok && w<gribData.getGribPointData()[h].length; w++)
@@ -442,7 +507,7 @@ public class GRIBDataUtil
               value = gribData.getGribPointData()[h][w].getPrmsl();
               break;
             case TYPE_TMP:
-              value = gribData.getGribPointData()[h][w].getTmp();
+              value = gribData.getGribPointData()[h][w].getAirtmp();
               break;
             case TYPE_WAVE:
               value = gribData.getGribPointData()[h][w].getWHgt();
@@ -491,7 +556,7 @@ public class GRIBDataUtil
           else if (option == TYPE_PRMSL)
             value = gribData.getGribPointData()[h][w].getPrmsl() / 10D;
           else if (option == TYPE_TMP)
-            value = gribData.getGribPointData()[h][w].getTmp();
+            value = gribData.getGribPointData()[h][w].getAirtmp();
           else if (option == TYPE_WAVE)
           {
             double wh = gribData.getGribPointData()[h][w].getWHgt();
@@ -575,7 +640,7 @@ public class GRIBDataUtil
             else if (option == TYPE_PRMSL)
               value = gribData.getGribPointData()[h][w].getPrmsl() / 10D;
             else if (option == TYPE_TMP)
-              value = gribData.getGribPointData()[h][w].getTmp();
+              value = gribData.getGribPointData()[h][w].getAirtmp();
             else if (option == TYPE_RAIN)
               value = gribData.getGribPointData()[h][w].getRain() * 3600D; 
             else if (option == TYPE_WAVE)
@@ -662,7 +727,7 @@ public class GRIBDataUtil
             else if (option == TYPE_PRMSL)
               value = gribData.getGribPointData()[h][w].getPrmsl() / 10D; 
             else if (option == TYPE_TMP)
-              value = gribData.getGribPointData()[h][w].getTmp();
+              value = gribData.getGribPointData()[h][w].getAirtmp();
             else if (option == TYPE_RAIN)
               value = gribData.getGribPointData()[h][w].getRain() * 3600D; 
             else if (option == TYPE_WAVE)
@@ -912,8 +977,10 @@ public class GRIBDataUtil
               {
                 double dist = pt.distance(prevPt.x, prevPt.y);
                 sum += dist;
-                if (dist > max) max = dist;
-                if (dist < min) min = dist;
+//              if (dist > max) max = dist;
+//              if (dist < min) min = dist;
+                max = Math.max(max, dist);
+                min = Math.min(min, dist);
                 if (dist > 75D)
                 {
                   prevPt = pt;
@@ -1037,7 +1104,7 @@ public class GRIBDataUtil
           else if (option == TYPE_PRMSL)
             value = gribData.getGribPointData()[h][w].getPrmsl() / 10D;
           else if (option == TYPE_TMP)
-            value = gribData.getGribPointData()[h][w].getTmp();
+            value = gribData.getGribPointData()[h][w].getAirtmp();
           else if (option == TYPE_RAIN)
             value = gribData.getGribPointData()[h][w].getRain();
           else if (option == TYPE_WAVE)
@@ -1122,10 +1189,10 @@ public class GRIBDataUtil
             }
             else if (option == TYPE_TMP)
             {
-              value1 = gribData.getGribPointData()[h][w].getTmp();
-              value2 = gribData.getGribPointData()[h][w+1].getTmp();
-              value3 = gribData.getGribPointData()[h+1][w+1].getTmp();
-              value4 = gribData.getGribPointData()[h+1][w].getTmp();
+              value1 = gribData.getGribPointData()[h][w].getAirtmp();
+              value2 = gribData.getGribPointData()[h][w+1].getAirtmp();
+              value3 = gribData.getGribPointData()[h+1][w+1].getAirtmp();
+              value4 = gribData.getGribPointData()[h+1][w].getAirtmp();
             }
             else if (option == TYPE_RAIN)
             {
@@ -1173,7 +1240,7 @@ public class GRIBDataUtil
     }
   }
 
-  private static boolean isBetween(double left, double right, double lng)
+  public static boolean isBetween(double left, double right, double lng)
   {
     double r = right, l = left, longitude = lng;
     if (Utilities.sign(left) != Utilities.sign(right) && r < 0D) // On each side of the anti-meridian
