@@ -13,12 +13,13 @@ import java.util.Iterator;
 
 public class CurveUtil
 {
-  public final static int PRMSL  = 0;
-  public final static int HGT500 = 1;
-  public final static int TEMP   = 2;
-  public final static int WAVES  = 3;
-  public final static int RAIN   = 4;
-  public final static int TWS    = 5;
+  public final static int PRMSL   = 0;
+  public final static int HGT500  = 1;
+  public final static int AIRTEMP = 2;
+  public final static int WAVES   = 3;
+  public final static int RAIN    = 4;
+  public final static int TWS     = 5;
+  public final static int SEATEMP = 6;
   
   public static ArrayList<GeoBump> getBumps(GribHelper.GribConditionData gribData, int type)
   {
@@ -75,17 +76,17 @@ public class CurveUtil
             value_7 = gribData.getGribPointData()[h+1][w].getWHgt();
             value_8 = gribData.getGribPointData()[h+1][w+1].getWHgt();            
           }
-          else if (type == TEMP)
+          else if (type == AIRTEMP) // TODO SEATEMP
           {
-            value = gribData.getGribPointData()[h][w].getTmp();
-            value_1 = gribData.getGribPointData()[h-1][w-1].getTmp();
-            value_2 = gribData.getGribPointData()[h-1][w].getTmp();
-            value_3 = gribData.getGribPointData()[h-1][w+1].getTmp();
-            value_4 = gribData.getGribPointData()[h][w-1].getTmp();
-            value_5 = gribData.getGribPointData()[h][w+1].getTmp();
-            value_6 = gribData.getGribPointData()[h+1][w-1].getTmp();
-            value_7 = gribData.getGribPointData()[h+1][w].getTmp();
-            value_8 = gribData.getGribPointData()[h+1][w+1].getTmp();            
+            value = gribData.getGribPointData()[h][w].getAirtmp();
+            value_1 = gribData.getGribPointData()[h-1][w-1].getAirtmp();
+            value_2 = gribData.getGribPointData()[h-1][w].getAirtmp();
+            value_3 = gribData.getGribPointData()[h-1][w+1].getAirtmp();
+            value_4 = gribData.getGribPointData()[h][w-1].getAirtmp();
+            value_5 = gribData.getGribPointData()[h][w+1].getAirtmp();
+            value_6 = gribData.getGribPointData()[h+1][w-1].getAirtmp();
+            value_7 = gribData.getGribPointData()[h+1][w].getAirtmp();
+            value_8 = gribData.getGribPointData()[h+1][w+1].getAirtmp();            
           }
           else if (type == TWS)
           {
