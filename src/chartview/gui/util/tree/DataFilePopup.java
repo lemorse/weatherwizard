@@ -17,6 +17,8 @@ import chartview.util.grib.GribHelper;
 
 import chartview.util.grib.GribHelper.GribConditionData;
 
+import chartview.util.http.HTTPClient;
+
 import coreutilities.Utilities;
 
 import java.awt.Component;
@@ -29,14 +31,18 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
+
+import java.net.URL;
 
 import java.util.ArrayList;
 import java.util.Collections;
 
 import java.util.List;
 
+import javax.swing.JFileChooser;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -73,6 +79,7 @@ public class DataFilePopup
   private JMenuItem edit;
   private JMenuItem rename;
   private JMenuItem copyFavorite;
+  private JMenuItem copyLocally;
   private JMenuItem fileSystem;
   private JMenu     sortByName;
   
@@ -107,6 +114,7 @@ public class DataFilePopup
   private final static String ARCHIVE_COMPOSITE = WWGnlUtilities.buildMessage("archive-composite");
   private final static String UNARCHIVE_COMPOSITE = WWGnlUtilities.buildMessage("unarchive-composite");
   private final static String ARCHIVE_COMPOSITE_DIR = WWGnlUtilities.buildMessage("archive-composite-dir");
+  private final static String COPY_LOCALLY = WWGnlUtilities.buildMessage("copy-locally");
   
   private final static String FAVORITE_DIRECTORY_NAME = "01.Favorites";
 
@@ -131,6 +139,8 @@ public class DataFilePopup
     rename.addActionListener(this);
     this.add(copyFavorite = new JMenuItem(COPY_TO_FAVORITE));
     copyFavorite.addActionListener(this);
+    this.add(copyLocally = new JMenuItem(COPY_LOCALLY));
+    copyLocally.addActionListener(this);
     this.add(fileSystem = new JMenuItem(SHOW_FILE_SYSTEM));
     fileSystem.addActionListener(this);
     this.add(new JSeparator());
@@ -616,6 +626,36 @@ public class DataFilePopup
         }
       }
     }
+    else if (event.getActionCommand().equals(COPY_LOCALLY))
+    {
+      // Choose the file name for "save as"
+      String patternDirectory = ParamPanel.data[ParamData.PATTERN_DIR][1].toString();
+      String fileName = WWGnlUtilities.chooseFile(this, JFileChooser.FILES_ONLY, 
+                                                  new String[] { "ptrn" }, 
+                                                  "Patterns", 
+                                                  patternDirectory,
+                                                  WWGnlUtilities.buildMessage("save-as-2"),
+                                                  "Save pattern as");
+      if (fileName != null && fileName.trim().length() > 0)
+      {
+        fileName = Utilities.makeSureExtensionIsOK(fileName, ".ptrn");
+        JTreeFilePanel.PatternFileTreeNode pftn = (JTreeFilePanel.PatternFileTreeNode)dtn;
+        try
+        {
+          URL patternURL = new URL(pftn.dir + pftn.name);
+          byte[] content = HTTPClient.readURL(patternURL);
+          FileWriter fw = new FileWriter(fileName);
+          fw.write(new String(content));
+          fw.close();
+          parent.reloadTree();
+        }
+        catch (Exception ex)
+        {
+          JOptionPane.showMessageDialog(this, ex.toString(), "Error", JOptionPane.ERROR_MESSAGE);
+          ex.printStackTrace();
+        }
+      }
+    }
     else if (event.getActionCommand().equals(SHOW_FILE_SYSTEM))
     {
       String dir = "";
@@ -766,19 +806,23 @@ public class DataFilePopup
     }
     unarchiveComposite.setEnabled(unarchiveEnabled);
     
+    copyLocally.setEnabled(false);
     if (dtn instanceof JTreeFilePanel.PatternFileTreeNode)
     {
       refresh.setEnabled(false);
       edit.setEnabled(true);
       rename.setEnabled(true);
 //    System.out.println("Parent:" + dtn.getParent().toString());
-      if (!dtn.getParent().toString().equals(FAVORITE_DIRECTORY_NAME))
+      if (!dtn.getParent().toString().equals(FAVORITE_DIRECTORY_NAME) && !((JTreeFilePanel.PatternFileTreeNode)dtn).dir.startsWith("http://"))
         copyFavorite.setEnabled(true);
       else
         copyFavorite.setEnabled(false);
-      fileSystem.setEnabled(true);     
+      fileSystem.setEnabled(!((JTreeFilePanel.PatternFileTreeNode)dtn).dir.startsWith("http://"));     
       gribDetails.setEnabled(false);
       archiveComposite.setEnabled(false);
+      
+      if (((JTreeFilePanel.PatternFileTreeNode)dtn).dir.startsWith("http://"))
+        copyLocally.setEnabled(true);
     }    
     // TODO Make sure it addresses all the cases.
     else if (dtnArray != null || (dtn instanceof JTreeFilePanel.DataFileTreeNode))
