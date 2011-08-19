@@ -2660,10 +2660,15 @@ public class WWGnlUtilities
     {
       XMLDocument doc = null;
       DOMParser parser = WWContext.getInstance().getParser();
+      URL url = null;
+      if (fileName.startsWith("http://"))
+        url = new URL(fileName);
+      else
+        url = new File(fileName).toURI().toURL();
       synchronized (parser)
       {
         parser.setValidationMode(XMLParser.NONVALIDATING);
-        parser.parse(new File(fileName).toURI().toURL());
+        parser.parse(url);
         doc = parser.getDocument();
       }
       NodeList one = doc.selectNodes("//fax/dynamic-resource");

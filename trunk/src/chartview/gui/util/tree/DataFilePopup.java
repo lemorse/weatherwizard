@@ -108,7 +108,7 @@ public class DataFilePopup
   private final static String UNARCHIVE_COMPOSITE = WWGnlUtilities.buildMessage("unarchive-composite");
   private final static String ARCHIVE_COMPOSITE_DIR = WWGnlUtilities.buildMessage("archive-composite-dir");
   
-  private final static String FAVORITE_DIRECTORY_NAME = "1.Favorites";
+  private final static String FAVORITE_DIRECTORY_NAME = "01.Favorites";
 
   private DefaultMutableTreeNode   dtn      = null;
   private DefaultMutableTreeNode[] dtnArray = null;
