@@ -102,6 +102,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringReader;
 
+import java.net.URL;
+
 import java.text.SimpleDateFormat;
 
 import java.util.ArrayList;
@@ -1335,8 +1337,8 @@ public class CommandPanel
     previousBlurSharpOption = blurSharpOption;
   }
   
-  private double nLat  =   65D;
-  private double sLat  =  -65D;
+  private double nLat  =   65d; // 82D;
+  private double sLat  =  -65d; //-76D;
   private double wLong = -180D;
   private double eLong =  180D;
   
@@ -2251,13 +2253,13 @@ public class CommandPanel
 
         public void loadWithPattern(final String fileName) 
         {
-         if (parent != null && parent.isVisible())
+          if (parent != null && parent.isVisible())
           {
             if (fileName != null && fileName.trim().length() > 0)
             {
               // Reset comment
               currentComment = "";
-              boolean dyn = WWGnlUtilities.isPatternDynamic(fileName);
+              boolean dyn = WWGnlUtilities.isPatternDynamic(fileName); // TODO http:// protocol
               if (dyn)
               {
 //              Runnable heavyRunnable = new Runnable()
@@ -2348,7 +2350,7 @@ public class CommandPanel
                   {
       //            System.out.println("Loader top");
                     WWContext.getInstance().fireSetLoading(true);
-                    restoreFromPattern(fileName);
+                    restoreFromPattern(fileName); // TODO http protocol
                     WWContext.getInstance().fireSetLoading(false);
       //            System.out.println("Loader bottom");
                   }
@@ -4603,7 +4605,15 @@ public class CommandPanel
       synchronized(parser)
       {
         parser.setValidationMode(DOMParser.NONVALIDATING);
-        try { parser.parse(new File(fileName).toURI().toURL()); }
+        URL patternURL = null;
+        try
+        {
+          if (fileName.startsWith("http://"))
+            patternURL = new URL(fileName);
+          else
+            patternURL = new File(fileName).toURI().toURL();
+          parser.parse(patternURL); 
+        }
         catch (FileNotFoundException fnfe) // Possibly happens at startup?
         {
           JOptionPane.showMessageDialog(instance, fnfe.toString(), "Loading Pattern", JOptionPane.ERROR_MESSAGE);
