@@ -1,39 +1,30 @@
 package chartview.gui.util.tree;
 
-import chartview.ctx.WWContext;
+
 import chartview.ctx.ApplicationEventListener;
+import chartview.ctx.WWContext;
 
 import chartview.gui.AdjustFrame;
-
-import chartview.util.grib.GribHelper;
-
 import chartview.gui.left.FileTypeHolder;
-
 import chartview.gui.toolbar.controlpanels.CustomPanelButton;
 
 import chartview.util.WWGnlUtilities;
-
-import chartview.util.grib.GribHelper.GribConditionData;
+import chartview.util.grib.GribHelper;
 
 import coreutilities.Utilities;
 
 import java.awt.BorderLayout;
-
 import java.awt.Component;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
-
-import java.io.IOException;
-
 import java.io.InputStream;
+
+import java.net.URL;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,21 +32,17 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.Properties;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import java.util.zip.ZipFile;
 
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.JTree;
-import javax.swing.SwingConstants;
 import javax.swing.ToolTipManager;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeSelectionEvent;
@@ -69,16 +56,14 @@ import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
 import oracle.xml.parser.v2.DOMParser;
-
 import oracle.xml.parser.v2.XMLDocument;
-
 import oracle.xml.parser.v2.XMLElement;
-
 import oracle.xml.parser.v2.XMLParser;
 
 import org.w3c.dom.NodeList;
 
 import user.util.GeomUtil;
+
 
 public class JTreeFilePanel
      extends JPanel
@@ -412,6 +397,37 @@ public class JTreeFilePanel
       }
     }
     WWContext.getInstance().fireLogging(WWGnlUtilities.buildMessage("loading2", new String[] { names[type] }));
+
+    DefaultMutableTreeNode onLinePatterns = null;
+    DefaultMutableTreeNode localPatterns  = null;
+    if (getType() == PATTERN_TYPE) // Add a node for the on-line patterns
+    {
+      onLinePatterns = new DefaultMutableTreeNode(WWGnlUtilities.buildMessage("on-line-patterns"));
+      localPatterns = new DefaultMutableTreeNode(WWGnlUtilities.buildMessage("local-patterns"));
+      root.add(localPatterns);
+      root.add(onLinePatterns);
+//    jTree.setRootVisible(false);
+
+      try
+      {
+        URL url = new URL("http://weather.lediouris.net/patterns/olp.xml");
+        DOMParser parser = WWContext.getInstance().getParser();
+        synchronized (parser)
+        {
+          parser.setValidationMode(XMLParser.NONVALIDATING);
+          parser.parse(url);
+          XMLDocument olpDoc = parser.getDocument();
+          drillDownWebPatterns((XMLElement)olpDoc.getDocumentElement(), onLinePatterns);
+       // onLinePatterns.add(new PatternFileTreeNode("http://", "weather.lediouris.net/patterns/01.Favorites/06.01.bis.AllPac.Faxes.Satellite.ptrn", "Web Pattern"));
+        }
+      }
+      catch (Exception ex)
+      {
+        root.remove(onLinePatterns);
+        System.out.println("No connection for OnLine patterns.");
+      }
+    }
+
     nbFile = 0;
     // Split if this is a path
     String[] pathElem = path.split(File.pathSeparator);
@@ -424,14 +440,16 @@ public class JTreeFilePanel
       {
         String name = pathElem[i].substring(pathElem[i].lastIndexOf("/") + 1);
         insertedNodes[i] = new DirectoryTreeNode(pathElem[i], name, name);
-        root.add(insertedNodes[i]);
-      }
-      
+        if (localPatterns != null)
+          localPatterns.add(insertedNodes[i]);
+        else  
+          root.add(insertedNodes[i]);
+      }      
     }
     for (int i=0; i<pathElem.length; i++)      
     {
 //    System.out.println("--> Drilling down " + pathElem[i]);
-      drillDown(new File(pathElem[i]), (insertedNodes != null?insertedNodes[i]:root), filter, regExp);
+      drillDown(new File(pathElem[i]), (insertedNodes != null?insertedNodes[i]:(localPatterns != null?localPatterns:root)), filter, regExp);
     }
     WWContext.getInstance().fireLogging("\n" + Integer.toString(nbFile) + " " + names[type] + ".");
   }
@@ -481,6 +499,27 @@ public class JTreeFilePanel
   public JTree getJTree()
   { return jTree; }
 
+  private void drillDownWebPatterns(XMLElement dir, DefaultMutableTreeNode parent) throws Exception
+  {
+    NodeList dirNodes = dir.selectNodes("./dir");
+    for (int i=0; i<dirNodes.getLength(); i++)
+    {
+      XMLElement elmt = (XMLElement)dirNodes.item(i);
+      String name = elmt.getAttribute("name");
+      DirectoryTreeNode node = new DirectoryTreeNode(name, name, name);
+      parent.add(node);
+      drillDownWebPatterns(elmt, node);
+    }
+    
+    NodeList patternNodes = dir.selectNodes("./pattern");
+    for (int i=0; i<patternNodes.getLength(); i++)
+    {
+      XMLElement elmt = (XMLElement)patternNodes.item(i);
+      PatternFileTreeNode pftn = new PatternFileTreeNode("http://", elmt.getAttribute("fullpath"), elmt.getAttribute("bubble"));
+      parent.add(pftn);  
+    }    
+  }
+  
   private int nbFile = 0;
   
   // TODO Implement lazy loading here
@@ -902,7 +941,7 @@ public class JTreeFilePanel
     {
       ApplicationEventListener l = WWContext.getInstance().getListeners().get(i);
       File f = new File(fName);
-      if (!f.isDirectory() && f.exists())
+      if (fName.startsWith("http://") || (!f.isDirectory() && f.exists()))
       {
         switch (type)
         {
@@ -923,8 +962,8 @@ public class JTreeFilePanel
             break;
         }
       }
-//    else // DEBUG
-//      System.out.println("Not doing anything for [" + fName + "]");
+      else // DEBUG
+        System.out.println("Not doing anything for [" + fName + "]");
     }    
   }
 
@@ -972,14 +1011,22 @@ public class JTreeFilePanel
     
     public String toString()
     {       
-      return name; 
+      String s = name;
+      if (dir.startsWith("http://"))
+        s = name.substring(name.lastIndexOf("/") + 1);
+      return s; 
     }
     public String getBubble()
     { return bubble; }
     public void setBubble(String str)
     { this.bubble = str; }
     public String getFullFileName()
-    { return dir + File.separator + name; }
+    { 
+      String s = dir + File.separator + name; 
+      if (dir.equals("http://"))
+        s = dir + name;
+      return s;
+    }
   }  
 
   public class PatternFileTreeNode extends DataFileTreeNode
