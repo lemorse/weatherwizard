@@ -309,6 +309,7 @@ public class GoogleUtil
         // make it transparent
         try
         {
+          @SuppressWarnings("deprecation")
           Image img = ImageUtil. makeTransparentImage(null, ImageUtil.readImage("temp" + File.separator + "grib.png"), Color.cyan);
           ImageIO.write(ImageUtil.toBufferedImage(img), "png", new File("temp" + File.separator + "grib.png"));
         }
