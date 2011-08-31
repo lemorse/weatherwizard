@@ -1878,6 +1878,7 @@ public class WWGnlUtilities
   {
     try
     {
+//    newComposite.print(System.out);
       String wazFileName = compositeName;
       try
       {
@@ -2359,7 +2360,7 @@ public class WWGnlUtilities
     }
   }
   
-  private static void writeToArchive(ZipOutputStream zip, String entryOriginLocation, String entryName) throws Exception
+  public static void writeToArchive(ZipOutputStream zip, String entryOriginLocation, String entryName) throws Exception
   {
     ZipEntry ze = new ZipEntry(entryName);                     
     zip.putNextEntry(ze);
@@ -2367,6 +2368,14 @@ public class WWGnlUtilities
     Utilities.copy(fin, zip);
     zip.closeEntry();
     fin.close();    
+  }
+  
+  public static void writeToArchive(ZipOutputStream zip, InputStream is, String entryName) throws Exception
+  {
+    ZipEntry ze = new ZipEntry(entryName);                     
+    zip.putNextEntry(ze);
+    Utilities.copy(is, zip);
+    zip.closeEntry();
   }
   
   public static String translatePath(String origDir, Date date)
