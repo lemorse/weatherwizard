@@ -110,6 +110,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.ConcurrentModificationException;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.EventObject;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
@@ -117,6 +118,7 @@ import java.util.Iterator;
 import java.util.TimeZone;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import javax.imageio.ImageIO;
@@ -1831,11 +1833,66 @@ public class CommandPanel
             }
             if (!ok2go)
             {
+              String compositeName = WWContext.getInstance().getCurrentComposite();
+              String newCompositeName = compositeName.substring(0, compositeName.indexOf(".waz")) + ".new.waz";
               JOptionPane.showMessageDialog(instance, 
-                                            WWGnlUtilities.buildMessage("no-save-from-archive"), 
+                                            WWGnlUtilities.buildMessage("no-save-from-archive", new String[] { newCompositeName }), 
                                             WWGnlUtilities.buildMessage("save-composite"),
                                             JOptionPane.WARNING_MESSAGE);
-              return;
+              update = true;
+              ok2go = true;
+              try
+              {
+                ZipOutputStream out = new ZipOutputStream(new FileOutputStream(newCompositeName));
+                // Duplicate current content
+                ZipInputStream in = new ZipInputStream(new FileInputStream(compositeName));
+                boolean go = true;
+                while (go)
+                {
+                  ZipEntry ze = in.getNextEntry();
+                  if (ze == null)
+                    go = false;
+                  else
+                  {
+                    System.out.println("Duplicating " + ze.getName());                  
+                    WWGnlUtilities.writeToArchive(out, in, ze.getName()); 
+                  }
+                }
+                // Add new files to the existing composite (file://, not waz://)
+                // 1 - Faxes
+                for (int i=0; faxImage!=null && i<faxImage.length; i++)
+                {
+                  if (!faxImage[i].fileName.startsWith(WWContext.WAZ_PROTOCOL_PREFIX))
+                  {
+                    String newFileName = faxImage[i].fileName;
+                    File f = new File(newFileName);
+                    String zipEntryName = "faxes/" + f.getName();
+                    faxImage[i].fileName = WWContext.WAZ_PROTOCOL_PREFIX + zipEntryName; // TODO Suggest to delete the newly added files?
+                    WWGnlUtilities.writeToArchive(out, f.getAbsolutePath(), zipEntryName);                  
+                  }
+                }                
+                // 2 - GRIB
+                if (gribFileName != null && !gribFileName.startsWith(WWContext.WAZ_PROTOCOL_PREFIX))
+                {
+                  String newFileName = gribFileName;
+                  File f = new File(newFileName);
+                  String zipEntryName = "grib/" + f.getName();
+                  gribFileName = WWContext.WAZ_PROTOCOL_PREFIX + zipEntryName; // TODO Suggest to delete the newly added files?
+                  WWGnlUtilities.writeToArchive(out, f.getAbsolutePath(), zipEntryName);                  
+                }
+                // 3 - Update composite.xml (taken care of later)
+                in.close();
+                out.close();
+                System.out.println("Saved as " + newCompositeName);
+                compositeName = newCompositeName;
+                WWContext.getInstance().setCurrentComposite(compositeName);
+              }
+              catch (Exception ex)
+              {
+                JOptionPane.showMessageDialog(null, ex.toString(), "Updating archive", JOptionPane.ERROR_MESSAGE);
+                ex.printStackTrace();
+                ok2go = false;
+              }
             }
             if (update)
             {
