@@ -3,6 +3,7 @@ package chartview.ctx;
 import astro.calc.GeoPoint;
 import astro.calc.GreatCircle;
 
+import chartview.gui.right.CommandPanel;
 import chartview.gui.util.dialog.FaxType;
 
 import chartview.gui.toolbar.controlpanels.LoggingPanel;
@@ -40,13 +41,19 @@ import oracle.xml.parser.v2.XMLParser;
  */
 public class WWContext
 {
-  public final static String VERSION_NUMBER = "0.9.0.5";
-  public final static String PRODUCT_ID     = "weather_assistant.0.9.0.5";
+  public final static String VERSION_NUMBER = "0.9.0.6";
+  public final static String PRODUCT_ID     = "weather_assistant." + VERSION_NUMBER;
   
   private static int debugLevel = 0;
   
   public final static String WAZ_PROTOCOL_PREFIX = "waz://";
   public final static String WAZ_EXTENSION       = ".waz";
+  
+  public final static String INTERNAL_RESOURCE_PREFIX = "resource://";
+  public final static String BG_MERCATOR_GREENWICH_CENTERED = CommandPanel.class.getResource("background/world.1.jpg").toString();
+  public final static String BG_MERCATOR_GREENWICH_CENTERED_ALIAS = "GREENWICH_CENTERED_MERCATOR_BG";
+  public final static String BG_MERCATOR_ANTIMERIDIAN_CENTERED = CommandPanel.class.getResource("background/world.2.jpg").toString();
+  public final static String BG_MERCATOR_ANTIMERIDIAN_CENTERED_ALIAS = "180_CENTERED_MERCATOR_BG";
   
   public final static String SAILMAIL_STATIONS = "sailmail-stations.xml";
   public final static String NOAA_STATIONS     = "noaa-stations.xml";
