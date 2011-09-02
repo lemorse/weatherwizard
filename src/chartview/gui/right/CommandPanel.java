@@ -102,6 +102,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringReader;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import java.text.SimpleDateFormat;
@@ -110,7 +111,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.ConcurrentModificationException;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.EventObject;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
@@ -1859,7 +1859,7 @@ public class CommandPanel
                   }
                 }
                 // Add new files to the existing composite (file://, not waz://)
-                // 1 - Faxes
+                // 1 - Fax(es)
                 for (int i=0; faxImage!=null && i<faxImage.length; i++)
                 {
                   if (!faxImage[i].fileName.startsWith(WWContext.WAZ_PROTOCOL_PREFIX))
@@ -1883,7 +1883,8 @@ public class CommandPanel
                 // 3 - Update composite.xml (taken care of later)
                 in.close();
                 out.close();
-                System.out.println("Saved as " + newCompositeName);
+                // TODO Swap pointers to archive
+//              System.out.println("Saved as " + newCompositeName);
                 compositeName = newCompositeName;
                 WWContext.getInstance().setCurrentComposite(compositeName);
               }
@@ -4828,12 +4829,36 @@ public class CommandPanel
               }
               else // Non HTTP protocols
               {
-                // Non http protocols! (local search, for SailMail)
-                if (url.startsWith(SearchUtil.SEARCH_PROTOCOL))                
+                // Non http protocols! 
+                if (url.startsWith(SearchUtil.SEARCH_PROTOCOL)) // (local search, for SailMail)               
                 {
                   // Parse Expression, like search:chartview.util.SearchUtil.findMostRecentFax(pattern, rootPath)
                   faxName = SearchUtil.dynamicSearch(url);
                   // System.out.println("For " + hintName + ", search: found [" + faxName + "]");
+                }
+                else if (url.startsWith(WWContext.INTERNAL_RESOURCE_PREFIX)) // like Backgrounds
+                {
+                  String internStr = url.substring(WWContext.INTERNAL_RESOURCE_PREFIX.length());
+                  if (internStr.equals(WWContext.BG_MERCATOR_GREENWICH_CENTERED_ALIAS))
+                    internStr = WWContext.BG_MERCATOR_GREENWICH_CENTERED; 
+                  else if (internStr.equals(WWContext.BG_MERCATOR_ANTIMERIDIAN_CENTERED_ALIAS))
+                    internStr = WWContext.BG_MERCATOR_ANTIMERIDIAN_CENTERED; 
+                  URL intern = new URL(internStr);
+                  Image image = null;
+                  try
+                  {
+                    image = ImageIO.read(intern);
+                    File temp = File.createTempFile("resource.bg.", ".png");
+                    ImageIO.write(ImageUtil.toBufferedImage(image), "png", temp);  
+                    faxName = temp.getAbsolutePath();
+                    temp.deleteOnExit();
+                  }
+                  catch(Exception e)
+                  {
+                    System.err.println("For URL: [" + url + "] => [" + internStr + "]");
+                    WWContext.getInstance().fireExceptionLogging(e);
+                    e.printStackTrace();
+                  }                 
                 }
               }
             }
@@ -4853,6 +4878,8 @@ public class CommandPanel
             if (faxName.trim().length() > 0)
             {
               Color c = WWGnlUtilities.buildColor(fax.getAttribute("color"));
+              if (false)
+                System.out.println("For " + faxName + ", color=" + WWGnlUtilities.colorToString(c));
               String strRatio = fax.getAttribute("wh-ratio");
               String transparentStr = fax.getAttribute("transparent");
               String colorChangeStr = fax.getAttribute("color-change");
@@ -5224,6 +5251,10 @@ public class CommandPanel
     g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
 
     chartPanel.setCleanFirst(true);
+     
+    // If there was any opaque faxes, then draw the grid again 
+    if (thereIsAnOpaqueFax() && chartPanel.isWithGrid()) 
+      chartPanel.redrawGrid(gr);
         
     if (wgd != null && drawGRIB)
     {
@@ -5509,7 +5540,7 @@ public class CommandPanel
         transparentFax = faxImage[i].transparent;
         if (!transparentFax)
           continue;
-    //      System.out.println("Image:" + (img==null?"NULL":"ok") + " show:" + show);
+  //      System.out.println("Image:" + (img==null?"NULL":"ok") + " show:" + show);
       } 
       catch (NullPointerException npe)
       {
@@ -5583,6 +5614,7 @@ public class CommandPanel
 //      System.out.println("Lambert detected");
       World.drawChart(chartPanel, gr); 
     }
+      
     // Globe view: draw the eye nadir
     if (chartPanel.getProjection() == ChartPanel.GLOBE_VIEW && plotNadir)
     {
@@ -6705,7 +6737,7 @@ public class CommandPanel
                                                     gribPoint.waves, 
                                                     gribPoint.temp, 
                                                     gribPoint.rain);
-            mess += ("wind " + Math.round(gribPoint.windspeed) + "kts@" + gribPoint.winddir + " (F " + WWGnlUtilities.getBeaufort(gribPoint.windspeed) + ")" +
+            mess += ("wind " + Math.round(gribPoint.windspeed) + "kts@" + gribPoint.winddir + " (" + (!displayAltTooltip?"<b>":"") + "F " + WWGnlUtilities.getBeaufort(gribPoint.windspeed) + (!displayAltTooltip?"</b>":"") + ")" +
                     ((gribPoint.prmsl>0)?br  + "prmsl:" + WWGnlUtilities.DF2.format((gribPoint.prmsl / 100F)) + units[PRMSL]:"") +
                     ((gribPoint.waves>0)?br  + "waves:" + WWGnlUtilities.XXX12.format((gribPoint.waves / 100F)) + units[WAVES]:"") +
                     ((gribPoint.temp>0)?br   + "temp:" + WWGnlUtilities.XX22.format(gribPoint.temp - 273) + units[TEMPERATURE]:"") + // Originally in Kelvin
@@ -7108,6 +7140,20 @@ public class CommandPanel
     return drawChart;
   }
 
+  private boolean thereIsAnOpaqueFax()
+  {
+    boolean b = false;
+    for (int i=0; faxImage != null && i<faxImage.length; i++)
+    {
+      if (faxImage[i] != null && !faxImage[i].transparent)
+      {
+        b = true;
+        break;
+      }
+    }
+    return b;
+  }
+  
   public void setDisplayPageSize(boolean displayPageSize)
   {
     this.displayPageSize = displayPageSize;

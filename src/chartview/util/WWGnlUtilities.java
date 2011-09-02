@@ -1237,47 +1237,13 @@ public class WWGnlUtilities
 
   public static Color buildColor(String str)
   {
-    StringTokenizer st = new StringTokenizer(str, ";");
+    String[] st = str.split(";");
     int b = 0, g = 0, r = 0;
-    int idx = 0;
-    while (st.hasMoreElements())
-    {
-      String s = st.nextToken();
-      switch (idx)
-      {
-        case 0:
-          try
-          {
-            r = Integer.parseInt(s);
-          }
-          catch (Exception ex)
-          {
-            ex.printStackTrace();
-          }
-          break;
-        case 1:
-          try
-          {
-            g = Integer.parseInt(s);
-          }
-          catch (Exception ex)
-          {
-            ex.printStackTrace();
-          }
-          break;
-        case 02:
-          try
-          {
-            b = Integer.parseInt(s);
-          }
-          catch (Exception ex)
-          {
-            ex.printStackTrace();
-          }
-          break;
-      }
-      idx++;
-    }
+    if (st.length != 3)
+      throw new RuntimeException("Bad color definition: [" + str + "]");
+    r = Integer.parseInt(st[0]);
+    g = Integer.parseInt(st[1]);
+    b = Integer.parseInt(st[2]);
     Color c = new Color(r, g, b);
     return c;
   }
