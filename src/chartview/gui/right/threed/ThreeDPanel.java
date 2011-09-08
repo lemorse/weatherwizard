@@ -1,45 +1,42 @@
 package chartview.gui.right.threed;
 
-import chartview.util.grib.GRIBDataUtil;
+
+import chartview.ctx.ApplicationEventListener;
+import chartview.ctx.WWContext;
 
 import chartview.gui.right.matrix.Matrix3D;
-
-import chartview.ctx.WWContext;
-import chartview.ctx.ApplicationEventListener;
-
 import chartview.gui.util.param.ParamData;
 import chartview.gui.util.param.ParamPanel;
 
+import chartview.util.grib.GRIBDataUtil;
+
 import java.awt.Color;
 import java.awt.Cursor;
+import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StreamTokenizer;
 
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Set;
 import java.util.Vector;
 
 import javax.swing.JPanel;
 
-import java.awt.Font;
-
-import java.awt.Point;
-
-import java.io.File;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Set;
 
 /**
  * A set of classes to parse, represent and display 3D wireframe models
