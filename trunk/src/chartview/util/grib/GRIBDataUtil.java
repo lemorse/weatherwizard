@@ -1,39 +1,40 @@
 package chartview.util.grib;
 
+
 import astro.calc.GeoPoint;
-import coreutilities.Utilities;
+
 import chart.components.ui.ChartPanel;
 import chart.components.util.World;
+
+import chartview.ctx.WWContext;
 
 import chartview.gui.right.wire.ObjMaker;
 
 import chartview.util.WWGnlUtilities;
-import chartview.ctx.WWContext;
+
+import coreutilities.Utilities;
 
 import java.awt.Point;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 
 import jgrib.GribFile;
-
 import jgrib.GribRecord;
 import jgrib.GribRecordBDS;
-import jgrib.GribRecordGDS;
 import jgrib.GribRecordPDS;
 
 import oracle.xml.parser.v2.XMLDocument;
 import oracle.xml.parser.v2.XMLElement;
-
 import oracle.xml.parser.v2.XMLParser;
 
 import org.w3c.dom.Text;
+
 
 public class GRIBDataUtil
 {
