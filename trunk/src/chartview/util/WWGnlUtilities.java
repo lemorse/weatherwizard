@@ -89,6 +89,7 @@ import java.security.MessageDigest;
 
 import java.text.DecimalFormat;
 
+import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 
 import java.util.ArrayList;
@@ -97,6 +98,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
@@ -146,6 +148,11 @@ public class WWGnlUtilities
   public final static DecimalFormat XXXX12 = new DecimalFormat("####0.00");
 
   public final static DecimalFormat BIG_DOUBLE = new DecimalFormat("####0.0000000000");
+  static
+  {
+    DecimalFormatSymbols dfs = new DecimalFormatSymbols(Locale.ENGLISH);              
+    BIG_DOUBLE.setDecimalFormatSymbols(dfs);    
+  }
   
   public final static SimpleDateFormat SDF_UT   = new SimpleDateFormat("'UTC' d MMM yyyy HH:mm");
   public final static SimpleDateFormat SDF_UT_bis = new SimpleDateFormat("'UTC' EEE d MMM yyyy HH:mm");

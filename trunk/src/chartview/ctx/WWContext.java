@@ -21,6 +21,8 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
+import java.text.NumberFormat;
+
 import oracle.xml.parser.v2.DOMParser;
 import java.util.ArrayList;
 
@@ -45,6 +47,8 @@ public class WWContext
   public final static String PRODUCT_ID     = "weather_assistant." + VERSION_NUMBER;
   
   private static int debugLevel = 0;
+  
+  public final static NumberFormat NF = NumberFormat.getInstance();
   
   public final static String WAZ_PROTOCOL_PREFIX = "waz://";
   public final static String WAZ_EXTENSION       = ".waz";

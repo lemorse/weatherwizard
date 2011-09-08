@@ -10,6 +10,8 @@ import java.net.URL;
 
 import java.util.Hashtable;
 
+import java.util.Locale;
+
 import oracle.xml.parser.schema.XSDBuilder;
 import oracle.xml.parser.v2.NSResolver;
 import oracle.xml.parser.v2.XMLDocument;
@@ -19,6 +21,8 @@ import oracle.xml.parser.v2.DOMParser;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Element;
+
+import org.xml.sax.SAXException;
 
 public class ObjMaker
 {
@@ -73,6 +77,11 @@ public class ObjMaker
     File source = null;
     startFrom = startOffset;
     DOMParser parser = WWContext.getInstance().getParser();
+
+    try
+    { parser.setLocale(Locale.getDefault()); }
+    catch (SAXException e) { e.printStackTrace(); }
+    
     synchronized (parser)
     {
       try
@@ -90,6 +99,7 @@ public class ObjMaker
         parser.setValidationMode(DOMParser.SCHEMA_VALIDATION);
         parser.setPreserveWhitespace(true);
         XSDBuilder xsdBuilder = new XSDBuilder();
+        xsdBuilder.setLocale(Locale.getDefault());
         java.io.InputStream is = validatorStream.openStream();
         oracle.xml.parser.schema.XMLSchema xmlSchema = xsdBuilder.build(is, null);
         parser.setXMLSchema(xmlSchema);
@@ -103,7 +113,7 @@ public class ObjMaker
         WWContext.getInstance().fireLogging(source.getName() + " is invalid...\n");
         WWContext.getInstance().fireExceptionLogging(ex);
         ex.printStackTrace();
-        //          System.exit(1);
+//      System.exit(1);
       }
       try
       {
@@ -783,7 +793,10 @@ public class ObjMaker
       }
       catch (Exception e)
       {
+        // Display Locale here
+        System.out.println("Locale is :" + Locale.getDefault());
         WWContext.getInstance().fireExceptionLogging(e);
+        System.out.println("Localized Message:" + e.getLocalizedMessage());
         e.printStackTrace();
       }
     }
