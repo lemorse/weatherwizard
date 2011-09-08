@@ -805,7 +805,8 @@ public class CompositeDetailsInputPanel
     double d = 0D;
     try
     {
-      d = Double.parseDouble(topLatTextField.getText());
+//    d = Double.parseDouble(topLatTextField.getText());
+      d = WWContext.NF.parse(topLatTextField.getText()).doubleValue();
       if (topLatComboBox.getSelectedItem().equals("S"))
         d = -d;
     }
@@ -822,7 +823,7 @@ public class CompositeDetailsInputPanel
     double d = 0D;
     try
     {
-      d = Double.parseDouble(bottomLatTextField.getText());
+      d = WWContext.NF.parse(bottomLatTextField.getText()).doubleValue();
       if (bottomLatComboBox.getSelectedItem().equals("S"))
         d = -d;
     }
@@ -839,7 +840,7 @@ public class CompositeDetailsInputPanel
     double d = 0D;
     try
     {
-      d = Double.parseDouble(leftLongTextField.getText());
+      d = WWContext.NF.parse(leftLongTextField.getText()).doubleValue();
       if (leftLongComboBox.getSelectedItem().equals("W"))
         d = -d;
     }
@@ -856,7 +857,7 @@ public class CompositeDetailsInputPanel
     double d = 0D;
     try
     {
-      d = Double.parseDouble(rightLongTextField.getText());
+      d = WWContext.NF.parse(rightLongTextField.getText()).doubleValue();
       if (rightLongComboBox.getSelectedItem().equals("W"))
         d = -d;
     }
