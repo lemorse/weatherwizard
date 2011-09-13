@@ -1,5 +1,6 @@
 package chartview.gui;
 
+
 import astro.calc.GeoPoint;
 
 import chartview.ctx.ApplicationEventListener;
@@ -22,7 +23,6 @@ import chartview.gui.util.dialog.PredefZonesTablePanel;
 import chartview.gui.util.param.CategoryPanel;
 import chartview.gui.util.param.ParamData;
 import chartview.gui.util.param.ParamPanel;
-
 import chartview.gui.util.tree.JTreeFilePanel;
 
 import chartview.util.GPXUtil;
@@ -32,11 +32,16 @@ import chartview.util.http.HTTPClient;
 
 import coreutilities.Utilities;
 
+import java.awt.AlphaComposite;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -60,6 +65,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JLayeredPane;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -87,6 +93,7 @@ import org.w3c.dom.NodeList;
 
 import user.util.TimeUtil;
 
+
 public class AdjustFrame
   extends JFrame
 {
@@ -96,7 +103,38 @@ public class AdjustFrame
   private BorderLayout borderLayout;
 
   private FileTypeHolder allJTrees = new FileTypeHolder();
+  
+  private JLayeredPane layers = new JLayeredPane()
+    {
+      @Override
+      public void paint(Graphics g)
+      {
+        super.paint(g);
+        masterTabPane.setBounds(0, 0, this.getWidth(), this.getHeight());
+        grayTransparentPanel.setBounds(0, 0, this.getWidth(), this.getHeight());
+      }
+    };
+
   private JTabbedPane masterTabPane = new JTabbedPane();
+  private String message2Display = "";
+  private JPanel grayTransparentPanel = new JPanel()
+    {
+      @Override
+      public void paintComponent(Graphics g)
+      {
+        this.setOpaque(false);      
+        this.setSize(masterTabPane.getSize());
+        ((Graphics2D)g).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.75f));
+//      g.setColor(Color.LIGHT_GRAY);
+        g.setColor(Color.GRAY);
+        g.fillRect(0, 0, this.getWidth(), this.getHeight());
+        g.setFont(new Font("Arial", Font.ITALIC | Font.BOLD, 50));
+        String str = message2Display; // WWGnlUtilities.buildMessage("loading");
+        int strWidth = g.getFontMetrics(g.getFont()).stringWidth(str);
+        g.setColor(Color.RED);
+        g.drawString(str, (this.getWidth() / 2) - (strWidth / 2), 20 + g.getFont().getSize());
+      }
+    };
 
   private JPanel statusPanel = new JPanel();
   private JProgressBar progressBar = new JProgressBar(0, 100);
@@ -278,9 +316,14 @@ public class AdjustFrame
       oscillate.abort();
   }
   
+  private Object grayLayerIndex = new Integer(2);
+  
   private void jbInit() throws Exception
   {
     WWContext.getInstance().setMasterTopFrame(this);
+    
+    layers.add(masterTabPane, new Integer(1));
+//  layers.add(grayTransparentPanel, grayLayerIndex);
     
     this.setIconImage(new ImageIcon(this.getClass().getResource("img/paperboat.png")).getImage());
     this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -926,8 +969,9 @@ public class AdjustFrame
 
     WWGnlUtilities.setTreeConfig(allJTrees);
     
-//  jSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, allJTrees, tabbedPane);
-    jSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, allJTrees, masterTabPane);
+//  jSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, allJTrees, masterTabPane);
+//  layers.setPreferredSize(new Dimension(800, 600));
+    jSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, allJTrees, layers);
     jSplitPane.setContinuousLayout(true);
     jSplitPane.setOneTouchExpandable(true);
 //  jSplitPane.setOneTouchExpandable(false);
@@ -963,11 +1007,23 @@ public class AdjustFrame
         @Override
         public void setLoading(boolean b, String mess)
         {
+          message2Display = mess;
           setLoadingProgresssBar(b, mess);
+          if (b)
+            layers.add(grayTransparentPanel, grayLayerIndex); // Add gray layer
+          else
+            layers.remove(grayTransparentPanel);              // remove gray layer
+          layers.repaint();
         }
       });
   }
 
+  @Override
+  public void repaint()
+  {
+    layers.repaint();
+  }
+  
   public void addCompositeTab()
   {
     final CompositeTabbedPane nctp = new CompositeTabbedPane();
