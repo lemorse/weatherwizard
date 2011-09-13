@@ -170,8 +170,6 @@ public class CommandPanel
   private JScrollPane chartPanelScrollPane;  
   private JSplitPane jSplitPane;
   private JPanel dummyGribSlicePlaceHolder;
-//private ScrollableLayeredPane layer;
-//private JLabel imgHolder;
   protected ChartPanel chartPanel;
   
   protected transient FaxImage[] faxImage = null;
@@ -3332,10 +3330,6 @@ public class CommandPanel
     WWContext.getInstance().addApplicationListener(ael);
     setLayout(borderLayout1);
     
-//  layer = new ScrollableLayeredPane(chartPanel.getW(), 
-//                                    chartPanel.getH());
-      
-//  imgHolder = new JLabel(weatherFaxImageIcon);
     this.setBackground(new Color(177, 220, 216));
     if (chartPanel.getProjection() != ChartPanel.GLOBE_VIEW &&
         chartPanel.getProjection() != ChartPanel.SATELLITE_VIEW)
@@ -3362,16 +3356,6 @@ public class CommandPanel
     chartPanel.setOpaque(false);
     chartPanel.setCleanFirst(true);
     
-//  imgHolder.setBounds(0, 
-//                      0, 
-//                      weatherFaxImage.getWidth(null), 
-//                      weatherFaxImage.getHeight(null));
-
-//  layer.setBounds(0, 0, weatherFaxImage.getWidth(null), weatherFaxImage.getHeight(null));
-    
-//  layer.add(imgHolder,  JLayeredPane.DEFAULT_LAYER);
-//  layer.add(chartPanel, JLayeredPane.PALETTE_LAYER);
-
     add(jSplitPane, BorderLayout.CENTER);
     
     chartPanelScrollPane.getViewport().setBackground(CUSTOM_LIGHT_BLUE);
@@ -3415,9 +3399,8 @@ public class CommandPanel
     double z = ((Double) ParamPanel.data[ParamData.DEFAULT_ZOOM_VALUE][1]).doubleValue();  
     chartPanel.setZoomFactor(z);
     dataPanel.setZoomFactor(chartPanel.getZoomFactor());
-//  jScrollPane1.getViewport().add(layer, null);
     chartPanelScrollPane.getViewport().add(chartPanel, null);
-
+    
     displayStatus();
     buildPlaces();
     buildSailMailStations();
