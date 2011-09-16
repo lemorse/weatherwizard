@@ -292,6 +292,12 @@ public final class ParamPanel
       case ParamData.ROUTING_OUTPUT_FLAVOR:
         it = new RoutingOutputList(0);
         break;
+      case ParamData.ROUTE_COLOR:
+        it = Color.blue;
+        break;
+      case ParamData.ROUTING_BOAT_COLOR:
+        it = Color.red;
+        break;
       default:
         break;
     }
@@ -333,7 +339,9 @@ public final class ParamPanel
                   i == ParamData.PRATE_CONTOUR || 
                   i == ParamData.GPS_BOAT_COLOR ||
                   i == ParamData.DD_ZOOM_COLOR || 
-                  i == ParamData.OLD_ISOCHRONS_COLOR)
+                  i == ParamData.OLD_ISOCHRONS_COLOR ||
+                  i == ParamData.ROUTE_COLOR || 
+                  i == ParamData.ROUTING_BOAT_COLOR)
                 data[i][1] = WWGnlUtilities.buildColor(s);
               else if (i == ParamData.ROUTING_STEP ||              // Integers
                        i == ParamData.ROUTING_FORK_WIDTH ||  
@@ -438,7 +446,9 @@ public final class ParamPanel
         ParamData.PRATE_CONTOUR, 
         ParamData.GPS_BOAT_COLOR,
         ParamData.DD_ZOOM_COLOR,
-        ParamData.OLD_ISOCHRONS_COLOR}, 
+        ParamData.OLD_ISOCHRONS_COLOR,
+        ParamData.ROUTE_COLOR,
+        ParamData.ROUTING_BOAT_COLOR}, 
       new int[] // Display
       { ParamData.CHART_LINE_THICK, 
         ParamData.FAX_TRANSPARENCY, 
@@ -641,7 +651,10 @@ public final class ParamPanel
                    currentIndex == ParamData.TEMP_CONTOUR ||
                    currentIndex == ParamData.PRATE_CONTOUR ||
                    currentIndex == ParamData.GPS_BOAT_COLOR ||
-                   currentIndex == ParamData.DD_ZOOM_COLOR) // The colors(s)
+                   currentIndex == ParamData.DD_ZOOM_COLOR || 
+                   currentIndex == ParamData.OLD_ISOCHRONS_COLOR ||
+                   currentIndex == ParamData.ROUTE_COLOR ||
+                   currentIndex == ParamData.ROUTING_BOAT_COLOR)            // The colors(s)
           {
 //            try { Color c = new Color(after); }
 //            catch (Exception e) 
@@ -699,7 +712,10 @@ public final class ParamPanel
                 currentIndex == ParamData.USE_TRANSPARENT_GRIB_WIND ||
                 currentIndex == ParamData.COLOR_RANGE ||
                 currentIndex == ParamData.DISPLAY_WIND_WITH_COLOR_WIND_RANGE || 
-                currentIndex == ParamData.GPS_BOAT_COLOR) 
+                currentIndex == ParamData.GPS_BOAT_COLOR ||
+                currentIndex == ParamData.OLD_ISOCHRONS_COLOR ||
+                currentIndex == ParamData.ROUTE_COLOR ||
+                currentIndex == ParamData.ROUTING_BOAT_COLOR) 
               WWContext.getInstance().fireChartRepaint();
             if (currentIndex == ParamData.LOOK_AND_FEEL) // TASK Remove, unused
               WWContext.getInstance().fireLookAndFeelChanged(((ListOfLookAndFeel) ParamPanel.data[ParamData.LOOK_AND_FEEL][1]).currentValue);

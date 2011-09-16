@@ -64,8 +64,10 @@ public class ParamData
   public final static int ROUTING_OUTPUT_FLAVOR          = 53;
   public final static int TCP_PORT                       = 54;
   public final static int UDP_PORT                       = 55;
+  public final static int ROUTE_COLOR                    = 56;
+  public final static int ROUTING_BOAT_COLOR             = 57;
 
-  public final static int NB_PRFERENCES         = 56; 
+  public final static int NB_PRFERENCES         = 58; 
   
   private final static String[] labels = 
   { 
@@ -124,7 +126,9 @@ public class ParamData
     WWGnlUtilities.buildMessage("nmea-serial-port"),
     WWGnlUtilities.buildMessage("routing-output"),
     WWGnlUtilities.buildMessage("nmea-tcp-port"),
-    WWGnlUtilities.buildMessage("nmea-udp-port")
+    WWGnlUtilities.buildMessage("nmea-udp-port"),
+    WWGnlUtilities.buildMessage("route-color"),
+    WWGnlUtilities.buildMessage("routing-boat-color")
   };
 
   private final static String[] helptext = 
@@ -184,7 +188,9 @@ public class ParamData
     WWGnlUtilities.buildMessage("help-nmea-serial-port"),
     WWGnlUtilities.buildMessage("help-routing-output"),
     WWGnlUtilities.buildMessage("help-nmea-tcp-port"),
-    WWGnlUtilities.buildMessage("help-nmea-udp-port")
+    WWGnlUtilities.buildMessage("help-nmea-udp-port"),
+    WWGnlUtilities.buildMessage("help-route-color"),
+    WWGnlUtilities.buildMessage("help-routing-boat-color")
   };
     
   public static String[] getLabels()
