@@ -986,6 +986,8 @@ public class AdjustFrame
         {
           return "from AdjustFrame.";
         }
+        
+        @Override
         public void compositeFileOpen(final String fileName) // fileName : full path to the file
         {
           String justFileName = fileName; 
@@ -1013,6 +1015,16 @@ public class AdjustFrame
             layers.add(grayTransparentPanel, grayLayerIndex); // Add gray layer
           else
             layers.remove(grayTransparentPanel);              // remove gray layer
+          layers.repaint();
+        }
+        
+        @Override
+        public void progressing(String mess)
+        {
+          System.out.println("... Progressing : " + mess + ", grayTransparentPanel is " + (grayTransparentPanel.isVisible()?"":"not ") + "visible");
+          message2Display = mess;
+          if (!grayTransparentPanel.isVisible())
+            layers.add(grayTransparentPanel, grayLayerIndex); // Add gray layer
           layers.repaint();
         }
       });

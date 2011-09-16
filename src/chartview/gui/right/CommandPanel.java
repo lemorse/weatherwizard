@@ -1937,6 +1937,7 @@ public class CommandPanel
                 
                 public void run()
                 {
+//                WWContext.getInstance().fireSetLoading(true, WWGnlUtilities.buildMessage("gathering-storing"));
                   if (!updateComposite)
                   {                    
                     WWContext.getInstance().setMonitor(ProgressUtil.createModalProgressMonitor(WWContext.getInstance().getMasterTopFrame(), 1, true, true));
@@ -1992,6 +1993,7 @@ public class CommandPanel
                   }
                   finally
                   {
+//                  WWContext.getInstance().fireSetLoading(false, WWGnlUtilities.buildMessage("gathering-storing"));
                     if (!updateComposite)
                     {
                       // to ensure that progress dlg is closed in case of any exception
@@ -5800,7 +5802,8 @@ public class CommandPanel
         if (closestPoint != null && drawBestRoute)
         {
           Graphics2D g2 = (Graphics2D)gr;
-          g2.setColor(Color.blue); // Route Color
+          g2.setColor((Color) ParamPanel.data[ParamData.ROUTE_COLOR][1]);
+//        g2.setColor(Color.blue); // Route Color
           originalStroke = g2.getStroke();
           Stroke stroke = new BasicStroke(4f, 0, 2);
           g2.setStroke(stroke);
@@ -5933,7 +5936,7 @@ public class CommandPanel
     if (routingPoint != null)
     {      
       WWGnlUtilities.drawBoat((Graphics2D)gr, 
-                             Color.red, // TODO Set as preference
+                             (Color)ParamPanel.data[ParamData.ROUTING_BOAT_COLOR][1],
                              chartPanel.getPanelPoint(routingPoint.getL(), 
                                                       routingPoint.getG()), 
                              30, 
