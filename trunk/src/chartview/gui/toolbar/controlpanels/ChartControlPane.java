@@ -182,7 +182,11 @@ public class ChartControlPane
     componentHolder.add(mainZoomPanel, new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));    
 
     // Chart Controls
-    chartControlPanelHolder.add(chartCommandPanel, BorderLayout.CENTER);
+    JPanel intermediatePanel = new JPanel(new GridBagLayout());
+    intermediatePanel.add(chartCommandPanel, new GridBagConstraints(0, 0, 0, 0, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+    
+//  chartControlPanelHolder.add(chartCommandPanel, BorderLayout.CENTER);
+    chartControlPanelHolder.add(intermediatePanel, BorderLayout.CENTER);
     chartControl = new SingleControlPane(WWGnlUtilities.buildMessage("chart-control"), chartControlPanelHolder, false);
     componentHolder.add(chartControl, new GridBagConstraints(0, 1, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
 
