@@ -101,21 +101,19 @@ public abstract class ButtonCommandPanel
           }
         });
     zoomPanel.setSize(new Dimension(60, 30));
+    zoomPanel.setPreferredSize(new Dimension(60, 30));
     this.add(upButton, 
              new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.SOUTH, GridBagConstraints.NONE, 
                                     new Insets(0, 0, 0, 0), 0, 0));
     this.add(downButton, 
              new GridBagConstraints(1, 2, 1, 1, 0.0, 0.0, GridBagConstraints.NORTH, GridBagConstraints.NONE, 
                                     new Insets(0, 0, 0, 0), 0, 0));
-    this.add(rightButton, 
-             new GridBagConstraints(2, 1, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, 
-                                    new Insets(0, 0, 0, 0), 0, 0));
-    this.add(leftButton, 
-             new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, 
-                                    new Insets(0, 0, 0, 0), 0, 0));
-    this.add(zoomPanel, 
-             new GridBagConstraints(1, 1, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, 
-                                    new Insets(0, 0, 0, 0), 0, 0));
+    this.add(rightButton, new GridBagConstraints(2, 1, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL,
+          new Insets(0, 0, 0, 0), 0, 0));
+    this.add(leftButton, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.HORIZONTAL,
+          new Insets(0, 0, 0, 0), 0, 0));
+    this.add(zoomPanel, new GridBagConstraints(1, 1, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
+          new Insets(0, 0, 0, 0), 0, 0));
   }
 
   private void upButton_actionPerformed(ActionEvent e)
