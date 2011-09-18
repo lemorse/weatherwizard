@@ -1,6 +1,5 @@
 package chartview.gui;
 
-
 import astro.calc.GeoPoint;
 
 import chartview.ctx.ApplicationEventListener;
@@ -93,10 +92,12 @@ import org.w3c.dom.NodeList;
 
 import user.util.TimeUtil;
 
-
 public class AdjustFrame
   extends JFrame
 {
+  @SuppressWarnings("compatibility:6828784390015466233")
+  private static final long serialVersionUID = -6756364686697947626L;
+  
   private static final String FRAME_BASE_TITLE = WWGnlUtilities.buildMessage("product-name");
   private static final SimpleDateFormat SDF_FOR_TITLE = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss");
   
@@ -157,6 +158,7 @@ public class AdjustFrame
   
 //private JMenuItem menuFileExit = new JMenuItem();
 //private JMenuItem menuFileStore = new JMenuItem();
+  private SaveCompositeAsAction scaa = null;
   private JMenuItem menuFileRestore = new JMenuItem();
   private JMenuItem menuFileRestoreFromURL = new JMenuItem();
 
@@ -316,7 +318,7 @@ public class AdjustFrame
       oscillate.abort();
   }
   
-  private Object grayLayerIndex = new Integer(2);
+  private transient Object grayLayerIndex = new Integer(2);
   
   private void jbInit() throws Exception
   {
@@ -421,6 +423,9 @@ public class AdjustFrame
     menuFile.add(new JSeparator());
 //  menuFile.add(menuFileStore);
     menuFile.add(new SaveCompositeAction()).setAccelerator(KeyStroke.getKeyStroke("ctrl S"));
+    scaa = new SaveCompositeAsAction();
+    menuFile.add(scaa).setAccelerator(KeyStroke.getKeyStroke("alt S"));
+    scaa.setEnabled(false);
     menuFile.add(menuFileRestore);
     menuFile.add(menuFileRestoreFromURL);
     menuFile.add(new JSeparator());
@@ -998,6 +1003,15 @@ public class AdjustFrame
           ((CompositeTabComponent)masterTabPane.getTabComponentAt(masterTabPane.getSelectedIndex())).setTabTitle(justFileName);
 //        ((CompositeTabComponent)masterTabPane.getTabComponentAt(masterTabPane.getSelectedIndex())).setToolTipText(JTreeFilePanel.getCompositeBubble(justFileName, fileName));
           masterTabPane.setToolTipTextAt(masterTabPane.getSelectedIndex(), JTreeFilePanel.getCompositeBubble(justFileName, fileName));
+          // Activate save as menu item
+          scaa.setEnabled(true);
+        }
+        
+        @Override
+        public void store()
+        {
+          // Activate save as menu item
+          scaa.setEnabled(true);
         }
 
         @Override
@@ -1021,7 +1035,7 @@ public class AdjustFrame
         @Override
         public void progressing(String mess)
         {
-          System.out.println("... Progressing : " + mess + ", grayTransparentPanel is " + (grayTransparentPanel.isVisible()?"":"not ") + "visible");
+//        System.out.println("... Progressing : " + mess + ", grayTransparentPanel is " + (grayTransparentPanel.isVisible()?"":"not ") + "visible");
           message2Display = mess;
           if (!grayTransparentPanel.isVisible())
             layers.add(grayTransparentPanel, grayLayerIndex); // Add gray layer
@@ -1843,6 +1857,16 @@ public class AdjustFrame
     }
   }
 
+  private void storeAs()
+  {
+    for (int i = 0; i < WWContext.getInstance().getListeners().size(); 
+         i++)
+    {
+      ApplicationEventListener l = WWContext.getInstance().getListeners().get(i);
+      l.storeAs();
+    }
+  }
+
   private void restore()
   {
     for (int i = 0; i < WWContext.getInstance().getListeners().size(); i++)
@@ -1972,18 +1996,29 @@ public class AdjustFrame
     }        
   }
 
-  public class SaveCompositeAction
-    extends AbstractAction
+  public class SaveCompositeAction extends AbstractAction
   {
     public SaveCompositeAction()
     {
-      super(WWGnlUtilities.buildMessage("save-composite"),
-            new ImageIcon(instance.getClass().getResource("img/save.png")));
+      super(WWGnlUtilities.buildMessage("save-composite"), new ImageIcon(instance.getClass().getResource("img/save.png")));
     }
 
     public void actionPerformed(ActionEvent ae)
     {
       store();
+    }
+  }
+
+  public class SaveCompositeAsAction extends AbstractAction
+  {
+    public SaveCompositeAsAction()
+    {
+      super(WWGnlUtilities.buildMessage("save-as-composite"), new ImageIcon(instance.getClass().getResource("img/save.png")));
+    }
+
+    public void actionPerformed(ActionEvent ae)
+    {
+      storeAs();
     }
   }
 
