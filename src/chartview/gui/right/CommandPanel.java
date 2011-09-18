@@ -1796,7 +1796,7 @@ public class CommandPanel
         
         public void store() // Save, and update
         {
-         if (parent != null && parent.isVisible())
+          if (parent != null && parent.isVisible())
           {
             boolean ok2go = true;
             int nbWaz = 0;
@@ -2022,6 +2022,41 @@ public class CommandPanel
               };
 //            new Thread(heavyRunnable).start();
               heavyRunnable.start();
+            }
+          }
+        }
+        
+        public void storeAs() // Save as...
+        {
+          String compositeName = WWContext.getInstance().getCurrentComposite();
+          final String newFileName = WWGnlUtilities.chooseFile(instance, 
+                                                               JFileChooser.FILES_ONLY, 
+                                                               new String[] { "xml", "waz" }, 
+                                                              "Composites", 
+                                                              ParamPanel.data[ParamData.CTX_FILES_LOC][1].toString(),
+                                                              "Save as", 
+                                                              "Save Composite as");
+          if (newFileName.trim().length() > 0)
+          {
+  //        System.out.println("Saving " + compositeName + " as " + newFileName);
+            try
+            {
+              FileInputStream in   = new FileInputStream(compositeName);
+              FileOutputStream out = new FileOutputStream(newFileName);
+              Utilities.copy(in, out);
+              WWContext.getInstance().setCurrentComposite(newFileName);
+              in.close();
+              out.close();
+              store();
+            }
+            catch (FileNotFoundException fnfe)
+            {
+              JOptionPane.showMessageDialog(instance, fnfe.toString(), "Save as...", JOptionPane.ERROR_MESSAGE);
+              fnfe.printStackTrace();
+            }
+            catch (Exception ex)
+            {
+              ex.printStackTrace();          
             }
           }
         }

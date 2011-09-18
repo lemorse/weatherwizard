@@ -45,6 +45,7 @@ public abstract class ApplicationEventListener implements EventListener
   public void lookAndFeelChanged(String laf) {}
   
   public void store() {}
+  public void storeAs() {}
   public void restore() {}
   
   public void generatePattern() {}
