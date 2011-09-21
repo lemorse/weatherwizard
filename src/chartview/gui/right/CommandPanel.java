@@ -48,6 +48,8 @@ import chartview.gui.util.transparent.TransparentFrame;
 
 import chartview.gui.util.transparent.TransparentPanel;
 
+import chartview.routing.DatedGribCondition;
+
 import chartview.util.GoogleUtil;
 import chartview.util.SearchUtil;
 import chartview.util.progress.ProgressMonitor;
@@ -102,7 +104,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringReader;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 
 import java.text.SimpleDateFormat;
@@ -557,7 +558,7 @@ public class CommandPanel
     chartPanel = new ChartPanel(this);
     
     dummyGribSlicePlaceHolder = new JPanel();
-    JLabel dummyLabel = new JLabel("Dummy  GRIB Slice place holder");
+    JLabel dummyLabel = new JLabel("Dummy GRIB Slice place holder");
     dummyLabel.setEnabled(false);
     dummyGribSlicePlaceHolder.add(dummyLabel, null);
     jSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, dummyGribSlicePlaceHolder, chartPanelScrollPane);
@@ -6919,7 +6920,9 @@ public class CommandPanel
   private void displayGRIBSlice(ArrayList<RoutingPoint> bestRoute)
   {
     System.out.println("displayGRIBSlice...");
-    ArrayList<GribHelper.GribCondition> data2plot = new ArrayList<GribHelper.GribCondition>();
+//  ArrayList<GribHelper.GribCondition> data2plot = new ArrayList<GribHelper.GribCondition>();
+    ArrayList<DatedGribCondition> data2plot = new ArrayList<DatedGribCondition>();
+    
     ArrayList<Double> bsp = null;
     ArrayList<Integer> twa = null;
     int fw = GRIBSlicePanel.DEFAULT_FORK_WIDTH; // That's for routing
@@ -6936,10 +6939,11 @@ public class CommandPanel
         int y = from.y + (int)((idx * ((float)to.y - (float)from.y)) / (float)nbSteps);
 //      System.out.println("x:" + x + ", y:" + y);
         GeoPoint gp = chartPanel.getGeoPos(x, y);
-        GribHelper.GribCondition gribPoint = null;
+//      GribHelper.GribCondition gribPoint = null;
+        DatedGribCondition gribPoint = null;
         try 
         { 
-          gribPoint = GribHelper.gribLookup(gp, gribData); 
+          gribPoint = new DatedGribCondition(GribHelper.gribLookup(gp, gribData)); 
           data2plot.add(gribPoint);
         }
         catch (Exception ignore) 
@@ -6960,15 +6964,20 @@ public class CommandPanel
       {
         RoutingPoint rp = bestRoute.get(i);
         GeoPoint gp = rp.getPosition();
-        GribHelper.GribCondition gribPoint = null;
+//      GribHelper.GribCondition gribPoint = null;
+        DatedGribCondition gribPoint = null;
         try 
         { 
           if (wgd != null)
-            gribPoint = GribHelper.gribLookup(gp, wgd, rp.getDate()); 
+          {
+            gribPoint = new DatedGribCondition(GribHelper.gribLookup(gp, wgd, rp.getDate())); 
+            gribPoint.setDate(rp.getDate());
+          }
           else
           {
             System.out.println("Warning:" + this.getClass().getName() + ": wgd is null.");
-            gribPoint = GribHelper.gribLookup(gp, gribData); 
+            gribPoint = new DatedGribCondition(GribHelper.gribLookup(gp, gribData)); 
+            gribPoint.setDate(rp.getDate());
           }
           data2plot.add(gribPoint);
           bsp.add((i==(routeSize - 1))?new Double(bestRoute.get(i-1).getBsp()):new Double(rp.getBsp()));
