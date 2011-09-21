@@ -5,6 +5,8 @@ import chartview.ctx.WWContext;
 import chartview.gui.util.param.ParamData;
 import chartview.gui.util.param.ParamPanel;
 
+import chartview.gui.util.tree.JTreeGRIBRequestPanel;
+
 import chartview.util.WWGnlUtilities;
 
 import chartview.util.RelativePath;
@@ -23,6 +25,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
@@ -54,7 +57,11 @@ public final class GRIBPatternEditorPanel
   private JTextField patternTextField = new JTextField();
   private JLabel extLabel = new JLabel();
   private JTextField extensionTextField = new JTextField();
+  private JPanel requestPanel = new JPanel();  
   private JTextField requestTextField = new JTextField();
+  private JButton requestButton = new JButton();
+  private BorderLayout borderLayout3 = new BorderLayout();
+
   private JTextField directoryTextField = new JTextField();
   private JButton directoryButton = new JButton();
   private JPanel directoryPanel = new JPanel();
@@ -127,7 +134,30 @@ public final class GRIBPatternEditorPanel
     extLabel.setText(GRIB_EXT);
     extensionTextField.setPreferredSize(new Dimension(30, 20));
     extensionTextField.setSize(new Dimension(30, 20));
-    requestTextField.setPreferredSize(new Dimension(300, 20));
+
+    requestTextField.setPreferredSize(new Dimension(200, 20));
+    requestTextField.setSize(new Dimension(200, 20));
+    requestButton.setText("...");
+    requestButton.setActionCommand("requestButton");
+    requestButton.setSize(new Dimension(40, 22));
+    requestButton.setPreferredSize(new Dimension(40, 22));
+    requestButton.setMaximumSize(new Dimension(40, 22));
+    requestButton.setMinimumSize(new Dimension(40, 22));
+    requestButton.addActionListener(new ActionListener()
+        {
+          public void actionPerformed(ActionEvent e)
+          {
+            requestButton_actionPerformed(e);
+          }
+        });
+    requestPanel.setPreferredSize(new Dimension(300, 22));
+    requestPanel.setSize(new Dimension(300, 32));
+    requestPanel.setLayout(borderLayout3);
+    requestPanel.setMinimumSize(new Dimension(300, 22));
+    //  justWindCheckBox.setText(JUST_WIND);
+    requestPanel.add(requestTextField, BorderLayout.CENTER);
+    requestPanel.add(requestButton, BorderLayout.EAST);
+
     directoryTextField.setPreferredSize(new Dimension(200, 20));
     directoryTextField.setSize(new Dimension(200, 20));
     directoryButton.setText("...");
@@ -150,6 +180,8 @@ public final class GRIBPatternEditorPanel
 //  justWindCheckBox.setText(JUST_WIND);
     directoryPanel.add(directoryTextField, BorderLayout.CENTER);
     directoryPanel.add(directoryButton, BorderLayout.EAST);
+    
+    
     titleLabel.setText(WWGnlUtilities.buildMessage("provide-grib-detail"));
     topPanel.add(gribCheckBox, BorderLayout.WEST);
 //  topPanel.add(justWindCheckBox, BorderLayout.CENTER);
@@ -302,9 +334,8 @@ public final class GRIBPatternEditorPanel
     bottomPanel.add(extensionTextField,
                    new GridBagConstraints(5, 3, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE,
                                           new Insets(0, 0, 0, 0), 0, 0));
-    bottomPanel.add(requestTextField,
-                   new GridBagConstraints(1, 1, 5, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
-                                          new Insets(0, 0, 0, 0), 0, 0));
+    bottomPanel.add(requestPanel, new GridBagConstraints(1, 1, 5, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+          new Insets(0, 0, 0, 0), 0, 0));
     bottomPanel.add(directoryPanel,
                    new GridBagConstraints(1, 2, 5, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                                           new Insets(0, 0, 0, 0), 0, 0));
@@ -379,6 +410,19 @@ public final class GRIBPatternEditorPanel
       directoryTextField.setText(RelativePath.getRelativePath(System.getProperty("user.dir"), s).replace(File.separatorChar, '/'));
   }
   
+  private void requestButton_actionPerformed(ActionEvent e)
+  {
+    String request = requestTextField.getText();
+    JTreeGRIBRequestPanel dialog = new JTreeGRIBRequestPanel(true);
+    dialog.parseGRIBRequest(request);
+    int resp = JOptionPane.showConfirmDialog(this, dialog, "GRIB Editor", JOptionPane.OK_CANCEL_OPTION, JOptionPane.INFORMATION_MESSAGE); // LOCALIZE
+    if (resp == JOptionPane.OK_OPTION)
+    {
+      request = dialog.getCurrentlySelectedRequest();
+      requestTextField.setText(request);
+    }
+  }
+    
   public void setData(String h, 
                       String rq,
                       ParamPanel.DataDirectory d,
