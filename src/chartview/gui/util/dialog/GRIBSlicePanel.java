@@ -3,6 +3,8 @@ package chartview.gui.util.dialog;
 
 import chartview.ctx.WWContext;
 
+import chartview.routing.DatedGribCondition;
+
 import chartview.util.WWGnlUtilities;
 import chartview.util.grib.GribHelper;
 
@@ -29,6 +31,8 @@ import java.text.DecimalFormat;
 
 import java.util.ArrayList;
 
+import java.util.Date;
+
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -50,8 +54,8 @@ public class GRIBSlicePanel
   private double bspMini = Double.MAX_VALUE;
   private double bspMaxi = Double.MIN_VALUE;
   
-  private transient ArrayList<GribHelper.GribCondition> data2plot;
-  private transient ArrayList<GribHelper.GribCondition> smoothedData;
+  private transient ArrayList<DatedGribCondition> data2plot;
+  private transient ArrayList<DatedGribCondition> smoothedData;
   
   private JPanel checkBoxPanel = new JPanel()
   {
@@ -100,7 +104,7 @@ public class GRIBSlicePanel
   private DecimalFormat tempFormat   = new DecimalFormat("##0'°C'");
   private DecimalFormat prateFormat  = new DecimalFormat("##0.00 'mm/h'");
 
-  public GRIBSlicePanel(ArrayList<GribHelper.GribCondition> data, 
+  public GRIBSlicePanel(ArrayList<DatedGribCondition> data, 
                         ArrayList<Double> bsp, 
                         ArrayList<Integer> twa, 
                         int opt, 
@@ -130,7 +134,7 @@ public class GRIBSlicePanel
     }
   }
   
-  public GRIBSlicePanel(ArrayList<GribHelper.GribCondition> data)
+  public GRIBSlicePanel(ArrayList<DatedGribCondition> data)
   {
     data2plot = data;
     try
@@ -147,13 +151,13 @@ public class GRIBSlicePanel
    * @depracated
    * @param data
    */
-  public void setData(ArrayList<GribHelper.GribCondition> data)
+  public void setData(ArrayList<DatedGribCondition> data)
   {
     data2plot = data;    
     computeData();
   }
   
-  public void setData(ArrayList<GribHelper.GribCondition> data, 
+  public void setData(ArrayList<DatedGribCondition> data, 
                       ArrayList<Double> bsp, 
                       ArrayList<Integer> twa,
                       int opt)
@@ -383,22 +387,24 @@ public class GRIBSlicePanel
       throw new RuntimeException("Fork must be odd.");
     }
     
-    ArrayList<GribHelper.GribCondition> data2smooth = data2plot; // Clone array
+    ArrayList<DatedGribCondition> data2smooth = data2plot; // Clone array
     
     // New ArrayList
-    smoothedData = new ArrayList<GribHelper.GribCondition>(data2smooth.size());
+    smoothedData = new ArrayList<DatedGribCondition>(data2smooth.size());
       
-    for (GribHelper.GribCondition cond : data2smooth) // Clone the array
+    for (DatedGribCondition cond : data2smooth) // Clone the array
     {
-      smoothedData.add(new GribHelper.GribCondition(cond.windspeed,
-                                                    cond.winddir,
-                                                    cond.hgt500,
-                                                    cond.horIdx,
-                                                    cond.vertIdx,
-                                                    cond.prmsl,
-                                                    cond.waves,
-                                                    cond.temp,
-                                                    cond.rain));
+      DatedGribCondition dgc = new DatedGribCondition(new GribHelper.GribCondition(cond.windspeed,
+                                                                                   cond.winddir,
+                                                                                   cond.hgt500,
+                                                                                   cond.horIdx,
+                                                                                   cond.vertIdx,
+                                                                                   cond.prmsl,
+                                                                                   cond.waves,
+                                                                                   cond.temp,
+                                                                                   cond.rain));
+      dgc.setDate(cond.getDate());
+      smoothedData.add(dgc);
     }
     if (dataOption == ROUTING_OPTION)
     {
@@ -466,10 +472,9 @@ public class GRIBSlicePanel
 //  return smoothed;    
   }
   
-  private ArrayList<GribHelper.GribCondition> expandArray(ArrayList<GribHelper.GribCondition> origData,
-                                                          int smoothFactor)
+  private ArrayList<DatedGribCondition> expandArray(ArrayList<DatedGribCondition> origData, int smoothFactor)
   {
-    ArrayList<GribHelper.GribCondition> expanded = new ArrayList<GribHelper.GribCondition>(origData.size() * smoothFactor);
+    ArrayList<DatedGribCondition> expanded = new ArrayList<DatedGribCondition>(origData.size() * smoothFactor);
       // Add points
     for (int i=0; i<origData.size() - 1; i++)
     {
@@ -480,6 +485,12 @@ public class GRIBSlicePanel
       double tempDeltaValue      = origData.get(i + 1).temp - origData.get(i).temp;
       double rainDeltaValue      = origData.get(i + 1).rain - origData.get(i).rain;
       
+      Date d1 = origData.get(i + 1).getDate();
+      Date d2 = origData.get(i).getDate();
+      long longDeltaDate = -1L;
+      if (d1 != null && d2 != null)
+        longDeltaDate = d1.getTime() - d2.getTime();
+      
       for (int j=0; j<smoothFactor; j++)
       {
         double windSpeedValue = origData.get(i).windspeed + (windspeedDeltaValue * ((double)j / (double)smoothFactor));
@@ -489,15 +500,22 @@ public class GRIBSlicePanel
         double tempValue      = origData.get(i).temp + (tempDeltaValue * ((double)j / (double)smoothFactor));
         double rainValue      = origData.get(i).rain + (rainDeltaValue * ((double)j / (double)smoothFactor));
         
-        expanded.add(new GribHelper.GribCondition((float)windSpeedValue,
-                                                  origData.get(i + 1).winddir, // No smooth
-                                                  (float)hgt500Value,
-                                                  origData.get(i + 1).horIdx,  // no smooth
-                                                  origData.get(i + 1).vertIdx, // no smooth
-                                                  (float)prmslValue,
-                                                  (float)wavesValue,
-                                                  (float)tempValue,
-                                                  (float)rainValue));
+        GribHelper.GribCondition gc = new GribHelper.GribCondition((float)windSpeedValue,
+                                                                    origData.get(i + 1).winddir, // No smooth
+                                                                    (float)hgt500Value,
+                                                                    origData.get(i + 1).horIdx,  // no smooth
+                                                                    origData.get(i + 1).vertIdx, // no smooth
+                                                                    (float)prmslValue,
+                                                                    (float)wavesValue,
+                                                                    (float)tempValue,
+                                                                    (float)rainValue);
+        DatedGribCondition dgc = new DatedGribCondition(gc);
+        if (longDeltaDate != -1L)
+        {
+          long dateValue = (long)(d1.getTime() + (longDeltaDate * ((double)j / (double)smoothFactor)));
+          dgc.setDate(new Date(dateValue));
+        }
+        expanded.add(dgc);
       }
     }
     return expanded;
@@ -631,7 +649,7 @@ public class GRIBSlicePanel
     this.bsp = bsp;
   }
 
-  class GRIBSliceDataPanel extends JPanel
+  private class GRIBSliceDataPanel extends JPanel
   {
     private int infoX = -1;
     
@@ -749,7 +767,14 @@ public class GRIBSlicePanel
 //      GribHelper.GribCondition gribPoint = data2plot.get(dataIdx);
         if (dataIdx > smoothedData.size() - 1) dataIdx = smoothedData.size() - 1;
         if (dataIdx < 0) dataIdx = 0;
-        GribHelper.GribCondition gribPoint = smoothedData.get(dataIdx);
+        DatedGribCondition gribPoint = smoothedData.get(dataIdx);
+        Date date = gribPoint.getDate();
+        if (date != null)
+        {
+          String s = WWGnlUtilities.SDF_UT_3.format(date);
+          postit(gr, s, infoX, this.getHeight() - 12, Color.yellow, Color.blue, 0.75f);
+        }
+
         Double boatSpeed = null;
         Integer windAngle = null;
         if (dataOption == ROUTING_OPTION)
@@ -815,7 +840,7 @@ public class GRIBSlicePanel
     }
 
     private void drawDataArray(Graphics gr,
-                               ArrayList<GribHelper.GribCondition> data,
+                               ArrayList<DatedGribCondition> data,
                                float windscale,
                                float prmslscale,
                                float hgt500scale,
@@ -831,7 +856,7 @@ public class GRIBSlicePanel
       int prevXwaves  = -1, prevYwaves  = -1;
       int prevXtemp   = -1, prevYtemp   = -1;
       int prevXrain   = -1, prevYrain   = -1;    
-      for (GribHelper.GribCondition gribPoint : data)
+      for (DatedGribCondition gribPoint : data)
       {
         if (gribPoint != null)
         {

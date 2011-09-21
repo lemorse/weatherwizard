@@ -59,6 +59,7 @@ public final class FaxPatternEditTablePanel
 
   static final String HINT = WWGnlUtilities.buildMessage("hint");
   static final String TRANSPARENT = WWGnlUtilities.buildMessage("transparent");
+  static final String CHANGE_COLOR = WWGnlUtilities.buildMessage("change-color");
   static final String DYNAMIC = WWGnlUtilities.buildMessage("dynamic");
   static final String FAX_URL = WWGnlUtilities.buildMessage("url");
   static final String FAX_DIR = WWGnlUtilities.buildMessage("directory");
@@ -67,7 +68,7 @@ public final class FaxPatternEditTablePanel
   static final String FAX_EXT = WWGnlUtilities.buildMessage("extension");
 
   static final String[] names =
-  { HINT, TRANSPARENT, DYNAMIC, FAX_URL, FAX_DIR, FAX_PREFIX, FAX_PATTERN, FAX_EXT };
+  { HINT, TRANSPARENT, DYNAMIC, CHANGE_COLOR, FAX_URL, FAX_DIR, FAX_PREFIX, FAX_PATTERN, FAX_EXT };
 
   TableModel dataModel;
 
@@ -142,6 +143,7 @@ public final class FaxPatternEditTablePanel
     data = addLineInTable(new FaxType("", Color.black, true, true, 0D, null, null), 
                           Boolean.TRUE,
                           Boolean.FALSE, 
+                          Boolean.TRUE,
                           "http://...", 
                           (ParamPanel.DataDirectory)ParamPanel.data[ParamData.FAX_FILES_LOC][1], 
                           "Fax_", 
@@ -158,6 +160,7 @@ public final class FaxPatternEditTablePanel
   private Object[][] addLineInTable(FaxType hint, 
                                     Boolean tr, 
                                     Boolean dyn, 
+                                    Boolean changeColor,
                                     String url, 
                                     ParamPanel.DataDirectory dir, 
                                     String prefix, 
@@ -177,11 +180,12 @@ public final class FaxPatternEditTablePanel
     newData[len][0] = hint;
     newData[len][1] = tr;
     newData[len][2] = dyn;
-    newData[len][3] = url;
-    newData[len][4] = dir;
-    newData[len][5] = prefix;
-    newData[len][6] = pattern;
-    newData[len][7] = ext;
+    newData[len][3] = changeColor;
+    newData[len][4] = url;
+    newData[len][5] = dir;
+    newData[len][6] = prefix;
+    newData[len][7] = pattern;
+    newData[len][8] = ext;
     data = newData;
     ((AbstractTableModel) dataModel).fireTableDataChanged();
     return newData;
@@ -303,6 +307,7 @@ public final class FaxPatternEditTablePanel
       table.getColumn(HINT).setPreferredWidth(200);     
       table.getColumn(TRANSPARENT).setPreferredWidth(50);     
       table.getColumn(DYNAMIC).setPreferredWidth(50);     
+      table.getColumn(CHANGE_COLOR).setPreferredWidth(50);     
       table.getColumn(FAX_URL).setPreferredWidth(300);     
       table.getColumn(FAX_DIR).setPreferredWidth(200);     
       table.getColumn(FAX_PREFIX).setPreferredWidth(100);     
