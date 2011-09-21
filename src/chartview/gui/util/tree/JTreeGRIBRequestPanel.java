@@ -71,7 +71,7 @@ public class JTreeGRIBRequestPanel
   private BorderLayout borderLayout1 = new BorderLayout();
   private JScrollPane jScrollPane1 = new JScrollPane();
   private JTree jTree = new JTree();
-  private final TreeSelectionListener treeMonitor = new JTreeGRIBRequestPanel.TreeMonitor(this);
+  private final transient TreeSelectionListener treeMonitor = new JTreeGRIBRequestPanel.TreeMonitor(this);
 
   private JPanel treeHolder = new JPanel();
   private JPanel editPanel = new JPanel();
@@ -110,6 +110,7 @@ public class JTreeGRIBRequestPanel
   private JCheckBox hgt500CheckBox = new JCheckBox();
   private JCheckBox tempCheckBox = new JCheckBox();
   private JCheckBox wavesCheckBox = new JCheckBox();
+  private JRadioButton threeRadioButton = new JRadioButton();
   private JRadioButton sixRadioButton = new JRadioButton();
   private JRadioButton twelveRadioButton = new JRadioButton();
   private JRadioButton twentyfourRadioButton = new JRadioButton();
@@ -119,9 +120,17 @@ public class JTreeGRIBRequestPanel
 
   private XMLDocument gribDocument = null;
   private JCheckBox rainCheckBox = new JCheckBox();
+  
+  private boolean displayOnlyGRIBEditor = false;
 
   public JTreeGRIBRequestPanel()
   {
+    this(false);
+  }
+  
+  public JTreeGRIBRequestPanel(boolean gribEditorOnly)
+  {
+    displayOnlyGRIBEditor = gribEditorOnly;
     root = new DefaultMutableTreeNode("Invisible", true);
     try
     {
@@ -249,6 +258,15 @@ public class JTreeGRIBRequestPanel
           }
         });
 
+    threeRadioButton.setText(WWGnlUtilities.buildMessage("3-hours"));
+    threeRadioButton.setSelected(false);
+    threeRadioButton.addActionListener(new ActionListener()
+        {
+          public void actionPerformed(ActionEvent e)
+          {
+            threeRadioButton_actionPerformed(e);
+          }
+        });
     sixRadioButton.setText(WWGnlUtilities.buildMessage("6-hours"));
     sixRadioButton.setSelected(true);
     sixRadioButton.addActionListener(new ActionListener()
@@ -303,6 +321,7 @@ public class JTreeGRIBRequestPanel
     ButtonGroup timeGroup = new ButtonGroup();
     ButtonGroup sizeGroup = new ButtonGroup();
     
+    timeGroup.add(threeRadioButton);
     timeGroup.add(sixRadioButton);
     timeGroup.add(twelveRadioButton);
     timeGroup.add(twentyfourRadioButton);
@@ -412,26 +431,30 @@ public class JTreeGRIBRequestPanel
     fillUpTree();
     treeHolder.add(jScrollPane1, BorderLayout.CENTER);
 
-    this.add(tabbedPane, BorderLayout.CENTER);
-    tabbedPane.add(WWGnlUtilities.buildMessage("grib-request"), treeHolder);
-    tabbedPane.add(WWGnlUtilities.buildMessage("grib-request-editor"), editPanel);
-    tabbedPane.setEnabledAt(1, false); // Edit not available by default.
- 
-    bottomPanel.setLayout(new BorderLayout());    
-    bottomPanel.add(requestField, BorderLayout.CENTER);
-    saveButton.setText(WWGnlUtilities.buildMessage("save"));
-    saveButton.setToolTipText(WWGnlUtilities.buildMessage("save-request"));
-    saveButton.addActionListener(new ActionListener()
-      {
-        public void actionPerformed(ActionEvent e)
+    if (displayOnlyGRIBEditor)
+      this.add(editPanel, BorderLayout.CENTER);
+    else
+    {
+      this.add(tabbedPane, BorderLayout.CENTER);
+      tabbedPane.add(WWGnlUtilities.buildMessage("grib-request"), treeHolder);
+      tabbedPane.add(WWGnlUtilities.buildMessage("grib-request-editor"), editPanel);
+      tabbedPane.setEnabledAt(1, false); // Edit not available by default.
+   
+      bottomPanel.setLayout(new BorderLayout());    
+      bottomPanel.add(requestField, BorderLayout.CENTER);
+      saveButton.setText(WWGnlUtilities.buildMessage("save"));
+      saveButton.setToolTipText(WWGnlUtilities.buildMessage("save-request"));
+      saveButton.addActionListener(new ActionListener()
         {
-          saveCurrentRequest();
-        }
-      });
-    bottomPanel.add(saveButton, BorderLayout.EAST);
-    
-    this.add(bottomPanel, BorderLayout.SOUTH);
-    
+          public void actionPerformed(ActionEvent e)
+          {
+            saveCurrentRequest();
+          }
+        });
+      bottomPanel.add(saveButton, BorderLayout.EAST);
+      
+      this.add(bottomPanel, BorderLayout.SOUTH);
+    }
     editPanel.add(titleLabel, 
                   new GridBagConstraints(0, 0, 5, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, 
                                          new Insets(0, 0, 5, 0), 0, 0));
@@ -483,6 +506,7 @@ public class JTreeGRIBRequestPanel
     editPanel.add(jPanel1, 
                   new GridBagConstraints(1, 5, 4, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, 
                                          new Insets(0, 0, 0, 0), 0, 0));
+    jPanel2.add(threeRadioButton, null);
     jPanel2.add(sixRadioButton, null);
     jPanel2.add(twelveRadioButton, null);
     jPanel2.add(twentyfourRadioButton, null);
@@ -823,7 +847,7 @@ public class JTreeGRIBRequestPanel
     return currentlySelectedRequest;
   }
 
-  private void parseGRIBRequest(String gr) 
+  public void parseGRIBRequest(String gr) 
   {
     // Sample: GFS:60N,0N,120E,070W|2,2|0,6..168|PRMSL,WIND,HGT500,SEATMP,WAVES
     
@@ -900,6 +924,9 @@ public class JTreeGRIBRequestPanel
             try { step = Integer.parseInt(stepStr); } catch (Exception ignore) {}
             switch (step)
             {
+              case 3:
+                threeRadioButton.setSelected(true);
+                break;
               case 6:
                 sixRadioButton.setSelected(true);
                 break;
@@ -965,7 +992,9 @@ public class JTreeGRIBRequestPanel
     if (periodSlider.getValue() > 0)
     {
       gribRequest += ",";
-      if (sixRadioButton.isSelected())
+      if (threeRadioButton.isSelected())
+        gribRequest += "3..";
+      else if (sixRadioButton.isSelected())
         gribRequest += "6..";
       else if (twelveRadioButton.isSelected())
         gribRequest += "12..";
@@ -1037,6 +1066,12 @@ public class JTreeGRIBRequestPanel
 
   private void rainCheckBox_actionPerformed(ActionEvent e)
   {
+    composeGRIBRequest();
+  }
+
+  private void threeRadioButton_actionPerformed(ActionEvent e)
+  {
+    periodSlider.setMinorTickSpacing(3);
     composeGRIBRequest();
   }
 
