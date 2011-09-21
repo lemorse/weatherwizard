@@ -259,7 +259,7 @@ public class DataFilePopup
             XMLDocument doc = parser.getDocument();
             NodeList faxList = doc.selectNodes("//fax-collection/fax");
   //        System.out.println("Found " + faxList.getLength() + " fax(es)");
-            Object[][] faxData = new Object[faxList.getLength()][8];
+            Object[][] faxData = new Object[faxList.getLength()][9];
             for (int i=0; i<faxList.getLength(); i++)
             {
               XMLElement faxrow = (XMLElement)faxList.item(i);
@@ -286,20 +286,22 @@ public class DataFilePopup
               {
                 XMLElement dyn = (XMLElement)dynamics.item(0);
                 faxData[i][2] = Boolean.TRUE;
-                faxData[i][3] = dyn.getAttribute("url");
-                faxData[i][4] = new ParamPanel.DataDirectory("Faxes", dyn.getAttribute("dir"));
-                faxData[i][5] = dyn.getAttribute("prefix");
-                faxData[i][6] = dyn.getAttribute("pattern");
-                faxData[i][7] = dyn.getAttribute("extension");
+                faxData[i][3] = colorChange;
+                faxData[i][4] = dyn.getAttribute("url");
+                faxData[i][5] = new ParamPanel.DataDirectory("Faxes", dyn.getAttribute("dir"));
+                faxData[i][6] = dyn.getAttribute("prefix");
+                faxData[i][7] = dyn.getAttribute("pattern");
+                faxData[i][8] = dyn.getAttribute("extension");
               }
               else
               {
                 faxData[i][2] = Boolean.FALSE;
-                faxData[i][3] = "";
-                faxData[i][4] = new ParamPanel.DataDirectory("Faxes", ".");
-                faxData[i][5] = "";
+                faxData[i][3] = Boolean.TRUE;
+                faxData[i][4] = "";
+                faxData[i][5] = new ParamPanel.DataDirectory("Faxes", ".");
                 faxData[i][6] = "";
-                faxData[i][7] = "";              
+                faxData[i][7] = "";
+                faxData[i][8] = "";              
               }
             }
             Object[][] gribData = new Object[1][23];
@@ -446,7 +448,7 @@ public class DataFilePopup
                 faxrow.setAttribute("hint", ft.toString());
                 faxrow.setAttribute("color", WWGnlUtilities.colorToString(ft.getColor()));
                 faxrow.setAttribute("transparent", ((Boolean)faxData[i][1]).toString());
-                faxrow.setAttribute("color-change", Boolean.toString(ft.isChangeColor())); // TASK Make sure it works
+                faxrow.setAttribute("color-change", ((Boolean)faxData[i][3]).toString());
                 XMLElement dyn = null;
                 if (faxrow.selectNodes("./dynamic-resource").getLength() != 0)
                 {
@@ -468,11 +470,11 @@ public class DataFilePopup
                 if (((Boolean)faxData[i][2]).booleanValue())
                 {
                   // assume dyn is not null
-                  dyn.setAttribute("url", (String)faxData[i][3]);
-                  dyn.setAttribute("dir", ((ParamPanel.DataDirectory)faxData[i][4]).toString());
-                  dyn.setAttribute("prefix", (String)faxData[i][5]);
-                  dyn.setAttribute("pattern", (String)faxData[i][6]);
-                  dyn.setAttribute("extension", (String)faxData[i][7]);
+                  dyn.setAttribute("url", (String)faxData[i][4]);
+                  dyn.setAttribute("dir", ((ParamPanel.DataDirectory)faxData[i][5]).toString());
+                  dyn.setAttribute("prefix", (String)faxData[i][6]);
+                  dyn.setAttribute("pattern", (String)faxData[i][7]);
+                  dyn.setAttribute("extension", (String)faxData[i][8]);
                 }
               }
               XMLElement gribNode = (XMLElement)doc.selectNodes("//grib").item(0);
