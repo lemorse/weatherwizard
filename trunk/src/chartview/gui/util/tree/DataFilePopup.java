@@ -448,6 +448,7 @@ public class DataFilePopup
                 faxrow.setAttribute("hint", ft.toString());
                 faxrow.setAttribute("color", WWGnlUtilities.colorToString(ft.getColor()));
                 faxrow.setAttribute("transparent", ((Boolean)faxData[i][1]).toString());
+             // faxrow.setAttribute("color-change", Boolean.toString(ft.isChangeColor()));
                 faxrow.setAttribute("color-change", ((Boolean)faxData[i][3]).toString());
                 XMLElement dyn = null;
                 if (faxrow.selectNodes("./dynamic-resource").getLength() != 0)
