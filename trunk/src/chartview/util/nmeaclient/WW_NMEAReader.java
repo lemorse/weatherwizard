@@ -11,6 +11,7 @@ import java.io.File;
 import nmea.server.NMEAEventManager;
 import nmea.server.datareader.CustomNMEAClient;
 
+import ocss.nmea.api.NMEAEvent;
 import ocss.nmea.parser.RMC;
 import ocss.nmea.parser.StringParsers;
 
