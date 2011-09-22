@@ -1,18 +1,17 @@
 package chartview.gui.util.dialog;
 
+
 import chartview.gui.util.TableResizeValue;
 import chartview.gui.util.param.ParamPanel;
 
 import java.awt.BorderLayout;
-
 import java.awt.Dimension;
-
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
-import javax.swing.JTable;
+
 
 public class PatternEditorPanel
   extends JPanel
@@ -21,8 +20,8 @@ public class PatternEditorPanel
   private FaxPatternEditTablePanel faxPatternEditTablePanel = new FaxPatternEditTablePanel();
   private GRIBPatternEditorPanel gribPatternEditorPanel = new GRIBPatternEditorPanel();
 
-  private Object[][] faxData = null;
-  private Object[][] gribData = null;
+  private transient Object[][] faxData = null;
+  private transient Object[][] gribData = null;
   private boolean grib = false;
   private JCheckBox fitColumnsCheckBox = new JCheckBox();
 

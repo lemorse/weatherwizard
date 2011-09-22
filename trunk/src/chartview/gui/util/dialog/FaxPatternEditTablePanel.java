@@ -49,36 +49,36 @@ import javax.swing.table.TableModel;
 public final class FaxPatternEditTablePanel
   extends JPanel
 {
-  BorderLayout borderLayout1 = new BorderLayout();
-  JPanel topPanel = new JPanel();
-  JPanel bottomPanel = new JPanel();
-  JPanel centerPane = new JPanel();
-  JLabel fileNameLabel = new JLabel();
+  private BorderLayout borderLayout1 = new BorderLayout();
+  private JPanel topPanel = new JPanel();
+  private JPanel bottomPanel = new JPanel();
+  private JPanel centerPane = new JPanel();
+  private JLabel fileNameLabel = new JLabel();
   private JButton addButton = new JButton();
   private JButton removeButton = new JButton();
 
-  static final String HINT = WWGnlUtilities.buildMessage("hint");
-  static final String TRANSPARENT = WWGnlUtilities.buildMessage("transparent");
-  static final String CHANGE_COLOR = WWGnlUtilities.buildMessage("change-color");
-  static final String DYNAMIC = WWGnlUtilities.buildMessage("dynamic");
-  static final String FAX_URL = WWGnlUtilities.buildMessage("url");
-  static final String FAX_DIR = WWGnlUtilities.buildMessage("directory");
-  static final String FAX_PREFIX = WWGnlUtilities.buildMessage("prefix");
-  static final String FAX_PATTERN = WWGnlUtilities.buildMessage("pattern");
-  static final String FAX_EXT = WWGnlUtilities.buildMessage("extension");
+  private static final String HINT = WWGnlUtilities.buildMessage("hint");
+  private static final String TRANSPARENT = WWGnlUtilities.buildMessage("transparent");
+  private static final String CHANGE_COLOR = WWGnlUtilities.buildMessage("change-color");
+  private static final String DYNAMIC = WWGnlUtilities.buildMessage("dynamic");
+  private static final String FAX_URL = WWGnlUtilities.buildMessage("url");
+  private static final String FAX_DIR = WWGnlUtilities.buildMessage("directory");
+  private static final String FAX_PREFIX = WWGnlUtilities.buildMessage("prefix");
+  private static final String FAX_PATTERN = WWGnlUtilities.buildMessage("pattern");
+  private static final String FAX_EXT = WWGnlUtilities.buildMessage("extension");
 
-  static final String[] names =
+  private static final String[] names =
   { HINT, TRANSPARENT, DYNAMIC, CHANGE_COLOR, FAX_URL, FAX_DIR, FAX_PREFIX, FAX_PATTERN, FAX_EXT };
 
-  TableModel dataModel;
+  private transient TableModel dataModel;
 
-  public static Object[][] data = new Object[0][0];
+  private transient Object[][] data = new Object[0][0];
 
-  JTable table;
-  JScrollPane scrollPane;
-  BorderLayout borderLayout2 = new BorderLayout();
-  GridBagLayout gridBagLayout1 = new GridBagLayout();
-  JLabel titleLabel = new JLabel();
+  private JTable table;
+  private JScrollPane scrollPane;
+  private BorderLayout borderLayout2 = new BorderLayout();
+  private GridBagLayout gridBagLayout1 = new GridBagLayout();
+  private JLabel titleLabel = new JLabel();
   
   private int tableResize = JTable.AUTO_RESIZE_OFF;
 
@@ -257,6 +257,31 @@ public final class FaxPatternEditTablePanel
           public void setValueAt(Object aValue, int row, int column)
           {
             data[row][column] = aValue;
+//          System.out.println("Value set at row " + row + ", col " + column);
+            if (column == 0 || column == 3) // Fax Color or color-change, propagate the "apply"
+            {
+              Boolean cc = (Boolean)getValueAt(row, 3);
+              FaxType ft = (FaxType)getValueAt(row, 0);
+              if (column == 0)
+              {
+                // Then set value of ColorChange in the table (col 3)
+                if (cc.booleanValue() != ft.isChangeColor())
+                {
+                  setValueAt(Boolean.valueOf(ft.isChangeColor()), row, 3);
+                  // Repaint the other cell
+                  this.fireTableCellUpdated(row, 3);
+                }
+              }
+              else if (column == 3)
+              {
+                // Then set value in the fax type (col 0)
+                if (cc.booleanValue() != ft.isChangeColor())
+                {
+                  ft.setChangeColor(cc.booleanValue());
+                  setValueAt(ft, row, 0);
+                }
+              }
+            }
           }
         };
     table = new JTable(dataModel)
