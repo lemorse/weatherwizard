@@ -6,7 +6,7 @@ import chartview.util.WWGnlUtilities;
 
 import java.io.File;
 
-// import javax.comm.NoSuchPortException;
+// import gnu.io.NoSuchPortException;
 
 import nmea.server.NMEAEventManager;
 import nmea.server.datareader.CustomNMEAClient;

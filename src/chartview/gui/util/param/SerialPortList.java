@@ -4,7 +4,7 @@ package chartview.gui.util.param;
 import java.util.ArrayList;
 import java.util.Enumeration;
 
-import javax.comm.CommPortIdentifier;
+import gnu.io.CommPortIdentifier;
 
 public class SerialPortList
 {

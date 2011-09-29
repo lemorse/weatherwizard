@@ -37,8 +37,10 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
+import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -123,17 +125,30 @@ public class AdjustFrame
       @Override
       public void paintComponent(Graphics g)
       {
+        ((Graphics2D)g).setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+                                         RenderingHints.VALUE_TEXT_ANTIALIAS_ON);      
+        ((Graphics2D)g).setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                                         RenderingHints.VALUE_ANTIALIAS_ON);      
         this.setOpaque(false);      
         this.setSize(masterTabPane.getSize());
         ((Graphics2D)g).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.75f));
+        
 //      g.setColor(Color.LIGHT_GRAY);
-        g.setColor(Color.GRAY);
+//      g.setColor(Color.GRAY);
+        Color startColor = Color.GRAY; // new Color(255, 255, 255);
+        Color endColor   = Color.BLACK;  // new Color(102, 102, 102);
+        GradientPaint gradient = new GradientPaint(0, this.getHeight(), startColor, 0, 0, endColor); // vertical, upside down
+        ((Graphics2D)g).setPaint(gradient);
         g.fillRect(0, 0, this.getWidth(), this.getHeight());
-        g.setFont(new Font("Arial", Font.ITALIC | Font.BOLD, 50));
+        
+//      g.setFont(new Font("Arial", Font.ITALIC | Font.BOLD, 50));
+        g.setFont(g.getFont().deriveFont(Font.ITALIC | Font.BOLD, 50f));
         String str = message2Display; // WWGnlUtilities.buildMessage("loading");
         int strWidth = g.getFontMetrics(g.getFont()).stringWidth(str);
+        g.setColor(Color.GRAY);
+        g.drawString(str, (this.getWidth() / 2) - (strWidth / 2) + 3, 20 + g.getFont().getSize() + 3); // Shadow
         g.setColor(Color.RED);
-        g.drawString(str, (this.getWidth() / 2) - (strWidth / 2), 20 + g.getFont().getSize());
+        g.drawString(str, (this.getWidth() / 2) - (strWidth / 2), 20 + g.getFont().getSize());         // Text
       }
     };
 
@@ -216,6 +231,9 @@ public class AdjustFrame
       WWContext.getInstance().fireExceptionLogging(e);
       e.printStackTrace();
     }
+    // Dispose the splash screen here
+    WWContext.getInstance().fireApplicationLoaded();
+    
     // Any composite to load at startup?
     String displayComposite = System.getProperty("display.composite", "");
     if (displayComposite.trim().length() == 0)

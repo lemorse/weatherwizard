@@ -72,6 +72,7 @@ import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.Insets;
 import java.awt.Point;
+import java.awt.RenderingHints;
 import java.awt.Stroke;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
@@ -5160,6 +5161,10 @@ public class CommandPanel
   
   public void chartPanelPaintComponentFeature(final Graphics gr)
   {
+    ((Graphics2D)gr).setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+                                      RenderingHints.VALUE_TEXT_ANTIALIAS_ON);      
+    ((Graphics2D)gr).setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                                      RenderingHints.VALUE_ANTIALIAS_ON);      
 //  System.out.println("chartPanelPaintComponentFeature");
 //  Color before = gr.getColor();
 //  gr.setColor(this.getBackground());
@@ -6385,19 +6390,43 @@ public class CommandPanel
           int clipboardOption = Integer.parseInt(((ParamPanel.RoutingOutputList)(ParamPanel.data[ParamData.ROUTING_OUTPUT_FLAVOR][1])).getStringIndex());
           String fileOutput = null;
           
+          i = allCalculatedIsochrons.size();
+          long after = System.currentTimeMillis();
+          routingOnItsWay = false;
+          WWContext.getInstance().fireSetLoading(false, WWGnlUtilities.buildMessage("routing"));
+          WWContext.getInstance().fireLogging(WWGnlUtilities.buildMessage("isochrones-calculated", new String[] { Integer.toString(i), Long.toString(after - before) }) + "\n");          
+
+          if (showProgressMonitor) // Then dispose progress bar
+          {
+            if (pm != null)
+            {
+              synchronized (pm)
+              {
+                try
+                {
+                  if (pm.getCurrent() != pm.getTotal())
+                    pm.setCurrent(null, pm.getTotal());
+                  WWContext.getInstance().removeApplicationListener(WWContext.getInstance().getAel4monitor());
+                  WWContext.getInstance().setAel4monitor(null);
+                  WWContext.getInstance().setMonitor(null);
+                }
+                catch (Exception ex)
+                {
+                  ex.printStackTrace();
+                }
+              }
+            }
+          }
+
           if (clipboardOption == ParamPanel.RoutingOutputList.ASK)
           {
+            try { Thread.sleep(500L); } catch (InterruptedException ie) {} // Pas joli...
             RoutingOutputFlavorPanel rofp = new RoutingOutputFlavorPanel();              
             JOptionPane.showMessageDialog(instance, rofp, "Routing output", JOptionPane.QUESTION_MESSAGE);
             clipboardOption = rofp.getSelectedOption();
             fileOutput = rofp.getFileOutput();
           }
 
-          i = allCalculatedIsochrons.size();
-          long after = System.currentTimeMillis();
-          routingOnItsWay = false;
-          WWContext.getInstance().fireSetLoading(false, WWGnlUtilities.buildMessage("routing"));
-          WWContext.getInstance().fireLogging(WWGnlUtilities.buildMessage("isochrones-calculated", new String[] { Integer.toString(i), Long.toString(after - before) }) + "\n");          
           // Reverse, for the clipboard
           boolean generateGPXRoute = true;
           String clipboardContent = "";
@@ -6582,28 +6611,6 @@ public class CommandPanel
               clipboard.setContents(stringSelection, null);    
   //          JOptionPane.showMessageDialog(null, "Routing is in the clipboard\n(Ctrl+V in any editor...)", "Routing completed", JOptionPane.INFORMATION_MESSAGE);
               WWContext.getInstance().fireSetStatus(WWGnlUtilities.buildMessage("routing-in-clip"));
-            }
-
-            if (showProgressMonitor)
-            {
-              if (pm != null)
-              {
-                synchronized (pm)
-                {
-                  try
-                  {
-                    if (pm.getCurrent() != pm.getTotal())
-                      pm.setCurrent(null, pm.getTotal());
-                    WWContext.getInstance().removeApplicationListener(WWContext.getInstance().getAel4monitor());
-                    WWContext.getInstance().setAel4monitor(null);
-                    WWContext.getInstance().setMonitor(null);
-                  }
-                  catch (Exception ex)
-                  {
-                    ex.printStackTrace();
-                  }
-                }
-              }
             }
 
             WWContext.getInstance().fireRoutingAvailable(true, bestRoute);                        

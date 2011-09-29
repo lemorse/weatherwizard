@@ -14,6 +14,8 @@ import java.awt.GridBagLayout;
 
 import java.awt.Insets;
 
+import java.awt.RenderingHints;
+
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
@@ -72,6 +74,10 @@ public class BSPDisplay
   
   public void paintComponent(Graphics gr)
   {
+    ((Graphics2D)gr).setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+                                      RenderingHints.VALUE_TEXT_ANTIALIAS_ON);      
+    ((Graphics2D)gr).setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                                      RenderingHints.VALUE_ANTIALIAS_ON);      
     Color startColor = Color.black; // new Color(255, 255, 255);
     Color endColor   = Color.gray; // new Color(102, 102, 102);
     GradientPaint gradient = new GradientPaint(0, this.getHeight(), startColor, 0, 0, endColor); // vertical, upside down

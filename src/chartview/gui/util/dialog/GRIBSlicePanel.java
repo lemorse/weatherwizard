@@ -20,6 +20,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Point;
+import java.awt.RenderingHints;
 import java.awt.Stroke;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -705,6 +706,10 @@ public class GRIBSlicePanel
     
     public void paintComponent(Graphics gr)
     {
+      ((Graphics2D)gr).setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+                                        RenderingHints.VALUE_TEXT_ANTIALIAS_ON);      
+      ((Graphics2D)gr).setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                                        RenderingHints.VALUE_ANTIALIAS_ON);      
       gr.setColor(Color.white);
       gr.fillRect(0, 0, this.getWidth(), this.getHeight());
       // Horizontal lines

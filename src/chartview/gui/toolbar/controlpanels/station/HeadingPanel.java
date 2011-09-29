@@ -9,6 +9,8 @@ import java.awt.Graphics;
 
 import java.awt.Graphics2D;
 
+import java.awt.RenderingHints;
+
 import javax.swing.JPanel;
 
 public class HeadingPanel
@@ -37,6 +39,10 @@ public class HeadingPanel
   
   public void paintComponent(Graphics gr)
   {    
+    ((Graphics2D)gr).setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+                                      RenderingHints.VALUE_TEXT_ANTIALIAS_ON);      
+    ((Graphics2D)gr).setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                                      RenderingHints.VALUE_ANTIALIAS_ON);      
     int w = this.getWidth();
     int h = this.getHeight();
     final int FONT_SIZE = 12;
