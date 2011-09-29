@@ -14,6 +14,8 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Polygon;
 
+import java.awt.RenderingHints;
+
 import java.text.DecimalFormat;
 
 public class GRIBVisualPanel extends TransparentPanel
@@ -117,6 +119,10 @@ public class GRIBVisualPanel extends TransparentPanel
   
   public void paintComponent(Graphics g)
   {
+    ((Graphics2D)g).setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+                                     RenderingHints.VALUE_TEXT_ANTIALIAS_ON);      
+    ((Graphics2D)g).setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                                     RenderingHints.VALUE_ANTIALIAS_ON);      
     int xOffset = BORDER_TICKNESS, 
         yOffset = BORDER_TICKNESS;
     int w = this.getWidth() - (2 * BORDER_TICKNESS);

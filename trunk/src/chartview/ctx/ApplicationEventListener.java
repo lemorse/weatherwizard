@@ -18,6 +18,7 @@ import java.util.EventListener;
 
 public abstract class ApplicationEventListener implements EventListener 
 {
+  public void applicationLoaded() {}
   public void collapseExpandToolBar(boolean b) {}
   public void imageUp() {}
   public void imageDown() {}

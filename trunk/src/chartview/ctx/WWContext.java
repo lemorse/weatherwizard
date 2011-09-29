@@ -150,6 +150,15 @@ public class WWContext
     }    
   }
 
+  public void fireApplicationLoaded()
+  {
+    for (int i=0; i < this.getListeners().size(); i++)
+    {
+      ApplicationEventListener l = this.getListeners().get(i);
+      l.applicationLoaded();
+    }    
+  }
+
   public void fireLogging(String str)
   {
     for (int i=0; i < this.getListeners().size(); i++)

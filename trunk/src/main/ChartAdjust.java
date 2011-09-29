@@ -156,7 +156,6 @@ public class ChartAdjust
     }
     
     ParamPanel.setUserValues();
-
     final JFrame frame = new AdjustFrame();
     
     boolean positioned = false;
@@ -290,7 +289,6 @@ public class ChartAdjust
         // Assign as System properties
         System.setProperty("tooltip.option", props.getProperty("tooltip.option", "on-chart")); // on-chart, none, tt-window        
         System.setProperty("composite.sort", props.getProperty("composite.sort", "date.desc")); // date, name, asc, desc
-
       }
       catch (Exception ex)
       {
