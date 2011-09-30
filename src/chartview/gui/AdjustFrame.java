@@ -107,14 +107,16 @@ public class AdjustFrame
 
   private FileTypeHolder allJTrees = new FileTypeHolder();
   
+  int grayPanelY = 0;
   private JLayeredPane layers = new JLayeredPane()
     {
       @Override
       public void paint(Graphics g)
       {
         super.paint(g);
-        masterTabPane.setBounds(0, 0, this.getWidth(), this.getHeight());
-        grayTransparentPanel.setBounds(0, 0, this.getWidth(), this.getHeight());
+        if (grayPanelY == 0)
+          masterTabPane.setBounds(0, 0, this.getWidth(), this.getHeight());
+        grayTransparentPanel.setBounds(0, grayPanelY, this.getWidth(), this.getHeight());
       }
     };
 
@@ -1046,7 +1048,22 @@ public class AdjustFrame
           if (b)
             layers.add(grayTransparentPanel, grayLayerIndex); // Add gray layer
           else
+          {
+//          System.out.print("Shifting down");
+            synchronized (layers)
+            {
+              message2Display = "";
+              for (int i=0; i<layers.getSize().getHeight(); i++) // Shifts down
+              {
+                try { Thread.sleep(5L); } catch (InterruptedException ex) {}
+//              System.out.print("," + i);
+                grayPanelY = i;
+                layers.repaint();
+              }
+            }
             layers.remove(grayTransparentPanel);              // remove gray layer
+            grayPanelY = 0;
+          }
           layers.repaint();
         }
         
