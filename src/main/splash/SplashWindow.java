@@ -104,7 +104,7 @@ public class SplashWindow extends JWindow
     JLabel imgHolder = new JLabel(img);
 //  imgHolder.setBorder(BorderFactory.createLineBorder(new Color(228, 24, 106), 2));
     imgHolder.setBounds(0, 10, 325, 150);
-    layer.add(imgHolder, JLayeredPane.DEFAULT_LAYER);
+    layer.add(imgHolder, JLayeredPane.DRAG_LAYER);
 
     JPanel itemHolder = new JPanel();
     itemHolder.setLayout(gridBagLayout1);
