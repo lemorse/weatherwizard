@@ -104,6 +104,7 @@ public class CommandPanelPopup
   private JMenuItem removeRouting;
   
   private JMenuItem eraseFlags;
+  private JCheckBoxMenuItem insertRoutingWayPointsMenuItem;
 
   private JMenu userExitMenu;
 
@@ -162,6 +163,7 @@ public class CommandPanelPopup
   private final String CLICK_SCROLL = WWGnlUtilities.buildMessage("click-scroll");
 
   private final String DROP_FLAGS = WWGnlUtilities.buildMessage("drop-flags");
+  private final String INSERT_ROUTING_WP = WWGnlUtilities.buildMessage("insert-routing-wp");
 
   private int _x = 0, _y = 0;
 
@@ -467,6 +469,14 @@ public class CommandPanelPopup
     eraseFlags.setEnabled(parent.from != null);
     eraseFlags.setBackground(Color.white);
     eraseFlags.addActionListener(this);
+
+    insertRoutingWayPointsMenuItem = new JCheckBoxMenuItem(INSERT_ROUTING_WP);
+//  insertRoutingWayPointsMenuItem.setIcon(new ImageIcon(this.getClass().getResource("greenflag.png")));
+    insertRoutingWayPointsMenuItem.setSelected(parent.insertRoutingWP);
+    this.add(insertRoutingWayPointsMenuItem);
+    insertRoutingWayPointsMenuItem.setEnabled(parent.from != null && parent.to != null);
+    insertRoutingWayPointsMenuItem.setBackground(Color.white);
+    insertRoutingWayPointsMenuItem.addActionListener(this);
 
     this.add(new JSeparator());
 
@@ -774,6 +784,8 @@ public class CommandPanelPopup
     else if (event.getActionCommand().equals(REMOVE_ROUTING))
     {
       parent.shutOffRouting();
+      parent.insertRoutingWP = false;
+      parent.intermediateRoutingWP = null;
       parent.chartPanel.repaint();
     }
     else if (event.getActionCommand().equals(DROP_FLAGS))
@@ -792,8 +804,14 @@ public class CommandPanelPopup
       if (drop)
       {
         parent.shutOffRouting();
+        parent.insertRoutingWP = false;
+        parent.intermediateRoutingWP = null;
         parent.chartPanel.repaint();
       }
+    }
+    else if (event.getActionCommand().equals(INSERT_ROUTING_WP))
+    {
+      parent.insertRoutingWP = insertRoutingWayPointsMenuItem.isSelected();
     }
     else if (isUserExitAction(event.getActionCommand()))
     {
