@@ -263,6 +263,9 @@ public class CommandPanel
   private double gribSliceInfo = -1D;
   
   protected transient GeoPoint from = null, to = null, closest = null;
+  protected transient boolean insertRoutingWP = false;
+  protected ArrayList<GeoPoint> intermediateRoutingWP = null;
+  
   private transient RoutingPoint closestPoint = null;
   private ArrayList<RoutingPoint> bestRoute = null;
   private transient GeoPoint boatPosition = null;
@@ -5671,7 +5674,10 @@ public class CommandPanel
     if (from != null)
     {
       Point gp = chartPanel.getPanelPoint(from.getL(), from.getG());
-      chartPanel.postit(gr, WWGnlUtilities.buildMessage("origin"), gp.x + 5, gp.y + 5, Color.yellow);
+      String prefix = "";
+	  if (intermediateRoutingWP != null)
+	    prefix = "1. ";
+      chartPanel.postit(gr, prefix + WWGnlUtilities.buildMessage("origin"), gp.x + 5, gp.y + 5, Color.yellow);
       Color orig = gr.getColor();
       gr.setColor(Color.black);
       gr.fillOval(gp.x - 3, gp.y - 3, 6, 6);
@@ -5686,7 +5692,10 @@ public class CommandPanel
     if (to != null)
     {
       Point gp = chartPanel.getPanelPoint(to.getL(), to.getG());
-      chartPanel.postit(gr, WWGnlUtilities.buildMessage("destination"), gp.x + 5, gp.y, Color.yellow);
+      String prefix = "";
+      if (intermediateRoutingWP != null)
+        prefix = Integer.toString(intermediateRoutingWP.size() + 2) + ". ";
+      chartPanel.postit(gr, prefix + WWGnlUtilities.buildMessage("destination"), gp.x + 5, gp.y, Color.yellow);
       Color orig = gr.getColor();
       gr.setColor(Color.black);
       gr.fillOval(gp.x - 3, gp.y - 3, 6, 6);
@@ -5695,6 +5704,23 @@ public class CommandPanel
 //      greenFlagImage = new DraggableFlag(this.getClass().getResource("greenflag.png"));
       gr.drawImage(greenFlagImage.getImage(), gp.x - 2, gp.y - greenFlagImage.getImage().getHeight(null), null);
       gr.setColor(orig);
+    }
+    if (intermediateRoutingWP != null)
+    {
+      int nbIntPt = 0;
+      for (GeoPoint gp : intermediateRoutingWP)
+      {
+        Point pt = chartPanel.getPanelPoint(gp.getL(), gp.getG());
+        chartPanel.postit(gr, Integer.toString(2 + (nbIntPt++)) + ".", pt.x + 5, pt.y, Color.yellow);
+        Color orig = gr.getColor();
+        gr.setColor(Color.black);
+        gr.fillOval(pt.x - 3, pt.y - 3, 6, 6);
+        if (greenFlagImage == null)
+          greenFlagImage = new ImageIcon(this.getClass().getResource("greenflag.png")); //.getImage();      
+  //      greenFlagImage = new DraggableFlag(this.getClass().getResource("greenflag.png"));
+        gr.drawImage(greenFlagImage.getImage(), pt.x - 2, pt.y - greenFlagImage.getImage().getHeight(null), null);
+        gr.setColor(orig);        
+      }
     }
     
     // Some plots - places.xml
@@ -5783,7 +5809,8 @@ public class CommandPanel
               {
                 RoutingPoint p = dimTwo.next();
                 Point pp = chartPanel.getPanelPoint(p.getPosition());
-                Point ancestor = chartPanel.getPanelPoint(p.getAncestor().getPosition());
+                Point ancestor = null;
+                try { ancestor = chartPanel.getPanelPoint(p.getAncestor().getPosition()); } catch (Exception ex) {}
                 
                 if (isochronLine)
                   gr.fillOval(pp.x - 2, pp.y - 2, 4, 4);
@@ -6181,7 +6208,7 @@ public class CommandPanel
     startIsochronComputation();
   }
 
-  private StartRoutingPanel dp = null;
+  private StartRoutingPanel startRoutingPanel = null;
 
   private transient GeoPoint isoFrom;
   private transient GeoPoint isoTo;
@@ -6233,11 +6260,11 @@ public class CommandPanel
     
     String mess = WWGnlUtilities.buildMessage("grib-from-to", new String[] { dateOne, dateTwo });
     
-    if (dp == null)
-      dp = new StartRoutingPanel();
+    if (startRoutingPanel == null)
+      startRoutingPanel = new StartRoutingPanel();
     else
       init = false;
-    dp.setGribFrom(gribFrom);
+    startRoutingPanel.setGribFrom(gribFrom);
     // Distance from to
     GreatCircle gcCalc = WWContext.getInstance().getGreatCircle();
     gcCalc.setStart(new GeoPoint(Math.toRadians(from.getL()), Math.toRadians(from.getG())));
@@ -6245,36 +6272,36 @@ public class CommandPanel
 //  gcCalc.calculateGreatCircle(20);
     double gcDist = Math.toDegrees(gcCalc.getDistance()) * 60.0;
     
-    dp.setDistanceLabel(WWGnlUtilities.buildMessage("great-circle", new String[] { WWGnlUtilities.XX22.format(gcDist) }));
-    dp.setMess(mess);
+    startRoutingPanel.setDistanceLabel(WWGnlUtilities.buildMessage("great-circle", new String[] { WWGnlUtilities.XX22.format(gcDist) }));
+    startRoutingPanel.setMess(mess);
     
     if (init) 
     {
-      dp.setDate(currentDate);
+      startRoutingPanel.setDate(currentDate);
 
-      dp.setTimeInterval((int)timeInterval);
-      dp.setAngularStep(routingStep);
-      dp.setForkWidth(routingForkWidth);
-      dp.setMaxTWS(borderTWS);
-      dp.setMinTWA(borderTWA);
-      dp.setStopRoutingOnExhaustedGRIB(stopOnExhausted);
-      dp.setPolarFactor(((Double) ParamPanel.data[ParamData.POLAR_SPEED_FACTOR][1]).doubleValue());
+      startRoutingPanel.setTimeInterval((int)timeInterval);
+      startRoutingPanel.setAngularStep(routingStep);
+      startRoutingPanel.setForkWidth(routingForkWidth);
+      startRoutingPanel.setMaxTWS(borderTWS);
+      startRoutingPanel.setMinTWA(borderTWA);
+      startRoutingPanel.setStopRoutingOnExhaustedGRIB(stopOnExhausted);
+      startRoutingPanel.setPolarFactor(((Double) ParamPanel.data[ParamData.POLAR_SPEED_FACTOR][1]).doubleValue());
     }
     
     int resp = JOptionPane.showConfirmDialog(this, 
-                                             dp, 
+                                             startRoutingPanel, 
                                              WWGnlUtilities.buildMessage("routing"), 
                                              JOptionPane.OK_CANCEL_OPTION);
     if (resp == JOptionPane.OK_OPTION)
     {
-      currentDate = dp.getDate();
-      timeInterval = dp.getTimeInterval();
-      routingForkWidth = dp.getForkWidth();
-      routingStep = dp.getAngularStep();
-      borderTWS = dp.getMaxTWS();
-      borderTWA = dp.getMinTWA();
-      stopOnExhausted = dp.isStopRoutingOnExhaustedGRIB();
-      polarFactor = dp.getPolarFactor();
+      currentDate = startRoutingPanel.getDate();
+      timeInterval = startRoutingPanel.getTimeInterval();
+      routingForkWidth = startRoutingPanel.getForkWidth();
+      routingStep = startRoutingPanel.getAngularStep();
+      borderTWS = startRoutingPanel.getMaxTWS();
+      borderTWA = startRoutingPanel.getMinTWA();
+      stopOnExhausted = startRoutingPanel.isStopRoutingOnExhaustedGRIB();
+      polarFactor = startRoutingPanel.getPolarFactor();
       
       if (borderTWS != -1 || borderTWA != -1)
       {
@@ -6373,10 +6400,22 @@ public class CommandPanel
           RoutingPoint destination = new RoutingPoint(point);
           destination.setPosition(to);
 
+          ArrayList<RoutingPoint> interWP = null;
+          if (intermediateRoutingWP != null)
+          {
+            interWP = new ArrayList<RoutingPoint>(intermediateRoutingWP.size());
+            for (GeoPoint gp : intermediateRoutingWP)
+            {
+              RoutingPoint rp = new RoutingPoint(chartPanel.getPanelPoint(gp));
+              rp.setPosition(gp);
+              interWP.add(rp);
+            }
+          }
           allCalculatedIsochrons = RoutingUtil.calculateIsochrons(instance, 
                                                                   chartPanel,
                                                                   center, 
                                                                   destination, 
+                                                                  interWP,
                                                                   now, 
                                                                   wgd,
                                                                   timeInterval,
@@ -6699,9 +6738,18 @@ public class CommandPanel
               to = here;
             else if (from != null && to != null)
             {
-              if (allCalculatedIsochrons != null) // reset
-                shutOffRouting(); // Caution: this one resets from & to.         
-              from = here;
+              if (!insertRoutingWP)
+              {
+                if (allCalculatedIsochrons != null) // reset
+                  shutOffRouting(); // Caution: this one resets from & to.         
+                from = here;
+              }
+              else
+              {
+                if (intermediateRoutingWP == null)
+                  intermediateRoutingWP = new ArrayList<GeoPoint>();
+                intermediateRoutingWP.add(here);
+              }
             }
           }
         }
