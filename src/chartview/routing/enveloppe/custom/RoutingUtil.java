@@ -48,34 +48,6 @@ public class RoutingUtil
   
   private static boolean interruptRouting = false;
 
-  public static ArrayList<ArrayList<RoutingPoint>> calculateIsochrons(RoutingClientInterface caller, 
-                                                                      ChartPanel chartPanel,
-                                                                      RoutingPoint center,
-                                                                      RoutingPoint destination,
-                                                                      Date fromDate,
-                                                                      GribHelper.GribConditionData[] gribData,
-                                                                      double timeInterval,
-                                                                      int routingForkWidth,
-                                                                      int routingStep,
-                                                                      int maxTWS,
-                                                                      int minTWA,
-                                                                      boolean stopIfGRIB2old)
-  {
-    return calculateIsochrons(caller, 
-                              chartPanel,
-                              center,
-                              destination,
-                              fromDate,
-                              gribData,
-                              timeInterval,
-                              routingForkWidth,
-                              routingStep,
-                              maxTWS,
-                              minTWA,
-                              stopIfGRIB2old,
-                              1D);
-  }
-  
   private static int getBearing(RoutingPoint center)
   {
     int brg = 0;
@@ -93,8 +65,9 @@ public class RoutingUtil
 
   public static ArrayList<ArrayList<RoutingPoint>> calculateIsochrons(RoutingClientInterface caller, 
                                                                       ChartPanel chartPanel,
-                                                                      RoutingPoint center,
+                                                                      RoutingPoint startFrom,
                                                                       RoutingPoint destination,
+                                                                      ArrayList<RoutingPoint> intermediateWP,
                                                                       Date fromDate,
                                                                       GribHelper.GribConditionData[] gribData,
                                                                       double timeInterval,
@@ -106,10 +79,16 @@ public class RoutingUtil
                                                                       double speedCoeff)
   {
     wgd              = gribData;
-    finalDestination = destination;
+    finalDestination = destination; // By default
     timeStep         = timeInterval;
     closest          = null;
     finalClosest     = null;
+    
+    RoutingPoint center = startFrom;
+    
+    int nbIntermediateIndex = 0;
+    if (intermediateWP != null)
+      finalDestination = intermediateWP.get(nbIntermediateIndex++);
     
     double gcDistance = 0D;
     
@@ -321,7 +300,29 @@ public class RoutingUtil
         {
           keepLooping = false;
           if (localSmallOne != Double.MAX_VALUE)
-            WWContext.getInstance().fireLogging("Finished (" + WWGnlUtilities.XXXX12.format(smallestDist) + " vs " + WWGnlUtilities.XXXX12.format(localSmallOne) + ").\n", LoggingPanel.YELLOW_STYLE);                  
+          {
+            if (intermediateWP != null)
+            {
+              smallestDist = Double.MAX_VALUE; // Reset, for the next leg
+              keepLooping = true;                     
+              finalCurve = new ArrayList<RoutingPoint>();
+              finalCurve.add(closest);
+              center = closest;
+              center.setDate(currentDate);
+
+              if (nbIntermediateIndex < intermediateWP.size())
+                finalDestination = intermediateWP.get(nbIntermediateIndex++);                
+              else
+              {
+                if (!finalDestination.getPosition().equals(destination.getPosition()))
+                  finalDestination = destination;
+                else
+                  keepLooping = false;
+              }
+            }
+            if (!keepLooping)
+              WWContext.getInstance().fireLogging("Finished (" + WWGnlUtilities.XXXX12.format(smallestDist) + " vs " + WWGnlUtilities.XXXX12.format(localSmallOne) + ").\n", LoggingPanel.YELLOW_STYLE);                  
+          }
         }
         
 //      timer = logDiffTime(timer, "Milestone 12");
@@ -453,8 +454,8 @@ public class RoutingUtil
       if (wirp.isDuringSelected())
         nbd = wirp.getNbDays();
             
-      long timeStep      = 6L;   // TODO Step, in hours
-      double polarFactor = 0.9f; // TODO Polar Factor
+      long timeStep      = 6L;   // Step, in hours
+      double polarFactor = 0.9f; // Polar Factor
       
       route = new ArrayList<RoutingPoint>(2);
       Date fromDate = gribData[0].getDate();
