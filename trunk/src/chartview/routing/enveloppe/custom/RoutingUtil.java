@@ -445,17 +445,30 @@ public class RoutingUtil
       boolean startNow = false;
 
       if (wirp.isHeadingSelected())
-        hdg = wirp.getHeading();
+      {
+        try { hdg = wirp.getHeading(); }
+        catch (Exception ex)
+        {
+          JOptionPane.showMessageDialog(cp, ex.toString(), "Heading", JOptionPane.ERROR_MESSAGE); 
+        }
+      }
       else
-        twa = wirp.getTWA();
-      
+      {
+        try { twa = wirp.getTWA(); }
+        catch (Exception ex)
+        {
+          JOptionPane.showMessageDialog(cp, ex.toString(), "TWA", JOptionPane.ERROR_MESSAGE); 
+        }
+      }
       startNow = wirp.isNowSelected();
       
       if (wirp.isDuringSelected())
         nbd = wirp.getNbDays();
             
-      long timeStep      = 6L;   // Step, in hours
-      double polarFactor = 0.9f; // Polar Factor
+      long timeStep      = 24;
+      try { timeStep = wirp.getRoutingStep(); } catch (Exception ex) { JOptionPane.showMessageDialog(cp, ex.toString(), "Time Step", JOptionPane.ERROR_MESSAGE); }
+      double polarFactor = 1.0;
+      try { polarFactor = wirp.getPolarFactor(); } catch (Exception ex) { JOptionPane.showMessageDialog(cp, ex.toString(), "Polar Factor", JOptionPane.ERROR_MESSAGE); }
       
       route = new ArrayList<RoutingPoint>(2);
       Date fromDate = gribData[0].getDate();

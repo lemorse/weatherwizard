@@ -2,6 +2,9 @@ package chartview.gui.util.dialog;
 
 import astro.calc.GeoPoint;
 
+import chartview.gui.util.param.ParamData;
+import chartview.gui.util.param.ParamPanel;
+
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
@@ -16,15 +19,21 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyVetoException;
 import java.beans.VetoableChangeListener;
 
+import java.text.DecimalFormat;
+
 import javax.swing.ButtonGroup;
 import javax.swing.JComboBox;
+import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JSeparator;
 
+import javax.swing.JSpinner;
 import javax.swing.JTextField;
 
+import javax.swing.SpinnerModel;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -59,10 +68,18 @@ public class WhatIfRoutingPanel
   private ButtonGroup groupTwo   = new ButtonGroup();
   private ButtonGroup groupThree = new ButtonGroup();
   
-  HeadingPanel        hp = new HeadingPanel();
-  TWAPanel            tp = new TWAPanel();
-  DurationPanel       dp = new DurationPanel();
-  GRIBExhaustedPanel gep = new GRIBExhaustedPanel();
+  private HeadingPanel        hp = new HeadingPanel();
+  private TWAPanel            tp = new TWAPanel();
+  private DurationPanel       dp = new DurationPanel();
+  private GRIBExhaustedPanel gep = new GRIBExhaustedPanel();
+  private JSeparator jSeparator = new JSeparator();
+  private JLabel polarFactorLabel = new JLabel();
+  private JLabel stepLabel = new JLabel();
+  
+  private JFormattedTextField polarFactorTextField = new JFormattedTextField(new DecimalFormat("#0.00"));
+  private int defaultStep = (int)(((Double) ParamPanel.data[ParamData.ROUTING_TIME_INTERVAL][1]).doubleValue());
+  private SpinnerModel model = new SpinnerNumberModel(defaultStep, 1, 48, 1);
+  private JSpinner stepJSpinner = new JSpinner(model);
 
   public WhatIfRoutingPanel()
   {
@@ -76,6 +93,9 @@ public class WhatIfRoutingPanel
     }
   }
 
+  // TODO Polar Factor
+  // TODO Step (in hours)
+  // LOCALIZE
   private void jbInit()
     throws Exception
   {
@@ -131,6 +151,8 @@ public class WhatIfRoutingPanel
           dp.setEnabled(duringRadioButton.isSelected());
         }
       });
+    polarFactorLabel.setText("Polar Factor:");
+    stepLabel.setText("Step (in hours):");
     this.add(jPanelOne, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
           new Insets(0, 0, 0, 0), 0, 0));
     jPanelOne.add(latLabel,
@@ -171,6 +193,19 @@ public class WhatIfRoutingPanel
           new Insets(0, 0, 0, 0), 0, 0));
     jPanelTwo.add(dp /*duringRadioButton*/, new GridBagConstraints(0, 5, 2, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
           new Insets(0, 0, 0, 0), 0, 0));
+    
+    jPanelTwo.add(jSeparator, new GridBagConstraints(0, 6, 2, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+          new Insets(0, 0, 0, 0), 0, 0));
+    jPanelTwo.add(polarFactorLabel, new GridBagConstraints(0, 7, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE,
+          new Insets(0, 0, 0, 0), 0, 0));
+    polarFactorTextField.setHorizontalAlignment(JTextField.RIGHT);
+    polarFactorTextField.setText(((Double)ParamPanel.data[ParamData.POLAR_SPEED_FACTOR][1]).toString());
+    jPanelTwo.add(polarFactorTextField, new GridBagConstraints(1, 7, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+          new Insets(0, 0, 0, 0), 0, 0));
+    jPanelTwo.add(stepLabel, new GridBagConstraints(0, 8, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE,
+          new Insets(0, 0, 0, 0), 0, 0));
+    jPanelTwo.add(stepJSpinner, new GridBagConstraints(1, 8, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+          new Insets(0, 0, 0, 0), 0, 0));
     dp.setEnabled(false);    
   }
   
@@ -178,6 +213,16 @@ public class WhatIfRoutingPanel
   {
     latLabel.setText(GeomUtil.decToSex(gp.getL(), GeomUtil.SWING, GeomUtil.NS));
     lngLabel.setText(GeomUtil.decToSex(gp.getG(), GeomUtil.SWING, GeomUtil.EW));
+  }
+  
+  public int getRoutingStep() throws Exception
+  {    
+    return ((Integer)stepJSpinner.getValue()).intValue();
+  }
+  
+  public double getPolarFactor() throws Exception
+  {
+    return Double.parseDouble(polarFactorTextField.getText());
   }
   
   class HeadingPanel extends JPanel
@@ -340,7 +385,7 @@ public class WhatIfRoutingPanel
   public boolean isDuringSelected()
   { return duringRadioButton.isSelected(); }
   
-  public int getHeading()
+  public int getHeading() throws Exception
   {
     int hdg = 0;
     try
@@ -349,12 +394,12 @@ public class WhatIfRoutingPanel
     }
     catch (Exception ex)
     {
-      ex.printStackTrace();
+      throw ex;
     }
     return hdg;
   }
   
-  public int getTWA()
+  public int getTWA() throws Exception
   {
     int twa = 0;
     try
@@ -363,7 +408,7 @@ public class WhatIfRoutingPanel
     }
     catch (Exception ex)
     {
-      ex.printStackTrace();
+      throw ex;
     }
     return twa;
   }
