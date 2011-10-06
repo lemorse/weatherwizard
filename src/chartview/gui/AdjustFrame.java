@@ -97,7 +97,7 @@ import user.util.TimeUtil;
 public class AdjustFrame
   extends JFrame
 {
-  @SuppressWarnings("compatibility:6828784390015466233")
+  @SuppressWarnings("compatibility:532649159250675893")
   private static final long serialVersionUID = -6756364686697947626L;
   
   private static final String FRAME_BASE_TITLE = WWGnlUtilities.buildMessage("product-name");
@@ -1049,11 +1049,11 @@ public class AdjustFrame
             layers.add(grayTransparentPanel, grayLayerIndex); // Add gray layer
           else
           {
-//          System.out.print("Shifting down");
+//          WWContext.getInstance().fireInterruptProcess();
             synchronized (layers)
             {
               message2Display = "";
-              for (int i=0; i<layers.getSize().getHeight(); i++) // Shifts down
+              for (int i=0; i<layers.getSize().getHeight(); i++) // Shifts/Scrolls down
               {
                 try { Thread.sleep(5L); } catch (InterruptedException ex) {}
 //              System.out.print("," + i);
