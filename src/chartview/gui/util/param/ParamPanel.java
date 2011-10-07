@@ -298,6 +298,27 @@ public final class ParamPanel
       case ParamData.ROUTING_BOAT_COLOR:
         it = Color.red;
         break;
+      case ParamData.TWS_COLOR_IN_ROUTING:
+        it = Color.blue;
+        break;
+      case ParamData.PRMSL_COLOR_IN_ROUTING:
+        it = Color.red;
+        break;
+      case ParamData.HGT500_COLOR_IN_ROUTING:
+        it = Color.cyan;
+        break;
+      case ParamData.WAVES_COLOR_IN_ROUTING:
+        it = Color.green;
+        break;
+      case ParamData.AIRTMP_COLOR_IN_ROUTING:
+        it = Color.black;
+        break;
+      case ParamData.RAIN_COLOR_IN_ROUTING:
+        it = Color.gray;
+        break;
+      case ParamData.BSP_COLOR_IN_ROUTING:
+        it = Color.orange;
+        break;
       default:
         break;
     }
@@ -341,7 +362,14 @@ public final class ParamPanel
                   i == ParamData.DD_ZOOM_COLOR || 
                   i == ParamData.OLD_ISOCHRONS_COLOR ||
                   i == ParamData.ROUTE_COLOR || 
-                  i == ParamData.ROUTING_BOAT_COLOR)
+                  i == ParamData.ROUTING_BOAT_COLOR ||
+                  i == ParamData.TWS_COLOR_IN_ROUTING ||
+                  i == ParamData.PRMSL_COLOR_IN_ROUTING ||
+                  i == ParamData.HGT500_COLOR_IN_ROUTING ||
+                  i == ParamData.WAVES_COLOR_IN_ROUTING ||
+                  i == ParamData.AIRTMP_COLOR_IN_ROUTING ||
+                  i == ParamData.RAIN_COLOR_IN_ROUTING ||
+                  i == ParamData.BSP_COLOR_IN_ROUTING)
                 data[i][1] = WWGnlUtilities.buildColor(s);
               else if (i == ParamData.ROUTING_STEP ||              // Integers
                        i == ParamData.ROUTING_FORK_WIDTH ||  
@@ -448,7 +476,14 @@ public final class ParamPanel
         ParamData.DD_ZOOM_COLOR,
         ParamData.OLD_ISOCHRONS_COLOR,
         ParamData.ROUTE_COLOR,
-        ParamData.ROUTING_BOAT_COLOR}, 
+        ParamData.ROUTING_BOAT_COLOR,
+        ParamData.TWS_COLOR_IN_ROUTING,
+        ParamData.PRMSL_COLOR_IN_ROUTING,
+        ParamData.HGT500_COLOR_IN_ROUTING,
+        ParamData.WAVES_COLOR_IN_ROUTING,
+        ParamData.AIRTMP_COLOR_IN_ROUTING,
+        ParamData.RAIN_COLOR_IN_ROUTING,
+        ParamData.BSP_COLOR_IN_ROUTING}, 
       new int[] // Display
       { ParamData.CHART_LINE_THICK, 
         ParamData.FAX_TRANSPARENCY, 
@@ -654,7 +689,14 @@ public final class ParamPanel
                    currentIndex == ParamData.DD_ZOOM_COLOR || 
                    currentIndex == ParamData.OLD_ISOCHRONS_COLOR ||
                    currentIndex == ParamData.ROUTE_COLOR ||
-                   currentIndex == ParamData.ROUTING_BOAT_COLOR)            // The colors(s)
+                   currentIndex == ParamData.ROUTING_BOAT_COLOR ||
+                   currentIndex == ParamData.TWS_COLOR_IN_ROUTING ||
+                   currentIndex == ParamData.PRMSL_COLOR_IN_ROUTING ||
+                   currentIndex == ParamData.HGT500_COLOR_IN_ROUTING ||
+                   currentIndex == ParamData.WAVES_COLOR_IN_ROUTING ||
+                   currentIndex == ParamData.AIRTMP_COLOR_IN_ROUTING ||
+                   currentIndex == ParamData.RAIN_COLOR_IN_ROUTING ||
+                   currentIndex == ParamData.BSP_COLOR_IN_ROUTING)            // The colors(s)
           {
 //            try { Color c = new Color(after); }
 //            catch (Exception e) 

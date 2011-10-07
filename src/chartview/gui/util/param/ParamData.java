@@ -65,9 +65,16 @@ public class ParamData
   public final static int TCP_PORT                       = 54;
   public final static int UDP_PORT                       = 55;
   public final static int ROUTE_COLOR                    = 56;
-  public final static int ROUTING_BOAT_COLOR             = 57;
+  public final static int ROUTING_BOAT_COLOR             = 57;  
+  public final static int TWS_COLOR_IN_ROUTING           = 58;
+  public final static int PRMSL_COLOR_IN_ROUTING         = 59;
+  public final static int HGT500_COLOR_IN_ROUTING        = 60;
+  public final static int WAVES_COLOR_IN_ROUTING         = 61;
+  public final static int AIRTMP_COLOR_IN_ROUTING        = 62;
+  public final static int RAIN_COLOR_IN_ROUTING          = 63;
+  public final static int BSP_COLOR_IN_ROUTING           = 64;
 
-  public final static int NB_PRFERENCES         = 58; 
+  public final static int NB_PRFERENCES         = 65; 
   
   private final static String[] labels = 
   { 
@@ -128,7 +135,14 @@ public class ParamData
     WWGnlUtilities.buildMessage("nmea-tcp-port"),
     WWGnlUtilities.buildMessage("nmea-udp-port"),
     WWGnlUtilities.buildMessage("route-color"),
-    WWGnlUtilities.buildMessage("routing-boat-color")
+    WWGnlUtilities.buildMessage("routing-boat-color"),
+    WWGnlUtilities.buildMessage("tws-color-in-routing"),
+    WWGnlUtilities.buildMessage("prmsl-color-in-routing"),
+    WWGnlUtilities.buildMessage("hgt500-color-in-routing"),
+    WWGnlUtilities.buildMessage("waves-color-in-routing"),
+    WWGnlUtilities.buildMessage("airtmp-color-in-routing"),
+    WWGnlUtilities.buildMessage("rain-color-in-routing"),
+    WWGnlUtilities.buildMessage("bsp-color-in-routing")
   };
 
   private final static String[] helptext = 
@@ -190,7 +204,14 @@ public class ParamData
     WWGnlUtilities.buildMessage("help-nmea-tcp-port"),
     WWGnlUtilities.buildMessage("help-nmea-udp-port"),
     WWGnlUtilities.buildMessage("help-route-color"),
-    WWGnlUtilities.buildMessage("help-routing-boat-color")
+    WWGnlUtilities.buildMessage("help-routing-boat-color"),
+    WWGnlUtilities.buildMessage("help-tws-color-in-routing"),
+    WWGnlUtilities.buildMessage("help-prmsl-color-in-routing"),
+    WWGnlUtilities.buildMessage("help-hgt500-color-in-routing"),
+    WWGnlUtilities.buildMessage("help-waves-color-in-routing"),
+    WWGnlUtilities.buildMessage("help-airtmp-color-in-routing"),
+    WWGnlUtilities.buildMessage("help-rain-color-in-routing"),
+    WWGnlUtilities.buildMessage("help-bsp-color-in-routing")
   };
     
   public static String[] getLabels()
