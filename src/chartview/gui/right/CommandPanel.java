@@ -6673,6 +6673,9 @@ public class CommandPanel
   }
    
   private boolean mouseDragDropOverriden = false;
+  private boolean fromBeingDragged = false;
+  private boolean toBeingDragged = false;
+  private int intermediatePointDragged = -1;
   
   public boolean onEvent(EventObject e, int type)
   {
@@ -6730,7 +6733,8 @@ public class CommandPanel
               if (allCalculatedIsochrons != null) // reset
                 shutOffRouting(); // Caution: this one resets from & to.         
               from = boatPosition;
-              to = null;
+              if (!insertRoutingWP)
+                to = null;
             }
             if (from == null && to == null)
               from = here;
@@ -6760,6 +6764,29 @@ public class CommandPanel
       int x = me.getX();
       int y = me.getY();
       GeoPoint gp = chartPanel.getGeoPos(x, y);
+      
+      if (from != null)
+      {
+        Point pt = chartPanel.getPanelPoint(from);
+        if (pt.x == x && pt.y == y)
+        {
+          System.out.println("On the from Point!!");
+          // TODO Change mouse shape
+          
+        }
+      }
+      if (to != null)
+      {
+        Point pt = chartPanel.getPanelPoint(from);
+        if (pt.x == x && pt.y == y)
+        {
+          System.out.println("On the to Point!!");
+          // TODO Change mouse shape
+          
+        }
+      }
+      // TODO Other points
+      
       String header = displayAltTooltip?"":"<html>";
       String footer = displayAltTooltip?"":"</html>";
       String br = displayAltTooltip?"\n":"<br>";
@@ -6872,10 +6899,38 @@ public class CommandPanel
         chartPanel.repaint();
         return false;
       }
+      
+      if (fromBeingDragged)
+      {
+        int x = ((MouseEvent)e).getX();
+        int y = ((MouseEvent)e).getY();
+        from = chartPanel.getGeoPos(x, y);
+        chartPanel.repaint();
+        return false;
+      }
+      if (toBeingDragged)
+      {
+        int x = ((MouseEvent)e).getX();
+        int y = ((MouseEvent)e).getY();
+        to = chartPanel.getGeoPos(x, y);
+        chartPanel.repaint();
+        return false;
+      }
+      if (intermediatePointDragged != -1)
+      {
+        int x = ((MouseEvent)e).getX();
+        int y = ((MouseEvent)e).getY();
+        intermediateRoutingWP.set(intermediatePointDragged, chartPanel.getGeoPos(x, y));
+        chartPanel.repaint();
+        return false;
+      }
     }  
     else if (type == ChartPanel.MOUSE_RELEASED)
     {
       altToooltipWindowBeingDragged = false;
+      fromBeingDragged              = false;
+      toBeingDragged                = false;
+      intermediatePointDragged      = -1;
       // Proceed if left clicked, and mouse was dragged.
       if ((mask & MouseEvent.BUTTON2_MASK) == 0 && 
           (mask & MouseEvent.BUTTON3_MASK) == 0 &&
@@ -6910,13 +6965,61 @@ public class CommandPanel
     }
     else if (type == ChartPanel.MOUSE_PRESSED)
     {
+//    System.out.println("Pressed!");
       if (isMouseInAltWindow((MouseEvent)e))
       {
-      //      System.out.println("Pressed: It's in!");
         altToooltipWindowBeingDragged = true;
         dragStartX = ((MouseEvent)e).getX();
         dragStartY = ((MouseEvent)e).getY();
       }
+      
+      if (from != null)
+      {
+        int x = ((MouseEvent)e).getX();
+        int y = ((MouseEvent)e).getY();
+        Point pt = chartPanel.getPanelPoint(from);
+//      System.out.println("...and here.");
+        if (pt.x >= x-1 && pt.x <= x+1 && pt.y >= y-1 && pt.y <= y+1)
+        {
+//        System.out.println("Pressed on the from Point, dragging !!");
+          // TODO Change mouse shape
+          fromBeingDragged = true;
+          return false;
+        }
+      }
+      if (to != null)
+      {
+        int x = ((MouseEvent)e).getX();
+        int y = ((MouseEvent)e).getY();
+        Point pt = chartPanel.getPanelPoint(to);
+//      System.out.println("...and here.");
+        if (pt.x >= x-1 && pt.x <= x+1 && pt.y >= y-1 && pt.y <= y+1)
+        {
+//        System.out.println("Pressed on the to Point, dragging !!");
+          // TODO Change mouse shape
+          toBeingDragged = true;
+          return false;
+        }
+      }
+      if (intermediateRoutingWP != null)
+      {
+        int x = ((MouseEvent)e).getX();
+        int y = ((MouseEvent)e).getY();
+        int ptIdx = 0;
+        for (GeoPoint gp : intermediateRoutingWP)
+        {
+          Point pt = chartPanel.getPanelPoint(gp);
+          if (pt.x >= x-1 && pt.x <= x+1 && pt.y >= y-1 && pt.y <= y+1)
+          {
+//          System.out.println("Pressed on the Point[" + ptIdx + "], dragging !!");
+            // TODO Change mouse shape
+            intermediatePointDragged = ptIdx;
+            return false;
+          }
+          ptIdx++;
+        }
+      }
+      
       if (chartPanel.getMouseDraggedEnabled() &&                            // Mouse Drag Enabled
           chartPanel.getMouseDraggedType() == ChartPanel.MOUSE_DRAG_ZOOM && // Set to Drag & Drop zoom
           (mask & MouseEvent.BUTTON1_MASK) != 0 &&                          // Left button
@@ -6944,7 +7047,6 @@ public class CommandPanel
         // Shift + Ctrl : Just Pointer
         if ((mask & MouseEvent.SHIFT_MASK) != 0 && (mask & MouseEvent.CTRL_MASK) != 0)
           chartPanel.setMouseDraggedEnabled(false);
-
       }
     }
     return true;

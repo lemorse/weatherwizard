@@ -1,10 +1,14 @@
 package chartview.gui.right;
 
+import astro.calc.GeoPoint;
+
 import chart.components.ui.ChartPanelInterface;
 
 import chartview.ctx.WWContext;
 
 import chartview.gui.util.dialog.WHRatioPanel;
+
+import chartview.gui.util.dialog.WayPointTablePanel;
 
 import chartview.util.UserExitAction;
 import chartview.util.UserExitException;
@@ -105,6 +109,7 @@ public class CommandPanelPopup
   
   private JMenuItem eraseFlags;
   private JCheckBoxMenuItem insertRoutingWayPointsMenuItem;
+  private JMenuItem editRoutingWayPoints;
 
   private JMenu userExitMenu;
 
@@ -164,6 +169,7 @@ public class CommandPanelPopup
 
   private final String DROP_FLAGS = WWGnlUtilities.buildMessage("drop-flags");
   private final String INSERT_ROUTING_WP = WWGnlUtilities.buildMessage("insert-routing-wp");
+  private final String EDIT_ROUTING_WP = WWGnlUtilities.buildMessage("edit-routing-wp");
 
   private int _x = 0, _y = 0;
 
@@ -477,6 +483,13 @@ public class CommandPanelPopup
     insertRoutingWayPointsMenuItem.setEnabled(parent.from != null && parent.to != null);
     insertRoutingWayPointsMenuItem.setBackground(Color.white);
     insertRoutingWayPointsMenuItem.addActionListener(this);
+    
+    editRoutingWayPoints = new JMenuItem(EDIT_ROUTING_WP);
+    editRoutingWayPoints.setIcon(new ImageIcon(this.getClass().getResource("greenflag.png")));
+    this.add(editRoutingWayPoints);
+    editRoutingWayPoints.setEnabled(parent.intermediateRoutingWP != null && parent.intermediateRoutingWP.size() > 0);
+    editRoutingWayPoints.setBackground(Color.white);
+    editRoutingWayPoints.addActionListener(this);
 
     this.add(new JSeparator());
 
@@ -812,6 +825,18 @@ public class CommandPanelPopup
     else if (event.getActionCommand().equals(INSERT_ROUTING_WP))
     {
       parent.insertRoutingWP = insertRoutingWayPointsMenuItem.isSelected();
+    }
+    else if (event.getActionCommand().equals(EDIT_ROUTING_WP))
+    {
+      // Reorder, delete
+      ArrayList<GeoPoint> aliwp = parent.intermediateRoutingWP;
+      WayPointTablePanel wptp = new WayPointTablePanel(aliwp);
+      int resp = JOptionPane.showConfirmDialog(this, wptp, "Way Point(s)", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+      if (resp == JOptionPane.OK_OPTION)
+      {
+        parent.intermediateRoutingWP = wptp.getData();
+        parent.chartPanel.repaint();
+      }
     }
     else if (isUserExitAction(event.getActionCommand()))
     {

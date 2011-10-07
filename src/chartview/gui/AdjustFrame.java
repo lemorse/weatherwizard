@@ -1050,15 +1050,18 @@ public class AdjustFrame
           else
           {
 //          WWContext.getInstance().fireInterruptProcess();
-            synchronized (layers)
+            if (false)
             {
-              message2Display = "";
-              for (int i=0; i<layers.getSize().getHeight(); i++) // Shifts/Scrolls down
+              synchronized (layers)
               {
-                try { Thread.sleep(5L); } catch (InterruptedException ex) {}
-//              System.out.print("," + i);
-                grayPanelY = i;
-                layers.repaint();
+                message2Display = "";
+                for (int i=0; i<layers.getSize().getHeight(); i++) // Shifts/Scrolls down
+                {
+                  try { Thread.sleep(5L); } catch (InterruptedException ex) {}
+  //              System.out.print("," + i);
+                  grayPanelY = i;
+                  layers.repaint();
+                }
               }
             }
             layers.remove(grayTransparentPanel);              // remove gray layer
