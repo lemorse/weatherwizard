@@ -3,6 +3,9 @@ package chartview.gui.util.dialog;
 
 import chartview.ctx.WWContext;
 
+import chartview.gui.util.param.ParamData;
+import chartview.gui.util.param.ParamPanel;
+
 import chartview.routing.DatedGribCondition;
 
 import chartview.util.WWGnlUtilities;
@@ -199,8 +202,12 @@ public class GRIBSlicePanel
 
     dataLabel.setText("Data");
     dataLabel.setFont(new Font("Tahoma", 1, 11));
+
     prmslCheckBox.setText("PRMSL");
-    prmslCheckBox.setBackground(Color.red);
+    prmslCheckBox.setToolTipText("PRMSL");
+    Color c = (Color)ParamPanel.data[ParamData.PRMSL_COLOR_IN_ROUTING][1];
+    prmslCheckBox.setBackground(c);
+    prmslCheckBox.setForeground(reverseColor(c));
     prmslCheckBox.addActionListener(new ActionListener()
       {
         public void actionPerformed(ActionEvent e)
@@ -209,7 +216,10 @@ public class GRIBSlicePanel
         }
       });
     hgt500CheckBox.setText("HGT500");
-    hgt500CheckBox.setBackground(Color.cyan);
+    hgt500CheckBox.setToolTipText("HGT500");
+    c = (Color)ParamPanel.data[ParamData.HGT500_COLOR_IN_ROUTING][1];
+    hgt500CheckBox.setBackground(c);
+    hgt500CheckBox.setForeground(reverseColor(c));
     hgt500CheckBox.addActionListener(new ActionListener()
       {
         public void actionPerformed(ActionEvent e)
@@ -218,7 +228,10 @@ public class GRIBSlicePanel
         }
       });
     twsCheckBox.setText("TWS");
-    twsCheckBox.setBackground(Color.blue);
+    twsCheckBox.setToolTipText("TWS");
+    c = (Color)ParamPanel.data[ParamData.TWS_COLOR_IN_ROUTING][1];
+    twsCheckBox.setBackground(c);
+    twsCheckBox.setForeground(reverseColor(c));
     twsCheckBox.addActionListener(new ActionListener()
       {
         public void actionPerformed(ActionEvent e)
@@ -227,7 +240,8 @@ public class GRIBSlicePanel
         }
       });
     wavesCheckBox.setText("WAVES");
-    wavesCheckBox.setBackground(Color.green);
+    wavesCheckBox.setToolTipText("WAVES");
+    wavesCheckBox.setBackground((Color)ParamPanel.data[ParamData.WAVES_COLOR_IN_ROUTING][1]);
     wavesCheckBox.addActionListener(new ActionListener()
       {
         public void actionPerformed(ActionEvent e)
@@ -236,6 +250,10 @@ public class GRIBSlicePanel
         }
       });
     tempCheckBox.setText("AIRTMP");
+    tempCheckBox.setToolTipText("AIRTMP");
+    c = (Color)ParamPanel.data[ParamData.AIRTMP_COLOR_IN_ROUTING][1];
+    tempCheckBox.setBackground(c);
+    tempCheckBox.setForeground(reverseColor(c));
     tempCheckBox.addActionListener(new ActionListener()
       {
         public void actionPerformed(ActionEvent e)
@@ -244,7 +262,10 @@ public class GRIBSlicePanel
         }
       });
     rainCheckBox.setText("RAIN");
-    rainCheckBox.setBackground(Color.gray);
+    rainCheckBox.setToolTipText("RAIN");
+    c = (Color)ParamPanel.data[ParamData.RAIN_COLOR_IN_ROUTING][1];
+    rainCheckBox.setBackground(c);
+    rainCheckBox.setForeground(reverseColor(c));
     rainCheckBox.addActionListener(new ActionListener()
       {
         public void actionPerformed(ActionEvent e)
@@ -254,7 +275,10 @@ public class GRIBSlicePanel
       });
     
     bspCheckBox.setText("BSP");
-    bspCheckBox.setBackground(Color.orange);
+    bspCheckBox.setToolTipText("BSP");
+    c = (Color)ParamPanel.data[ParamData.BSP_COLOR_IN_ROUTING][1];
+    bspCheckBox.setBackground(c);
+    bspCheckBox.setForeground(reverseColor(c));
     bspCheckBox.addActionListener(new ActionListener()
       {
         public void actionPerformed(ActionEvent e)
@@ -649,6 +673,14 @@ public class GRIBSlicePanel
   {
     this.bsp = bsp;
   }
+  
+  private Color reverseColor(Color c)
+  {
+    Color reversed = new Color(255 - c.getRed(), 
+                               255 - c.getGreen(), 
+                               255 - c.getBlue());    
+    return reversed;
+  }
 
   private class GRIBSliceDataPanel extends JPanel
   {
@@ -879,7 +911,7 @@ public class GRIBSlicePanel
           {
       //    System.out.println("Idx:" + gribIdx + ", x:" + x + " for w:" + this.getWidth() + " and gSize:" + gribSize);
             y = (int)(this.getHeight() - (tws * windscale));
-            gr.setColor(Color.blue);
+            gr.setColor((Color)ParamPanel.data[ParamData.TWS_COLOR_IN_ROUTING][1]);
             if (prevXtws > -1 && prevYtws > -1)
               gr.drawLine(prevXtws, prevYtws, x, y);
             prevXtws = x;
@@ -889,7 +921,7 @@ public class GRIBSlicePanel
           if (displayPRMSL)
           {
             y = (int)(this.getHeight() - ((prmsl - (gribMini.prmsl / 100f))* prmslscale));
-            gr.setColor(Color.red);
+            gr.setColor((Color)ParamPanel.data[ParamData.PRMSL_COLOR_IN_ROUTING][1]);
             if (prevXprmsl > -1 && prevYprmsl > -1)
               gr.drawLine(prevXprmsl, prevYprmsl, x, y);
             prevXprmsl = x;
@@ -899,7 +931,7 @@ public class GRIBSlicePanel
           if (displayHGT500)
           {
             y = (int)(this.getHeight() - ((hgt500 - (gribMini.hgt500))* hgt500scale));
-            gr.setColor(Color.cyan);
+            gr.setColor((Color)ParamPanel.data[ParamData.HGT500_COLOR_IN_ROUTING][1]);
             if (prevXhgt500 > -1 && prevYhgt500 > -1)
               gr.drawLine(prevXhgt500, prevYhgt500, x, y);
             prevXhgt500 = x;
@@ -909,7 +941,7 @@ public class GRIBSlicePanel
           if (displayWAVES)
           {
             y = (int)(this.getHeight() - (waves * wavescale));
-            gr.setColor(Color.green);
+            gr.setColor((Color)ParamPanel.data[ParamData.WAVES_COLOR_IN_ROUTING][1]);
             if (prevXwaves > -1 && prevYwaves > -1)
               gr.drawLine(prevXwaves, prevYwaves, x, y);
             prevXwaves = x;
@@ -919,7 +951,7 @@ public class GRIBSlicePanel
           if (displayTEMP)
           {
             y = (int)(this.getHeight() - ((temp - (gribMini.temp - 273))* tempscale));
-            gr.setColor(Color.black);
+            gr.setColor((Color)ParamPanel.data[ParamData.AIRTMP_COLOR_IN_ROUTING][1]);
             if (prevXtemp > -1 && prevYtemp > -1)
               gr.drawLine(prevXtemp, prevYtemp, x, y);
             prevXtemp = x;
@@ -929,7 +961,7 @@ public class GRIBSlicePanel
           if (displayRAIN)
           {
             y = (int)(this.getHeight() - ((rain - (gribMini.rain * 3600f))* rainscale));
-            gr.setColor(Color.gray);
+            gr.setColor((Color)ParamPanel.data[ParamData.RAIN_COLOR_IN_ROUTING][1]);
             if (prevXrain > -1 && prevYrain > -1)
               gr.drawLine(prevXrain, prevYrain, x, y);
             prevXrain = x;
@@ -960,7 +992,7 @@ public class GRIBSlicePanel
           {
       //    System.out.println("Idx:" + gribIdx + ", x:" + x + " for w:" + this.getWidth() + " and gSize:" + gribSize);
             y = (int)(this.getHeight() - (bsp * bspscale));
-            gr.setColor(Color.orange);
+            gr.setColor((Color)ParamPanel.data[ParamData.BSP_COLOR_IN_ROUTING][1]);
             if (prevXbsp > -1 && prevYbsp > -1)
               gr.drawLine(prevXbsp, prevYbsp, x, y);
             prevXbsp = x;
