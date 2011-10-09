@@ -16,6 +16,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.KeyboardFocusManager;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -100,13 +101,19 @@ public final class WayPointTablePanel
         });
     removeButton.setEnabled(false);
     bottomPanel.setLayout(new GridBagLayout());    
-    bottomPanel.add(removeButton, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 2, 0, 0), 0, 0));
+    bottomPanel.add(removeButton, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
+          new Insets(2, 2, 2, 0), 0, 0));
 
     rightPanel.setLayout(new GridBagLayout());    
-    rightPanel.add(upButton, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 2, 0, 0), 0, 0));
-    rightPanel.add(downButton, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 2, 0, 0), 0, 0));
+    rightPanel.add(upButton, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
+          new Insets(2, 2, 2, 2), 0, 0));
+    rightPanel.add(downButton, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
+          new Insets(2, 2, 2, 2), 0, 0));
     upButton.setEnabled(false);
+    upButton.setBounds(new Rectangle(2, 2, 2, 2));
+    upButton.setMargin(new Insets(1, 1, 1, 1));
     downButton.setEnabled(false);
+    downButton.setMargin(new Insets(1, 1, 1, 1));
     upButton.addActionListener(new ActionListener()
         {
           public void actionPerformed(ActionEvent e)
