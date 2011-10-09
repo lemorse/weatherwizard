@@ -1,5 +1,6 @@
 package chartview.gui;
 
+
 import astro.calc.GeoPoint;
 
 import chartview.ctx.ApplicationEventListener;
@@ -36,7 +37,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.FontMetrics;
 import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -93,6 +93,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import user.util.TimeUtil;
+
 
 public class AdjustFrame
   extends JFrame
@@ -997,11 +998,12 @@ public class AdjustFrame
 //  jSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, allJTrees, masterTabPane);
 //  layers.setPreferredSize(new Dimension(800, 600));
     jSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, allJTrees, layers);
-    jSplitPane.setContinuousLayout(true);
-    jSplitPane.setOneTouchExpandable(true);
+//  jSplitPane.setContinuousLayout(true);
+    jSplitPane.setOneTouchExpandable(true); // That one was on
 //  jSplitPane.setOneTouchExpandable(false);
-    jSplitPane.setDividerSize(8);
-    jSplitPane.setDividerLocation(175);
+//  jSplitPane.setDividerSize(8);
+//  jSplitPane.setDividerLocation(175);
+    jSplitPane.setDividerLocation(.20D);
 
     this.getContentPane().add(jSplitPane, BorderLayout.CENTER);
     
