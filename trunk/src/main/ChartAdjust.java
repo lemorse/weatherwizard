@@ -1,26 +1,23 @@
 package main;
 
-import chartview.gui.AdjustFrame;
 
-import chartview.gui.util.param.ParamData;
-
-import chartview.util.WWGnlUtilities;
 import chartview.ctx.WWContext;
 
+import chartview.gui.AdjustFrame;
 import chartview.gui.util.dialog.UpdatePanel;
+import chartview.gui.util.param.ParamData;
 import chartview.gui.util.param.ParamPanel;
 
-import coreutilities.CheckForUpdateThread;
+import chartview.util.WWGnlUtilities;
 
+import coreutilities.CheckForUpdateThread;
 import coreutilities.Utilities;
 
 import coreutilities.ctx.CoreContext;
-
 import coreutilities.ctx.CoreEventListener;
 
-import java.awt.Toolkit;
 import java.awt.Dimension;
-import java.awt.Frame;
+import java.awt.Toolkit;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
@@ -28,7 +25,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 
@@ -42,14 +38,14 @@ import java.util.Date;
 import java.util.Properties;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
-
 import java.util.jar.Manifest;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
-/** 
+
+/**
  * Main GUI entry point
  */ 
 public class ChartAdjust
@@ -113,7 +109,7 @@ public class ChartAdjust
     {
       strURL = strURL.substring(0, strURL.lastIndexOf(className));
       strURL += resource;
-      try { me = new URL(strURL); } catch (Exception ex) {}
+      try { me = new URL(strURL); } catch (Exception ex) { System.err.println(ex.toString()); }
       System.out.println("URL:" + me);
   
       try
@@ -174,7 +170,8 @@ public class ChartAdjust
         frame.setLocation(x, y);
         positioned = true;
       }
-      catch (Exception forgetit) { }
+      catch (Exception forgetit) 
+      { System.err.println(forgetit.toString()); }
     }
     
     if (!positioned)

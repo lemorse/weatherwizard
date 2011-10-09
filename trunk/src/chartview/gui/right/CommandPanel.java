@@ -62,6 +62,7 @@ import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GradientPaint;
@@ -83,7 +84,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.geom.AffineTransform;
-import java.awt.image.BufferedImage;
 import java.awt.print.PageFormat;
 import java.awt.print.PrinterJob;
 
@@ -165,6 +165,10 @@ public class CommandPanel
   
   private CompositeTabbedPane parent = null;
   private CommandPanel instance = this;
+  
+  private Cursor backupCursor = null;
+  private Cursor cursorOverWayPoint = null;
+  private Cursor cusorDraggingWayPoint = null;
   
   private int defaultWindOption = Integer.parseInt(((ParamPanel.WindOptionList)(ParamPanel.data[ParamData.PREFERRED_WIND_DISPLAY][1])).getStringIndex());
   
@@ -1359,7 +1363,6 @@ public class CommandPanel
   private transient ArrayList<WWGnlUtilities.SailMailStation> sma = null;
   private transient ArrayList<WWGnlUtilities.WeatherStation> wsta = null;
 
-//private DraggableFlag /*Image*/ greenFlagImage = null;
   private ImageIcon greenFlagImage = null;
   
   private boolean showGRIBPointPanel = false;
@@ -1370,6 +1373,14 @@ public class CommandPanel
   private void jbInit()
         throws Exception
   {
+    Toolkit toolkit = Toolkit.getDefaultToolkit();
+    String imgFileName = "PanOpenHand32x32.png";
+    Image image = toolkit.getImage(ChartPanel.class.getResource(imgFileName));
+    cursorOverWayPoint = toolkit.createCustomCursor(image , new Point(15,15), imgFileName);
+    imgFileName = "PanClosedHand32x32.png";
+    image = toolkit.getImage(ChartPanel.class.getResource(imgFileName));
+    cusorDraggingWayPoint = toolkit.createCustomCursor(image , new Point(15,15), imgFileName);
+    
     TransparentPanel tp = new GRIBVisualPanel();
     tp.setBgColor(new Color(Color.yellow.getRed(), Color.yellow.getGreen(), Color.yellow.getBlue(), 150));
     gribDataPanel = new TransparentFrame(tp);
@@ -5675,16 +5686,14 @@ public class CommandPanel
     {
       Point gp = chartPanel.getPanelPoint(from.getL(), from.getG());
       String prefix = "";
-	  if (intermediateRoutingWP != null)
-	    prefix = "1. ";
+      if (intermediateRoutingWP != null && intermediateRoutingWP.size() > 0)
+        prefix = "1. ";
       chartPanel.postit(gr, prefix + WWGnlUtilities.buildMessage("origin"), gp.x + 5, gp.y + 5, Color.yellow);
       Color orig = gr.getColor();
       gr.setColor(Color.black);
       gr.fillOval(gp.x - 3, gp.y - 3, 6, 6);
-      // TODO replace the ImageIcon greenFlag with a DragableFlag (same package).
       if (greenFlagImage == null)
         greenFlagImage = new ImageIcon(this.getClass().getResource("greenflag.png")); //.getImage();      
-//      greenFlagImage = new DraggableFlag(this.getClass().getResource("greenflag.png"));
       
       gr.drawImage(greenFlagImage.getImage(), gp.x - 2, gp.y - greenFlagImage.getImage().getHeight(null), null);
       gr.setColor(orig);
@@ -5693,7 +5702,7 @@ public class CommandPanel
     {
       Point gp = chartPanel.getPanelPoint(to.getL(), to.getG());
       String prefix = "";
-      if (intermediateRoutingWP != null)
+      if (intermediateRoutingWP != null && intermediateRoutingWP.size() > 0)
         prefix = Integer.toString(intermediateRoutingWP.size() + 2) + ". ";
       chartPanel.postit(gr, prefix + WWGnlUtilities.buildMessage("destination"), gp.x + 5, gp.y, Color.yellow);
       Color orig = gr.getColor();
@@ -5701,11 +5710,10 @@ public class CommandPanel
       gr.fillOval(gp.x - 3, gp.y - 3, 6, 6);
       if (greenFlagImage == null)
         greenFlagImage = new ImageIcon(this.getClass().getResource("greenflag.png")); //.getImage();      
-//      greenFlagImage = new DraggableFlag(this.getClass().getResource("greenflag.png"));
       gr.drawImage(greenFlagImage.getImage(), gp.x - 2, gp.y - greenFlagImage.getImage().getHeight(null), null);
       gr.setColor(orig);
     }
-    if (intermediateRoutingWP != null)
+    if (intermediateRoutingWP != null && intermediateRoutingWP.size() > 0)
     {
       int nbIntPt = 0;
       for (GeoPoint gp : intermediateRoutingWP)
@@ -5717,7 +5725,6 @@ public class CommandPanel
         gr.fillOval(pt.x - 3, pt.y - 3, 6, 6);
         if (greenFlagImage == null)
           greenFlagImage = new ImageIcon(this.getClass().getResource("greenflag.png")); //.getImage();      
-  //      greenFlagImage = new DraggableFlag(this.getClass().getResource("greenflag.png"));
         gr.drawImage(greenFlagImage.getImage(), pt.x - 2, pt.y - greenFlagImage.getImage().getHeight(null), null);
         gr.setColor(orig);        
       }
@@ -6401,7 +6408,7 @@ public class CommandPanel
           destination.setPosition(to);
 
           ArrayList<RoutingPoint> interWP = null;
-          if (intermediateRoutingWP != null)
+          if (intermediateRoutingWP != null && intermediateRoutingWP.size() > 0)
           {
             interWP = new ArrayList<RoutingPoint>(intermediateRoutingWP.size());
             for (GeoPoint gp : intermediateRoutingWP)
@@ -6768,24 +6775,69 @@ public class CommandPanel
       if (from != null)
       {
         Point pt = chartPanel.getPanelPoint(from);
-        if (pt.x == x && pt.y == y)
+        if (pt.x >= x-1 && pt.x <= x+1 && pt.y >= y-1 && pt.y <= y+1)
         {
-          System.out.println("On the from Point!!");
-          // TODO Change mouse shape
-          
+//        System.out.println("On the from Point.");
+          backupCursor = chartPanel.getCursor();
+//        System.out.println("BackupCursor is" + (backupCursor!=null?" not":"") +  " null.");
+          chartPanel.setCursor(cursorOverWayPoint);
         }
-      }
-      if (to != null)
+        else
+        {
+          if (backupCursor != null)
+          {
+            chartPanel.setCursor(backupCursor);
+            chartPanel.setDefaultCursor();
+          }
+          backupCursor = null;
+        }
+      } 
+      if (to != null && backupCursor == null)
       {
-        Point pt = chartPanel.getPanelPoint(from);
-        if (pt.x == x && pt.y == y)
+        Point pt = chartPanel.getPanelPoint(to);
+        if (pt.x >= x-1 && pt.x <= x+1 && pt.y >= y-1 && pt.y <= y+1)
         {
-          System.out.println("On the to Point!!");
-          // TODO Change mouse shape
-          
+//        System.out.println("On the to Point.");
+          backupCursor = chartPanel.getCursor();
+//        System.out.println("BackupCursor is" + (backupCursor!=null?" not":"") +  " null.");
+          chartPanel.setCursor(cursorOverWayPoint);
+        }
+        else
+        {
+          if (backupCursor != null)
+          {
+            chartPanel.setCursor(backupCursor);
+            chartPanel.setDefaultCursor();
+          }
+          backupCursor = null;
         }
       }
-      // TODO Other points
+      if (intermediateRoutingWP != null && intermediateRoutingWP.size() > 0 && backupCursor == null)
+      {
+        int ptIdx = 0;
+        for (GeoPoint gpt : intermediateRoutingWP)
+        {
+          Point pt = chartPanel.getPanelPoint(gpt);
+          if (pt.x >= x-1 && pt.x <= x+1 && pt.y >= y-1 && pt.y <= y+1)
+          {
+//          System.out.println("Pressed on the Point[" + ptIdx + "], dragging !!");
+            backupCursor = chartPanel.getCursor();
+            chartPanel.setCursor(cursorOverWayPoint);
+            intermediatePointDragged = ptIdx;
+            break;
+          }
+          else
+          {
+            if (backupCursor != null)
+            {
+              chartPanel.setCursor(backupCursor);
+              chartPanel.setDefaultCursor();
+            }
+            backupCursor = null;
+          }
+          ptIdx++;
+        }
+      }
       
       String header = displayAltTooltip?"":"<html>";
       String footer = displayAltTooltip?"":"</html>";
@@ -6931,6 +6983,13 @@ public class CommandPanel
       fromBeingDragged              = false;
       toBeingDragged                = false;
       intermediatePointDragged      = -1;
+      if (backupCursor != null)
+      {
+        chartPanel.setCursor(backupCursor);
+        chartPanel.setDefaultCursor();
+      }
+      backupCursor = null;
+      
       // Proceed if left clicked, and mouse was dragged.
       if ((mask & MouseEvent.BUTTON2_MASK) == 0 && 
           (mask & MouseEvent.BUTTON3_MASK) == 0 &&
@@ -6982,7 +7041,7 @@ public class CommandPanel
         if (pt.x >= x-1 && pt.x <= x+1 && pt.y >= y-1 && pt.y <= y+1)
         {
 //        System.out.println("Pressed on the from Point, dragging !!");
-          // TODO Change mouse shape
+          chartPanel.setCursor(cusorDraggingWayPoint);
           fromBeingDragged = true;
           return false;
         }
@@ -6996,12 +7055,12 @@ public class CommandPanel
         if (pt.x >= x-1 && pt.x <= x+1 && pt.y >= y-1 && pt.y <= y+1)
         {
 //        System.out.println("Pressed on the to Point, dragging !!");
-          // TODO Change mouse shape
+          chartPanel.setCursor(cusorDraggingWayPoint);
           toBeingDragged = true;
           return false;
         }
       }
-      if (intermediateRoutingWP != null)
+      if (intermediateRoutingWP != null && intermediateRoutingWP.size() > 0)
       {
         int x = ((MouseEvent)e).getX();
         int y = ((MouseEvent)e).getY();
@@ -7012,7 +7071,7 @@ public class CommandPanel
           if (pt.x >= x-1 && pt.x <= x+1 && pt.y >= y-1 && pt.y <= y+1)
           {
 //          System.out.println("Pressed on the Point[" + ptIdx + "], dragging !!");
-            // TODO Change mouse shape
+            chartPanel.setCursor(cusorDraggingWayPoint);
             intermediatePointDragged = ptIdx;
             return false;
           }
