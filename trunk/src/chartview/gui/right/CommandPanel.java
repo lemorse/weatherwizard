@@ -274,6 +274,8 @@ public class CommandPanel
   private ArrayList<RoutingPoint> bestRoute = null;
   private transient GeoPoint boatPosition = null;
   private int boatHeading = -1;
+  private transient GeoPoint wp2highlight = null;
+  private transient GeoPoint wpBeingDragged = null;
   
   private int nmeaPollingInterval = ((Integer) ParamPanel.data[ParamData.NMEA_POLLING_FREQ][1]).intValue();
   private boolean goNmea          = false;
@@ -3024,6 +3026,12 @@ public class CommandPanel
             routingHeading = hdg;
             chartPanel.repaint();
           }
+        }
+        
+        public void highlightWayPoint(GeoPoint gp) 
+        {
+          wp2highlight = gp;
+          chartPanel.repaint();
         }
         
         public void manuallyEnterBoatPosition(GeoPoint gp, int hdg) 
@@ -5995,6 +6003,27 @@ public class CommandPanel
       }
     }
     
+    if (wp2highlight != null)
+    {
+      Point wp = chartPanel.getPanelPoint(wp2highlight);
+      ((Graphics2D)gr).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.6f));
+      gr.setColor(Color.green);
+      gr.fillOval(wp.x - 8, wp.y - 8, 16, 16);        
+      ((Graphics2D)gr).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
+    }
+    
+    if (wpBeingDragged != null) // Postit
+    {
+      Point p = chartPanel.getPanelPoint(wpBeingDragged);
+      chartPanel.bubble(gr, 
+                        wpBeingDragged.toString(), 
+                        p.x,                              
+                        p.y, 
+                        Color.yellow, 
+                        Color.red, 
+                        0.40f);
+    }
+    
     if (boatPosition != null) 
     {
       WWGnlUtilities.drawBoat((Graphics2D)gr, 
@@ -6737,7 +6766,7 @@ public class CommandPanel
     //      boatHeading = 45;
             if (boatPosition != null && ((Boolean) ParamPanel.data[ParamData.ROUTING_FROM_CURR_LOC][1]).booleanValue())
             {
-              if (allCalculatedIsochrons != null) // reset
+              if (allCalculatedIsochrons != null && !insertRoutingWP) // reset
                 shutOffRouting(); // Caution: this one resets from & to.         
               from = boatPosition;
               if (!insertRoutingWP)
@@ -6957,6 +6986,7 @@ public class CommandPanel
         int x = ((MouseEvent)e).getX();
         int y = ((MouseEvent)e).getY();
         from = chartPanel.getGeoPos(x, y);
+        wpBeingDragged = from;
         chartPanel.repaint();
         return false;
       }
@@ -6965,6 +6995,7 @@ public class CommandPanel
         int x = ((MouseEvent)e).getX();
         int y = ((MouseEvent)e).getY();
         to = chartPanel.getGeoPos(x, y);
+        wpBeingDragged = to;
         chartPanel.repaint();
         return false;
       }
@@ -6972,7 +7003,9 @@ public class CommandPanel
       {
         int x = ((MouseEvent)e).getX();
         int y = ((MouseEvent)e).getY();
-        intermediateRoutingWP.set(intermediatePointDragged, chartPanel.getGeoPos(x, y));
+        GeoPoint gp = chartPanel.getGeoPos(x, y);
+        intermediateRoutingWP.set(intermediatePointDragged, gp);
+        wpBeingDragged = gp;
         chartPanel.repaint();
         return false;
       }
@@ -6983,6 +7016,7 @@ public class CommandPanel
       fromBeingDragged              = false;
       toBeingDragged                = false;
       intermediatePointDragged      = -1;
+      wpBeingDragged = null;
       if (backupCursor != null)
       {
         chartPanel.setCursor(backupCursor);
