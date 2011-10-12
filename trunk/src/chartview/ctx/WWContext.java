@@ -430,6 +430,15 @@ public class WWContext
     }    
   }
     
+  public void fireHighlightWayPoint(GeoPoint gp)
+  {
+    for (int i=0; i < this.getListeners().size(); i++)
+    {
+      ApplicationEventListener l = this.getListeners().get(i);
+      l.highlightWayPoint(gp);
+    }    
+  }
+    
   public void fireManuallyEnterBoatPosition(GeoPoint gp, int hdg)
   {
     for (int i=0; i < this.getListeners().size(); i++)
