@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -49,6 +50,7 @@ public final class WayPointTablePanel
   private BorderLayout borderLayout1 = new BorderLayout();
   private JPanel centerPane = new JPanel();
   private JPanel bottomPanel = new JPanel();
+  private JLabel topLabel = new JLabel("");
   private JPanel rightPanel = new JPanel();
   private JButton removeButton = new JButton(WWGnlUtilities.buildMessage("remove"));
   private JButton upButton = new JButton(new ImageIcon(this.getClass().getResource("up.png")));
@@ -139,6 +141,7 @@ public final class WayPointTablePanel
           }
         });
 
+    this.add(topLabel, BorderLayout.NORTH);
     this.add(centerPane, BorderLayout.CENTER);
     this.add(bottomPanel, BorderLayout.SOUTH);
     this.add(rightPanel, BorderLayout.EAST);
@@ -153,6 +156,10 @@ public final class WayPointTablePanel
     }
   }
 
+  public void setTopLabel(String str)
+  {
+    topLabel.setText(str);
+  }
   public ArrayList<GeoPoint> getData()
   {
     ArrayList<GeoPoint> al = new ArrayList<GeoPoint>(data.length);
@@ -311,12 +318,14 @@ public final class WayPointTablePanel
       selectedRow = table.getSelectedRow();
       if (selectedRow < 0)
       {
+        WWContext.getInstance().fireHighlightWayPoint(null);
         removeButton.setEnabled(false);
         upButton.setEnabled(false);
         downButton.setEnabled(false);
       }
       else
       {
+        WWContext.getInstance().fireHighlightWayPoint(data[selectedRow][0]);
         removeButton.setEnabled(true);
         int tableSize = data.length;
         if (tableSize < 2)

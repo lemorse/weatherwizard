@@ -822,37 +822,72 @@ public class GRIBSlicePanel
         if (displayTWS)
         {
           int y = (int)(this.getHeight() - (gribPoint.windspeed * windscale));
-          postit(gr, " " + speedFormat.format(gribPoint.windspeed), infoX, y, Color.yellow, Color.blue, 0.75f);
+          postit(gr, 
+                 " " + speedFormat.format(gribPoint.windspeed),
+                 infoX, y, 
+                 (Color)ParamPanel.data[ParamData.TWS_COLOR_IN_ROUTING][1], 
+                 reverseColor((Color)ParamPanel.data[ParamData.TWS_COLOR_IN_ROUTING][1]), 
+                 0.75f);
         }
         if (displayPRMSL)
         {
           int y = (int)(this.getHeight() - (((gribPoint.prmsl / 100f) - (gribMini.prmsl / 100f))* prmslscale));
-          postit(gr, " " + prmslFormat.format(gribPoint.prmsl / 100f), infoX, y, Color.yellow, Color.red, 0.75f);
+          postit(gr, 
+                 " " + prmslFormat.format(gribPoint.prmsl / 100f), 
+                 infoX, y, 
+                 (Color)ParamPanel.data[ParamData.PRMSL_COLOR_IN_ROUTING][1], 
+                 reverseColor((Color)ParamPanel.data[ParamData.PRMSL_COLOR_IN_ROUTING][1]), 
+                 0.75f);
         }
         if (displayHGT500)
         {
           int y = (int)(this.getHeight() - ((gribPoint.hgt500 - (gribMini.hgt500))* hgt500scale));
-          postit(gr, " " + hgt500Format.format(gribPoint.hgt500), infoX, y, Color.yellow, Color.cyan, 0.75f);
+          postit(gr, 
+                 " " + hgt500Format.format(gribPoint.hgt500), 
+                 infoX, y, 
+                 (Color)ParamPanel.data[ParamData.HGT500_COLOR_IN_ROUTING][1], 
+                 reverseColor((Color)ParamPanel.data[ParamData.HGT500_COLOR_IN_ROUTING][1]), 
+                 0.75f);
         }
         if (displayWAVES)
         {
           int y = (int)(this.getHeight() - ((gribPoint.waves / 100f) * wavescale));
-          postit(gr, " " + wavesFormat.format(gribPoint.waves / 100f), infoX, y, Color.yellow, Color.green, 0.75f);
+          postit(gr, 
+                 " " + wavesFormat.format(gribPoint.waves / 100f), 
+                 infoX, y, 
+                 (Color)ParamPanel.data[ParamData.WAVES_COLOR_IN_ROUTING][1], 
+                 reverseColor((Color)ParamPanel.data[ParamData.WAVES_COLOR_IN_ROUTING][1]), 
+                 0.75f);
         }
         if (displayTEMP)
         {
           int y = (int)(this.getHeight() - (((gribPoint.temp - 273) - (gribMini.temp - 273))* tempscale));
-          postit(gr, " " + tempFormat.format(gribPoint.temp - 273), infoX, y, Color.yellow, Color.black, 0.75f);
+          postit(gr, 
+                 " " + tempFormat.format(gribPoint.temp - 273), 
+                 infoX, y, 
+                 (Color)ParamPanel.data[ParamData.AIRTMP_COLOR_IN_ROUTING][1], 
+                 reverseColor((Color)ParamPanel.data[ParamData.AIRTMP_COLOR_IN_ROUTING][1]), 
+                 0.75f);
         }
         if (displayRAIN)
         {
           int y = (int)(this.getHeight() - (((gribPoint.rain * 3600f) - (gribMini.rain * 3600f))* rainscale));
-          postit(gr, " " + prateFormat.format(gribPoint.rain * 3600f), infoX, y, Color.yellow, Color.gray, 0.75f);
+          postit(gr, 
+                 " " + prateFormat.format(gribPoint.rain * 3600f), 
+                 infoX, y, 
+                 (Color)ParamPanel.data[ParamData.RAIN_COLOR_IN_ROUTING][1], 
+                 reverseColor((Color)ParamPanel.data[ParamData.RAIN_COLOR_IN_ROUTING][1]), 
+                 0.75f);
         }
         if (displayBSP)
         {
           int y = (int)(this.getHeight() - (boatSpeed.doubleValue() * bspscale));
-          postit(gr, " " + speedFormat.format(boatSpeed.doubleValue()), infoX, y, Color.yellow, Color.blue, 0.75f);
+          postit(gr, 
+                 " " + speedFormat.format(boatSpeed.doubleValue()), 
+                 infoX, y, 
+                 (Color)ParamPanel.data[ParamData.BSP_COLOR_IN_ROUTING][1], 
+                 reverseColor((Color)ParamPanel.data[ParamData.BSP_COLOR_IN_ROUTING][1]), 
+                 0.75f);
         }
         if (dataOption == ROUTING_OPTION && displayTWS)
         {

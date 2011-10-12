@@ -314,7 +314,7 @@ public final class ParamPanel
         it = Color.black;
         break;
       case ParamData.RAIN_COLOR_IN_ROUTING:
-        it = Color.gray;
+        it = new Color(204, 204, 204); // Color.gray;
         break;
       case ParamData.BSP_COLOR_IN_ROUTING:
         it = Color.orange;
