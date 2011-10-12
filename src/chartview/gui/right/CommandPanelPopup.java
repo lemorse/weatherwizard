@@ -829,14 +829,25 @@ public class CommandPanelPopup
     else if (event.getActionCommand().equals(EDIT_ROUTING_WP))
     {
       // Reorder, delete
-      ArrayList<GeoPoint> aliwp = parent.intermediateRoutingWP;
+      ArrayList<GeoPoint> aliwp = new ArrayList<GeoPoint>(parent.intermediateRoutingWP.size() + 1);
+      for (GeoPoint gp : parent.intermediateRoutingWP)
+        aliwp.add(gp);
+      aliwp.add(parent.to);
       WayPointTablePanel wptp = new WayPointTablePanel(aliwp);
+      wptp.setTopLabel("From " + parent.to.toString()); // LOCALIZE
       int resp = JOptionPane.showConfirmDialog(this, wptp, "Way Point(s)", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
       if (resp == JOptionPane.OK_OPTION)
       {
-        parent.intermediateRoutingWP = wptp.getData();
-        parent.chartPanel.repaint();
+        aliwp = wptp.getData();
+        parent.to = aliwp.get(aliwp.size() - 1); // Destination
+        parent.intermediateRoutingWP = new ArrayList<GeoPoint>(aliwp.size() - 1);
+        for (int i=0; i<aliwp.size() - 1; i++)
+          parent.intermediateRoutingWP.add(aliwp.get(i));
+        WWContext.getInstance().fireHighlightWayPoint(null); // Will do the repaint
+//      parent.chartPanel.repaint();
       }
+      else
+        WWContext.getInstance().fireHighlightWayPoint(null);        
     }
     else if (isUserExitAction(event.getActionCommand()))
     {
