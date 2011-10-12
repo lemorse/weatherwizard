@@ -118,6 +118,8 @@ public abstract class ApplicationEventListener implements EventListener
   public void setNMEAAcquisition(boolean b) {}
   
   public void plotBoatAt(GeoPoint gp, int hdg) {}
+
+  public void highlightWayPoint(GeoPoint gp) {}
   public void manuallyEnterBoatPosition(GeoPoint gp, int hdg) {}
   
   public void setLoading(boolean b) { setLoading(b, WWGnlUtilities.buildMessage("loading")); }
