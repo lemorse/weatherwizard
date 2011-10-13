@@ -1,13 +1,13 @@
 package chartview.gui.toolbar.controlpanels;
 
-import chartview.ctx.WWContext;
+
 import chartview.ctx.ApplicationEventListener;
+import chartview.ctx.WWContext;
 
 import chartview.util.WWGnlUtilities;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -19,14 +19,11 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JProgressBar;
 import javax.swing.JSlider;
-import javax.swing.JSpinner;
 import javax.swing.JTextField;
-import javax.swing.SpinnerModel;
-import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
 
 public class GribPanel
      extends JPanel
