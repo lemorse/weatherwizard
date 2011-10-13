@@ -107,6 +107,7 @@ import java.io.StringReader;
 
 import java.net.URL;
 
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 
 import java.util.ArrayList;
@@ -117,6 +118,7 @@ import java.util.EventObject;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
 
+import java.util.Locale;
 import java.util.TimeZone;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -6619,9 +6621,12 @@ public class CommandPanel
               {
                 if (generateGPXRoute)
                 {
+                  NumberFormat nf = NumberFormat.getInstance(Locale.ENGLISH);      
+                  nf.setMaximumFractionDigits(2);
                   clipboardContent +=
                     ("       <rtept lat=\"" + rp.getPosition().getL() + "\" lon=\"" + rp.getPosition().getG() + "\">\n" + 
                     "            <name>" + WWGnlUtilities.DF3.format(routesize - r) + "_WW</name>\n" + 
+                    "            <desc>Waypoint " + Integer.toString(routesize - r) + ";VMG=" + nf.format(ic.getBsp()) + ";</desc>\n" +
                     "            <sym>triangle</sym>\n" + 
                     "            <type>WPT</type>\n" + 
                     "            <extensions>\n" + 
