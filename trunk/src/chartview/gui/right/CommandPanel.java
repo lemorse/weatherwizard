@@ -2637,6 +2637,7 @@ public class CommandPanel
               if (go)
               {
                 animateThread = new AnimateThread();
+//              System.out.println("New Animated Thread");
                 animateThread.start();
                 WWContext.getInstance().fireStartGRIBAnimation();
               }
@@ -2645,6 +2646,7 @@ public class CommandPanel
             {
               animateThread.freeze();
               animateThread = null;
+//            System.out.println("Resting Animated Thread...");
               WWContext.getInstance().fireStopGRIBAnimation();
             }
           }
@@ -4200,7 +4202,7 @@ public class CommandPanel
         int minutes = cal.get(Calendar.MINUTE);
         int seconds = cal.get(Calendar.SECOND);
         
-        String gribInfo2 = Integer.toString(year) + "-" + WWGnlUtilities.MONTH[month] + "-" + WWGnlUtilities.DF2.format(day) + " " + WWGnlUtilities.WEEK[dow - 1] + " " + WWGnlUtilities.DF2.format(hours) + ":" + WWGnlUtilities.DF2.format(minutes) + ":" + WWGnlUtilities.DF2.format(seconds) + " GMT";
+        String gribInfo2 = Integer.toString(year) + "-" + WWGnlUtilities.MONTH[month] + "-" + WWGnlUtilities.DF2.format(day) + " " + WWGnlUtilities.WEEK[dow - 1] + " " + WWGnlUtilities.DF2.format(hours) + ":" + WWGnlUtilities.DF2.format(minutes) + ":" + WWGnlUtilities.DF2.format(seconds) + " UTC";
         String gribInfo3 = GeomUtil.decToSex(gribData.getNLat(), GeomUtil.SWING, GeomUtil.NS) + " " + 
                            GeomUtil.decToSex(gribData.getWLng(), GeomUtil.SWING, GeomUtil.EW);
         String gribInfo4 = GeomUtil.decToSex(gribData.getSLat(), GeomUtil.SWING, GeomUtil.NS) + " " + 
@@ -5364,7 +5366,7 @@ public class CommandPanel
 //      System.out.println("GRIB Rendering: stepX=" + gribStepX + ", stepY=" + gribStepY);
         for (int h=0; gribData.getGribPointData() != null && h<gribData.getGribPointData().length; h++)
         {
-          // TASK It seems that the next lines throws an NPE some times...
+          // TASK It seems that the next lines throws an NPE some times, or an IndexOutOfBoundsException...
           for (int w=0; gribData.getGribPointData()[h] != null && w<gribData.getGribPointData()[h].length; w++)
           {
             if (gribData.getGribPointData()[h][w] != null) // Border of the smoothed frame
@@ -6627,10 +6629,13 @@ public class CommandPanel
                     ("       <rtept lat=\"" + rp.getPosition().getL() + "\" lon=\"" + rp.getPosition().getG() + "\">\n" + 
                     "            <name>" + WWGnlUtilities.DF3.format(routesize - r) + "_WW</name>\n" + 
                     "            <desc>Waypoint " + Integer.toString(routesize - r) + ";VMG=" + nf.format(ic.getBsp()) + ";</desc>\n" +
-                    "            <sym>triangle</sym>\n" + 
+                //  "            <sym>triangle</sym>\n" + 
+                    "            <sym>empty</sym>\n" + 
                     "            <type>WPT</type>\n" + 
                     "            <extensions>\n" + 
                     "                <opencpn:prop>A,0,1,1,1</opencpn:prop>\n" + 
+                    "                <opencpn:viz>1</opencpn:viz>\n" + 
+                    "                <opencpn:viz_name>0</opencpn:viz_name>\n" +
                     "            </extensions>\n" + 
                     "        </rtept>\n");
                 }
@@ -7174,11 +7179,12 @@ public class CommandPanel
   
   private void displayGRIBSlice(ArrayList<RoutingPoint> bestRoute)
   {
-    System.out.println("displayGRIBSlice...");
+//  System.out.println("displayGRIBSlice...");
 //  ArrayList<GribHelper.GribCondition> data2plot = new ArrayList<GribHelper.GribCondition>();
     ArrayList<DatedGribCondition> data2plot = new ArrayList<DatedGribCondition>();
     
     ArrayList<Double> bsp = null;
+    ArrayList<Integer> hdg = null;
     ArrayList<Integer> twa = null;
     int fw = GRIBSlicePanel.DEFAULT_FORK_WIDTH; // That's for routing
     int dataOption = GRIBSlicePanel.GRIB_SLICE_OPTION;
@@ -7211,6 +7217,7 @@ public class CommandPanel
     {
       dataOption = GRIBSlicePanel.ROUTING_OPTION;
       bsp = new ArrayList<Double>();
+      hdg = new ArrayList<Integer>();
       twa = new ArrayList<Integer>();
       // Route is upside down, reverse it.
       int routeSize = bestRoute.size();
@@ -7234,8 +7241,9 @@ public class CommandPanel
             gribPoint = new DatedGribCondition(GribHelper.gribLookup(gp, gribData)); 
             gribPoint.setDate(rp.getDate());
           }
-          data2plot.add(gribPoint);
+          data2plot.add(gribPoint); 
           bsp.add((i==(routeSize - 1))?new Double(bestRoute.get(i-1).getBsp()):new Double(rp.getBsp()));
+          hdg.add((i==(routeSize - 1))?new Integer(bestRoute.get(i-1).getHdg()):new Integer(rp.getHdg()));
           twa.add((i==(routeSize - 1))?new Integer(bestRoute.get(i-1).getTwa()):new Integer(rp.getTwa()));
         }
         catch (Exception ignore) 
@@ -7245,10 +7253,10 @@ public class CommandPanel
       }
     }
     if (gsp == null)
-      gsp = new GRIBSlicePanel(data2plot, bsp, twa, dataOption, fw);
+      gsp = new GRIBSlicePanel(data2plot, bsp, hdg, twa, dataOption, fw);
     else
     {
-      gsp.setData(data2plot, bsp, twa, dataOption);
+      gsp.setData(data2plot, bsp, hdg, twa, dataOption);
       gsp.setForkWidth(fw);
     }
 //  gsp.setDataOption(dataOption);
@@ -8018,7 +8026,8 @@ public class CommandPanel
     public void run()
     {
       long before = System.currentTimeMillis();
-      WWContext.getInstance().fireSetLoading(true, WWGnlUtilities.buildMessage("calculating"));
+      if (animateThread == null)
+        WWContext.getInstance().fireSetLoading(true, WWGnlUtilities.buildMessage("calculating"));
       ArrayList<ArrayList<GeoPoint>> isopoints = null;
       // TWS
       if (gribData != null && displayContourTWS)
@@ -8058,7 +8067,8 @@ public class CommandPanel
         islandsPrate = null;
       long after = System.currentTimeMillis();
       WWContext.getInstance().fireLogging(WWGnlUtilities.buildMessage("all-calculated-in", new String[] { Long.toString(after - before) }) + "\n");
-      WWContext.getInstance().fireSetLoading(false, WWGnlUtilities.buildMessage("calculating"));
+      if (animateThread == null)
+        WWContext.getInstance().fireSetLoading(false, WWGnlUtilities.buildMessage("calculating"));
       chartPanel.repaint();
     }
   }
