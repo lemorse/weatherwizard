@@ -17,7 +17,10 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 
 import java.awt.RenderingHints;
+import java.awt.Shape;
 import java.awt.Stroke;
+
+import java.awt.geom.Arc2D;
 
 import javax.swing.JPanel;
 
@@ -61,6 +64,38 @@ public class WindVanePanel
     (g2d).setPaint(gradient);
 //  g2d.fillRect(0, 0, this.getWidth(), this.getHeight());
     g2d.fillOval(0, 0, this.getWidth(), this.getHeight());
+    // Starboard, Port
+    float alpha = 0.3f;
+    ((Graphics2D)g).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
+    Stroke origStroke = ((Graphics2D)g).getStroke();
+    int edgeWidth = 10;
+    Stroke stroke =  new BasicStroke(edgeWidth, 
+                                     BasicStroke.CAP_BUTT,
+                                     BasicStroke.JOIN_BEVEL);
+    ((Graphics2D)g).setStroke(stroke);  
+    g.setColor(Color.green);
+    // The origin of the angles is on the right (East). They turn counter-clockwise.
+    double radius = (Math.min(this.getWidth(),this.getHeight()) - edgeWidth - 2) / 2d;
+    Shape starBoardSide = new Arc2D.Float((float)((this.getWidth() / 2) - radius),  // x
+                                          (float)((this.getHeight() / 2) - radius), // y
+                                          (float)(2 * radius),                      // w
+                                          (float)(2 * radius),                      // h
+                                          -80f,                                     // start
+                                          160f,                                     // extent
+                                          Arc2D.OPEN);
+    ((Graphics2D) g).draw(starBoardSide);
+    g.setColor(Color.red);
+    Shape portSide      = new Arc2D.Float((float)((this.getWidth() / 2) - radius),
+                                          (float)((this.getHeight() / 2) - radius),
+                                          (float)(2 * radius), 
+                                          (float)(2 * radius), 
+                                          100f, 
+                                          160f,
+                                          Arc2D.OPEN);
+    ((Graphics2D) g).draw(portSide);
+    
+    ((Graphics2D)g).setStroke(origStroke);  
+    ((Graphics2D)g).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
     // Boat
     g2d.setColor(Color.white);
     int boatLength = this.getHeight() - 30;
@@ -71,7 +106,7 @@ public class WindVanePanel
                            0,
                            1.0f);
     WWGnlUtilities.drawTWAOverBoat(g2d, 
-                                   (this.getWidth() / 2) - 10, 
+                                   (this.getWidth() / 2) - 5, 
                                    center,
                                    windDir);
   }
