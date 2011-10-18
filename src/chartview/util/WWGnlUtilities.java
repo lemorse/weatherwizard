@@ -712,6 +712,13 @@ public class WWGnlUtilities
   }
 
   private final static int KNOB_DIAMETER = 10; // Make it even
+  
+  private final static int SIMPLE_HAND_OPTION = 1;
+  private final static int ARROW_HAND_OPTION  = 2;
+  private final static int BIG_HAND_OPTION    = 3;
+  // TODO A preference for the hand flavor
+  private final static int HAND_OPTION = BIG_HAND_OPTION;
+  
   public static void drawTWAOverBoat(Graphics2D g2d, int hLength, Point center, int twa)
   {
     // Hand shadow
@@ -725,10 +732,27 @@ public class WWGnlUtilities
     g2d.setStroke(stroke);  
     int handLength = hLength;
     int shadowOffset = 5;
-    g2d.drawLine(center.x + shadowOffset, 
-                 center.y + shadowOffset, 
-                 center.x + shadowOffset + (int)(handLength * Math.sin(Math.toRadians((double)twa))),
-                 center.y + shadowOffset - (int)(handLength * Math.cos(Math.toRadians((double)twa))));
+    if (HAND_OPTION == SIMPLE_HAND_OPTION)
+    {
+      g2d.drawLine(center.x + shadowOffset, 
+                   center.y + shadowOffset, 
+                   center.x + shadowOffset + (int)(handLength * Math.sin(Math.toRadians((double)twa))),
+                   center.y + shadowOffset - (int)(handLength * Math.cos(Math.toRadians((double)twa))));
+    }
+    else if (HAND_OPTION == ARROW_HAND_OPTION)
+    {
+      Point from = new Point(center.x + shadowOffset + (int)((handLength) * Math.sin(Math.toRadians((double)twa))),
+                             center.y + shadowOffset - (int)((handLength) * Math.cos(Math.toRadians((double)twa))));
+      drawAnemometerArrow(g2d, from, center, 20, BACKWARD, null);      
+    }
+    else if (HAND_OPTION == BIG_HAND_OPTION)
+    {
+      Point to   = new Point(center.x + shadowOffset + (int)(handLength * Math.sin(Math.toRadians((double)twa))),
+                             center.y + shadowOffset - (int)(handLength * Math.cos(Math.toRadians((double)twa))));
+      Point from = new Point(center.x + shadowOffset - (int)(handLength * Math.sin(Math.toRadians((double)twa))),
+                             center.y + shadowOffset + (int)(handLength * Math.cos(Math.toRadians((double)twa))));
+      drawAnemometerArrow(g2d, from, to, 30, FORWARD, null);      
+    }
     g2d.fillOval(center.x + shadowOffset - (KNOB_DIAMETER / 2),
                  center.y + shadowOffset - (KNOB_DIAMETER / 2),
                  KNOB_DIAMETER, KNOB_DIAMETER);                 
@@ -736,15 +760,81 @@ public class WWGnlUtilities
     alpha = 1.0f;
     g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));      
     // Hand
-    g2d.drawLine(center.x, 
-                 center.y, 
-                 center.x + (int)(handLength * Math.sin(Math.toRadians((double)twa))),
-                 center.y - (int)(handLength * Math.cos(Math.toRadians((double)twa))));
+    if (HAND_OPTION == SIMPLE_HAND_OPTION)
+    {
+      g2d.drawLine(center.x, 
+                   center.y, 
+                   center.x + (int)(handLength * Math.sin(Math.toRadians((double)twa))),
+                   center.y - (int)(handLength * Math.cos(Math.toRadians((double)twa))));
+    }
+    else if (HAND_OPTION == ARROW_HAND_OPTION)
+    {
+      Point from = new Point(center.x + (int)((handLength) * Math.sin(Math.toRadians((double)twa))),
+                             center.y - (int)((handLength) * Math.cos(Math.toRadians((double)twa))));
+      drawAnemometerArrow(g2d, from, center, 20, BACKWARD, null);      
+    }
+    else if (HAND_OPTION == BIG_HAND_OPTION)
+    {
+      Point to   = new Point(center.x + (int)(handLength * Math.sin(Math.toRadians((double)twa))),
+                             center.y - (int)(handLength * Math.cos(Math.toRadians((double)twa))));
+      Point from = new Point(center.x - (int)(handLength * Math.sin(Math.toRadians((double)twa))),
+                             center.y + (int)(handLength * Math.cos(Math.toRadians((double)twa))));
+      Color c = new Color(19, 234, 186);
+      drawAnemometerArrow(g2d, from, to, 30, FORWARD, c, c);      
+    }
     g2d.fillOval(center.x - (KNOB_DIAMETER / 2),
                  center.y - (KNOB_DIAMETER / 2),
                  KNOB_DIAMETER, KNOB_DIAMETER);                 
     
     g2d.setStroke(originalStroke);      
+  }
+
+  public static void drawAnemometerArrow(Graphics2D g, Point from, Point to, int headLength, int option, Color c)
+  {
+    drawAnemometerArrow(g, from, to, headLength, option, c, null);
+  }
+  
+  public final static int FORWARD  = 1;
+  public final static int BACKWARD = 2;
+
+  public static void drawAnemometerArrow(Graphics2D g, Point from, Point to, int headLength, int option, Color handColor, Color arrowColor)
+  {
+    Color orig = null;
+    if (g != null) orig = g.getColor();
+    if (handColor != null) g.setColor(handColor);
+//  int headLength = 30; // 17; // (int)(Math.sqrt( Math.pow((from.x - to.x), 2) + Math.pow((from.y - to.y), 2)) / 3d);
+    double headHalfAngle = 15D;
+    
+    Point middlePoint = null;
+    if (option == FORWARD)
+      middlePoint = new Point(from.x - ((from.x - to.x) / 2), from.y - ((from.y - to.y) / 2));
+    else
+      middlePoint = new Point(from.x + ((from.x - to.x) / 6), from.y + ((from.y - to.y) / 6));
+    
+    double dir = getDir((float)(from.x - to.x), (float)(to.y - from.y));
+  //  System.out.println("Dir:" + dir);
+    Point left = null, right = null;
+    if (option == FORWARD)
+    {
+      left = new Point((int)(middlePoint.x - (headLength * Math.cos(Math.toRadians(dir - 90 + headHalfAngle)))),
+                       (int)(middlePoint.y - (headLength * Math.sin(Math.toRadians(dir - 90 + headHalfAngle)))));
+      right = new Point((int)(middlePoint.x - (headLength * Math.cos(Math.toRadians(dir - 90 - headHalfAngle)))),
+                        (int)(middlePoint.y - (headLength * Math.sin(Math.toRadians(dir - 90 - headHalfAngle)))));
+    }
+    else if (option == BACKWARD)
+    {
+      left = new Point((int)(middlePoint.x + (headLength * Math.cos(Math.toRadians(dir - 90 + headHalfAngle)))),
+                       (int)(middlePoint.y + (headLength * Math.sin(Math.toRadians(dir - 90 + headHalfAngle)))));
+      right = new Point((int)(middlePoint.x + (headLength * Math.cos(Math.toRadians(dir - 90 - headHalfAngle)))),
+                        (int)(middlePoint.y + (headLength * Math.sin(Math.toRadians(dir - 90 - headHalfAngle)))));      
+    }
+    g.drawLine(from.x, from.y, to.x, to.y);
+    Polygon head = new Polygon(new int[] { middlePoint.x, left.x, right.x }, new int[] { middlePoint.y, left.y, right.y }, 3);
+    if (arrowColor != null)
+      g.setColor(arrowColor);
+    g.fillPolygon(head);
+    
+    if (g != null) g.setColor(orig);
   }
   
   public static void drawWind(Graphics gr, 
@@ -3285,6 +3375,35 @@ public class WWGnlUtilities
     return b;
   }
   
+  /**
+   * get the angle in radians, based on its sin & cos.
+   * 
+   * @param sin
+   * @param cos
+   * @return angle in radians 0-2PI
+   */
+  public static double getAngle(double sin, double cos)
+  {
+    double angle = 0;
+    angle = Math.asin(sin);
+    if (cos < 0)
+      angle = Math.PI - angle;
+    
+    return angle;
+  }
+  
+  public static void main0(String[] args)
+  {
+    DecimalFormat df = new DecimalFormat("##0.00");
+    for (int i=0; i<=360; i++)
+    {
+      double sin = Math.sin(Math.toRadians(i));
+      double cos = Math.cos(Math.toRadians(i));
+      double rad = getAngle(sin, cos);
+      System.out.println("For:" + i + " => " + df.format(Math.toDegrees(rad)));
+    }
+  }
+  
   public static void main2(String[] args)
   {
     String before = "\r\r\n  Akeu coucou  \r\n  \n";
@@ -3297,7 +3416,7 @@ public class WWGnlUtilities
     System.out.println("Returned:" + ar);
   }
   
-  public static void main(String[] args)
+  public static void main1(String[] args)
   {
 //  String ptrn = "jar_[0-9]+";
 //  String ptrn = ".jar_[0-9]+";
@@ -3354,6 +3473,7 @@ public class WWGnlUtilities
       return stationName;
     }
   }
+  
   public static class WeatherStation
   {
     GeoPoint gp = null;

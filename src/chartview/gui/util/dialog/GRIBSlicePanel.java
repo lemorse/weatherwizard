@@ -43,7 +43,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-
 public class GRIBSlicePanel
      extends JPanel
 {
@@ -52,8 +51,10 @@ public class GRIBSlicePanel
   
   private int dataOption = -1;
   private ArrayList<Double> bsp = null;
+  private ArrayList<Integer> hdg = null;
   private ArrayList<Integer> twa = null;
   private ArrayList<Double> smoothedBsp = null;
+  private ArrayList<Integer> smoothedHdg = null;
   private ArrayList<Integer> smoothedTwa = null;
   private double bspMini = Double.MAX_VALUE;
   private double bspMaxi = Double.MIN_VALUE;
@@ -110,6 +111,7 @@ public class GRIBSlicePanel
 
   public GRIBSlicePanel(ArrayList<DatedGribCondition> data, 
                         ArrayList<Double> bsp, 
+                        ArrayList<Integer> hdg, 
                         ArrayList<Integer> twa, 
                         int opt, 
                         int fw)
@@ -125,6 +127,7 @@ public class GRIBSlicePanel
       forkWidth = fw;
     data2plot = data;
     this.bsp = bsp;
+    this.hdg = hdg;
     this.twa = twa;
     dataOption = opt;
     
@@ -163,11 +166,13 @@ public class GRIBSlicePanel
   
   public void setData(ArrayList<DatedGribCondition> data, 
                       ArrayList<Double> bsp, 
+                      ArrayList<Integer> hdg, 
                       ArrayList<Integer> twa,
                       int opt)
   {
     data2plot = data;   
     this.bsp = bsp;
+    this.hdg = hdg;
     this.twa = twa;
     dataOption = opt;
     computeData();
@@ -193,7 +198,7 @@ public class GRIBSlicePanel
   {
     this.setLayout(new BorderLayout());
 
-    this.setSize(new Dimension(700, 190));
+    this.setSize(new Dimension(704, 159));
     this.setPreferredSize(new Dimension(700, 190));
     dataPanel.setLayout(null);
     dataPanel.setBackground(Color.white);
@@ -288,17 +293,26 @@ public class GRIBSlicePanel
       });
 
     twsCheckBox.setSelected(displayTWS);
+    twsCheckBox.setFont(new Font("Tahoma", 0, 9));
     prmslCheckBox.setSelected(displayPRMSL);
+    prmslCheckBox.setFont(new Font("Tahoma", 0, 9));
     hgt500CheckBox.setSelected(displayHGT500);
+    hgt500CheckBox.setFont(new Font("Tahoma", 0, 9));
     wavesCheckBox.setSelected(displayWAVES);
+    wavesCheckBox.setFont(new Font("Tahoma", 0, 9));
     tempCheckBox.setSelected(displayTEMP);
+    tempCheckBox.setFont(new Font("Tahoma", 0, 9));
     rainCheckBox.setSelected(displayRAIN);
+    rainCheckBox.setFont(new Font("Tahoma", 0, 9));
     bspCheckBox.setSelected(displayBSP);
 
+    bspCheckBox.setFont(new Font("Tahoma", 0, 9));
     smoothLabel.setText("Smooth");
+    smoothLabel.setFont(new Font("Tahoma", 0, 9));
     smoothTextField.setSize(new Dimension(30, 20));
     smoothTextField.setText(Integer.toString(forkWidth));
     smoothTextField.setPreferredSize(new Dimension(30, 20));
+    smoothTextField.setFont(new Font("Tahoma", 0, 9));
     smoothTextField.addActionListener(new ActionListener()
       {
         public void actionPerformed(ActionEvent e)
@@ -354,6 +368,7 @@ public class GRIBSlicePanel
       if (dataOption == ROUTING_OPTION)
       {
         bsp = expandBSPArray(bsp, 75);
+        hdg = expandHDGArray(hdg, 75);
         twa = expandTWAArray(twa, 75);
       }
     }
@@ -434,9 +449,12 @@ public class GRIBSlicePanel
     if (dataOption == ROUTING_OPTION)
     {
       smoothedBsp = new ArrayList<Double>(bsp.size());
+      smoothedHdg = new ArrayList<Integer>(hdg.size());
       smoothedTwa = new ArrayList<Integer>(twa.size());
       for (Double d : bsp)
         smoothedBsp.add(new Double(d.doubleValue()));
+      for (Integer i : hdg)
+        smoothedHdg.add(new Integer(i.intValue()));
       for (Integer i : twa)
         smoothedTwa.add(new Integer(i.intValue()));
     }
@@ -450,8 +468,11 @@ public class GRIBSlicePanel
       double temp   = 0D;
       double rain   = 0D;
       
-      double boatSpeed = 0D;
-      double windAngle = 0D;
+      double boatSpeed      = 0D;
+      double boatHeadingCos = 0D;
+      double boatHeadingSin = 0D;
+      double windAngleCos   = 0D;
+      double windAngleSin   = 0D;
       
       for (int j=(i-halfFork); j<=(i+halfFork); j++)
       {
@@ -469,23 +490,30 @@ public class GRIBSlicePanel
         
         if (dataOption == ROUTING_OPTION)
         {
-          boatSpeed += bsp.get(_j).doubleValue();
-          windAngle += twa.get(_j).intValue();
+          boatSpeed      += bsp.get(_j).doubleValue();
+          boatHeadingCos += Math.cos(Math.toRadians(hdg.get(_j).doubleValue()));
+          boatHeadingSin += Math.sin(Math.toRadians(hdg.get(_j).doubleValue()));
+          windAngleCos   += Math.cos(Math.toRadians(twa.get(_j).intValue()));
+          windAngleSin   += Math.sin(Math.toRadians(twa.get(_j).intValue()));
         }
       }
-      tws = tws / fork;
+      tws    = tws / fork;
       hgt500 = hgt500 / fork;
-      prmsl = prmsl / fork;
-      waves = waves / fork;
-      temp = temp / fork;
-      rain = rain / fork;
+      prmsl  = prmsl / fork;
+      waves  = waves / fork;
+      temp   = temp / fork;
+      rain   = rain / fork;
       
-      boatSpeed = boatSpeed / fork;
-      windAngle = windAngle / fork;
+      boatSpeed      = boatSpeed / fork;
+      boatHeadingCos = boatHeadingCos / fork;
+      boatHeadingSin = boatHeadingSin / fork;
+      windAngleCos   = windAngleCos / fork;  
+      windAngleSin   = windAngleSin / fork;  
       if (dataOption == ROUTING_OPTION)
       {
         smoothedBsp.set(i, new Double(boatSpeed)); 
-        smoothedTwa.set(i, new Integer((int)windAngle));
+        smoothedHdg.set(i, new Integer((int)Math.toDegrees(WWGnlUtilities.getAngle(boatHeadingSin, boatHeadingCos))));
+        smoothedTwa.set(i, new Integer((int)Math.toDegrees(WWGnlUtilities.getAngle(windAngleSin, windAngleCos))));
       }
       smoothedData.get(i).windspeed = (float)tws;      
       smoothedData.get(i).hgt500    = (float)hgt500;      
@@ -582,6 +610,25 @@ public class GRIBSlicePanel
     return expanded;
   }
   
+  // TODO sin & cos
+  private ArrayList<Integer> expandHDGArray(ArrayList<Integer> origData,
+                                           int smoothFactor)
+  {
+    ArrayList<Integer> expanded = new ArrayList<Integer>(origData.size() * smoothFactor);
+      // Add points
+    for (int i=0; i<origData.size() - 1; i++)
+    {
+      double hdgDeltaValue = origData.get(i + 1).doubleValue() - origData.get(i).doubleValue();
+      
+      for (int j=0; j<smoothFactor; j++)
+      {
+        double twaValue = origData.get(i).doubleValue() + (hdgDeltaValue * ((double)j / (double)smoothFactor));
+        expanded.add(new Integer((int)twaValue));
+      }
+    }
+    return expanded;
+  }
+    
   private void twsCheckBox_actionPerformed(ActionEvent e)
   {
     displayTWS = twsCheckBox.isSelected();
@@ -759,6 +806,8 @@ public class GRIBSlicePanel
       float tempscale   = (float)this.getHeight() / ((gribMaxi.temp) - (gribMini.temp));
       float rainscale   = (float)this.getHeight() / (gribMaxi.rain * 3600f);
       
+//    float dirScale    = (float)this.getHeight() / 360f;
+      
       float bspscale    = 1f;
       if (dataOption == ROUTING_OPTION)
         bspscale = (float)this.getHeight() / (float)bspMaxi;
@@ -778,8 +827,10 @@ public class GRIBSlicePanel
       }
       drawDataArray(gr, data2plot, windscale, prmslscale, hgt500scale, wavescale, tempscale, rainscale);
       if (dataOption == ROUTING_OPTION)
+      {
         drawBoatSpeed(gr, bsp, bspscale);
-      
+//      drawTWA(gr, twa, dirScale);
+      }
       // Display smoothed data
       if (gr instanceof Graphics2D)
       {
@@ -792,8 +843,10 @@ public class GRIBSlicePanel
       }
       drawDataArray(gr, smoothedData, windscale, prmslscale, hgt500scale, wavescale, tempscale, rainscale);
       if (dataOption == ROUTING_OPTION)
+      {
         drawBoatSpeed(gr, smoothedBsp, bspscale);
-      
+//      drawTWA(gr, smoothedTwa, dirScale);
+      }
       if (infoX != -1) // Mouse is pressed
       {
         gr.setColor(Color.gray);
@@ -814,9 +867,11 @@ public class GRIBSlicePanel
 
         Double boatSpeed = null;
         Integer windAngle = null;
+        Integer heading   = null;
         if (dataOption == ROUTING_OPTION)
         {
           boatSpeed = smoothedBsp.get(dataIdx);
+          heading   = smoothedHdg.get(dataIdx);
           windAngle = smoothedTwa.get(dataIdx);
         }
         if (displayTWS)
@@ -828,6 +883,14 @@ public class GRIBSlicePanel
                  (Color)ParamPanel.data[ParamData.TWS_COLOR_IN_ROUTING][1], 
                  reverseColor((Color)ParamPanel.data[ParamData.TWS_COLOR_IN_ROUTING][1]), 
                  0.75f);
+
+//          y = (int)(this.getHeight() - (windAngle * dirScale));
+//          postit(gr, 
+//                 " TWA:" + windAngle + "\272",
+//                 infoX, y, 
+//                 (Color)ParamPanel.data[ParamData.TWS_COLOR_IN_ROUTING][1], 
+//                 reverseColor((Color)ParamPanel.data[ParamData.TWS_COLOR_IN_ROUTING][1]), 
+//                 0.75f);
         }
         if (displayPRMSL)
         {
@@ -897,13 +960,13 @@ public class GRIBSlicePanel
                                   Color.CYAN, 
                                   boatCenter,             // Pos on the Panel
                                   (this.getHeight() / 3), // Boat Length
-                                  0,                      // Heading
+                                  heading,                // Heading
                                   0.5f);                  // Alpha
           // Now, the wind
           WWGnlUtilities.drawTWAOverBoat((Graphics2D)gr, 
                                          (this.getHeight() / 6), // Hand Length
                                          boatCenter, 
-                                         -windAngle); // TODO See why -windAngle
+                                         heading - windAngle); // TODO See why -windAngle
         }
       }
 
@@ -1028,6 +1091,37 @@ public class GRIBSlicePanel
       //    System.out.println("Idx:" + gribIdx + ", x:" + x + " for w:" + this.getWidth() + " and gSize:" + gribSize);
             y = (int)(this.getHeight() - (bsp * bspscale));
             gr.setColor((Color)ParamPanel.data[ParamData.BSP_COLOR_IN_ROUTING][1]);
+            if (prevXbsp > -1 && prevYbsp > -1)
+              gr.drawLine(prevXbsp, prevYbsp, x, y);
+            prevXbsp = x;
+            prevYbsp = y;
+          }
+        }            
+        bspIdx++;
+      }         
+    }
+    
+    private void drawTWA(Graphics gr,
+                         ArrayList<Integer> data,
+                         float scale)
+    {
+      int bspIdx = 0, bspSize = data.size();
+      
+      int prevXbsp    = -1, 
+          prevYbsp    = -1;
+      for (Integer d : data)
+      {
+        if (d != null)
+        {
+          float bsp   = (float)d.doubleValue();
+          int x, y;
+          x = (int)((float)bspIdx * (float)this.getWidth() / (float)bspSize);
+          // BSP
+          if (displayTWS)
+          {
+      //    System.out.println("Idx:" + gribIdx + ", x:" + x + " for w:" + this.getWidth() + " and gSize:" + gribSize);
+            y = (int)(this.getHeight() - (bsp * scale));
+            gr.setColor((Color)ParamPanel.data[ParamData.TWS_COLOR_IN_ROUTING][1]);
             if (prevXbsp > -1 && prevYbsp > -1)
               gr.drawLine(prevXbsp, prevYbsp, x, y);
             prevXbsp = x;
