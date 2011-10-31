@@ -20,6 +20,8 @@ import chartview.gui.util.dialog.WhatIfRoutingPanel;
 import chartview.util.grib.GribHelper.GribCondition;
 import chartview.util.grib.GribHelper.GribConditionData;
 
+import chartview.util.progress.ProgressMonitor;
+
 import java.awt.Point;
 import java.awt.Polygon;
 
@@ -109,6 +111,7 @@ public class RoutingUtil
     center.setDate(fromDate);
     GribHelper.GribCondition wind = GribHelper.gribLookup(center.getPosition(), wgd, fromDate);
     boolean keepLooping = true;
+    boolean interruptedBecauseTooOld = false;
     if (wind != null && wind.comment != null && wind.comment.equals("TOO_OLD"))
     {
       center.setGribTooOld(true);
@@ -116,6 +119,7 @@ public class RoutingUtil
       if (stopIfGRIB2old)
       {
         keepLooping = false;
+        interruptedBecauseTooOld = true;
         WWContext.getInstance().fireLogging("Routing aborted. GRIB exhausted (preference).\n", LoggingPanel.YELLOW_STYLE);
       }
     }
@@ -133,11 +137,13 @@ public class RoutingUtil
         double localSmallOne = Double.MAX_VALUE;
         ArrayList<ArrayList<RoutingPoint>> temp = new ArrayList<ArrayList<RoutingPoint>>();
         Iterator<ArrayList<RoutingPoint>> dimOne = data.iterator();
+        int nbNonZeroSpeed = 0;
         while (!interruptRouting && dimOne.hasNext() && keepLooping)
         {
 //        timer = logDiffTime(timer, "Milestone 2");
           ArrayList<RoutingPoint> curve = dimOne.next();
           Iterator<RoutingPoint> dimTwo = curve.iterator();
+          nbNonZeroSpeed = 0;
           while (!interruptRouting && keepLooping && dimTwo.hasNext())
           {
 //          timer = logDiffTime(timer, "Milestone 3");
@@ -152,13 +158,14 @@ public class RoutingUtil
               if (stopIfGRIB2old)
               {
                 keepLooping = false;
+                interruptedBecauseTooOld = true;
                 WWContext.getInstance().fireLogging("Routing aborted. GRIB exhausted (preference).\n", LoggingPanel.YELLOW_STYLE);
               }
             }
 //          timer = logDiffTime(timer, "Milestone 4");
             
             brg = getBearing(newCurveCenter); // 7-apr-2010
-            
+            nbNonZeroSpeed = 0;
             // Calculate isochron from center
             for (int bearing=brg - routingForkWidth / 2; keepLooping && !interruptRouting && bearing<=brg + routingForkWidth / 2; bearing += routingStep)
             {
@@ -209,6 +216,7 @@ public class RoutingUtil
               
               if (speed > 0D)
               {
+                nbNonZeroSpeed++;
                 double dist = timeInterval * speed;
                 arrivalDate = new Date(currentDate.getTime() + (long)(timeStep * 3600D * 1000D));
                 GeoPoint dr = GreatCircle.dr(new GeoPoint(Math.toRadians(newCurveCenter.getPosition().getL()), 
@@ -294,7 +302,18 @@ public class RoutingUtil
           keepLooping = false;
           WWContext.getInstance().fireLogging("Not progressing (stuck at " + WWGnlUtilities.XXXX12.format(smallestDist) + " nm), aborting.\n", LoggingPanel.RED_STYLE);                  
           System.out.println("Not progressing (stuck at " + WWGnlUtilities.XXXX12.format(smallestDist) + " nm), aborting.");                  
-          JOptionPane.showMessageDialog(null, "Routing aborted, not progressing", "Routing", JOptionPane.WARNING_MESSAGE);
+          ProgressMonitor monitor = WWContext.getInstance().getMonitor();
+          if (monitor != null)
+          {
+            synchronized (monitor)
+            {
+              int total = monitor.getTotal();
+              int current = monitor.getCurrent();
+              if (current != total)
+                monitor.setCurrent(null, total);
+            }
+          }
+          JOptionPane.showMessageDialog(null, "Routing aborted, not progressing (dead-end),\nat isochron #" + Integer.toString(allIsochrons.size()), "Routing", JOptionPane.WARNING_MESSAGE);
         }
         else
         {
@@ -321,7 +340,43 @@ public class RoutingUtil
               }
             }
             if (!keepLooping)
-              WWContext.getInstance().fireLogging("Finished (" + WWGnlUtilities.XXXX12.format(smallestDist) + " vs " + WWGnlUtilities.XXXX12.format(localSmallOne) + ").\n", LoggingPanel.YELLOW_STYLE);                  
+              WWContext.getInstance().fireLogging("Finished (" + WWGnlUtilities.XXXX12.format(smallestDist) + " vs " + WWGnlUtilities.XXXX12.format(localSmallOne) + ").\n(Non Zero Speed:" + nbNonZeroSpeed+ ")\n", LoggingPanel.YELLOW_STYLE);                  
+            if (nbNonZeroSpeed == 0)
+            {
+              ProgressMonitor monitor = WWContext.getInstance().getMonitor();
+              if (monitor != null)
+              {
+                synchronized (monitor)
+                {
+                  int total = monitor.getTotal();
+                  int current = monitor.getCurrent();
+                  if (current != total)
+                      monitor.setCurrent(null, total);
+                }
+              }
+              if (interruptedBecauseTooOld)
+                JOptionPane.showMessageDialog(null, "Routing aborted (GRIB exhausted),\nat isochron #" + Integer.toString(allIsochrons.size()), "Routing", JOptionPane.WARNING_MESSAGE);
+              else
+                JOptionPane.showMessageDialog(null, "Routing aborted, not progressing (dead-end),\nat isochron #" + Integer.toString(allIsochrons.size()), "Routing", JOptionPane.WARNING_MESSAGE);
+            }
+          }
+          else
+          {
+            ProgressMonitor monitor = WWContext.getInstance().getMonitor();
+            if (monitor != null)
+            {
+              synchronized (monitor)
+              {
+                int total = monitor.getTotal();
+                int current = monitor.getCurrent();
+                if (current != total)
+                    monitor.setCurrent(null, total);
+              }
+            }
+            if (interruptedBecauseTooOld)
+              JOptionPane.showMessageDialog(null, "Routing aborted (GRIB exhausted),\nat isochron #" + Integer.toString(allIsochrons.size()), "Routing", JOptionPane.WARNING_MESSAGE);
+            else
+              JOptionPane.showMessageDialog(null, "Routing aborted, not progressing (dead-end),\nat isochron #" + Integer.toString(allIsochrons.size()), "Routing", JOptionPane.WARNING_MESSAGE);
           }
         }
         
