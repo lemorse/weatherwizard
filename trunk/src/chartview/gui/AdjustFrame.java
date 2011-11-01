@@ -801,7 +801,8 @@ public class AdjustFrame
           }
         });
     menuToolsGeostrophicWind.setText(WWGnlUtilities.buildMessage("geostrophic-wind"));
-    menuToolsGeostrophicWind.setIcon(new ImageIcon(this.getClass().getResource("img/greenflag.png")));
+//  menuToolsGeostrophicWind.setIcon(new ImageIcon(this.getClass().getResource("img/greenflag.png")));
+    menuToolsGeostrophicWind.setIcon(new ImageIcon(this.getClass().getResource("img/pushpin_16x16.png")));
     menuToolsGeostrophicWind.addActionListener(new ActionListener()
         {
           public void actionPerformed(ActionEvent ae)

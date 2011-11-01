@@ -5705,9 +5705,11 @@ public class CommandPanel
       gr.setColor(Color.black);
       gr.fillOval(gp.x - 3, gp.y - 3, 6, 6);
       if (greenFlagImage == null)
-        greenFlagImage = new ImageIcon(this.getClass().getResource("greenflag.png")); //.getImage();      
+//      greenFlagImage = new ImageIcon(this.getClass().getResource("greenflag.png")); //.getImage();      
+        greenFlagImage = new ImageIcon(this.getClass().getResource("pushpin_25x25.gif")); //.getImage();      
       
-      gr.drawImage(greenFlagImage.getImage(), gp.x - 2, gp.y - greenFlagImage.getImage().getHeight(null), null);
+//    gr.drawImage(greenFlagImage.getImage(), gp.x - 2, gp.y - greenFlagImage.getImage().getHeight(null), null);
+      gr.drawImage(greenFlagImage.getImage(), gp.x - 25, gp.y - greenFlagImage.getImage().getHeight(null), null);
       gr.setColor(orig);
     }
     if (to != null)
@@ -5721,8 +5723,10 @@ public class CommandPanel
       gr.setColor(Color.black);
       gr.fillOval(gp.x - 3, gp.y - 3, 6, 6);
       if (greenFlagImage == null)
-        greenFlagImage = new ImageIcon(this.getClass().getResource("greenflag.png")); //.getImage();      
-      gr.drawImage(greenFlagImage.getImage(), gp.x - 2, gp.y - greenFlagImage.getImage().getHeight(null), null);
+//      greenFlagImage = new ImageIcon(this.getClass().getResource("greenflag.png")); //.getImage();      
+        greenFlagImage = new ImageIcon(this.getClass().getResource("pushpin_25x25.gif")); //.getImage();      
+//    gr.drawImage(greenFlagImage.getImage(), gp.x - 2, gp.y - greenFlagImage.getImage().getHeight(null), null);
+      gr.drawImage(greenFlagImage.getImage(), gp.x - 25, gp.y - greenFlagImage.getImage().getHeight(null), null);
       gr.setColor(orig);
     }
     if (intermediateRoutingWP != null && intermediateRoutingWP.size() > 0)
@@ -5736,8 +5740,10 @@ public class CommandPanel
         gr.setColor(Color.black);
         gr.fillOval(pt.x - 3, pt.y - 3, 6, 6);
         if (greenFlagImage == null)
-          greenFlagImage = new ImageIcon(this.getClass().getResource("greenflag.png")); //.getImage();      
-        gr.drawImage(greenFlagImage.getImage(), pt.x - 2, pt.y - greenFlagImage.getImage().getHeight(null), null);
+//        greenFlagImage = new ImageIcon(this.getClass().getResource("greenflag.png")); //.getImage();      
+          greenFlagImage = new ImageIcon(this.getClass().getResource("pushpin_25x25.gif")); //.getImage();      
+//      gr.drawImage(greenFlagImage.getImage(), pt.x - 2, pt.y - greenFlagImage.getImage().getHeight(null), null);
+        gr.drawImage(greenFlagImage.getImage(), pt.x - 25, pt.y - greenFlagImage.getImage().getHeight(null), null);
         gr.setColor(orig);        
       }
     }

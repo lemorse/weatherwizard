@@ -470,7 +470,8 @@ public class CommandPanelPopup
     this.add(new JSeparator());
 
     eraseFlags = new JMenuItem(DROP_FLAGS);
-    eraseFlags.setIcon(new ImageIcon(this.getClass().getResource("greenflag.png")));
+//  eraseFlags.setIcon(new ImageIcon(this.getClass().getResource("greenflag.png")));
+    eraseFlags.setIcon(new ImageIcon(this.getClass().getResource("pushpin_16x16.png")));
     this.add(eraseFlags);
     eraseFlags.setEnabled(parent.from != null);
     eraseFlags.setBackground(Color.white);
@@ -485,7 +486,8 @@ public class CommandPanelPopup
     insertRoutingWayPointsMenuItem.addActionListener(this);
     
     editRoutingWayPoints = new JMenuItem(EDIT_ROUTING_WP);
-    editRoutingWayPoints.setIcon(new ImageIcon(this.getClass().getResource("greenflag.png")));
+//  editRoutingWayPoints.setIcon(new ImageIcon(this.getClass().getResource("greenflag.png")));
+    editRoutingWayPoints.setIcon(new ImageIcon(this.getClass().getResource("pushpin_16x16.png")));
     this.add(editRoutingWayPoints);
     editRoutingWayPoints.setEnabled(parent.intermediateRoutingWP != null && parent.intermediateRoutingWP.size() > 0);
     editRoutingWayPoints.setBackground(Color.white);
