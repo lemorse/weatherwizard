@@ -138,6 +138,7 @@ public class RoutingUtil
         ArrayList<ArrayList<RoutingPoint>> temp = new ArrayList<ArrayList<RoutingPoint>>();
         Iterator<ArrayList<RoutingPoint>> dimOne = data.iterator();
         int nbNonZeroSpeed = 0;
+        boolean allowOtherRoute = false;
         while (!interruptRouting && dimOne.hasNext() && keepLooping)
         {
 //        timer = logDiffTime(timer, "Milestone 2");
@@ -193,6 +194,7 @@ public class RoutingUtil
 //                Context.getInstance().fireLogging("Avoiding too much wind (" + GnlUtilities.XXXX12.format(wSpeed) + " over " + Integer.toString(maxTWS) + ")\n");
 //                WWContext.getInstance().fireLogging(".", LoggingPanel.RED_STYLE); // Takes a long time!
                   wSpeed = 0;
+                  allowOtherRoute = true;
                   continue;
                 }
               }
@@ -202,6 +204,7 @@ public class RoutingUtil
 //              Context.getInstance().fireLogging("Avoiding too close wind (" + Integer.toString(twa) + " below " + Integer.toString(minTWA) + ")\n");
 //              WWContext.getInstance().fireLogging(".", LoggingPanel.RED_STYLE); // Takes a long time!
                 speed = 0D;
+                allowOtherRoute = true;
                 continue; // Added 22-Jun-2009
               }              
               else
@@ -318,6 +321,11 @@ public class RoutingUtil
         else
         {
           keepLooping = false;
+          if (allowOtherRoute && nbNonZeroSpeed == 0)
+          {
+            smallestDist = localSmallOne;
+            keepLooping = true; // Try again, even if the distance was not shrinking
+          }
           if (localSmallOne != Double.MAX_VALUE)
           {
             if (intermediateWP != null)
@@ -379,6 +387,7 @@ public class RoutingUtil
               JOptionPane.showMessageDialog(null, "Routing aborted, not progressing (dead-end),\nat isochron #" + Integer.toString(allIsochrons.size()), "Routing", JOptionPane.WARNING_MESSAGE);
           }
         }
+        allowOtherRoute = false;
         
 //      timer = logDiffTime(timer, "Milestone 12");
         if (keepLooping)
