@@ -1000,12 +1000,12 @@ public class AdjustFrame
 //  jSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, allJTrees, masterTabPane);
 //  layers.setPreferredSize(new Dimension(800, 600));
     jSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, allJTrees, layers);
-//  jSplitPane.setContinuousLayout(true);
-    jSplitPane.setOneTouchExpandable(true); // That one was on
+    jSplitPane.setContinuousLayout(true);
+    jSplitPane.setOneTouchExpandable(true); 
 //  jSplitPane.setOneTouchExpandable(false);
 //  jSplitPane.setDividerSize(8);
-//  jSplitPane.setDividerLocation(175);
-    jSplitPane.setDividerLocation(.20D);
+    jSplitPane.setDividerLocation(175);
+//  jSplitPane.setDividerLocation(.20D);
 
     this.getContentPane().add(jSplitPane, BorderLayout.CENTER);
     

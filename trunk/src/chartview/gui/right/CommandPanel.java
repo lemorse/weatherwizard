@@ -7211,6 +7211,7 @@ public class CommandPanel
         try 
         { 
           gribPoint = new DatedGribCondition(GribHelper.gribLookup(gp, gribData)); 
+//        System.out.println("1 - Adding to slice:" + (gribPoint.rain * 3600f));
           data2plot.add(gribPoint);
         }
         catch (Exception ignore) 
@@ -7247,6 +7248,7 @@ public class CommandPanel
             gribPoint = new DatedGribCondition(GribHelper.gribLookup(gp, gribData)); 
             gribPoint.setDate(rp.getDate());
           }
+//        System.out.println("2 - Adding to slice:" + (gribPoint.rain * 3600f));
           data2plot.add(gribPoint); 
           bsp.add((i==(routeSize - 1))?new Double(bestRoute.get(i-1).getBsp()):new Double(rp.getBsp()));
           hdg.add((i==(routeSize - 1))?new Integer(bestRoute.get(i-1).getHdg()):new Integer(rp.getHdg()));
