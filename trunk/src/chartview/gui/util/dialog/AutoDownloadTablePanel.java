@@ -273,8 +273,7 @@ public final class AutoDownloadTablePanel
   {
     Object curValue = null;
 
-    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, 
-                                                   int column)
+    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column)
     {
       curValue = value;
       return this;
