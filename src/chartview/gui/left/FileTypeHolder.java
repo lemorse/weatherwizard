@@ -59,8 +59,9 @@ public class FileTypeHolder
     throws Exception
   {
     this.setLayout(gridBagLayout1);
-    this.setPreferredSize(new Dimension(250, 600));
+    this.setPreferredSize(new Dimension(200, 600));
 
+    this.setSize(new Dimension(200, 300));
     this.add(faxTree, 
              new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.NORTH, GridBagConstraints.BOTH, 
                                     new Insets(5, 5, 0, 5), 0, 0));
