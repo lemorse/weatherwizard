@@ -384,29 +384,45 @@ public class GRIBSlicePanel
     gribMini.hgt500 = Integer.MAX_VALUE;   gribMaxi.hgt500 = 0;
     gribMini.rain = Float.MAX_VALUE;       gribMaxi.rain = 0f;
     int nbNull = 0;
+//  System.out.println("Mini-maxi from " + data2plot.size() + " element(s)");
     for (GribHelper.GribCondition ghgc : data2plot) // Mini/Maxi
     {
       if (ghgc != null)
       {
-        if (ghgc.windspeed < gribMini.windspeed) gribMini.windspeed = ghgc.windspeed;
-        if (ghgc.winddir < gribMini.winddir) gribMini.winddir = ghgc.winddir;
-        if (ghgc.prmsl < gribMini.prmsl) gribMini.prmsl = ghgc.prmsl;
-        if (ghgc.waves < gribMini.waves) gribMini.waves = ghgc.waves;
-        if (ghgc.temp < gribMini.temp) gribMini.temp = ghgc.temp;
+//      if (ghgc.windspeed < gribMini.windspeed) gribMini.windspeed = ghgc.windspeed;
+        gribMini.windspeed = Math.min(gribMini.windspeed, ghgc.windspeed);
+//      if (ghgc.winddir < gribMini.winddir) gribMini.winddir = ghgc.winddir;
+        gribMini.winddir = Math.min(gribMini.winddir, ghgc.winddir);
+//      if (ghgc.prmsl < gribMini.prmsl) gribMini.prmsl = ghgc.prmsl;
+        gribMini.prmsl = Math.min(gribMini.prmsl, ghgc.prmsl);
+//      if (ghgc.waves < gribMini.waves) gribMini.waves = ghgc.waves;
+        gribMini.waves = Math.min(gribMini.waves, ghgc.waves);
+//      if (ghgc.temp < gribMini.temp) gribMini.temp = ghgc.temp;
         if (ghgc.hgt500 < gribMini.hgt500) gribMini.hgt500 = ghgc.hgt500;
-        if (ghgc.rain < gribMini.rain) gribMini.rain = ghgc.rain;
+        gribMini.hgt500 = Math.min(gribMini.hgt500, ghgc.hgt500);
+//      if (ghgc.rain < gribMini.rain) gribMini.rain = ghgc.rain;
+        gribMini.rain = Math.min(gribMini.rain, ghgc.rain);
         
-        if (ghgc.windspeed > gribMaxi.windspeed) gribMaxi.windspeed = ghgc.windspeed;
-        if (ghgc.winddir > gribMaxi.winddir) gribMaxi.winddir = ghgc.winddir;
-        if (ghgc.prmsl > gribMaxi.prmsl) gribMaxi.prmsl = ghgc.prmsl;
-        if (ghgc.waves > gribMaxi.waves) gribMaxi.waves = ghgc.waves;
-        if (ghgc.temp > gribMaxi.temp) gribMaxi.temp = ghgc.temp;
-        if (ghgc.hgt500 > gribMaxi.hgt500) gribMaxi.hgt500 = ghgc.hgt500;
-        if (ghgc.rain > gribMaxi.rain) gribMaxi.rain = ghgc.rain;
+//      if (ghgc.windspeed > gribMaxi.windspeed) gribMaxi.windspeed = ghgc.windspeed;
+        gribMaxi.windspeed = Math.max(gribMaxi.windspeed, ghgc.windspeed);
+//      if (ghgc.winddir > gribMaxi.winddir) gribMaxi.winddir = ghgc.winddir;
+        gribMaxi.winddir = Math.max(gribMaxi.winddir, ghgc.winddir);
+//      if (ghgc.prmsl > gribMaxi.prmsl) gribMaxi.prmsl = ghgc.prmsl;
+        gribMaxi.prmsl = Math.max(gribMaxi.prmsl, ghgc.prmsl);
+//      if (ghgc.waves > gribMaxi.waves) gribMaxi.waves = ghgc.waves;
+        gribMaxi.waves = Math.max(gribMaxi.waves, ghgc.waves);
+//      if (ghgc.temp > gribMaxi.temp) gribMaxi.temp = ghgc.temp;
+        gribMaxi.temp = Math.max(gribMaxi.temp, ghgc.temp);
+//      if (ghgc.hgt500 > gribMaxi.hgt500) gribMaxi.hgt500 = ghgc.hgt500;
+        gribMaxi.hgt500 = Math.max(gribMaxi.hgt500, ghgc.hgt500);
+//      if (ghgc.rain > gribMaxi.rain) gribMaxi.rain = ghgc.rain;
+        gribMaxi.rain = Math.max(gribMaxi.rain, ghgc.rain);
       }
       else
         nbNull++;
     }
+//  System.out.println("1 - Mini:" + (gribMini.rain * 3600f) + ", maxi:" + (gribMaxi.rain * 3600f));
+    
     if (bsp != null)
     {
       for (Double d : bsp)
@@ -806,6 +822,8 @@ public class GRIBSlicePanel
       float tempscale   = (float)this.getHeight() / ((gribMaxi.temp) - (gribMini.temp));
       float rainscale   = (float)this.getHeight() / (gribMaxi.rain * 3600f);
       
+//    System.out.println("2 - RainScale:" + rainscale + ", mini:" + (gribMini.rain * 3600f) + ", maxi:" + (gribMaxi.rain * 3600f));
+      
 //    float dirScale    = (float)this.getHeight() / 360f;
       
       float bspscale    = 1f;
@@ -934,7 +952,8 @@ public class GRIBSlicePanel
         }
         if (displayRAIN)
         {
-          int y = (int)(this.getHeight() - (((gribPoint.rain * 3600f) - (gribMini.rain * 3600f))* rainscale));
+//        System.out.println("-> Rain (1) " + infoX + ":" + (gribPoint.rain * 3600f));
+          int y = (int)(this.getHeight() - (((gribPoint.rain * 3600f) /* - (gribMini.rain * 3600f) */)* rainscale));
           postit(gr, 
                  " " + prateFormat.format(gribPoint.rain * 3600f), 
                  infoX, y, 
@@ -1058,7 +1077,8 @@ public class GRIBSlicePanel
           // RAIN
           if (displayRAIN)
           {
-            y = (int)(this.getHeight() - ((rain - (gribMini.rain * 3600f))* rainscale));
+//          System.out.println("-> Rain (2) " + x + ":" + (rain));
+            y = (int)(this.getHeight() - (((rain) /* - (gribMini.rain * 3600f) */)* rainscale));
             gr.setColor((Color)ParamPanel.data[ParamData.RAIN_COLOR_IN_ROUTING][1]);
             if (prevXrain > -1 && prevYrain > -1)
               gr.drawLine(prevXrain, prevYrain, x, y);

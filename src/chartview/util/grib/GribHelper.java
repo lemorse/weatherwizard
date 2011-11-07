@@ -1254,6 +1254,7 @@ public class GribHelper
         if(refDate < wgdArray[i].getDate().getTime() || refDate >= wgdArray[i + 1].getDate().getTime())
           continue;
         wgd = wgdArray[i];
+//      System.out.println("Found date:" + wgdArray[i].getDate().toString());
         break;
       }
       wgd = wgdArray[i];
@@ -1304,6 +1305,7 @@ public class GribHelper
           gribCond.waves = wpd[l][g].getWHgt();
           gribCond.temp = wpd[l][g].getAirtmp(); // TODO seatmp
           gribCond.rain = wpd[l][g].getRain();
+//        System.out.println("l:" + l + ",g:" + g + ", temp:" + (gribCond.temp - 273) + ", rain:" + (gribCond.rain * 3600f));
           if (alreadySaidTooOld) 
             gribCond.comment = "TOO_OLD";
 
