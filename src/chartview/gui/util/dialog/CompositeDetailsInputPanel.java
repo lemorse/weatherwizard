@@ -1005,9 +1005,19 @@ public class CompositeDetailsInputPanel
         TimeZone tz = TimeZone.getDefault();
         TimeZone.setDefault(TimeZone.getTimeZone("127"));
         Date date = GPXUtil.getLastDate(gpxURL);
-        dtPanel.setDate(date);
-        date = GPXUtil.getFirstDate(gpxURL);
-        fromGPXLabel.setText("From " + date.toString()); //  + " to " + GPXUtil.getLastDate(gpxURL).toString());
+        if (date != null)
+        {
+          dtPanel.setDate(date);
+          date = GPXUtil.getFirstDate(gpxURL);
+          fromGPXLabel.setText("From " + date.toString()); //  + " to " + GPXUtil.getLastDate(gpxURL).toString());
+        }
+        else
+        {
+          upToCheckBox.setSelected(false);
+          upToCheckBox.setEnabled(false);
+          dtPanel.setEnabled(false);
+          fromGPXLabel.setEnabled(false);
+        }
         TimeZone.setDefault(tz); // Reset      
       }
       catch (Exception ex)

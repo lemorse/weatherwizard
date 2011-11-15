@@ -60,16 +60,30 @@ public class GPXUtil
               return GPX_NS;
             }
           };
-        NodeList nl = gpx.selectNodes("//gpx:trkpt[./gpx:type = 'WPT']", nsr);      
+        boolean track = true;
+        NodeList nl = gpx.selectNodes("//gpx:trkpt[./gpx:type = 'WPT']", nsr);     
+        if (nl.getLength() == 0) // Then try a route (was a track)
+        {
+          nl = gpx.selectNodes("//gpx:rtept[./gpx:type = 'WPT']", nsr);    
+          track = false;
+        }
         for (int i=0; i<nl.getLength(); i++)
         {
           XMLElement xe = (XMLElement)nl.item(i);
           double lat = Double.parseDouble(xe.getAttribute("lat"));
           double lon = Double.parseDouble(xe.getAttribute("lon"));
-          long time  = StringParsers.durationToDate(xe.selectNodes("./gpx:time", nsr).item(0).getTextContent());
-          int tuOffset = TimeUtil.getGMTOffset();
-          time += (tuOffset * (3600L * 1000L));
-          if (true)
+          long time  = -1L;
+          try
+          {
+            time = StringParsers.durationToDate(xe.selectNodes("./gpx:time", nsr).item(0).getTextContent());
+            int tuOffset = TimeUtil.getGMTOffset();
+            time += (tuOffset * (3600L * 1000L));
+          }
+          catch (Exception ex)
+          {
+            System.out.println("Finding time:" + ex.toString());
+          }
+          if (track)
           {
             TimeZone tz = TimeZone.getDefault();
             TimeZone.setDefault(TimeZone.getTimeZone("127"));
@@ -77,16 +91,17 @@ public class GPXUtil
             TimeZone.setDefault(tz); // Reset
           }
           boolean add = true;
-          if (from > -1L && time < from)
+          if (track && from > -1L && time < from)
             add = false;
-          if (add && to > -1L && time > to)
+          if (track && add && to > -1L && time > to)
             add = false;
           if (add)
           {
             GeoPoint gp = new GeoPoint(lat, lon);
             ret.add(gp);
           }
-        }   
+        }
+          
         JOptionPane.showMessageDialog(null, "Added " + ret.size() + " points", "GPX Parsing", JOptionPane.INFORMATION_MESSAGE);
       }
       catch (Exception ex)
@@ -144,7 +159,8 @@ public class GPXUtil
           xpath = "//gpx:trkseg[position() = 1]//gpx:trkpt[position() = 1]/gpx:time";
         
         NodeList nl = gpx.selectNodes(xpath, nsr);
-        String strDate = ((XMLElement)nl.item(0)).getTextContent();
+        String strDate = "";
+        strDate = ((XMLElement)nl.item(0)).getTextContent();
         long time  = StringParsers.durationToDate(strDate);
         int tuOffset = TimeUtil.getGMTOffset();
         time += (tuOffset * (3600L * 1000L));
