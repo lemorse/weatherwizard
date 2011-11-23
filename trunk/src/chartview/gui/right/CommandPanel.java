@@ -5,7 +5,7 @@ import astro.calc.GreatCircle;
 
 import chart.components.ui.ChartPanel;
 import chart.components.ui.ChartPanelInterface;
-import chart.components.ui.ChartPanelParentInterface;
+// import chart.components.ui.ChartPanelParentInterface;
 import chart.components.ui.ChartPanelParentInterface_II;
 import chart.components.util.World;
 
@@ -157,6 +157,7 @@ import org.w3c.dom.Text;
 
 import user.util.GeomUtil;
 
+@SuppressWarnings("serial")
 public class CommandPanel 
      extends JPanel
   implements ChartPanelParentInterface_II, 
