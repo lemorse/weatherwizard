@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/ChartComponents"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/CoreUtilities"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/JavaNMEAParser"/>
+	<classpathentry kind="lib" path="C:/_mywork/dev-corner/olivsoft/all-3rd-party/orai18n-collation.jar"/>
+	<classpathentry kind="lib" path="C:/_mywork/dev-corner/olivsoft/all-3rd-party/orai18n-mapping.jar"/>
+	<classpathentry kind="lib" path="C:/_mywork/dev-corner/olivsoft/all-3rd-party/xmlparserv2.jar"/>
+	<classpathentry kind="lib" path="C:/_mywork/dev-corner/olivsoft/all-3rd-party/jai_codec.jar"/>
+	<classpathentry kind="lib" path="C:/_mywork/dev-corner/olivsoft/all-3rd-party/jai_core.jar"/>
+	<classpathentry kind="lib" path="C:/_mywork/dev-corner/olivsoft/all-3rd-party/jai_windows-i586.jar"/>
+	<classpathentry kind="lib" path="C:/_mywork/dev-corner/olivsoft/all-3rd-party/rxtx.distrib/RXTXcomm.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/FullNMEAConsole"/>
+	<classpathentry kind="output" path="classes"/>
+</classpath>
