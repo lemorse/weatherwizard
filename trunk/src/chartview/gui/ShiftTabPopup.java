@@ -8,6 +8,7 @@ import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.ImageIcon;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.event.PopupMenuEvent;
@@ -32,8 +33,10 @@ public class ShiftTabPopup
     parent = caller;
     this.tab = tab;
     this.add(shiftRight = new JMenuItem(SHIFT_RIGHT));
+    shiftRight.setIcon(new ImageIcon(this.getClass().getResource("img/panright.gif")));
     shiftRight.addActionListener(this);
     this.add(shiftLeft = new JMenuItem(SHIFT_LEFT));
+    shiftLeft.setIcon(new ImageIcon(this.getClass().getResource("img/panleft.gif")));
     shiftLeft.addActionListener(this);
   }
 
