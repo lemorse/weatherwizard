@@ -5,7 +5,7 @@ import astro.calc.GreatCircle;
 
 import chart.components.ui.ChartPanel;
 import chart.components.ui.ChartPanelInterface;
-// import chart.components.ui.ChartPanelParentInterface;
+import chart.components.ui.ChartPanelParentInterface;
 import chart.components.ui.ChartPanelParentInterface_II;
 import chart.components.util.World;
 
@@ -157,7 +157,6 @@ import org.w3c.dom.Text;
 
 import user.util.GeomUtil;
 
-@SuppressWarnings("serial")
 public class CommandPanel 
      extends JPanel
   implements ChartPanelParentInterface_II, 
@@ -230,7 +229,7 @@ public class CommandPanel
   private final static int RAIN        = 5;
   
   private final static String[] dataLabels = { "WIND", "PRMSL", "500HGT", "AIRTMP", "WAVES", "RAIN" };
-  private final static String[] units      = { " kts", " mb",   " m",     "°C",     " m",    " mm/h" };
+  private final static String[] units      = { " kts", " mb",   " m",     "ï¿½C",     " m",    " mm/h" };
   private double[][] boundaries = new double[dataLabels.length][2];
   
   private JLabel statusLabel = new JLabel("");
@@ -4291,9 +4290,18 @@ public class CommandPanel
   private final static String GLOBE       = "GLOBE";
   private final static String SATELLITE   = "SATELLITE";
   
+  @SuppressWarnings("CallToThreadDumpStack")
   public void restoreComposite(String fileName)
   {
-    restoreComposite(fileName, TwoFilePanel.EVERY_THING, true);
+    try
+    {
+      restoreComposite(fileName, TwoFilePanel.EVERY_THING, true);
+    }
+    catch (Exception ex)
+    {
+      ex.printStackTrace();
+      JOptionPane.showMessageDialog(this, ex.getLocalizedMessage(), "Restoring Composite", JOptionPane.ERROR_MESSAGE);
+    }
   }
   
   public void restoreComposite(String fileName, String option, boolean withBoatAndTrack)
@@ -4521,6 +4529,7 @@ public class CommandPanel
               catch (Exception e)
               {
                 WWContext.getInstance().fireLogging(WWGnlUtilities.buildMessage("file-not-found", new String[] { faxName }) + "\n");
+                throw e;
               }
               ft[i] = new FaxType(faxName, c, Boolean.valueOf(true), Boolean.valueOf(true), imageRotation, faxOrigin, faxTitle, faxImage[i].colorChange);
               ft[i].setRank(i+1);
