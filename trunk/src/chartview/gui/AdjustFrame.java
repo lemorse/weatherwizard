@@ -35,6 +35,7 @@ import coreutilities.Utilities;
 import java.awt.AlphaComposite;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GradientPaint;
@@ -64,6 +65,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
@@ -98,9 +100,6 @@ import user.util.TimeUtil;
 public class AdjustFrame
   extends JFrame
 {
-  @SuppressWarnings("compatibility:532649159250675893")
-  private static final long serialVersionUID = -6756364686697947626L;
-  
   private static final String FRAME_BASE_TITLE = WWGnlUtilities.buildMessage("product-name");
   private static final SimpleDateFormat SDF_FOR_TITLE = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss");
   
@@ -223,6 +222,8 @@ public class AdjustFrame
 
   protected AdjustFrame instance = this;
   
+  private boolean goAnimate = false;
+  
   public AdjustFrame()
   {
     borderLayout = new BorderLayout();
@@ -255,6 +256,78 @@ public class AdjustFrame
     }
   }
 
+  public void shiftTabRight(int tabIdx)
+  {   
+//  System.out.println("Shifting tab " + tabIdx + " to " + (tabIdx + 1) + " (out of " + masterTabPane.getTabCount() + ")");
+    try
+    {
+      Component compOne = masterTabPane.getComponentAt(tabIdx);
+      String titleOne   = masterTabPane.getTitleAt(tabIdx);
+      
+      Component compTwo = masterTabPane.getComponentAt(tabIdx + 1);
+      String titleTwo   = masterTabPane.getTitleAt(tabIdx + 1);
+  
+//    System.out.println("Swaping Left  [" + titleOne + "] with Right [" + titleTwo + "]");
+      // Swap
+      masterTabPane.setComponentAt(tabIdx + 1, new JPanel()); // Avoid duplicated components across the tabs
+      masterTabPane.setComponentAt(tabIdx, compTwo);
+      ((CompositeTabComponent)masterTabPane.getTabComponentAt(tabIdx)).setTabTitle(titleTwo);
+      masterTabPane.setTitleAt(tabIdx, titleTwo);
+      
+      try
+      {
+        masterTabPane.setComponentAt(tabIdx + 1, compOne);
+        ((CompositeTabComponent)masterTabPane.getTabComponentAt(tabIdx + 1)).setTabTitle(titleOne);
+        masterTabPane.setTitleAt(tabIdx + 1, titleOne);
+      }
+      catch (Exception ex)
+      {
+        ex.printStackTrace();
+      }        
+      masterTabPane.setSelectedIndex(tabIdx + 1);
+    }
+    catch (Exception ex)
+    {
+      ex.printStackTrace();
+    }
+  }
+  
+  public void shiftTabLeft(int tabIdx)
+  {
+//  System.out.println("Shifting tab " + tabIdx + " to " + (tabIdx - 1) + " (out of " + masterTabPane.getTabCount() + ")");
+    try
+    {
+      Component compOne = masterTabPane.getComponentAt(tabIdx);
+      String titleOne   = masterTabPane.getTitleAt(tabIdx);
+      
+      Component compTwo = masterTabPane.getComponentAt(tabIdx - 1);
+      String titleTwo   = masterTabPane.getTitleAt(tabIdx - 1);
+    
+//    System.out.println("Swaping Right  [" + titleOne + "] with Left [" + titleTwo + "]");
+      // Swap
+      masterTabPane.setComponentAt(tabIdx - 1, new JPanel()); // Avoid duplicated components across the tabs
+      masterTabPane.setComponentAt(tabIdx, compTwo);
+      ((CompositeTabComponent)masterTabPane.getTabComponentAt(tabIdx)).setTabTitle(titleTwo);
+      masterTabPane.setTitleAt(tabIdx, titleTwo);
+      
+      try
+      {
+        masterTabPane.setComponentAt(tabIdx - 1, compOne);
+        ((CompositeTabComponent)masterTabPane.getTabComponentAt(tabIdx - 1)).setTabTitle(titleOne);
+        masterTabPane.setTitleAt(tabIdx - 1, titleOne);
+      }
+      catch (Exception ex)
+      {
+        ex.printStackTrace();
+      }          
+      masterTabPane.setSelectedIndex(tabIdx - 1);
+    }
+    catch (Exception ex)
+    {
+      ex.printStackTrace();
+    }
+  }
+  
   private void askAndWaitForLoadAtStartup(final String compositeName, int timeout)
   {
     final LoadAtStartupPanel specialPanel = new LoadAtStartupPanel(compositeName);
@@ -359,6 +432,8 @@ public class AdjustFrame
       {
         public void onClose()
         {
+          int nbT = masterTabPane.getTabCount() - 2;
+          WWContext.getInstance().fireSetOpenTabNum(nbT);            
           if (masterTabPane.getTabCount() > 2)
           {
             masterTabPane.remove(0);          
@@ -394,29 +469,32 @@ public class AdjustFrame
          }
          if ((mask & MouseEvent.BUTTON2_MASK) != 0 || (mask & MouseEvent.BUTTON3_MASK) != 0) // Right click
          {
-           System.out.println("Right-Click on Tab " + ((JTabbedPane)mouseEvent.getSource()).getSelectedIndex());
+//         System.out.println("Right-Click on Tab #" + ((JTabbedPane)mouseEvent.getSource()).getSelectedIndex());
            mouseEvent.consume(); // Trap
-           // Remove the tab
-           if (false)
+           // Show menu to shift the tab right or left when appropriate
+           int selectedIndex = ((JTabbedPane)mouseEvent.getSource()).getSelectedIndex();
+           if (((JTabbedPane)mouseEvent.getSource()).getTabCount() > 2 && 
+               selectedIndex < ((JTabbedPane)mouseEvent.getSource()).getTabCount() - 1) // More than one tab, clicked
            {
-             int selectedIndex = ((JTabbedPane)mouseEvent.getSource()).getSelectedIndex();
-             if (((JTabbedPane)mouseEvent.getSource()).getTabCount() > 2 && selectedIndex < ((JTabbedPane)mouseEvent.getSource()).getTabCount() - 1)
-             {
-               JTabbedPane tp = (JTabbedPane)mouseEvent.getSource();             
-               ((CompositeTabbedPane)tp.getSelectedComponent()).removeListener();
-               tp.remove(selectedIndex);          
-               int newIndex = selectedIndex - 1;
-               while (newIndex < 0) newIndex++;
-               tp.setSelectedIndex(newIndex);
-             }
-             else
-               ((JTabbedPane)mouseEvent.getSource()).setSelectedIndex(0);
+//             JTabbedPane tp = (JTabbedPane)mouseEvent.getSource();             
+             ShiftTabPopup stp = new ShiftTabPopup(instance, selectedIndex);
+             if (selectedIndex == 0)
+               stp.enableShiftLeft(false);
+             if (selectedIndex == ((JTabbedPane)mouseEvent.getSource()).getTabCount() - 2)
+               stp.enableShiftRight(false);
+             if (selectedIndex > 0)
+               stp.enableShiftLeft(true);
+             if (selectedIndex < ((JTabbedPane)mouseEvent.getSource()).getTabCount() - 2)
+               stp.enableShiftRight(true);
+             stp.show(masterTabPane, mouseEvent.getX(), mouseEvent.getY());               
            }
+           else
+             ((JTabbedPane)mouseEvent.getSource()).setSelectedIndex(0);
          }
          else // Usual left-click
          {
     //     System.out.println("Click on Tab " + ((JTabbedPane)mouseEvent.getSource()).getSelectedIndex());
-           if (((JTabbedPane)mouseEvent.getSource()).getSelectedIndex() == ((JTabbedPane)mouseEvent.getSource()).getTabCount() - 1) // Last
+           if (((JTabbedPane)mouseEvent.getSource()).getSelectedIndex() == ((JTabbedPane)mouseEvent.getSource()).getTabCount() - 1) // Last tab clicked
            {
              addCompositeTab();
            }
@@ -1083,6 +1161,39 @@ public class AdjustFrame
             layers.add(grayTransparentPanel, grayLayerIndex); // Add gray layer
           layers.repaint();
         }
+        
+        @Override
+        public void scrollThroughTabs() 
+        {
+          if (!goAnimate) // That is a start
+          {
+//          System.out.println("Starting Tab Animation");
+            goAnimate = true;
+            Thread tabThread = new Thread()
+              {
+                public void run()
+                {
+                  while (goAnimate)
+                  {
+                    int nbTab = masterTabPane.getTabCount() - 1;
+                    int selectedTab = masterTabPane.getSelectedIndex();
+                    selectedTab += 1;
+                    if (selectedTab > (nbTab - 1))
+                      selectedTab = 0;
+                    masterTabPane.setSelectedIndex(selectedTab);
+                    try { Thread.sleep(2000L); } catch (Exception ex) {}                 
+                  }
+//                System.out.println("Done with Tab animation");
+                }
+              };
+            tabThread.start();
+          }
+          else
+          {
+            goAnimate = false; // This is a stop
+//          System.out.println("Stoping Tab Animation");
+          }
+        }
       });
   }
 
@@ -1100,6 +1211,8 @@ public class AdjustFrame
       {
         public void onClose()
         {
+          int nbT = masterTabPane.getTabCount() - 2;
+          WWContext.getInstance().fireSetOpenTabNum(nbT);            
           if (masterTabPane.getTabCount() > 2)
           {
             nctp.removeListener();
@@ -1116,6 +1229,7 @@ public class AdjustFrame
       });
     // masterTabPane.setToolTipTextAt(masterTabPane.getTabCount() - 2, "Right-click to close");
     masterTabPane.setSelectedIndex(masterTabPane.getTabCount() - 2);    
+    WWContext.getInstance().fireSetOpenTabNum(masterTabPane.getTabCount() - 1);
   }
   
   private void buildChartMenu()
