@@ -193,4 +193,7 @@ public abstract class ApplicationEventListener implements EventListener
   
   public void setGRIBData(int twd, float tws, float prmsl, float hgt500, float wh, float t, float prate) {}
   public void gribDataPanelClosed() {}
+  
+  public void setOpenTabNum(int i) {}
+  public void scrollThroughTabs() {}
 }
