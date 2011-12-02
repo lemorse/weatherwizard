@@ -47,6 +47,7 @@ public class ChartCommandPanelToolBar
   private JRadioButton arrowRadioButton = new JRadioButton();
   
   private JButton expandCollapseControlButton = new JButton();
+  private JButton scrollThruOpenTabsButton = new JButton();
   private boolean controlExpanded = false;
 
   public static final int DD_ZOOM           = 0;
@@ -82,6 +83,10 @@ public class ChartCommandPanelToolBar
            default:
              break;
          }
+       }
+       public void setOpenTabNum(int i) 
+       {
+         scrollThruOpenTabsButton.setEnabled(i > 1);
        }
      };
   
@@ -162,12 +167,26 @@ public class ChartCommandPanelToolBar
         }
       });
     
+    scrollThruOpenTabsButton.setIcon(new ImageIcon(this.getClass().getResource("img/clustering.png")));
+    scrollThruOpenTabsButton.setToolTipText(WWGnlUtilities.buildMessage("scroll-thru-tabs"));
+    scrollThruOpenTabsButton.setPreferredSize(new Dimension(24, 24));
+    scrollThruOpenTabsButton.setBorderPainted(false);
+    scrollThruOpenTabsButton.setEnabled(false);
+    scrollThruOpenTabsButton.addActionListener(new ActionListener()
+      {
+        public void actionPerformed(ActionEvent e)
+        {
+          WWContext.getInstance().fireScrollThroughTabs();
+        }
+      });
+      
     this.add(zoomInButton);
     this.add(zoomOutButton);
     this.add(reloadButton);
     
     this.add(extraComponentHolder);
     extraComponentHolder.add(radioButtonHolder, BorderLayout.WEST);
+    expandCollapseHolder.add(scrollThruOpenTabsButton);
     expandCollapseHolder.add(expandCollapseControlButton);
     extraComponentHolder.add(expandCollapseHolder, BorderLayout.EAST);
     
