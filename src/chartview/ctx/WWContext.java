@@ -1023,6 +1023,24 @@ public class WWContext
     }    
   }
 
+  public void fireSetOpenTabNum(int n)
+  {    
+    for (int i = 0; i < WWContext.getInstance().getListeners().size(); i++)
+    {
+      ApplicationEventListener l = WWContext.getInstance().getListeners().get(i);
+      l.setOpenTabNum(n);
+    }    
+  }
+  
+  public void fireScrollThroughTabs()
+  {    
+    for (int i = 0; i < WWContext.getInstance().getListeners().size(); i++)
+    {
+      ApplicationEventListener l = WWContext.getInstance().getListeners().get(i);
+      l.scrollThroughTabs();
+    }    
+  }
+  
   public void setUseGRIBWindSpeedTransparency(Boolean useGRIBWindSpeedTransparency)
   {
     this.useGRIBWindSpeedTransparency = useGRIBWindSpeedTransparency;
