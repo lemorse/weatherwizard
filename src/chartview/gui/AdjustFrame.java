@@ -436,6 +436,7 @@ public class AdjustFrame
           WWContext.getInstance().fireSetOpenTabNum(nbT);            
           if (masterTabPane.getTabCount() > 2)
           {
+            masterTabPane.setComponentAt(0, null);
             masterTabPane.remove(0);          
             firstTab.removeListener();
             int newIndex = 0 - 1;
@@ -1212,11 +1213,23 @@ public class AdjustFrame
         public void onClose()
         {
           int nbT = masterTabPane.getTabCount() - 2;
-          WWContext.getInstance().fireSetOpenTabNum(nbT);            
+          WWContext.getInstance().fireSetOpenTabNum(nbT);
+          int componentIndex = -1;
           if (masterTabPane.getTabCount() > 2)
           {
+            for (int i=0; i<masterTabPane.getTabCount(); i++)
+            {
+              if (masterTabPane.getComponentAt(i) != null && masterTabPane.getComponentAt(i).equals(nctp))
+              {
+//              System.out.println("Found Component at pos " + i);
+                componentIndex = i;
+              }
+            }
             nctp.removeListener();
-            masterTabPane.remove(nctp);          
+            if (componentIndex != -1)
+              masterTabPane.setComponentAt(componentIndex, null);
+//          masterTabPane.remove(nctp);
+            masterTabPane.remove(componentIndex);
             int newIndex = masterTabPane.getTabCount() - 2;
             while (newIndex < 0) newIndex++;
             masterTabPane.setSelectedIndex(newIndex);
