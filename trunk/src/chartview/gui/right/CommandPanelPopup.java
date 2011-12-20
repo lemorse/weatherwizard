@@ -1067,7 +1067,7 @@ public class CommandPanelPopup
           else // Thread
           {
             final UserExitAction t = task;
-            Thread ueThread = new Thread()
+            Thread ueThread = new Thread("user-exit-thread")
               {
                 public void run()
                 {

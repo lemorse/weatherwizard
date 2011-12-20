@@ -19,7 +19,7 @@ public class BoatPositionUDPClient implements BoatPositionClient
     final WW_NMEAReader reader = new WW_NMEAReader(false, this, CustomNMEAClient.UDP_OPTION, udpPortNumber,  "");     
 //  reader.setParent(this);
     
-    Thread t = new Thread()
+    Thread t = new Thread("udp-port-reader")
       {
         public void run()
         {

@@ -444,7 +444,7 @@ public class CompositeTabbedPane
 
 //    System.out.println("InputPanel OK");
       WWContext.getInstance().fireSetLoading(true);
-      Thread loader = new Thread()
+      Thread loader = new Thread("composite-data-loader")
         {
           public void run()
           {
@@ -643,7 +643,7 @@ public class CompositeTabbedPane
       }
       if (go)
       {
-        Thread downLoadThread = new Thread()
+        Thread downLoadThread = new Thread("internet-fax-loader")
         {
           public void run()
           {
@@ -689,7 +689,7 @@ public class CompositeTabbedPane
       }
       if (go)
       {
-        Thread downLoadThread = new Thread()
+        Thread downLoadThread = new Thread("grib-downloader")
         {
           public void run()
           {
@@ -851,7 +851,7 @@ public class CompositeTabbedPane
           doc = parser.getDocument();
         }
         final NodeList downloadableDocuments = doc.selectNodes("/fax-collection/*");
-        Thread autoDownload = new Thread()
+        Thread autoDownload = new Thread("auto-download-thread")
         {
           public void run()
           {
@@ -1009,7 +1009,7 @@ public class CompositeTabbedPane
     
     public OscillateThread(String txt, boolean b)
     {
-      super();
+      super("oscillator-2");
       this.txt = txt;
       this.b = b;
     }

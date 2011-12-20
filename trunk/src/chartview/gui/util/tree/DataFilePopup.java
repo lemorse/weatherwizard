@@ -167,7 +167,7 @@ public class DataFilePopup
 
   private void refreshTree()
   {
-    Thread refreshThread = new Thread()
+    Thread refreshThread = new Thread("tree-refresher")
     {
       public void run()
       {

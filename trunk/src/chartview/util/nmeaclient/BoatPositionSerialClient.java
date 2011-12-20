@@ -17,7 +17,7 @@ public class BoatPositionSerialClient implements BoatPositionClient
     final WW_NMEAReader reader = new WW_NMEAReader(false, this, serialPortName, 4800, ""); 
 //  reader.setParent(this);
     
-    Thread t = new Thread()
+    Thread t = new Thread("serial-port-reader")
       {
         public void run()
         {

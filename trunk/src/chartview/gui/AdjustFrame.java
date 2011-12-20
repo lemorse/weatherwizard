@@ -334,7 +334,7 @@ public class AdjustFrame
     final WWGnlUtilities.SpecialBool imDone = new WWGnlUtilities.SpecialBool(false);
     
     final Thread me = Thread.currentThread();  
-    Thread thread = new Thread()
+    Thread thread = new Thread("startup-loader")
       {
         public void run()
         {
@@ -735,12 +735,12 @@ public class AdjustFrame
         {
           public void actionPerformed(ActionEvent ae)
           {
-            Thread t = new Thread()
+            Thread t = new Thread("unused-document-detector")
               {
                 public void run()
                 {
-              WWGnlUtilities.detectUnusedDocuments();
-              WWContext.getInstance().fireSetLoading(false, "Detecting..."); // LOCALIZE
+                  WWGnlUtilities.detectUnusedDocuments();
+                  WWContext.getInstance().fireSetLoading(false, "Detecting..."); // LOCALIZE
                 }
               };
           WWContext.getInstance().fireSetLoading(true, "Detecting..."); // LOCALIZE
@@ -1041,7 +1041,7 @@ public class AdjustFrame
     getContentPane().setLayout(borderLayout);
     setSize(new Dimension(1000, 700));
 
-    Thread pendule = new Thread()
+    Thread pendule = new Thread("clock")
     {
       public void run()
       {
@@ -1170,7 +1170,7 @@ public class AdjustFrame
           {
 //          System.out.println("Starting Tab Animation");
             goAnimate = true;
-            Thread tabThread = new Thread()
+            Thread tabThread = new Thread("tab-animator")
               {
                 public void run()
                 {
@@ -1511,7 +1511,7 @@ public class AdjustFrame
         ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().setGPXData(null);
 //    System.out.println("InputPanel OK");
       WWContext.getInstance().fireSetLoading(true);
-      Thread loader = new Thread()
+      Thread loader = new Thread("composite-loader")
         {
           public void run()
           {
@@ -1718,7 +1718,7 @@ public class AdjustFrame
       }
       if (go)
       {
-        Thread downLoadThread = new Thread()
+        Thread downLoadThread = new Thread("downloader")
         {
           public void run()
           {
@@ -1764,7 +1764,7 @@ public class AdjustFrame
       }
       if (go)
       {
-        Thread downLoadThread = new Thread()
+        Thread downLoadThread = new Thread("grib-getter")
         {
           public void run()
           {
@@ -1926,7 +1926,7 @@ public class AdjustFrame
           doc = parser.getDocument();
         }
         final NodeList downloadableDocuments = doc.selectNodes("/fax-collection/*");
-        Thread autoDownload = new Thread()
+        Thread autoDownload = new Thread("auto-downloader")
         {
           public void run()
           {
@@ -2216,7 +2216,7 @@ public class AdjustFrame
     
     public OscillateThread(String txt, boolean b)
     {
-      super();
+      super("oscillator");
       this.txt = txt;
       this.b = b;
     }
