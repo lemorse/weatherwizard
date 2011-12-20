@@ -184,7 +184,7 @@ public class JTreeFilePanel
                 final DefaultMutableTreeNode dtn = (DefaultMutableTreeNode)children.nextElement();
                 if (dtn instanceof DataFileTreeNode && !(dtn instanceof DirectoryTreeNode))
                 {
-                  Thread lazyLoad = new Thread()
+                  Thread lazyLoad = new Thread("bubble-generator")
                     {
                       public void run()
                       {

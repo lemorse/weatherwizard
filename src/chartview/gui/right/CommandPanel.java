@@ -229,7 +229,7 @@ public class CommandPanel
   private final static int RAIN        = 5;
   
   private final static String[] dataLabels = { "WIND", "PRMSL", "500HGT", "AIRTMP", "WAVES", "RAIN" };
-  private final static String[] units      = { " kts", " mb",   " m",     "ï¿½C",     " m",    " mm/h" };
+  private final static String[] units      = { " kts", " mb",   " m",     "°C",     " m",    " mm/h" };
   private double[][] boundaries = new double[dataLabels.length][2];
   
   private JLabel statusLabel = new JLabel("");
@@ -808,7 +808,7 @@ public class CommandPanel
 
   private void adjustFuzziness()
   {
-    Thread adjustThread = new Thread()
+    Thread adjustThread = new Thread("fuzziness-adjuster")
       {
         public void run()
         {
@@ -1951,7 +1951,7 @@ public class CommandPanel
             {
               final boolean updateComposite = update;
 //            Runnable heavyRunnable = new Runnable() // Show progress bar
-              Thread heavyRunnable = new Thread() // Show progress bar
+              Thread heavyRunnable = new Thread("progress-bar") // Show progress bar
               {
   //            ProgressMonitor monitor = null;
                 
@@ -2322,7 +2322,7 @@ public class CommandPanel
                                                             "Open Composite");
             if (fileName != null && fileName.trim().length() > 0)
             {
-              Thread loader = new Thread()
+              Thread loader = new Thread("composite-loader")
               {
                 public void run()
                 {
@@ -2376,7 +2376,7 @@ public class CommandPanel
               if (dyn)
               {
 //              Runnable heavyRunnable = new Runnable()
-                Thread heavyRunnable = new Thread()
+                Thread heavyRunnable = new Thread("pattern-loader")
                 {
   //              ProgressMonitor monitor = null;
   
@@ -2457,7 +2457,7 @@ public class CommandPanel
               }
               else
               {
-                Thread loader = new Thread()
+                Thread loader = new Thread("non-dynamic-pattern-loader")
                 {
                   public void run()
                   {
@@ -2850,7 +2850,7 @@ public class CommandPanel
                 WWContext.getInstance().fireSetLoading(false);
               }
             };
-            new Thread(heavyRunnable).start();
+            new Thread(heavyRunnable, "composite-restorer").start();
   
             // Apply values
             if (chartPanel.getProjection() != ChartPanel.GLOBE_VIEW &&
@@ -2888,7 +2888,7 @@ public class CommandPanel
             {
               nmeaPollingInterval = ((Integer) ParamPanel.data[ParamData.NMEA_POLLING_FREQ][1]).intValue();
               final boolean KEEP_LOOPING = false;
-              nmeaThread = new Thread()
+              nmeaThread = new Thread("nmea-data-thread")
               {
                 public void run()
                 {
@@ -4261,7 +4261,7 @@ public class CommandPanel
       }
       else
       {              
-        Thread googleThread = new Thread()
+        Thread googleThread = new Thread("google-thread")
         {
           public void run()
           {
@@ -4290,7 +4290,6 @@ public class CommandPanel
   private final static String GLOBE       = "GLOBE";
   private final static String SATELLITE   = "SATELLITE";
   
-  @SuppressWarnings("CallToThreadDumpStack")
   public void restoreComposite(String fileName)
   {
     try
@@ -6380,7 +6379,7 @@ public class CommandPanel
     {
       final boolean showProgressMonitor = true;
       // the Routing
-      isochronThread = new Thread()
+      isochronThread = new Thread("routing-thread")
       {
         public void run()
         {
@@ -8033,7 +8032,7 @@ public class CommandPanel
   {
     public IsoPointsThread(GribHelper.GribConditionData gd)
     {
-      super();
+      super("contour-line-detector");
       this.gribData = gd;
     }
     GribHelper.GribConditionData gribData = null;
@@ -8095,6 +8094,7 @@ public class CommandPanel
   {
     public AnimateThread()
     {
+      super("grib-animator");
 //    originalwgd = wgd;
 //    wgd = GribHelper.smoothGRIBinTime(wgd, 12); 
     }

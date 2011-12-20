@@ -66,14 +66,14 @@ public class GribRequestPopup
 
   private void refreshTree()
   {
-    Thread refreshThread = new Thread()
+    Thread refreshThread = new Thread("tree-reloader")
       {
         public void run()
         {
-        WWContext.getInstance().fireSetLoading(true, WWGnlUtilities.buildMessage("refreshing"));
+          WWContext.getInstance().fireSetLoading(true, WWGnlUtilities.buildMessage("refreshing"));
           parent.reloadTree();
   //      ((DefaultTreeModel)parent.getJTree().getModel()).reload(parent.getRoot());
-        WWContext.getInstance().fireSetLoading(false, WWGnlUtilities.buildMessage("refreshing"));
+          WWContext.getInstance().fireSetLoading(false, WWGnlUtilities.buildMessage("refreshing"));
         }
       };
     refreshThread.start();

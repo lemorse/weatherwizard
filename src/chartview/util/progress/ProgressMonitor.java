@@ -91,7 +91,7 @@ public class ProgressMonitor implements Serializable
 
   public synchronized void addChangeListener(final ChangeListener listener)
   {
-    Thread t = new Thread()
+    Thread t = new Thread("listener-adder")
       {
         public void run()
         {
@@ -110,7 +110,7 @@ public class ProgressMonitor implements Serializable
 
   public synchronized void removeChangeListener(final ChangeListener listener)
   {
-    Thread t = new Thread()
+    Thread t = new Thread("listener-remover")
       {
         public void run()
         {
@@ -129,7 +129,7 @@ public class ProgressMonitor implements Serializable
   
   public synchronized void removeAllListeners()
   {
-    Thread t = new Thread()
+    Thread t = new Thread("all-listener-remover")
       {
         public void run()
         {
@@ -148,7 +148,7 @@ public class ProgressMonitor implements Serializable
   {
     /* Java bug? (ConcurrentModificationException) */
     
-    Thread t = new Thread()
+    Thread t = new Thread("event-firer")
       {
         public void run()
         {

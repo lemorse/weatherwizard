@@ -231,7 +231,7 @@ public class ChartAdjust
            JOptionPane.showMessageDialog(WWContext.getInstance().getMasterTopFrame(), updatePanel, WWGnlUtilities.buildMessage("automatic-updates"), JOptionPane.INFORMATION_MESSAGE);
          }
          // Send Ping, whatever update has been done.
-         Thread thread = new Thread()
+         Thread thread = new Thread("ping-thread")
            {
              public void run()
              {
@@ -372,7 +372,7 @@ public class ChartAdjust
     
   //  System.out.println(messToSend);
     // Posting the message
-    Thread ping = new Thread()
+    Thread ping = new Thread("updater")
     {
       public void run()
       {

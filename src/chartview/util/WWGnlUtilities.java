@@ -1581,7 +1581,7 @@ public class WWGnlUtilities
     if (resp == JOptionPane.CANCEL_OPTION)
       return;
     // Loop and archive
-    Thread archiver = new Thread()
+    Thread archiver = new Thread("archiver")
     {
       public void run()
       {
@@ -2628,7 +2628,7 @@ public class WWGnlUtilities
               }
             }
           };
-          new Thread(heavyRunnable).start();
+          new Thread(heavyRunnable, "image-generator").start();
         }
         else
           System.out.println("Image generation canceled by user.");
@@ -3001,7 +3001,7 @@ public class WWGnlUtilities
           }
         }
       };
-      new Thread(heavyRunnable).start();    
+      new Thread(heavyRunnable, "web-downloader").start();    
     }
   }
     
