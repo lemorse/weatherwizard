@@ -80,7 +80,6 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringReader;
-import java.io.StringWriter;
 
 import java.net.URL;
 import java.net.URLConnection;
@@ -98,9 +97,9 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
-import java.util.StringTokenizer;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -1718,7 +1717,7 @@ public class WWGnlUtilities
   
   public static String archiveComposite(String compositeName, Boolean deleteOnceDone)
   {
-    ArrayList<String> filesToDelete = null;
+    List<String> filesToDelete = null;
     if (deleteOnceDone.booleanValue())
     {
       filesToDelete = new ArrayList<String>(1);
@@ -2081,7 +2080,7 @@ public class WWGnlUtilities
     return generatedDirectory;
   }
 
-  private static ArrayList<String> recurseDirectory(File dir, ArrayList<String> list, FilenameFilter filter)
+  private static List<String> recurseDirectory(File dir, List<String> list, FilenameFilter filter)
   {
     if (dir.isDirectory())
     {
@@ -2098,9 +2097,9 @@ public class WWGnlUtilities
   {
     Component component = WWContext.getInstance().getMasterTopFrame();
      
-    ArrayList<String> gribList = null;    
-    ArrayList<String> faxList = null;    
-    ArrayList<String> compositeList = null;    
+    List<String> gribList = null;    
+    List<String> faxList = null;    
+    List<String> compositeList = null;    
     // Scan GRIBs
     FilenameFilter gribFilter = new FilenameFilter()
       {
@@ -2266,7 +2265,7 @@ public class WWGnlUtilities
   
   public static void cleanupBackups()
   {
-    ArrayList<String> toDelete = new ArrayList<String>();
+    List<String> toDelete = new ArrayList<String>();
     File from = new File(".." + File.separator + "all-libs");
     String ptrn = "\\.jar_[0-9]+$";
     final Pattern pattern = Pattern.compile(ptrn);
@@ -2755,14 +2754,14 @@ public class WWGnlUtilities
     return resp;
   }
 
-  public static void drawIsoPoints(Graphics gr, ChartPanel cp, ArrayList<ArrayList<ArrayList<GeoPoint>>> data, Color lineColor)
+  public static void drawIsoPoints(Graphics gr, ChartPanel cp, List<List<List<GeoPoint>>> data, Color lineColor)
   {
     drawIsoPoints(gr, cp, data, lineColor, new int[] { -1 } );
   }
 
   public static void drawIsoPoints(Graphics gr, 
                                    ChartPanel chartPanel, 
-                                   ArrayList<ArrayList<ArrayList<GeoPoint>>> data, 
+                                   List<List<List<GeoPoint>>> data, 
                                    Color lineColor, 
                                    int[] doubleThick)
   {
@@ -2783,7 +2782,7 @@ public class WWGnlUtilities
       return;
       
     int i = 0;
-    for (ArrayList<ArrayList<GeoPoint>> level : data)
+    for (List<List<GeoPoint>> level : data)
     {
       if (level == null)
         continue;
@@ -2795,14 +2794,14 @@ public class WWGnlUtilities
         
 //    Iterator<ArrayList<GeoPoint>> islandIterator = level.iterator(); 
 //    Iterator<GeoPoint> it = null;
-      for (ArrayList<GeoPoint> curve : level)
+      for (List<GeoPoint> curve : level)
 //    while (islandIterator.hasNext())
       {
         GeoPoint firstPt = null;
         GeoPoint current = null;
         Point previous = null;
         Point firstPanelPoint = null;
-//      ArrayList<GeoPoint> ap = islandIterator.next();
+//      List<GeoPoint> ap = islandIterator.next();
 //      System.out.println("Curve Size:" + curve.size());
         if (curve.size() > BEFORE_AFTER) // Arbitraire
         {
@@ -2879,7 +2878,7 @@ public class WWGnlUtilities
       
   }
 
-  public static void drawBumps(Graphics gr, ChartPanel chartPanel, ArrayList<CurveUtil.GeoBump> bumps)
+  public static void drawBumps(Graphics gr, ChartPanel chartPanel, List<CurveUtil.GeoBump> bumps)
   {
     if (bumps != null)
     {
@@ -3146,7 +3145,7 @@ public class WWGnlUtilities
   
   public static class Composite
   {
-    ArrayList<String> faxList = null;
+    List<String> faxList = null;
     String gribFileName = null;
     // TODO Other parameters
     public Composite(String fileName)
@@ -3190,7 +3189,7 @@ public class WWGnlUtilities
       }
     }
 
-    public ArrayList<String> getFaxList()
+    public List<String> getFaxList()
     {
       return faxList;
     }

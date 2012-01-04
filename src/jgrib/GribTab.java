@@ -172,7 +172,7 @@ public class GribTab implements Comparable
    private void init (BufferedReader br)
          throws IOException
    {
-      ArrayList<String> paraTable = new ArrayList<String>(300);
+      List<String> paraTable = new ArrayList<String>(300);
       String line = br.readLine();
       String[] tableDefArr = SmartStringArray.split(":", line);
 

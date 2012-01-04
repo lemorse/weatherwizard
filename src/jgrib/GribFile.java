@@ -458,7 +458,7 @@ public class GribFile
   @Deprecated
   public Date[] getDatesForTypeGridLevel(String aType, GribRecordGDS aGDS, String aLevel)
   {
-    ArrayList<Date> gdList = new ArrayList<Date>();
+    List<Date> gdList = new ArrayList<Date>();
 
     for (int i = 0; i < lightRecords.length; i++)
     {
@@ -485,7 +485,7 @@ public class GribFile
    */
   public Date[] getDatesForTypeGridLevel(String aType, GribRecordGDS aGDS, GribPDSLevel aLevel)
   {
-    ArrayList<Date> dateList = new ArrayList<Date>();
+    List<Date> dateList = new ArrayList<Date>();
 
     for (int i = 0; i < lightRecords.length; i++)
     {

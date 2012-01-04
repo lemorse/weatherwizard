@@ -12,9 +12,9 @@ import chartview.util.WWGnlUtilities;
 import java.awt.Color;
 import java.awt.Point;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.EventListener;
+import java.util.List;
 
 public abstract class ApplicationEventListener implements EventListener 
 {
@@ -128,18 +128,18 @@ public abstract class ApplicationEventListener implements EventListener
   public void setStatus(String str) {}
   public void setGribSmoothing(int i) {}
   public void setGribTimeSmoothing(int i) {}
-  public void new500mbObj(ArrayList<Point> al) {}
+  public void new500mbObj(List<Point> al) {}
   public void no500mbObj() {}
-  public void newPrmslObj(ArrayList<Point> al) {}
+  public void newPrmslObj(List<Point> al) {}
   public void noPrmslObj() {}
-  public void newTmpObj(ArrayList<Point> al) {}
+  public void newTmpObj(List<Point> al) {}
   public void noTmpObj() {}
-  public void newWaveObj(ArrayList<Point> al) {}
+  public void newWaveObj(List<Point> al) {}
   public void noWaveObj() {}
-  public void newRainObj(ArrayList<Point> al) {}
+  public void newRainObj(List<Point> al) {}
   public void noRainObj() {}
   
-  public void newTWSObj(ArrayList<Point> al) {}
+  public void newTWSObj(List<Point> al) {}
   public void noTWSObj() {}
 
   public void setTWSDisplayed(boolean b) {}
@@ -166,8 +166,8 @@ public abstract class ApplicationEventListener implements EventListener
   public void faxSelectedForPreview(String s) {}
   public void ddZoomConfirmChanged(boolean b) {}
   
-  public void routingAvailable(boolean b, ArrayList<RoutingPoint> bestRoute) {}
-  public void routingForecastAvailable(boolean b, ArrayList<RoutingPoint> route) {}
+  public void routingAvailable(boolean b, List<RoutingPoint> bestRoute) {}
+  public void routingForecastAvailable(boolean b, List<RoutingPoint> route) {}
   
   public void reloadFaxTree() {}
   public void reloadGRIBTree() {}

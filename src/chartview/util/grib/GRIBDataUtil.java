@@ -24,6 +24,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import java.util.List;
+
 import jgrib.GribFile;
 import jgrib.GribRecord;
 import jgrib.GribRecordBDS;
@@ -186,27 +188,27 @@ public class GRIBDataUtil
     return new double[] { minValue, maxValue };
   }
   
-  public final static ArrayList<ArrayList<ArrayList<GeoPoint>>> generateIsoTWS(GribHelper.GribConditionData gribData, int[] va)
+  public final static List<List<List<GeoPoint>>> generateIsoTWS(GribHelper.GribConditionData gribData, int[] va)
   { return generateIsoCurves(gribData, va, TYPE_TWS); }
   
-  public final static ArrayList<ArrayList<ArrayList<GeoPoint>>> generateIsobars(GribHelper.GribConditionData gribData, int[] va)
+  public final static List<List<List<GeoPoint>>> generateIsobars(GribHelper.GribConditionData gribData, int[] va)
   { return generateIsoCurves(gribData, va, TYPE_PRMSL); }
 
-  public final static ArrayList<ArrayList<ArrayList<GeoPoint>>> generateIso500(GribHelper.GribConditionData gribData, int[] va)
+  public final static List<List<List<GeoPoint>>> generateIso500(GribHelper.GribConditionData gribData, int[] va)
   { return generateIsoCurves(gribData, va, TYPE_500MB); }
   
-  public final static ArrayList<ArrayList<ArrayList<GeoPoint>>> generateIsotherm(GribHelper.GribConditionData gribData, int[] va)
+  public final static List<List<List<GeoPoint>>> generateIsotherm(GribHelper.GribConditionData gribData, int[] va)
   { return generateIsoCurves(gribData, va, TYPE_TMP); }
   
-  public final static ArrayList<ArrayList<ArrayList<GeoPoint>>> generateIsowaves(GribHelper.GribConditionData gribData, int[] va)
+  public final static List<List<List<GeoPoint>>> generateIsowaves(GribHelper.GribConditionData gribData, int[] va)
   { return generateIsoCurves(gribData, va, TYPE_WAVE); }
   
-  public final static ArrayList<ArrayList<ArrayList<GeoPoint>>> generateIsorain(GribHelper.GribConditionData gribData, int[] va)
+  public final static List<List<List<GeoPoint>>> generateIsorain(GribHelper.GribConditionData gribData, int[] va)
   { return generateIsoCurves(gribData, va, TYPE_RAIN); }
   
-  private final static ArrayList<ArrayList<ArrayList<GeoPoint>>> generateIsoCurves(GribHelper.GribConditionData gribData, int[] va, int dataType)
+  private final static List<List<List<GeoPoint>>> generateIsoCurves(GribHelper.GribConditionData gribData, int[] va, int dataType)
   {
-    ArrayList<ArrayList<ArrayList<GeoPoint>>> alalalgp = new ArrayList<ArrayList<ArrayList<GeoPoint>>>();
+    List<List<List<GeoPoint>>> alalalgp = new ArrayList<List<List<GeoPoint>>>();
     for (int i=0; i<va.length; i++)
     {
   //  long before = System.currentTimeMillis();
@@ -217,10 +219,10 @@ public class GRIBDataUtil
     return alalalgp;
   }
   
-  private static ArrayList<ArrayList<GeoPoint>> detect(double val2detect, GribHelper.GribConditionData gribData, int dataType)
+  private static List<List<GeoPoint>> detect(double val2detect, GribHelper.GribConditionData gribData, int dataType)
   {
-    ArrayList<ArrayList<GeoPoint>> alalgp = new ArrayList<ArrayList<GeoPoint>>();
-    ArrayList<GeoPoint> iso = new ArrayList<GeoPoint>();
+    List<List<GeoPoint>> alalgp = new ArrayList<List<GeoPoint>>();
+    List<GeoPoint> iso = new ArrayList<GeoPoint>();
     
     // Detect
     for (int h=0; gribData.getGribPointData() != null && h<gribData.getGribPointData().length - 1; h++)
@@ -256,7 +258,7 @@ public class GRIBDataUtil
       else
       {
         GeoPoint p = iso.get(0);
-        ArrayList<GeoPoint> is = new ArrayList<GeoPoint>();
+        List<GeoPoint> is = new ArrayList<GeoPoint>();
         alalgp.add(is);
         is.add(p);
         iso.remove(p);
@@ -397,7 +399,7 @@ public class GRIBDataUtil
     return coordinates;
   }
   
-  private static GeoPoint getClosest(GeoPoint pt, ArrayList<GeoPoint> al, double minDist)
+  private static GeoPoint getClosest(GeoPoint pt, List<GeoPoint> al, double minDist)
   {
     GeoPoint p = null;
     double min = minDist;
@@ -777,7 +779,7 @@ public class GRIBDataUtil
         Point _w = new Point(0, (int)(chartPanel.getHeight() * scaleFactor) / 2);
         Point _e = new Point((int)(chartPanel.getWidth() * scaleFactor), 
                              (int)(chartPanel.getHeight() * scaleFactor) / 2);
-        ArrayList<Point> labelPts = new ArrayList<Point>(4);
+        List<Point> labelPts = new ArrayList<Point>(4);
         labelPts.add(_n);
         labelPts.add(_s);
         labelPts.add(_w);
@@ -833,7 +835,7 @@ public class GRIBDataUtil
     xmlDoc.appendChild(root);
 
     WWContext.getInstance().getParser().setValidationMode(XMLParser.NONVALIDATING);
-    ArrayList chartPoints = World.getChartPoints(chartPanel, WWContext.getInstance().getParser());
+    List<List<Point>> chartPoints = World.getChartPoints(chartPanel, WWContext.getInstance().getParser());
     if (chartPoints != null && chartPoints.size() > 0)
     {
       XMLElement modules = (XMLElement)xmlDoc.createElementNS(ObjMaker.NAMESPACE, "modules");
@@ -950,11 +952,11 @@ public class GRIBDataUtil
         z.appendChild(txt);
       }
       // One module per chart section         
-      Iterator iterator = chartPoints.iterator();
+      Iterator<List<Point>> iterator = chartPoints.iterator();
       int sectionIdx = 0;
       while (iterator.hasNext())
       {
-        ArrayList section = (ArrayList)iterator.next();
+        List section = iterator.next();
         if (section.size() > 0)
         {
           XMLElement module = (XMLElement)xmlDoc.createElementNS(ObjMaker.NAMESPACE, "module");
@@ -1025,7 +1027,7 @@ public class GRIBDataUtil
       Point _w = new Point(0, (int)(chartPanel.getHeight() * scaleFactor) / 2);
       Point _e = new Point((int)(chartPanel.getWidth() * scaleFactor), 
                            (int)(chartPanel.getHeight() * scaleFactor) / 2);
-      ArrayList<Point> labelPts = new ArrayList<Point>(4);
+      List<Point> labelPts = new ArrayList<Point>(4);
       labelPts.add(_n);
       labelPts.add(_s);
       labelPts.add(_w);

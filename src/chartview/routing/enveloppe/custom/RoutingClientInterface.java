@@ -1,9 +1,9 @@
 package chartview.routing.enveloppe.custom;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public interface RoutingClientInterface
 {
-  public void routingNotification(ArrayList<ArrayList<RoutingPoint>> all, RoutingPoint closest);
+  public void routingNotification(List<List<RoutingPoint>> all, RoutingPoint closest);
   
 }

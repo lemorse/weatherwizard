@@ -55,6 +55,7 @@ import java.net.URL;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -129,7 +130,7 @@ public class GribPDSParamTable
   /**
    * List of parameter tables
    */
-  protected static ArrayList<GribPDSParamTable> tables = null;
+  protected static List<GribPDSParamTable> tables = null;
 
   /**
    *  Added by Richard D. Gonzalez
@@ -270,7 +271,7 @@ public class GribPDSParamTable
    * @param aTables
    * @throws IOException
    */
-  private static void initFromJAR(ArrayList<GribPDSParamTable> aTables)
+  private static void initFromJAR(List<GribPDSParamTable> aTables)
     throws IOException
   {
     ClassLoader cl = GribPDSParamTable.class.getClassLoader();
@@ -291,7 +292,7 @@ public class GribPDSParamTable
    * added by Tor C.Bekkvik
    * @param aTables
    */
-  private static void initDefaultTableEntries(ArrayList<GribPDSParamTable> aTables)
+  private static void initDefaultTableEntries(List<GribPDSParamTable> aTables)
   {
     String[][] defaulttable_ncep_reanal2 =
     {
@@ -833,7 +834,7 @@ public class GribPDSParamTable
    * @throws IOException
    * @throws NotSupportedException
    */
-  protected static void readTableEntry(URL aFileUrl, ArrayList<GribPDSParamTable> aTables)
+  protected static void readTableEntry(URL aFileUrl, List<GribPDSParamTable> aTables)
     throws IOException, NotSupportedException
   {
     // System.out.println("JGRIB: readTableEntry: aFileUrl = "+aFileUrl.toString());
@@ -866,7 +867,7 @@ public class GribPDSParamTable
    * @param aTables
    * @throws IOException
    */
-  private static void readTableEntries(String aBaseUrl, ArrayList<GribPDSParamTable> aTables)
+  private static void readTableEntries(String aBaseUrl, List<GribPDSParamTable> aTables)
     throws IOException
   {
 

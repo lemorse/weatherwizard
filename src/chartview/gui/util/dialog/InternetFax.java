@@ -22,6 +22,8 @@ import java.util.ArrayList;
 
 import java.util.Iterator;
 
+import java.util.List;
+
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
@@ -49,7 +51,7 @@ public class InternetFax extends JPanel
   
   private final static String DOWNLOADABLE_FAX_FILE_NAME = "config" + File.separator + "download.xml";
   
-  ArrayList<DownloadableFax> faxes = null;
+  List<DownloadableFax> faxes = null;
   private JLabel jLabel4 = new JLabel();
   private JButton browseButton = new JButton();
   private JTextField saveAsTextField = new JTextField();

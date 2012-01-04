@@ -18,7 +18,6 @@ import chartview.gui.util.dialog.FaxType;
 import chartview.gui.util.dialog.InternetFax;
 import chartview.gui.util.dialog.InternetGRIB;
 import chartview.gui.util.dialog.LoadAtStartupPanel;
-import chartview.gui.util.dialog.PositionInputPanel;
 import chartview.gui.util.dialog.PredefZonesTablePanel;
 import chartview.gui.util.param.CategoryPanel;
 import chartview.gui.util.param.ParamData;
@@ -59,6 +58,7 @@ import java.text.SimpleDateFormat;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
 
 import javax.swing.AbstractAction;
@@ -218,7 +218,6 @@ public class AdjustFrame
   private JSplitPane jSplitPane = null;
   
   private CompositeDetailsInputPanel inputPanel = null;
-  private PositionInputPanel pip = null;
 
   protected AdjustFrame instance = this;
   
@@ -1227,9 +1226,11 @@ public class AdjustFrame
             }
             nctp.removeListener();
             if (componentIndex != -1)
+            {
               masterTabPane.setComponentAt(componentIndex, null);
-//          masterTabPane.remove(nctp);
-            masterTabPane.remove(componentIndex);
+//            masterTabPane.remove(nctp);
+              masterTabPane.remove(componentIndex);
+            }
             int newIndex = masterTabPane.getTabCount() - 2;
             while (newIndex < 0) newIndex++;
             masterTabPane.setSelectedIndex(newIndex);
@@ -1250,7 +1251,7 @@ public class AdjustFrame
     menuCharts.removeAll();
     try
     {
-      ArrayList<PredefZone> pdfz = getPredefZones(); // Read the file
+      List<PredefZone> pdfz = getPredefZones(); // Read the file
       for (final PredefZone pz : pdfz)
       {
         if (pz.name.equals("[SEPARATOR]"))
@@ -1499,7 +1500,7 @@ public class AdjustFrame
           Date date = inputPanel.getUpToDate();
           if (date != null)
             to = date.getTime();
-          ArrayList<GeoPoint> algp = GPXUtil.parseGPXData(new File(gpxDataFileName).toURI().toURL(), -1L, to);
+          List<GeoPoint> algp = GPXUtil.parseGPXData(new File(gpxDataFileName).toURI().toURL(), -1L, to);
           ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().setGPXData(algp);
         }
         catch (Exception ex)
@@ -2082,9 +2083,9 @@ public class AdjustFrame
     }
   }
   
-  private ArrayList<PredefZone> getPredefZones() throws Exception
+  private List<PredefZone> getPredefZones() throws Exception
   {
-    ArrayList<PredefZone> pdfz = new ArrayList<PredefZone>(5);
+    List<PredefZone> pdfz = new ArrayList<PredefZone>(5);
     DOMParser parser = WWContext.getInstance().getParser();
     XMLDocument doc = null;
     synchronized(parser)

@@ -16,6 +16,8 @@ import java.awt.Insets;
 
 import java.util.ArrayList;
 
+import java.util.List;
+
 import javax.swing.JPanel;
 
 
@@ -148,14 +150,14 @@ public class ChartControlPane
             WWContext.getInstance().setGribFile(null);
           }
 
-          public void routingAvailable(boolean b, ArrayList<RoutingPoint> bestRoute)
+          public void routingAvailable(boolean b, List<RoutingPoint> bestRoute)
           {
 //          System.out.println("Routing is " + (b?"":"not ") + "available");
             routingPreviewControl.setEnabled(b);
             routingPanel.setBestRoute(bestRoute, RoutingUtil.REAL_ROUTING);
           }
           
-          public void routingForecastAvailable(boolean b, ArrayList<RoutingPoint> route)
+          public void routingForecastAvailable(boolean b, List<RoutingPoint> route)
           {
             routingPreviewControl.setEnabled(b);
             routingPanel.setBestRoute(route, RoutingUtil.WHAT_IF_ROUTING);

@@ -26,6 +26,8 @@ import java.io.File;
 
 import java.util.ArrayList;
 
+import java.util.List;
+
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
@@ -52,7 +54,7 @@ public class CommandPanelPopup
 {
   private CommandPanel parent;
 
-  private transient ArrayList<UserExitAction> userExitList = null;
+  private transient List<UserExitAction> userExitList = null;
   
   private JCheckBoxMenuItem showPrintablePageSize;
   
@@ -831,7 +833,7 @@ public class CommandPanelPopup
     else if (event.getActionCommand().equals(EDIT_ROUTING_WP))
     {
       // Reorder, delete
-      ArrayList<GeoPoint> aliwp = new ArrayList<GeoPoint>(parent.intermediateRoutingWP.size() + 1);
+      List<GeoPoint> aliwp = new ArrayList<GeoPoint>(parent.intermediateRoutingWP.size() + 1);
       for (GeoPoint gp : parent.intermediateRoutingWP)
         aliwp.add(gp);
       aliwp.add(parent.to);
@@ -1106,7 +1108,7 @@ public class CommandPanelPopup
       boolean execOk = uei.userExitTask(parent, WWContext.getInstance());
       if (ack)
       {
-        ArrayList<String> feedback = uei.getFeedback();
+        List<String> feedback = uei.getFeedback();
         String message = "";
         if (feedback != null)
         {

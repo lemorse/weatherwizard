@@ -37,6 +37,8 @@ import java.util.ArrayList;
 
 import java.util.Date;
 
+import java.util.List;
+
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -50,17 +52,17 @@ public class GRIBSlicePanel
   public final static int ROUTING_OPTION    = 1;
   
   private int dataOption = -1;
-  private ArrayList<Double> bsp = null;
-  private ArrayList<Integer> hdg = null;
-  private ArrayList<Integer> twa = null;
-  private ArrayList<Double> smoothedBsp = null;
-  private ArrayList<Integer> smoothedHdg = null;
-  private ArrayList<Integer> smoothedTwa = null;
+  private List<Double> bsp = null;
+  private List<Integer> hdg = null;
+  private List<Integer> twa = null;
+  private List<Double> smoothedBsp = null;
+  private List<Integer> smoothedHdg = null;
+  private List<Integer> smoothedTwa = null;
   private double bspMini = Double.MAX_VALUE;
   private double bspMaxi = Double.MIN_VALUE;
   
-  private transient ArrayList<DatedGribCondition> data2plot;
-  private transient ArrayList<DatedGribCondition> smoothedData;
+  private transient List<DatedGribCondition> data2plot;
+  private transient List<DatedGribCondition> smoothedData;
   
   private JPanel checkBoxPanel = new JPanel()
   {
@@ -109,10 +111,10 @@ public class GRIBSlicePanel
   private DecimalFormat tempFormat   = new DecimalFormat("##0'°C'");
   private DecimalFormat prateFormat  = new DecimalFormat("##0.00 'mm/h'");
 
-  public GRIBSlicePanel(ArrayList<DatedGribCondition> data, 
-                        ArrayList<Double> bsp, 
-                        ArrayList<Integer> hdg, 
-                        ArrayList<Integer> twa, 
+  public GRIBSlicePanel(List<DatedGribCondition> data, 
+                        List<Double> bsp, 
+                        List<Integer> hdg, 
+                        List<Integer> twa, 
                         int opt, 
                         int fw)
   {
@@ -141,7 +143,7 @@ public class GRIBSlicePanel
     }
   }
   
-  public GRIBSlicePanel(ArrayList<DatedGribCondition> data)
+  public GRIBSlicePanel(List<DatedGribCondition> data)
   {
     data2plot = data;
     try
@@ -158,16 +160,16 @@ public class GRIBSlicePanel
    * @depracated
    * @param data
    */
-  public void setData(ArrayList<DatedGribCondition> data)
+  public void setData(List<DatedGribCondition> data)
   {
     data2plot = data;    
     computeData();
   }
   
-  public void setData(ArrayList<DatedGribCondition> data, 
-                      ArrayList<Double> bsp, 
-                      ArrayList<Integer> hdg, 
-                      ArrayList<Integer> twa,
+  public void setData(List<DatedGribCondition> data, 
+                      List<Double> bsp, 
+                      List<Integer> hdg, 
+                      List<Integer> twa,
                       int opt)
   {
     data2plot = data;   
@@ -443,7 +445,7 @@ public class GRIBSlicePanel
       throw new RuntimeException("Fork must be odd.");
     }
     
-    ArrayList<DatedGribCondition> data2smooth = data2plot; // Clone array
+    List<DatedGribCondition> data2smooth = data2plot; // Clone array
     
     // New ArrayList
     smoothedData = new ArrayList<DatedGribCondition>(data2smooth.size());
@@ -541,9 +543,9 @@ public class GRIBSlicePanel
 //  return smoothed;    
   }
   
-  private ArrayList<DatedGribCondition> expandArray(ArrayList<DatedGribCondition> origData, int smoothFactor)
+  private List<DatedGribCondition> expandArray(List<DatedGribCondition> origData, int smoothFactor)
   {
-    ArrayList<DatedGribCondition> expanded = new ArrayList<DatedGribCondition>(origData.size() * smoothFactor);
+    List<DatedGribCondition> expanded = new ArrayList<DatedGribCondition>(origData.size() * smoothFactor);
       // Add points
     for (int i=0; i<origData.size() - 1; i++)
     {
@@ -590,10 +592,9 @@ public class GRIBSlicePanel
     return expanded;
   }
   
-  private ArrayList<Double> expandBSPArray(ArrayList<Double> origData,
-                                           int smoothFactor)
+  private List<Double> expandBSPArray(List<Double> origData, int smoothFactor)
   {
-    ArrayList<Double> expanded = new ArrayList<Double>(origData.size() * smoothFactor);
+    List<Double> expanded = new ArrayList<Double>(origData.size() * smoothFactor);
       // Add points
     for (int i=0; i<origData.size() - 1; i++)
     {
@@ -608,10 +609,9 @@ public class GRIBSlicePanel
     return expanded;
   }
   
-  private ArrayList<Integer> expandTWAArray(ArrayList<Integer> origData,
-                                           int smoothFactor)
+  private List<Integer> expandTWAArray(List<Integer> origData, int smoothFactor)
   {
-    ArrayList<Integer> expanded = new ArrayList<Integer>(origData.size() * smoothFactor);
+    List<Integer> expanded = new ArrayList<Integer>(origData.size() * smoothFactor);
       // Add points
     for (int i=0; i<origData.size() - 1; i++)
     {
@@ -627,10 +627,9 @@ public class GRIBSlicePanel
   }
   
   // TODO sin & cos
-  private ArrayList<Integer> expandHDGArray(ArrayList<Integer> origData,
-                                           int smoothFactor)
+  private List<Integer> expandHDGArray(List<Integer> origData, int smoothFactor)
   {
-    ArrayList<Integer> expanded = new ArrayList<Integer>(origData.size() * smoothFactor);
+    List<Integer> expanded = new ArrayList<Integer>(origData.size() * smoothFactor);
       // Add points
     for (int i=0; i<origData.size() - 1; i++)
     {
@@ -732,7 +731,7 @@ public class GRIBSlicePanel
     this.dataOption = dataOption;
   }
 
-  public void setBsp(ArrayList<Double> bsp)
+  public void setBsp(List<Double> bsp)
   {
     this.bsp = bsp;
   }
@@ -994,7 +993,7 @@ public class GRIBSlicePanel
     }
 
     private void drawDataArray(Graphics gr,
-                               ArrayList<DatedGribCondition> data,
+                               List<DatedGribCondition> data,
                                float windscale,
                                float prmslscale,
                                float hgt500scale,
@@ -1091,7 +1090,7 @@ public class GRIBSlicePanel
     }
     
     private void drawBoatSpeed(Graphics gr,
-                               ArrayList<Double> data,
+                               List<Double> data,
                                float bspscale)
     {
       int bspIdx = 0, bspSize = data.size();
@@ -1122,7 +1121,7 @@ public class GRIBSlicePanel
     }
     
     private void drawTWA(Graphics gr,
-                         ArrayList<Integer> data,
+                         List<Integer> data,
                          float scale)
     {
       int bspIdx = 0, bspSize = data.size();
@@ -1136,7 +1135,6 @@ public class GRIBSlicePanel
           float bsp   = (float)d.doubleValue();
           int x, y;
           x = (int)((float)bspIdx * (float)this.getWidth() / (float)bspSize);
-          // BSP
           if (displayTWS)
           {
       //    System.out.println("Idx:" + gribIdx + ", x:" + x + " for w:" + this.getWidth() + " and gSize:" + gribSize);

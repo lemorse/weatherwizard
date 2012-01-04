@@ -118,6 +118,7 @@ import java.util.EventObject;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.zip.ZipEntry;
@@ -270,10 +271,10 @@ public class CommandPanel
   
   protected transient GeoPoint from = null, to = null, closest = null;
   protected transient boolean insertRoutingWP = false;
-  protected ArrayList<GeoPoint> intermediateRoutingWP = null;
+  protected List<GeoPoint> intermediateRoutingWP = null;
   
   private transient RoutingPoint closestPoint = null;
-  private ArrayList<RoutingPoint> bestRoute = null;
+  private List<RoutingPoint> bestRoute = null;
   private transient GeoPoint boatPosition = null;
   private int boatHeading = -1;
   private transient GeoPoint wp2highlight = null;
@@ -292,7 +293,7 @@ public class CommandPanel
 //private static int routingForkWidth = ((Integer) ParamPanel.data[ParamData.ROUTING_FORK_WIDTH][1]).intValue(); // 50;
 //private static int routingStep      = ((Integer) ParamPanel.data[ParamData.ROUTING_STEP][1]).intValue(); // 10;
     
-  protected transient ArrayList<ArrayList<RoutingPoint>> allCalculatedIsochrons = new ArrayList<ArrayList<RoutingPoint>>();
+  protected transient List<List<RoutingPoint>> allCalculatedIsochrons = new ArrayList<List<RoutingPoint>>();
   
   private boolean displayPageSize = false;
   
@@ -337,12 +338,12 @@ public class CommandPanel
 
   private static boolean coloredWind = true;
   
-  private transient ArrayList<ArrayList<ArrayList<GeoPoint>>> islandsPressure = null,
-                                                              islands500mb    = null,
-                                                              islandsTemp     = null,
-                                                              islandsWave     = null,
-                                                              islandsTws      = null,
-                                                              islandsPrate    = null;
+  private transient List<List<List<GeoPoint>>> islandsPressure = null,
+                                               islands500mb    = null,
+                                               islandsTemp     = null,
+                                               islandsWave     = null,
+                                               islandsTws      = null,
+                                               islandsPrate    = null;
 
   private boolean displayGribPRMSLContour  = true,
                   displayGrib500HGTContour = true,
@@ -351,12 +352,12 @@ public class CommandPanel
                   displayGribTempContour   = true,
                   displayGribPrateContour  = true;
 
-  private transient ArrayList<CurveUtil.GeoBump> twsBumps = null;
-  private transient ArrayList<CurveUtil.GeoBump> prmslBumps = null;
-  private transient ArrayList<CurveUtil.GeoBump> hgt500Bumps = null;
-  private transient ArrayList<CurveUtil.GeoBump> tempBumps = null;
-  private transient ArrayList<CurveUtil.GeoBump> wavesBumps = null;
-  private transient ArrayList<CurveUtil.GeoBump> prateBumps = null;
+  private transient List<CurveUtil.GeoBump> twsBumps = null;
+  private transient List<CurveUtil.GeoBump> prmslBumps = null;
+  private transient List<CurveUtil.GeoBump> hgt500Bumps = null;
+  private transient List<CurveUtil.GeoBump> tempBumps = null;
+  private transient List<CurveUtil.GeoBump> wavesBumps = null;
+  private transient List<CurveUtil.GeoBump> prateBumps = null;
   
   private transient IsoPointsThread isoPointsThread = null;
   
@@ -397,7 +398,7 @@ public class CommandPanel
   private final static int ZOOMEXPAND_IMAGE  = 2;
   private final static int ZOOMSHRINK_IMAGE  = 3;
   
-  private ArrayList<GeoPoint> gpxData = null;
+  private List<GeoPoint> gpxData = null;
   
   public boolean isBusy() // Is there a Composite in the panel?
   {
@@ -1171,7 +1172,7 @@ public class CommandPanel
   {
     removeContourCheckBoxes();
     int nbContour = 0;
-    final ArrayList<Integer> contourList = new ArrayList<Integer>();
+    final List<Integer> contourList = new ArrayList<Integer>();
     
     if (gribData != null && isDisplayContourTWS())   contourList.add(new Integer(GRIBDataUtil.TYPE_TWS));
     if (gribData != null && isTherePrmsl() && isDisplayContourPRMSL()) contourList.add(new Integer(GRIBDataUtil.TYPE_PRMSL));
@@ -1364,8 +1365,8 @@ public class CommandPanel
   private static String[] ptLabels = null;
   private static Boolean[] showPlacesArray = null;
 
-  private transient ArrayList<WWGnlUtilities.SailMailStation> sma = null;
-  private transient ArrayList<WWGnlUtilities.WeatherStation> wsta = null;
+  private transient List<WWGnlUtilities.SailMailStation> sma = null;
+  private transient List<WWGnlUtilities.WeatherStation> wsta = null;
 
   private ImageIcon greenFlagImage = null;
   
@@ -3996,9 +3997,9 @@ public class CommandPanel
         doc = parser.getDocument();
       }
       NodeList place = doc.selectNodes("//place");
-      ArrayList<GeoPoint> alPos  = new ArrayList<GeoPoint>(place.getLength());
-      ArrayList<String> alName = new ArrayList<String>(place.getLength());
-      ArrayList<Boolean> alShow = new ArrayList<Boolean>(place.getLength());
+      List<GeoPoint> alPos  = new ArrayList<GeoPoint>(place.getLength());
+      List<String> alName = new ArrayList<String>(place.getLength());
+      List<Boolean> alShow = new ArrayList<Boolean>(place.getLength());
       for (int i=0; i<place.getLength(); i++)
       {
         GeoPoint gp = null;
@@ -4052,9 +4053,9 @@ public class CommandPanel
         doc = parser.getDocument();
       }
       NodeList place = doc.selectNodes("//place");
-      ArrayList<GeoPoint> alPos  = new ArrayList<GeoPoint>(place.getLength());
-      ArrayList<String> alName = new ArrayList<String>(place.getLength());
-      ArrayList<Boolean> alShow = new ArrayList<Boolean>(place.getLength());
+//    List<GeoPoint> alPos  = new ArrayList<GeoPoint>(place.getLength());
+//    List<String> alName = new ArrayList<String>(place.getLength());
+//    List<Boolean> alShow = new ArrayList<Boolean>(place.getLength());
       for (int i=0; i<place.getLength(); i++)
       {
         GeoPoint gp = null;
@@ -4104,9 +4105,9 @@ public class CommandPanel
         doc = parser.getDocument();
       }
       NodeList place = doc.selectNodes("//place");
-      ArrayList<GeoPoint> alPos  = new ArrayList<GeoPoint>(place.getLength());
-      ArrayList<String> alName = new ArrayList<String>(place.getLength());
-      ArrayList<Boolean> alShow = new ArrayList<Boolean>(place.getLength());
+//    List<GeoPoint> alPos  = new ArrayList<GeoPoint>(place.getLength());
+//    List<String> alName = new ArrayList<String>(place.getLength());
+//    List<Boolean> alShow = new ArrayList<Boolean>(place.getLength());
       for (int i=0; i<place.getLength(); i++)
       {
         GeoPoint gp = null;
@@ -4619,7 +4620,7 @@ public class CommandPanel
               {
                 GribFile gf = (GribFile)o;
                 WWContext.getInstance().setGribFile(gf);
-                ArrayList<GribHelper.GribConditionData> agcd = GribHelper.dumper(gf, displayFileName);
+                List<GribHelper.GribConditionData> agcd = GribHelper.dumper(gf, displayFileName);
                 GribHelper.GribConditionData wgd[] = agcd.toArray(new GribHelper.GribConditionData[agcd.size()]);
                 setGribData(wgd, displayFileName);
               }
@@ -5832,10 +5833,10 @@ public class CommandPanel
         {
           try
           {
-            Iterator<ArrayList<RoutingPoint>> dimOne = allCalculatedIsochrons.iterator();
+            Iterator<List<RoutingPoint>> dimOne = allCalculatedIsochrons.iterator();
             while (dimOne.hasNext())
             {
-              ArrayList<RoutingPoint> curve = dimOne.next();
+              List<RoutingPoint> curve = dimOne.next();
               Iterator<RoutingPoint> dimTwo = curve.iterator();
               Point previous = null;
               int colorIndex = (nbIsochron % colors.length);
@@ -6244,7 +6245,7 @@ public class CommandPanel
 
   public void whatIfRouting() 
   {
-    ArrayList<RoutingPoint> route = RoutingUtil.whatIfRouting(this, this.getFrom(), wgd);
+    List<RoutingPoint> route = RoutingUtil.whatIfRouting(this, this.getFrom(), wgd);
     if (route != null)
     {
       routingForecastMode = true;
@@ -6455,7 +6456,7 @@ public class CommandPanel
           RoutingPoint destination = new RoutingPoint(point);
           destination.setPosition(to);
 
-          ArrayList<RoutingPoint> interWP = null;
+          List<RoutingPoint> interWP = null;
           if (intermediateRoutingWP != null && intermediateRoutingWP.size() > 0)
           {
             interWP = new ArrayList<RoutingPoint>(intermediateRoutingWP.size());
@@ -6555,7 +6556,7 @@ public class CommandPanel
           if (closestPoint != null && allCalculatedIsochrons != null)
           {
             Calendar cal = new GregorianCalendar();
-            ArrayList<RoutingPoint> bestRoute = new ArrayList<RoutingPoint>(allCalculatedIsochrons.size());
+            List<RoutingPoint> bestRoute = new ArrayList<RoutingPoint>(allCalculatedIsochrons.size());
             boolean go = true;
             RoutingPoint start = closestPoint;
             bestRoute.add(start);
@@ -6915,7 +6916,7 @@ public class CommandPanel
         {
           WWContext.getInstance().fireLogging(WWGnlUtilities.buildMessage("wind-lookup", new String[] { gribData.getDate().toString(), ignore.getMessage() }) + "\n"); }
 
-//        ArrayList<Integer> ar = gribData.getDataPointsAround(gp);   
+//        List<Integer> ar = gribData.getDataPointsAround(gp);   
 //        if (ar != null)
 //        {          
 //          int yIdx = ar.get(0).intValue();
@@ -7192,15 +7193,15 @@ public class CommandPanel
     displayGRIBSlice(null);
   }
   
-  private void displayGRIBSlice(ArrayList<RoutingPoint> bestRoute)
+  private void displayGRIBSlice(List<RoutingPoint> bestRoute)
   {
 //  System.out.println("displayGRIBSlice...");
-//  ArrayList<GribHelper.GribCondition> data2plot = new ArrayList<GribHelper.GribCondition>();
-    ArrayList<DatedGribCondition> data2plot = new ArrayList<DatedGribCondition>();
+//  List<GribHelper.GribCondition> data2plot = new ArrayList<GribHelper.GribCondition>();
+    List<DatedGribCondition> data2plot = new ArrayList<DatedGribCondition>();
     
-    ArrayList<Double> bsp = null;
-    ArrayList<Integer> hdg = null;
-    ArrayList<Integer> twa = null;
+    List<Double> bsp = null;
+    List<Integer> hdg = null;
+    List<Integer> twa = null;
     int fw = GRIBSlicePanel.DEFAULT_FORK_WIDTH; // That's for routing
     int dataOption = GRIBSlicePanel.GRIB_SLICE_OPTION;
     if (fromGRIBSlice != null && toGRIBSlice != null) // GRIB Slice
@@ -7631,7 +7632,7 @@ public class CommandPanel
     return displayWindSpeedValue;
   }
 
-  public void routingNotification(ArrayList<ArrayList<RoutingPoint>> o, RoutingPoint close)
+  public void routingNotification(List<List<RoutingPoint>> o, RoutingPoint close)
   {
     allCalculatedIsochrons = o;
     closestPoint = close;
@@ -7973,7 +7974,7 @@ public class CommandPanel
     return displayContourTWS;
   }
 
-  public ArrayList<ArrayList<RoutingPoint>> getAllCalculatedIsochrons()
+  public List<List<RoutingPoint>> getAllCalculatedIsochrons()
   {
     return allCalculatedIsochrons;
   }
@@ -7993,12 +7994,12 @@ public class CommandPanel
     jSplitPane.setDividerLocation(0);
   }
 
-  public void setGPXData(ArrayList<GeoPoint> gpxData)
+  public void setGPXData(List<GeoPoint> gpxData)
   {
     this.gpxData = gpxData;
   }
 
-  public ArrayList<GeoPoint> getGPXData()
+  public List<GeoPoint> getGPXData()
   {
     return gpxData;
   }
@@ -8045,7 +8046,7 @@ public class CommandPanel
       long before = System.currentTimeMillis();
       if (animateThread == null)
         WWContext.getInstance().fireSetLoading(true, WWGnlUtilities.buildMessage("calculating"));
-      ArrayList<ArrayList<GeoPoint>> isopoints = null;
+//    List<ArrayList<GeoPoint>> isopoints = null;
       // TWS
       if (gribData != null && displayContourTWS)
         islandsTws = GRIBDataUtil.generateIsoTWS(gribData, ((ParamPanel.ContourLinesList)ParamPanel.data[ParamData.ISO_TWS_LIST][1]).getIntValues()); 

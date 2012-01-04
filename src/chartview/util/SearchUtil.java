@@ -12,6 +12,7 @@ import java.io.FilenameFilter;
 import java.lang.reflect.Method;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -22,9 +23,9 @@ public class SearchUtil
 {
   private static boolean verbose = false;
   
-  public static ArrayList<String> findMatchingFiles(String pattern, String startPath) throws Exception
+  public static List<String> findMatchingFiles(String pattern, String startPath) throws Exception
   {
-    ArrayList<String> ret = null;
+    List<String> ret = null;
     final Pattern p = Pattern.compile(pattern);
 
     FilenameFilter fnf = new FilenameFilter()
@@ -62,7 +63,7 @@ public class SearchUtil
     return ret;
   }
 
-  private static ArrayList<String> recurseDirectory(File dir, ArrayList<String> list, FilenameFilter filter)
+  private static List<String> recurseDirectory(File dir, List<String> list, FilenameFilter filter)
   {
     if (dir.isDirectory())
     {
@@ -78,7 +79,7 @@ public class SearchUtil
   public static String findMostRecentFile(String pattern, String startpath) throws Exception
   {
     String ret = null;
-    ArrayList<String> mf = findMatchingFiles(pattern, startpath);
+    List<String> mf = findMatchingFiles(pattern, startpath);
     long mostRecent = 0L;
     
     for (String f : mf)
@@ -96,7 +97,7 @@ public class SearchUtil
   public static String findMostRecentFax(String pattern, String startPath) throws Exception
   {
     String ret = null;
-    ArrayList<String> mf = findMatchingSailmailFax(pattern, startPath);
+    List<String> mf = findMatchingSailmailFax(pattern, startPath);
     long mostRecent = 0L;
     
     for (String f : mf)
@@ -116,9 +117,9 @@ public class SearchUtil
   private final static String HEADER_EXTENSION = ".hdr";
   private final static String FAX_EXTENSION    = ".tif";
   
-  public static ArrayList<String> findMatchingSailmailFax(String pattern, String startPath) throws Exception
+  public static List<String> findMatchingSailmailFax(String pattern, String startPath) throws Exception
   {
-    ArrayList<String> ret = null;
+    List<String> ret = null;
     final Pattern p = Pattern.compile(pattern);
 
     FilenameFilter fnf = new FilenameFilter()
@@ -286,7 +287,7 @@ public class SearchUtil
       String p = ".*2009-(0[8-9]|1[0-2])-.*AllPacific\\.waz$";
       String dir = "C:\\_myWork\\_ForExport\\dev-corner\\olivsoft\\all-scripts\\composites";
       
-      ArrayList<String> al = findMatchingFiles(p, dir);
+      List<String> al = findMatchingFiles(p, dir);
       System.out.println("Found " + al.size() + " waz files.");
       
       System.out.println("Most recent WAZ: " + findMostRecentFile(p, dir));

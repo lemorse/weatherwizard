@@ -35,6 +35,7 @@ import java.net.URLEncoder;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Properties;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
@@ -210,7 +211,7 @@ public class ChartAdjust
     // Add listener
     CoreContext.getInstance().addApplicationListener(new CoreEventListener()
      {
-       public void updateCompleted(ArrayList<String> fList)
+       public void updateCompleted(List<String> fList)
        {
          System.out.println("Update Completed by the Core Context");
          if (fList != null && fList.size() > 0)

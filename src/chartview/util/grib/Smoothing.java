@@ -1,6 +1,7 @@
 package chartview.util.grib;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Smoothing
 {
@@ -20,9 +21,9 @@ public class Smoothing
    * @param y ordinate of the point to calculate for
    * @return Direction & Speed, as Doubles
    */
-  public static ArrayList<Double> calculate(DataPoint[] dp, double x, double y)
+  public static List<Double> calculate(DataPoint[] dp, double x, double y)
   {
-    ArrayList<Double> data = null;
+    List<Double> data = null;
     double totalcoeff   = 0;
     double totalangle   = 0;
     double totalspeed   = 0;

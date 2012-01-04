@@ -19,6 +19,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import java.util.List;
+
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
@@ -46,7 +48,7 @@ public class InternetGRIB
 
   private static final String DOWNLOADABLE_GRIB_FILE_NAME = "config" + File.separator + "grib.xml";
 
-  ArrayList<InternetGRIB.DownloadableGRIB> gribs = null;
+  List<InternetGRIB.DownloadableGRIB> gribs = null;
   private JLabel jLabel4 = new JLabel();
   private JButton browseButton = new JButton();
   private JTextField saveAsTextField = new JTextField();

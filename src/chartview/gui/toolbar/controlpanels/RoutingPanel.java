@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.TimeZone;
 
 import javax.swing.ButtonGroup;
@@ -62,7 +63,7 @@ public class RoutingPanel extends JPanel
   private Date date = null;
   private transient GeoPoint position = null;
   
-  private ArrayList<RoutingPoint> bestRoute = null;
+  private List<RoutingPoint> bestRoute = null;
   
   private GridBagLayout gridBagLayoutOne    = new GridBagLayout();
   private GridBagLayout gridBagLayoutTwo    = new GridBagLayout();
@@ -487,7 +488,7 @@ public class RoutingPanel extends JPanel
   Date fromDate    = null;
   Date toDate      = null;
 
-  public void setBestRoute(ArrayList<RoutingPoint> bestRoute, int routingType)
+  public void setBestRoute(List<RoutingPoint> bestRoute, int routingType)
   {
     GreatCircle gc = WWContext.getInstance().getGreatCircle();
 
@@ -652,7 +653,7 @@ public class RoutingPanel extends JPanel
     }
   }
   
-  public ArrayList<RoutingPoint> getBestRoute()
+  public List<RoutingPoint> getBestRoute()
   {
     return bestRoute;
   }
