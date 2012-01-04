@@ -233,8 +233,14 @@ public class JTreeFilePanel
                       }
                     };
                   lazyLoad.start(); 
-                } // End if lazyload
-              }
+                } 
+                else if (dtn instanceof DirectoryTreeNode)
+                {
+//                System.out.println("Directory:" + dtn.toString());
+                  int nb = dtn.getChildCount(); 
+                  ((DirectoryTreeNode)dtn).setBubble(dtn.toString() + ":" + Integer.toString(nb) + " document" + (nb>1?"s":"") + ".");
+                }
+              } // End if lazyload
             }
           }
 
@@ -472,7 +478,7 @@ public class JTreeFilePanel
   private void removeEmptyBranches(DefaultMutableTreeNode fromRoot)
   {
     Enumeration children = fromRoot.children();
-    ArrayList<DirectoryTreeNode> toRemove = new ArrayList<DirectoryTreeNode>();
+    List<DirectoryTreeNode> toRemove = new ArrayList<DirectoryTreeNode>();
     while (children.hasMoreElements())
     {
       TreeNode dtn = (TreeNode)children.nextElement();
@@ -1110,6 +1116,9 @@ public class JTreeFilePanel
         
         setToolTipText(((DataFileTreeNode)value).getBubble());
       }
+      else if (value instanceof DirectoryTreeNode)
+        setToolTipText(((DirectoryTreeNode)value).getBubble());
+      
       return this;
     }
   }

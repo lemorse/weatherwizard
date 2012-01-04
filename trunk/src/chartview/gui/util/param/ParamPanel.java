@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.EventObject;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
@@ -1370,7 +1371,7 @@ public final class ParamPanel
     
     public int[] getIntValues()
     {
-      ArrayList<Integer> al = new ArrayList<Integer>();
+      List<Integer> al = new ArrayList<Integer>();
       StringTokenizer strtokContourLines = new StringTokenizer(value, ",");
       while (strtokContourLines.hasMoreTokens())
       {
@@ -1393,7 +1394,7 @@ public final class ParamPanel
     
     public int[] getBoldIndexes()
     {
-      ArrayList<Integer> al = new ArrayList<Integer>();
+      List<Integer> al = new ArrayList<Integer>();
       StringTokenizer strtokContourLines = new StringTokenizer(value, ",");
       int idx = 0;
       while (strtokContourLines.hasMoreTokens())

@@ -23,6 +23,7 @@ import java.io.FileOutputStream;
 
 import java.util.ArrayList;
 import java.util.EventObject;
+import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
@@ -338,7 +339,7 @@ public class UserExitTablePanel
         // Open
         JarFile jarFile = new JarFile(ueArchive);
         // Get Manifest and Validate
-        ArrayList<UserExitAction> ueal = new ArrayList<UserExitAction>();
+        List<UserExitAction> ueal = new ArrayList<UserExitAction>();
         Manifest manifest = jarFile.getManifest();   
         Map<String, Attributes> entries = manifest.getEntries();
         for (String key : entries.keySet())

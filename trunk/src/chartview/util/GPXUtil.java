@@ -12,6 +12,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 
+import java.util.List;
 import java.util.TimeZone;
 
 import javax.swing.JOptionPane;
@@ -31,9 +32,9 @@ public class GPXUtil
 {
   private final static String GPX_NS = "http://www.topografix.com/GPX/1/1";
   
-  public static ArrayList<GeoPoint> parseGPXData(URL url, long from, long to)
+  public static List<GeoPoint> parseGPXData(URL url, long from, long to)
   {
-    ArrayList<GeoPoint> ret = new ArrayList<GeoPoint>();
+    List<GeoPoint> ret = new ArrayList<GeoPoint>();
     DOMParser parser = WWContext.getInstance().getParser();
     XMLDocument gpx = null;
     
@@ -188,7 +189,7 @@ public class GPXUtil
       String testData = // "C:\\_stage\\2010-11-13.gpx";
                         "C:\\OlivWork\\olivsoft\\ChartAdjustment\\leg.02.gpx";
       URL gpxURL = new File(testData).toURI().toURL();
-      ArrayList<GeoPoint> algp = GPXUtil.parseGPXData(gpxURL, -1L, -1L);
+      List<GeoPoint> algp = GPXUtil.parseGPXData(gpxURL, -1L, -1L);
       System.out.println("Returned " + algp.size() + " points.");
      
       TimeZone tz = TimeZone.getDefault();

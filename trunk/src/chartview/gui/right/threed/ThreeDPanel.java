@@ -28,10 +28,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StreamTokenizer;
 
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
@@ -43,7 +43,6 @@ import javax.swing.JPanel;
  * represented in Wavefront .obj format.
  * Adapted from ThreeD.java, delivered with the jdk 1.2.2
  */
-@SuppressWarnings("serial")
 public class ThreeDPanel
      extends JPanel
   implements Runnable, MouseListener, MouseMotionListener
@@ -124,7 +123,7 @@ public class ThreeDPanel
           {
             return "from ThreeDPanel.";
           }
-          public void newTWSObj(ArrayList<Point> al)
+          public void newTWSObj(List<Point> al)
           {
             if (md == null)
             {
@@ -149,7 +148,7 @@ public class ThreeDPanel
             }
           }
           
-          public void new500mbObj(ArrayList<Point> al)
+          public void new500mbObj(List<Point> al)
           {
             if (md == null)
             {
@@ -178,7 +177,7 @@ public class ThreeDPanel
             }
           }
           
-          public void newPrmslObj(ArrayList<Point> al)
+          public void newPrmslObj(List<Point> al)
           {
             if (md == null)
             {
@@ -206,7 +205,7 @@ public class ThreeDPanel
             }
           }
           
-          public void newTmpObj(ArrayList<Point> al)
+          public void newTmpObj(List<Point> al)
           {
             if (md == null)
             {
@@ -233,7 +232,7 @@ public class ThreeDPanel
             }
           }
           
-          public void newWaveObj(ArrayList<Point> al)
+          public void newWaveObj(List<Point> al)
           {
             if (md == null)
             {
@@ -260,7 +259,7 @@ public class ThreeDPanel
             }
           }
           
-          public void newRainObj(ArrayList<Point> al)
+          public void newRainObj(List<Point> al)
           {
             if (md == null)
             {

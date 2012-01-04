@@ -32,6 +32,7 @@ import java.util.GregorianCalendar;
 
 import java.util.HashMap;
 
+import java.util.List;
 import java.util.Set;
 
 import javax.swing.JOptionPane;
@@ -95,7 +96,7 @@ public class GribHelper
       int w = 0;
       for (double _Lng = _w; _Lng <= _e; _Lng += stepX)
       {
-        ArrayList<Integer> ar = gribData.getDataPointsAround(new GeoPoint(_Lat, _Lng));   
+        List<Integer> ar = gribData.getDataPointsAround(new GeoPoint(_Lat, _Lng));   
         if (ar != null)
         {          
           try
@@ -209,7 +210,7 @@ public class GribHelper
               }
             }
             // Smooth
-            ArrayList<Double> _ar = Smoothing.calculate(dp, _Lng, _Lat);
+            List<Double> _ar = Smoothing.calculate(dp, _Lng, _Lat);
             if (_ar != null)
             {
               double _dir    = _ar.get(0).doubleValue();
@@ -575,9 +576,9 @@ public class GribHelper
      * top-right   : gribPointData[Y+1][X+1]
      * top-left    : gribPointData[Y+1][X]
      */
-    public ArrayList<Integer> getDataPointsAround(GeoPoint pt)
+    public List<Integer> getDataPointsAround(GeoPoint pt)
     {
-      ArrayList<Integer> array = null;
+      List<Integer> array = null;
       double l = pt.getL();
       double g = pt.getG();
       // G same sign...
@@ -774,7 +775,7 @@ public class GribHelper
 
   public static GribConditionData[] getGribData(InputStream stream, String name) throws Exception
   {
-    ArrayList<GribConditionData> wgd = null;
+    List<GribConditionData> wgd = null;
     try
     {
       TimeZone tz = TimeZone.getTimeZone("127"); // "GMT + 0"
@@ -823,7 +824,7 @@ public class GribHelper
 
   public static GribConditionData[] getGribData(String fileName) throws Exception
   {
-    ArrayList<GribConditionData> wgd = null;
+    List<GribConditionData> wgd = null;
     try
     {
       TimeZone tz = TimeZone.getTimeZone("127");
@@ -871,11 +872,11 @@ public class GribHelper
     return (gcd!=null?wgd.toArray(gcd):null);
   }
 
-  public static ArrayList<GribConditionData> dumper(GribFile gribFile, String fileName) throws Exception
+  public static List<GribConditionData> dumper(GribFile gribFile, String fileName) throws Exception
   {
-    ArrayList<String> unrecognized = new ArrayList<String>();
+    List<String> unrecognized = new ArrayList<String>();
 
-    ArrayList<GribConditionData> wgd = null;
+    List<GribConditionData> wgd = null;
     Map<String, Map<Date, TempGribData>> map = new HashMap<String, Map<Date, TempGribData>>();
     
     TimeZone tz = TimeZone.getTimeZone("127"); // "GMT + 0"

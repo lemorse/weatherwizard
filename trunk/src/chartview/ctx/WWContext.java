@@ -30,6 +30,8 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
+import java.util.List;
+
 import javax.swing.JFrame;
 import javax.swing.filechooser.FileFilter;
 
@@ -73,7 +75,7 @@ public class WWContext
   
   private DOMParser parser = null;
   private GreatCircle greatCircle = null;
-  private transient ArrayList<ApplicationEventListener> applicationListeners = null;
+  private transient List<ApplicationEventListener> applicationListeners = null;
   private ProgressMonitor monitor = null;
   private ApplicationEventListener ael4monitor = null;
   
@@ -112,7 +114,7 @@ public class WWContext
     System.gc();
   }
 
-  public ArrayList<ApplicationEventListener> getListeners()
+  public List<ApplicationEventListener> getListeners()
   {
     return applicationListeners;
   }
@@ -583,7 +585,7 @@ public class WWContext
     }    
   }
   
-  public void fireNew500mbObj(ArrayList<Point> al)
+  public void fireNew500mbObj(List<Point> al)
   {
     for (int i=0; i < this.getListeners().size(); i++)
     {
@@ -601,7 +603,7 @@ public class WWContext
     }    
   }
   
-  public void fireNewRainObj(ArrayList<Point> al)
+  public void fireNewRainObj(List<Point> al)
   {
     for (int i=0; i < this.getListeners().size(); i++)
     {
@@ -618,7 +620,7 @@ public class WWContext
       l.noRainObj();
     }    
   }
-  public void fireNewPrmslObj(ArrayList<Point> al)
+  public void fireNewPrmslObj(List<Point> al)
   {
     for (int i=0; i < this.getListeners().size(); i++)
     {
@@ -636,7 +638,7 @@ public class WWContext
     }    
   }
   
-  public void fireNewTmpObj(ArrayList<Point> al)
+  public void fireNewTmpObj(List<Point> al)
   {
     for (int i=0; i < this.getListeners().size(); i++)
     {
@@ -654,7 +656,7 @@ public class WWContext
     }    
   }
   
-  public void fireNewWaveObj(ArrayList<Point> al)
+  public void fireNewWaveObj(List<Point> al)
   {
     for (int i=0; i < this.getListeners().size(); i++)
     {
@@ -672,7 +674,7 @@ public class WWContext
     }    
   }
 
-  public void fireNewTWSObj(ArrayList<Point> al)
+  public void fireNewTWSObj(List<Point> al)
   {
     for (int i=0; i < this.getListeners().size(); i++)
     {
@@ -825,7 +827,7 @@ public class WWContext
     }        
   }
   
-  public void fireRoutingAvailable(boolean b, ArrayList<RoutingPoint> bestRoute)
+  public void fireRoutingAvailable(boolean b, List<RoutingPoint> bestRoute)
   {
     for (int i=0; i < this.getListeners().size(); i++)
     {
@@ -834,7 +836,7 @@ public class WWContext
     }        
   }
   
-  public void fireRoutingForecastAvailable(boolean b, ArrayList<RoutingPoint> route)
+  public void fireRoutingForecastAvailable(boolean b, List<RoutingPoint> route)
   {
     for (int i=0; i < this.getListeners().size(); i++)
     {
@@ -1115,7 +1117,7 @@ public class WWContext
     return greatCircle;
   }
 
-  public void setApplicationListeners(ArrayList<ApplicationEventListener> applicationListeners)
+  public void setApplicationListeners(List<ApplicationEventListener> applicationListeners)
   {
     this.applicationListeners = applicationListeners;
   }

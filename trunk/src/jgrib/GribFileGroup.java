@@ -33,6 +33,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
 /**
  * A class to store multiple GribFile-s while allowing access to the GribRecords
@@ -73,7 +74,7 @@ public class GribFileGroup
   public GribFileGroup(String[] filenames)
     throws FileNotFoundException, IOException, NotSupportedException, NoValidGribException
   {
-    ArrayList<Date> dateList = new ArrayList<Date>();
+    List<Date> dateList = new ArrayList<Date>();
     for (int i = 0; i < filenames.length; i++)
     {
 
@@ -122,7 +123,7 @@ public class GribFileGroup
   {
     GribFile gribFile = null;
     GribRecordLight[] grls = null;
-    ArrayList<GribRecordLight> grlList = new ArrayList<GribRecordLight>();
+    List<GribRecordLight> grlList = new ArrayList<GribRecordLight>();
     for (int i = 0; i < dates.length; i++)
     {
       Date date = dates[i];
@@ -145,7 +146,7 @@ public class GribFileGroup
   {
     GribFile gribFile = null;
     GribRecordGDS[] gdss = null;
-    ArrayList<GribRecordGDS> gdsList = new ArrayList<GribRecordGDS>();
+    List<GribRecordGDS> gdsList = new ArrayList<GribRecordGDS>();
     for (int i = 0; i < dates.length; i++)
     {
       Date date = dates[i];

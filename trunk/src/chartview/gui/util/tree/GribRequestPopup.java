@@ -12,6 +12,8 @@ import java.util.ArrayList;
 
 import java.util.Iterator;
 
+import java.util.List;
+
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
@@ -205,7 +207,7 @@ public class GribRequestPopup
             XMLElement groupNode = (XMLElement)node.getParentNode();
             // Create an array
             NodeList siblingList = groupNode.selectNodes("./grib");
-            ArrayList<XMLElement> reordered = new ArrayList<XMLElement>(siblingList.getLength());
+            List<XMLElement> reordered = new ArrayList<XMLElement>(siblingList.getLength());
             int idx = -1;
             for (int i=0; i<siblingList.getLength(); i++)
             {
@@ -255,7 +257,7 @@ public class GribRequestPopup
             XMLElement groupNode = (XMLElement)node.getParentNode();
             // Create an array
             NodeList siblingList = groupNode.selectNodes("./grib");
-            ArrayList<XMLElement> reordered = new ArrayList<XMLElement>(siblingList.getLength());
+            List<XMLElement> reordered = new ArrayList<XMLElement>(siblingList.getLength());
             int idx = -1;
             for (int i=0; i<siblingList.getLength(); i++)
             {

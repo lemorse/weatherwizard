@@ -26,6 +26,8 @@ import java.io.File;
 
 import java.util.ArrayList;
 
+import java.util.List;
+
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -57,7 +59,7 @@ public final class WayPointTablePanel
   private JButton downButton = new JButton(new ImageIcon(this.getClass().getResource("down.png")));
 
   private String colName = "Way Point(s)"; 
-  private ArrayList<GeoPoint> aliwp = null;
+  private List<GeoPoint> aliwp = null;
 
   private String[] names = { colName };
 
@@ -70,7 +72,7 @@ public final class WayPointTablePanel
   private JScrollPane scrollPane;
   private BorderLayout borderLayout2 = new BorderLayout();
 
-  public WayPointTablePanel(ArrayList<GeoPoint> aliwp)
+  public WayPointTablePanel(List<GeoPoint> aliwp)
   {
     this.aliwp = aliwp;
     this.names[0] = this.colName;
@@ -160,9 +162,10 @@ public final class WayPointTablePanel
   {
     topLabel.setText(str);
   }
-  public ArrayList<GeoPoint> getData()
+  
+  public List<GeoPoint> getData()
   {
-    ArrayList<GeoPoint> al = new ArrayList<GeoPoint>(data.length);
+    List<GeoPoint> al = new ArrayList<GeoPoint>(data.length);
     for (int i=0; i<data.length; i++)
       al.add(data[i][0]);
     return al;

@@ -31,6 +31,7 @@ import java.util.Collections;
 
 import java.util.Date;
 
+import java.util.List;
 import java.util.TimeZone;
 
 import javax.swing.JButton;
@@ -515,7 +516,7 @@ public class CompositeDetailsInputPanel
   public FaxType[] getFaxes()
   {
     Object[][] faxData = faxTablePanel.getData();
-    ArrayList<FaxType> alft = new ArrayList<FaxType>(faxData.length);
+    List<FaxType> alft = new ArrayList<FaxType>(faxData.length);
     int arrayLen = 0;
     for (int i=0; i<faxData.length; i++)
     {

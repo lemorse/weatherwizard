@@ -18,7 +18,8 @@ import java.awt.event.MouseEvent;
 
 import java.io.File;
 
-import java.util.ArrayList;
+import java.util.List;
+
 import javax.swing.JComponent;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
@@ -197,7 +198,7 @@ public final class OneColumnTablePanel
     return data;
   }
 
-  public void setData(ArrayList<String> newData)
+  public void setData(List<String> newData)
   {
     Object[][] d = new Object[newData.size()][1];
     for (int i=0; i<newData.size(); i++)

@@ -6,11 +6,13 @@ import java.util.Enumeration;
 
 import gnu.io.CommPortIdentifier;
 
+import java.util.List;
+
 public class SerialPortList
 {
   public static String[] listSerialPorts()
   {
-    ArrayList<String> portList = new ArrayList<String>();                                  
+    List<String> portList = new ArrayList<String>();                                  
     CommPortIdentifier portId;
     Enumeration en = CommPortIdentifier.getPortIdentifiers();
     while (en.hasMoreElements())

@@ -39,6 +39,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+import java.util.List;
+
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
@@ -431,7 +433,7 @@ public class CompositeTabbedPane
           Date date = inputPanel.getUpToDate();
           if (date != null)
             to = date.getTime();
-          ArrayList<GeoPoint> algp = GPXUtil.parseGPXData(new File(gpxDataFileName).toURI().toURL(), -1L, to);
+          List<GeoPoint> algp = GPXUtil.parseGPXData(new File(gpxDataFileName).toURI().toURL(), -1L, to);
           commandPanel.setGPXData(algp);
         }
         catch (Exception ex)

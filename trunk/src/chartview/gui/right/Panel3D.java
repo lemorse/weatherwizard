@@ -28,6 +28,7 @@ import java.io.File;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.JCheckBox;
@@ -57,32 +58,32 @@ public class Panel3D
           {
             return "from Panel3D.";
           }
-          public void newTWSObj(ArrayList<Point> al)
+          public void newTWSObj(List<Point> al)
           {
             twsCheckBox.setEnabled(true);
           }
           
-          public void new500mbObj(ArrayList<Point> al)
+          public void new500mbObj(List<Point> al)
           {
             prmslCheckBox.setEnabled(true);
           }
           
-          public void newPrmslObj(ArrayList<Point> al)
+          public void newPrmslObj(List<Point> al)
           {
             hgt500CheckBox.setEnabled(true);
           }
           
-          public void newTmpObj(ArrayList<Point> al)
+          public void newTmpObj(List<Point> al)
           {
             temperatureCheckBox.setEnabled(true);;
           }
           
-          public void newWaveObj(ArrayList<Point> al)
+          public void newWaveObj(List<Point> al)
           {
             wavesCheckBox.setEnabled(true);
           }
           
-          public void newRainObj(ArrayList<Point> al)
+          public void newRainObj(List<Point> al)
           {
             rainCheckBox.setEnabled(true);
           }

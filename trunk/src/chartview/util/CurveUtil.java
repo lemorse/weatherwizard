@@ -10,6 +10,7 @@ import chartview.util.grib.GribHelper.GribConditionData;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 public class CurveUtil
 {
@@ -21,9 +22,9 @@ public class CurveUtil
   public final static int TWS     = 5;
   public final static int SEATEMP = 6;
   
-  public static ArrayList<GeoBump> getBumps(GribHelper.GribConditionData gribData, int type)
+  public static List<GeoBump> getBumps(GribHelper.GribConditionData gribData, int type)
   {
-    ArrayList<CurveUtil.GeoBump> result = new ArrayList<CurveUtil.GeoBump>();
+    List<CurveUtil.GeoBump> result = new ArrayList<CurveUtil.GeoBump>();
     
     for (int h=0; gribData.getGribPointData() != null && h<gribData.getGribPointData().length; h++)
     {

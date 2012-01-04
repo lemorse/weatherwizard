@@ -29,6 +29,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 
+import java.util.List;
+
 import javax.swing.JOptionPane;
 
 public class RoutingUtil
@@ -65,20 +67,20 @@ public class RoutingUtil
     return brg;
   }
 
-  public static ArrayList<ArrayList<RoutingPoint>> calculateIsochrons(RoutingClientInterface caller, 
-                                                                      ChartPanel chartPanel,
-                                                                      RoutingPoint startFrom,
-                                                                      RoutingPoint destination,
-                                                                      ArrayList<RoutingPoint> intermediateWP,
-                                                                      Date fromDate,
-                                                                      GribHelper.GribConditionData[] gribData,
-                                                                      double timeInterval,
-                                                                      int routingForkWidth,
-                                                                      int routingStep,
-                                                                      int maxTWS,
-                                                                      int minTWA,
-                                                                      boolean stopIfGRIB2old,
-                                                                      double speedCoeff)
+  public static List<List<RoutingPoint>> calculateIsochrons(RoutingClientInterface caller, 
+                                                            ChartPanel chartPanel,
+                                                            RoutingPoint startFrom,
+                                                            RoutingPoint destination,
+                                                            List<RoutingPoint> intermediateWP,
+                                                            Date fromDate,
+                                                            GribHelper.GribConditionData[] gribData,
+                                                            double timeInterval,
+                                                            int routingForkWidth,
+                                                            int routingStep,
+                                                            int maxTWS,
+                                                            int minTWA,
+                                                            boolean stopIfGRIB2old,
+                                                            double speedCoeff)
   {
     wgd              = gribData;
     finalDestination = destination; // By default
@@ -99,14 +101,14 @@ public class RoutingUtil
     // Calcutate bearing to detination (from start)
     brg = getBearing(center);
     
-    ArrayList<ArrayList<RoutingPoint>> allIsochrons = new ArrayList<ArrayList<RoutingPoint>>();
+    List<List<RoutingPoint>> allIsochrons = new ArrayList<List<RoutingPoint>>();
     
     // Initialization
     interruptRouting = false;
     timer = System.currentTimeMillis();
     
     smallestDist = Double.MAX_VALUE;
-    ArrayList<ArrayList<RoutingPoint>> data = new ArrayList<ArrayList<RoutingPoint>>(1);
+    List<List<RoutingPoint>> data = new ArrayList<List<RoutingPoint>>(1);
     ArrayList<RoutingPoint> one = new ArrayList<RoutingPoint>(1);
     center.setDate(fromDate);
     GribHelper.GribCondition wind = GribHelper.gribLookup(center.getPosition(), wgd, fromDate);
@@ -135,21 +137,21 @@ public class RoutingUtil
       {
 //      timer = logDiffTime(timer, "Milestone 1");
         double localSmallOne = Double.MAX_VALUE;
-        ArrayList<ArrayList<RoutingPoint>> temp = new ArrayList<ArrayList<RoutingPoint>>();
-        Iterator<ArrayList<RoutingPoint>> dimOne = data.iterator();
+        List<List<RoutingPoint>> temp = new ArrayList<List<RoutingPoint>>();
+        Iterator<List<RoutingPoint>> dimOne = data.iterator();
         int nbNonZeroSpeed = 0;
         boolean allowOtherRoute = false;
         while (!interruptRouting && dimOne.hasNext() && keepLooping)
         {
 //        timer = logDiffTime(timer, "Milestone 2");
-          ArrayList<RoutingPoint> curve = dimOne.next();
+          List<RoutingPoint> curve = dimOne.next();
           Iterator<RoutingPoint> dimTwo = curve.iterator();
           nbNonZeroSpeed = 0;
           while (!interruptRouting && keepLooping && dimTwo.hasNext())
           {
 //          timer = logDiffTime(timer, "Milestone 3");
             RoutingPoint newCurveCenter = dimTwo.next();
-            ArrayList<RoutingPoint> oneCurve = new ArrayList<RoutingPoint>(10);
+            List<RoutingPoint> oneCurve = new ArrayList<RoutingPoint>(10);
             
             wind = GribHelper.gribLookup(newCurveCenter.getPosition(), wgd, currentDate);
             if (wind != null && wind.comment != null && wind.comment.equals("TOO_OLD"))
@@ -255,7 +257,7 @@ public class RoutingUtil
         // Flip data
 //      timer = logDiffTime(timer, "Milestone 8");
         data = temp;  
-        ArrayList<RoutingPoint> finalCurve = null;
+        List<RoutingPoint> finalCurve = null;
         if (!interruptRouting)
         {
 //        timer = logDiffTime(timer, "Milestone 8-bis");
@@ -393,7 +395,7 @@ public class RoutingUtil
         if (keepLooping)
         {
           allIsochrons.add(finalCurve);
-          data = new ArrayList<ArrayList<RoutingPoint>>();
+          data = new ArrayList<List<RoutingPoint>>();
           data.add(finalCurve);
           currentDate = arrivalDate;
         }
@@ -422,15 +424,15 @@ public class RoutingUtil
     return after;
   }
      
-  private static ArrayList<RoutingPoint> calculateEnveloppe(ArrayList<ArrayList<RoutingPoint>> bulkPoints, RoutingPoint center)
+  private static List<RoutingPoint> calculateEnveloppe(List<List<RoutingPoint>> bulkPoints, RoutingPoint center)
   {
-    ArrayList<RoutingPoint> returnCurve = new ArrayList<RoutingPoint>();
+    List<RoutingPoint> returnCurve = new ArrayList<RoutingPoint>();
     long before = System.currentTimeMillis();
     // Put ALL the points in the finalCurve
-     Iterator<ArrayList<RoutingPoint>> dimOne = bulkPoints.iterator();
+     Iterator<List<RoutingPoint>> dimOne = bulkPoints.iterator();
      while (!interruptRouting && dimOne.hasNext())
      {
-       ArrayList<RoutingPoint> curve = dimOne.next();
+       List<RoutingPoint> curve = dimOne.next();
        Iterator<RoutingPoint> dimTwo = curve.iterator();
        while (!interruptRouting && dimTwo.hasNext())
        {
@@ -445,7 +447,7 @@ public class RoutingUtil
     {
       Polygon currentPolygon = new Polygon();
       currentPolygon.addPoint(center.getPoint().x, center.getPoint().y); // center
-      ArrayList<RoutingPoint> curve = dimOne.next();
+      List<RoutingPoint> curve = dimOne.next();
       Iterator<RoutingPoint> dimTwo = curve.iterator();
       while (!interruptRouting && dimTwo.hasNext())
       {
@@ -455,10 +457,10 @@ public class RoutingUtil
       }
       currentPolygon.addPoint(center.getPoint().x, center.getPoint().y); // close
       
-      Iterator<ArrayList<RoutingPoint>> dimOneBis = bulkPoints.iterator();
+      Iterator<List<RoutingPoint>> dimOneBis = bulkPoints.iterator();
       while (!interruptRouting && dimOneBis.hasNext())
       {
-        ArrayList<RoutingPoint> curveBis = dimOneBis.next();
+        List<RoutingPoint> curveBis = dimOneBis.next();
         if (curveBis.equals(curve)) continue;
         Iterator<RoutingPoint> dimTwoBis = curveBis.iterator();
         while (!interruptRouting && dimTwoBis.hasNext())
@@ -491,13 +493,13 @@ public class RoutingUtil
   
   private static WhatIfRoutingPanel wirp = null;
   
-  public static ArrayList<RoutingPoint> whatIfRouting(CommandPanel cp, GeoPoint fromPt, GribHelper.GribConditionData[] gribData) 
+  public static List<RoutingPoint> whatIfRouting(CommandPanel cp, GeoPoint fromPt, GribHelper.GribConditionData[] gribData) 
   {
     if (wirp == null)
       wirp = new WhatIfRoutingPanel();
     wirp.setFromPos(fromPt);
     
-    ArrayList<RoutingPoint> route = null;
+    List<RoutingPoint> route = null;
     int resp = JOptionPane.showConfirmDialog(cp, 
                                              wirp, 
                                              "Routing", 
@@ -599,7 +601,7 @@ public class RoutingUtil
       long after = System.currentTimeMillis();
       System.out.println("Created " + route.size() + " Routing Points between " + fromDate.toString() + " and " + toDate.toString() + " in " + Long.toString(after - before) + " ms.");
       // Turn the route upside down, to do like the routing backtracking
-      ArrayList<RoutingPoint> route2 = new ArrayList<RoutingPoint>(route.size());
+      List<RoutingPoint> route2 = new ArrayList<RoutingPoint>(route.size());
       for (int i=0; i<route.size(); i++)
       {
         RoutingPoint rp = route.get(route.size() - (i + 1));
