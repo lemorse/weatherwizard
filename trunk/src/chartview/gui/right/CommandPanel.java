@@ -4953,7 +4953,7 @@ public class CommandPanel
               int imageVOffset  = Integer.parseInt(fax.selectNodes("./faxYoffset").item(0).getFirstChild().getNodeValue());
               double imageRotation  = 0D;
               try { imageRotation = Double.parseDouble(fax.selectNodes("./faxRotation").item(0).getFirstChild().getNodeValue()); } 
-              catch (Exception ignore) { ignore.printStackTrace(); }
+              catch (Exception ignore) { System.err.println("Rotation:" + ignore.getLocalizedMessage()); }
               faxImage[i] = new FaxImage();
               faxImage[i].fileName = faxName;
               faxImage[i].color = c;
