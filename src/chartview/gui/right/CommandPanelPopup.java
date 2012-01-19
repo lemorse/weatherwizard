@@ -545,8 +545,9 @@ public class CommandPanelPopup
   {
     if (event.getActionCommand().equals(REMOVE_COMPOSITE))
     {
+      parent.removeComposite();
+      /*
       WWContext.getInstance().setCurrentComposite("");
-
       parent.unsetFaxImage();
       parent.unsetGribData();
       parent.setNLat(65D);
@@ -558,6 +559,7 @@ public class CommandPanelPopup
       parent.wgd = null;
       parent.gribFileName = "";
       parent.chartPanel.repaint();
+      */
     }
     if (event.getActionCommand().equals(SHOW_PRINTABLE_PAGE_SIZE))
     {

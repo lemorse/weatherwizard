@@ -121,6 +121,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
@@ -967,12 +969,18 @@ public class CommandPanel
   {
     faxOpacitySlider.setEnabled(false);
     gribOpacitySlider.setEnabled(false);
-    if (compositeCheckBox != null) // Remove before adding new ones
+    if (checkBoxCompositePanel != null)
     {
-      for (int i=0; i<compositeCheckBox.length; i++)
-        checkBoxCompositePanel.remove(compositeCheckBox[i]);       
+      if (compositeCheckBox != null) // Remove before adding new ones
+      {
+        for (int i=0; i<compositeCheckBox.length; i++)
+        {
+          if (compositeCheckBox[i] != null)
+            checkBoxCompositePanel.remove(compositeCheckBox[i]);
+        }
+      }
+      checkBoxCompositePanel.repaint();
     }
-    checkBoxCompositePanel.repaint();
   }
   
   public void removeContourCheckBoxes()
@@ -1008,8 +1016,10 @@ public class CommandPanel
 
     compositeCheckBox = new JCheckBox[nbFaxes + EXTRA_CHECK_BOXES + (wgd!=null?1:0)]; 
 
-    for (int i=0; faxes != null && i<faxes.length; i++)
+    for (int i=0; faxes != null && faxes.length > 0 && i<faxes.length; i++)
     {
+      if (faxes[i] == null)
+        continue;
       compositeCheckBox[i] = new JCheckBox("");
       compositeCheckBox[i].setBackground(faxes[i].getColor());
 //    compositeCheckBox[i].setForeground(faxes[i].getColor());
@@ -4304,8 +4314,14 @@ public class CommandPanel
     }
   }
   
-  public void restoreComposite(String fileName, String option, boolean withBoatAndTrack)
+  public int restoreComposite(String fileName, String option, boolean withBoatAndTrack)
   {
+    return restoreComposite(fileName, option, null, withBoatAndTrack);
+  }
+  
+  public int restoreComposite(String fileName, String option, Pattern faxPattern, boolean withBoatAndTrack)
+  {
+    int nbComponents = 0;
     boolean fromArchive = false;
     ZipFile waz = null;
     XMLDocument doc = null;
@@ -4336,7 +4352,7 @@ public class CommandPanel
           else
           {
             JOptionPane.showMessageDialog(instance, fileName + " is a directory", "Restoring Composite", JOptionPane.ERROR_MESSAGE);
-            return;
+            return 0;
           }
         }
         doc = parser.getDocument();
@@ -4448,6 +4464,13 @@ public class CommandPanel
                                                                                                                  Integer.toString(faxes.getLength())}));
               XMLElement fax = (XMLElement)faxes.item(i);
               String faxName = fax.getAttribute("file");
+              if (faxPattern != null)
+              {
+                Matcher m = faxPattern.matcher(faxName);
+                if (!m.find())
+                  continue;
+              }
+              nbComponents++;
               Color c = WWGnlUtilities.buildColor(fax.getAttribute("color"));
               String strRatio = fax.getAttribute("wh-ratio");
               if (strRatio.trim().length() > 0)
@@ -4538,13 +4561,16 @@ public class CommandPanel
               ft[i].setTransparent(true);
               repaint(); // Repaint between each fax
             }
-            setCheckBoxes(ft);
-            if (faxes.getLength() > 0)
+            if (faxPattern == null)
             {
-              WWContext.getInstance().fireFaxLoaded();
-              WWContext.getInstance().fireFaxesLoaded(ft);
+              setCheckBoxes(ft);
+              if (faxes.getLength() > 0)
+              {
+                WWContext.getInstance().fireFaxLoaded();
+                WWContext.getInstance().fireFaxesLoaded(ft);
+              }
+              setCheckBoxes(ft);
             }
-            setCheckBoxes(ft);       
           }
           catch (Exception ex) 
           {
@@ -4665,6 +4691,7 @@ public class CommandPanel
               
               setGribData(wgd, displayFileName);
             }
+            nbComponents++;
           }
           catch (Exception ex)  
           { 
@@ -4697,6 +4724,7 @@ public class CommandPanel
                                            Double.parseDouble(gpx.getAttribute("lng")));
                 gpxData.add(gp);
               }
+              nbComponents++;
             }            
           }
           catch (Exception ex)
@@ -4711,6 +4739,7 @@ public class CommandPanel
         e.printStackTrace();
       }    
     }
+    return nbComponents;
   }
   
   public void restoreFromPattern(String fileName)
@@ -8007,6 +8036,23 @@ public class CommandPanel
   public int getBlurSharpOption()
   {
     return blurSharpOption;
+  }
+  
+  public void removeComposite()
+  {
+    WWContext.getInstance().setCurrentComposite("");
+
+    this.unsetFaxImage();
+    this.unsetGribData();
+    this.setNLat(65D);
+    this.setSLat(-65D);
+    this.setWLong(-180D);
+    this.setELong(180D);
+    this.applyBoundariesChanges();
+    this.faxImage = null;
+    this.wgd = null;
+    this.gribFileName = "";
+    this.chartPanel.repaint();    
   }
   
   public class FaxImage

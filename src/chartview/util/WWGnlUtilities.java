@@ -135,10 +135,12 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
-//import user.util.TimeUtil;
-
 public class WWGnlUtilities
 {
+  public final static String REGEXPR_PROPERTIES_FILE = "regexpr.properties";
+  public final static String COMPOSITE_FILTER        = "composite.filter";
+  public final static String FAX_NAME_FILTER         = "fax.filter";
+  
   public final static DecimalFormat XX14   = new DecimalFormat("##0.0000");
   public final static DecimalFormat DF2    = new DecimalFormat("00");
   public final static DecimalFormat DF3    = new DecimalFormat("000");
@@ -581,6 +583,7 @@ public class WWGnlUtilities
     String fileNameTwo = "";
     String displayOpt = null;
     String withBoatStr = "true";
+    String faxNameFilter = null;
 
     if (twoFilePanel == null)
     {
@@ -643,8 +646,9 @@ public class WWGnlUtilities
       regExp = twoFilePanel.getRegExprPatternTextField().getText();
       displayOpt = twoFilePanel.getDisplayOption();
       withBoatStr = (twoFilePanel.withBoatAndTrack()?"true":"false");
+      faxNameFilter = twoFilePanel.getFaxNameRegExpr();
     }
-    return new String[] { fileNameOne, fileNameTwo, regExp, displayOpt, twoFilePanel.getPDFTitle(), withBoatStr };
+    return new String[] { fileNameOne, fileNameTwo, regExp, displayOpt, twoFilePanel.getPDFTitle(), withBoatStr, faxNameFilter };
   }
   
   public final static int NOTHING  = 0;
@@ -1599,6 +1603,7 @@ public class WWGnlUtilities
                                                File imgDir, 
                                                CommandPanel cp, 
                                                final Pattern pattern, 
+                                               final Pattern faxPattern, 
                                                boolean countOnly,
                                                String displayOption,
                                                BufferedWriter corellation,
@@ -1634,7 +1639,7 @@ public class WWGnlUtilities
       for (int i=0; i<flist.length && keepWorking.valueOf(); i++)
       {
         if (flist[i].isDirectory())
-          howMany += drillDownAndGenerateImage(flist[i], imgDir, cp, pattern, countOnly, displayOption, corellation, withBoatAndTrack);
+          howMany += drillDownAndGenerateImage(flist[i], imgDir, cp, pattern, faxPattern, countOnly, displayOption, corellation, withBoatAndTrack);
         else
         {
           String fName = flist[i].getAbsolutePath();
@@ -1642,7 +1647,14 @@ public class WWGnlUtilities
           {
             System.out.println("Generating Image for Composite [" + fName + "]");
             // That's here !!
-            cp.restoreComposite(flist[i].getAbsolutePath(), displayOption, withBoatAndTrack);
+            int nbc = cp.restoreComposite(flist[i].getAbsolutePath(), displayOption, faxPattern, withBoatAndTrack);
+            if (nbc == 0)
+            {
+              System.out.println(">>>>>> No component for " + fName + ", skipping.");
+              continue;
+            }
+//          else
+//            System.out.println(">>> " + nbc + " component(s) for " + fName);
             String compositeComment = cp.getCurrentComment();            
             String imgfName = fName.substring(fName.lastIndexOf(File.separator) + 1) + ".png"; 
             if (corellation != null)
@@ -2479,8 +2491,11 @@ public class WWGnlUtilities
     final String displayOpt = fromTo[3];
     final String pdfTitle   = fromTo[4];
     final boolean withBoatAndTrack = "true".equals(fromTo[5]);
+    final String faxNameFilter = fromTo[6];
     
     Pattern pattern = null;
+    Pattern faxNamePattern = null;
+    
     if (startFrom.trim().length() > 0 && generateIn.trim().length() > 0)
     {
       boolean ok2go = true;
@@ -2494,7 +2509,8 @@ public class WWGnlUtilities
           String mess = pse.toString() + "\n" +
                         WWGnlUtilities.buildMessage("invalid-pattern"); 
           int resp = JOptionPane.showConfirmDialog(WWContext.getInstance().getMasterTopFrame(), 
-                                                   mess, WWGnlUtilities.buildMessage("pattern-validation"), 
+                                                   mess, 
+                                                   WWGnlUtilities.buildMessage("pattern-validation"), 
                                                    JOptionPane.OK_CANCEL_OPTION, 
                                                    JOptionPane.WARNING_MESSAGE);
           if (resp == JOptionPane.OK_OPTION)
@@ -2504,11 +2520,41 @@ public class WWGnlUtilities
           }
         }
       }
+      if (faxNameFilter != null && faxNameFilter.trim().length() > 0)
+      {
+        try { faxNamePattern = Pattern.compile(faxNameFilter); }
+        catch (PatternSyntaxException pse)
+        {
+          ok2go = false;
+          String mess = pse.toString() + "\n" +
+                        WWGnlUtilities.buildMessage("invalid-pattern"); 
+          int resp = JOptionPane.showConfirmDialog(WWContext.getInstance().getMasterTopFrame(), 
+                                                   mess, WWGnlUtilities.buildMessage("pattern-validation"), 
+                                                   JOptionPane.OK_CANCEL_OPTION, 
+                                                   JOptionPane.WARNING_MESSAGE);
+          if (resp == JOptionPane.OK_OPTION)
+          {
+            ok2go = true;
+            faxNamePattern = null;
+          }
+        }
+      }
       if (ok2go) // Means pattern validated
       {
-        // 1 - Count
-        
-        final int howMany = drillDownAndGenerateImage(new File(startFrom), new File(generateIn), cp, pattern, true, displayOpt, null, withBoatAndTrack);       
+        // Store patterns
+        try
+        {
+          Properties props = new Properties();
+          props.setProperty(COMPOSITE_FILTER, regExpPattern);
+          props.setProperty(FAX_NAME_FILTER, faxNameFilter);
+          props.store(new FileWriter(REGEXPR_PROPERTIES_FILE), "Last Regular Expressions");
+        }
+        catch (Exception ex)
+        {
+          ex.printStackTrace();
+        }
+        // 1 - Count        
+        final int howMany = drillDownAndGenerateImage(new File(startFrom), new File(generateIn), cp, pattern, faxNamePattern, true, displayOpt, null, withBoatAndTrack);       
         int resp = JOptionPane.showConfirmDialog(cp, 
                                                  WWGnlUtilities.buildMessage("image-gen-prompt", 
                                                                              new String[] { Integer.toString(howMany) }), 
@@ -2518,6 +2564,7 @@ public class WWGnlUtilities
         if (resp == JOptionPane.OK_OPTION)
         {
           final Pattern ptrn = pattern;
+          final Pattern faxPtrn = faxNamePattern;
           Runnable heavyRunnable = new Runnable() // Show progress bar
           {
 //          ProgressMonitor monitor = null;
@@ -2565,6 +2612,7 @@ public class WWGnlUtilities
                                                         new File(generateIn), 
                                                         cp, 
                                                         ptrn, 
+                                                        faxPtrn,
                                                         false,
                                                         displayOpt,
                                                         xc,
@@ -2599,6 +2647,8 @@ public class WWGnlUtilities
                   }
                 }
                 
+                cp.removeComposite();
+
                 String mess = WWGnlUtilities.buildMessage("after-img-gen", // Show on File System after generation?
                                                           new String[] {Integer.toString(howMuch)});
                 int resp = JOptionPane.showConfirmDialog(cp, 

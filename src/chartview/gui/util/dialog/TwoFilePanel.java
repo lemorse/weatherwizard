@@ -17,6 +17,12 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
+import java.util.Properties;
+
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
@@ -53,6 +59,8 @@ public class TwoFilePanel
   private JLabel pdfTitleLabel = new JLabel("A title for the pdf:");
   private JTextField pdfTitle = new JTextField();
   private JCheckBox boatAndTrackCheckBox = new JCheckBox();
+  private JCheckBox faxFilterCheckBox = new JCheckBox();
+  private JTextField faxNameFilterTextField = new JTextField();
 
   public TwoFilePanel()
   {
@@ -107,8 +115,29 @@ public class TwoFilePanel
     
     allRadioButton.setText(WWGnlUtilities.buildMessage("everything")); 
     allRadioButton.setSelected(true);
+    allRadioButton.addActionListener(new ActionListener()
+      {
+        public void actionPerformed(ActionEvent e)
+        {
+          faxNameFilterTextField.setEnabled(faxFilterCheckBox.isSelected() && !justGRIBRadioButton.isSelected());
+        }                                    
+      });
     justFaxesRadioButton.setText(WWGnlUtilities.buildMessage("just-faxes"));
+    justFaxesRadioButton.addActionListener(new ActionListener()
+      {
+        public void actionPerformed(ActionEvent e)
+        {
+          faxNameFilterTextField.setEnabled(faxFilterCheckBox.isSelected() && !justGRIBRadioButton.isSelected());
+        }                                    
+      });
     justGRIBRadioButton.setText(WWGnlUtilities.buildMessage("just-gribs"));
+    justGRIBRadioButton.addActionListener(new ActionListener()
+      {
+        public void actionPerformed(ActionEvent e)
+        {
+          faxNameFilterTextField.setEnabled(faxFilterCheckBox.isSelected() && !justGRIBRadioButton.isSelected());
+        }                                    
+      });
     pdfCheckBox.setText("Generate PDF when done");
     pdfCheckBox.setSelected(false);
     pdfTitle.setEnabled(false);
@@ -123,6 +152,18 @@ public class TwoFilePanel
       });
     pdfTitle.setPreferredSize(new Dimension(200, 24));
     boatAndTrackCheckBox.setText("Boat & Track");
+    faxFilterCheckBox.setText("Fax Filter");
+    faxFilterCheckBox.setToolTipText("Filter Fax names ?");
+    faxFilterCheckBox.addActionListener(new ActionListener()
+      {
+        public void actionPerformed(ActionEvent e)
+        {
+          faxNameFilterTextField.setEnabled(faxFilterCheckBox.isSelected() && !justGRIBRadioButton.isSelected());
+        }                                    
+      });
+    faxNameFilterTextField.setPreferredSize(new Dimension(150, 24));
+    faxNameFilterTextField.setEnabled(false);
+    faxNameFilterTextField.setToolTipText("Regular Expression for the Fax Names");
     this.add(leftLabel, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
     this.add(rightLabel, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
     this.add(leftChooser, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
@@ -133,14 +174,29 @@ public class TwoFilePanel
     gribOptionPanel.add(allRadioButton, null);
     gribOptionPanel.add(justFaxesRadioButton, null);
     gribOptionPanel.add(justGRIBRadioButton, null);
+    gribOptionPanel.add(faxFilterCheckBox, null);
+    gribOptionPanel.add(faxNameFilterTextField, null);
     gribOptionPanel.add(boatAndTrackCheckBox, null);
     gribOptionPanel.add(pdfCheckBox, null);
     gribOptionPanel.add(pdfTitleLabel, null);
     gribOptionPanel.add(pdfTitle, null);
-    this.add(gribOptionPanel,
-             new GridBagConstraints(0, 4, 2, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(10, 10,
-                                                                                                                       0, 0),
-                                    0, 0));
+    this.add(gribOptionPanel, new GridBagConstraints(0, 4, 2, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(10, 10, 0, 0), 0, 0));
+    //Previous regexpr?
+    Properties p = new Properties();
+    try
+    {
+      p.load(new FileInputStream(WWGnlUtilities.REGEXPR_PROPERTIES_FILE));
+      regExprPatternTextField.setText(p.getProperty(WWGnlUtilities.COMPOSITE_FILTER, ".*"));
+      faxNameFilterTextField.setText(p.getProperty(WWGnlUtilities.FAX_NAME_FILTER, ""));
+    }
+    catch (FileNotFoundException fnfe)
+    {
+      fnfe.printStackTrace();
+    }
+    catch (IOException ioe)
+    {
+      ioe.printStackTrace();
+    }
   }
 
   public JLabel getLeftLabel()
@@ -182,6 +238,15 @@ public class TwoFilePanel
     else if (justGRIBRadioButton.isSelected())
       return JUST_GRIBS;
     return null;
+  }
+  
+  public String getFaxNameRegExpr()
+  {
+    String expr = null;
+    if (faxFilterCheckBox.isSelected() && faxNameFilterTextField.isEnabled())
+      expr = faxNameFilterTextField.getText().trim();
+    
+    return expr;
   }
   
   public boolean withBoatAndTrack()
