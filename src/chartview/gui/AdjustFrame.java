@@ -1571,7 +1571,10 @@ public class AdjustFrame
                   String gribRequest = WWGnlUtilities.generateGRIBRequest(grib);
                   try
                   {                
-                    System.out.println(gribRequest);
+                    System.out.println("GRIB Request:" + gribRequest);
+                    
+                    assert gribRequest.toUpperCase().startsWith("http://");
+                    
                     URL saildocs = new URL(gribRequest);
                     URLConnection connection = saildocs.openConnection();
                     connection.connect();
