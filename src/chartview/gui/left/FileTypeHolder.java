@@ -20,25 +20,39 @@ import java.awt.event.ComponentEvent;
 
 import javax.swing.JPanel;
 
+@SuppressWarnings("serial")
 public class FileTypeHolder
      extends JPanel
 {
-  private JTreeFilePanel faxTree       = new JTreeFilePanel(ParamPanel.data[ParamData.FAX_FILES_LOC][1].toString(),  JTreeFilePanel.FAX_TYPE,       this);
-  private JTreeFilePanel gribTree      = new JTreeFilePanel(ParamPanel.data[ParamData.GRIB_FILES_LOC][1].toString(), JTreeFilePanel.GRIB_TYPE,      this);
-  private JTreeFilePanel compositeTree = new JTreeFilePanel(ParamPanel.data[ParamData.CTX_FILES_LOC][1].toString(),  JTreeFilePanel.COMPOSITE_TYPE, this);
-  private JTreeFilePanel patternTree   = new JTreeFilePanel(ParamPanel.data[ParamData.PATTERN_DIR][1].toString(),    JTreeFilePanel.PATTERN_TYPE,   this);
+  private JTreeFilePanel faxTree       = new JTreeFilePanel(ParamPanel.data[ParamData.FAX_FILES_LOC][1].toString(),  
+                                                            JTreeFilePanel.FAX_TYPE,         
+                                                            this);
+  private JTreeFilePanel gribTree      = new JTreeFilePanel(ParamPanel.data[ParamData.GRIB_FILES_LOC][1].toString(), 
+                                                            JTreeFilePanel.GRIB_TYPE,        
+                                                            this);
+  private JTreeFilePanel compositeTree = new JTreeFilePanel(ParamPanel.data[ParamData.CTX_FILES_LOC][1].toString(),  
+                                                            JTreeFilePanel.COMPOSITE_TYPE,   
+                                                            this);
+  private JTreeFilePanel patternTree   = new JTreeFilePanel(ParamPanel.data[ParamData.PATTERN_DIR][1].toString(),    
+                                                            JTreeFilePanel.PATTERN_TYPE,     
+                                                            this);
+  private JTreeFilePanel preDefFaxTree = new JTreeFilePanel(null,                                                    
+                                                            JTreeFilePanel.PRE_DEF_FAX_TYPE, 
+                                                            this);
   
   private JPanel filler                = new JPanel();
   
   private JTreeFilePanel[] pa = {faxTree, 
                                  gribTree, 
                                  compositeTree, 
-                                 patternTree};
+                                 patternTree,
+                                 preDefFaxTree};
 
-  public final static int FAX_TREE       = 0;
-  public final static int GRIB_TREE      = 1;
-  public final static int COMPOSITE_TREE = 2;
-  public final static int PATTERN_TREE   = 3;
+  public final static int FAX_TREE        = 0;
+  public final static int GRIB_TREE       = 1;
+  public final static int COMPOSITE_TREE  = 2;
+  public final static int PATTERN_TREE    = 3;
+  public final static int PREDEF_FAX_TREE = 4;
   
   private GridBagLayout gridBagLayout1 = new GridBagLayout();
     
@@ -75,8 +89,12 @@ public class FileTypeHolder
              new GridBagConstraints(0, 3, 1, 1, 1.0, 1.0, GridBagConstraints.NORTH, GridBagConstraints.BOTH, 
                                     new Insets(0, 5, 5, 5), 0, 0));
 
-    this.add(filler, 
+    this.add(preDefFaxTree, 
              new GridBagConstraints(0, 4, 1, 1, 1.0, 1.0, GridBagConstraints.NORTH, GridBagConstraints.BOTH, 
+                                    new Insets(0, 5, 5, 5), 0, 0));
+
+    this.add(filler, 
+             new GridBagConstraints(0, 5, 1, 1, 1.0, 1.0, GridBagConstraints.NORTH, GridBagConstraints.BOTH, 
                                     new Insets(0, 5, 5, 5), 0, 0));
 
     this.addComponentListener(new ComponentAdapter()
@@ -186,6 +204,8 @@ public class FileTypeHolder
   { compositeTree.reloadTree(); }
   public void refreshPatternTree()
   { patternTree.reloadTree(); }
+  public void refreshPredefFaxTree()
+  { preDefFaxTree.reloadTree(); }
   
   public boolean isTreeExpanded(int i)
   { return pa[i].isExpanded(); }

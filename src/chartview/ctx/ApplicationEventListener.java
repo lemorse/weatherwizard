@@ -3,6 +3,7 @@ package chartview.ctx;
 
 import astro.calc.GeoPoint;
 
+import chartview.gui.right.CommandPanel;
 import chartview.gui.util.dialog.FaxType;
 
 import chartview.routing.enveloppe.custom.RoutingPoint;
@@ -113,6 +114,8 @@ public abstract class ApplicationEventListener implements EventListener
   public void faxFileOpen(String str) {}
   public void compositeFileOpen(String str) {}
   public void patternFileOpen(String str) {}
+  public void predfinedFaxOpen(String str) {}
+  public void addFaxImage(CommandPanel.FaxImage fi) {}
   
   public void chartRepaintRequested() {}
   public void setNMEAAcquisition(boolean b) {}

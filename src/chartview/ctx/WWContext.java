@@ -276,6 +276,15 @@ public class WWContext
       l.allFaxesSelected();
     }    
   }
+  
+  public void fireAddFaxImage(CommandPanel.FaxImage fi)
+  {
+    for (int i=0; i < this.getListeners().size(); i++)
+    {
+      ApplicationEventListener l = this.getListeners().get(i);
+      l.addFaxImage(fi);
+    }    
+  }
 
   public void fireSetCursor(int shape)
   {

@@ -64,10 +64,13 @@ import org.w3c.dom.NodeList;
 
 import user.util.GeomUtil;
 
-
+@SuppressWarnings("serial")
 public class JTreeFilePanel
      extends JPanel
 {
+  public final static String OLP_URL = "http://weather.lediouris.net/patterns/olp.xml";
+  public final static String PDF_URL = "dyn.fax.xml";
+  
   private BorderLayout borderLayout1 = new BorderLayout();
   private JScrollPane jScrollPane1 = new JScrollPane();
   private JTree jTree = new JTree();
@@ -85,7 +88,7 @@ public class JTreeFilePanel
   public final static int FAX_TYPE               = 1;
   public final static int COMPOSITE_TYPE         = 2;
   public final static int PATTERN_TYPE           = 3;
-//public final static int COMPOSITE_ARCHIVE_TYPE = 4;
+  public final static int PRE_DEF_FAX_TYPE       = 4;
   
   private int type = -1;
   
@@ -99,15 +102,18 @@ public class JTreeFilePanel
   private final static String[] names = { WWGnlUtilities.buildMessage("grib-files-button"), 
                                           WWGnlUtilities.buildMessage("faxes-button"), 
                                           WWGnlUtilities.buildMessage("composite-button"), 
-                                          WWGnlUtilities.buildMessage("pattern-button") };
+                                          WWGnlUtilities.buildMessage("pattern-button"),
+                                          WWGnlUtilities.buildMessage("pre-def-faxes")};
   private final static ImageIcon[] exanped_icons = {new ImageIcon(JTreeFilePanel.class.getResource("exp_page.png")),
                                                     new ImageIcon(JTreeFilePanel.class.getResource("exp_script.png")),
                                                     new ImageIcon(JTreeFilePanel.class.getResource("exp_map.png")),
-                                                    new ImageIcon(JTreeFilePanel.class.getResource("exp_layout.png")) };
+                                                    new ImageIcon(JTreeFilePanel.class.getResource("exp_layout.png")),
+                                                    new ImageIcon(JTreeFilePanel.class.getResource("exp_script.png")) };
   private final static ImageIcon[] collapsed_icons = {new ImageIcon(JTreeFilePanel.class.getResource("col_page.png")),
                                                       new ImageIcon(JTreeFilePanel.class.getResource("col_script.png")),
                                                       new ImageIcon(JTreeFilePanel.class.getResource("col_map.png")),
-                                                      new ImageIcon(JTreeFilePanel.class.getResource("col_layout.png")) };
+                                                      new ImageIcon(JTreeFilePanel.class.getResource("col_layout.png")),
+                                                      new ImageIcon(JTreeFilePanel.class.getResource("col_script.png")) };
   
   private FileTypeHolder parent = null;
 
@@ -134,6 +140,7 @@ public class JTreeFilePanel
           this.sort = SORT_BY_NAME_DESC;
         break;
       case PATTERN_TYPE:
+      case PRE_DEF_FAX_TYPE:
       default:
         this.sort = SORT_BY_NAME_ASC;
         break;
@@ -293,7 +300,12 @@ public class JTreeFilePanel
               if (jTree.getPathForLocation(e.getX(), e.getY()) != null)
               {
                 DefaultMutableTreeNode dtn = (DefaultMutableTreeNode) jTree.getLastSelectedPathComponent();
-                if (dtn instanceof DataFileTreeNode)
+                if (dtn instanceof PredefinedFaxTreeNode)
+                {
+                  String faxUrl = ((DataFileTreeNode) dtn).getBubble();
+                  fireFileOpen(faxUrl);
+                }
+                else if (dtn instanceof DataFileTreeNode)
                 {
                   String fName = ((DataFileTreeNode) dtn).getFullFileName();
   //              System.out.println("Selected :" + fName);
@@ -405,7 +417,8 @@ public class JTreeFilePanel
     WWContext.getInstance().fireLogging(WWGnlUtilities.buildMessage("loading2", new String[] { names[type] }));
 
     DefaultMutableTreeNode onLinePatterns = null;
-    DefaultMutableTreeNode localPatterns  = null;
+    DefaultMutableTreeNode localPatterns  = null;    
+//  DefaultMutableTreeNode preDefFaxes    = null;
     if (getType() == PATTERN_TYPE) // Add a node for the on-line patterns
     {
       onLinePatterns = new DefaultMutableTreeNode(WWGnlUtilities.buildMessage("on-line-patterns"));
@@ -416,7 +429,7 @@ public class JTreeFilePanel
 
       try
       {
-        URL url = new URL("http://weather.lediouris.net/patterns/olp.xml");
+        URL url = new URL(OLP_URL);
         DOMParser parser = WWContext.getInstance().getParser();
         synchronized (parser)
         {
@@ -433,31 +446,59 @@ public class JTreeFilePanel
         System.out.println("No connection for OnLine patterns.");
       }
     }
+    else if (getType() == PRE_DEF_FAX_TYPE)
+    {
+//    preDefFaxes = new DefaultMutableTreeNode(WWGnlUtilities.buildMessage("pre-def-faxes"));
+//    root.add(preDefFaxes);
+      jTree.setRootVisible(true);
+      try
+      {
+        URL url = new File(PDF_URL).toURI().toURL();
+        DOMParser parser = WWContext.getInstance().getParser();
+        synchronized (parser)
+        {
+          parser.setValidationMode(XMLParser.NONVALIDATING);
+          parser.parse(url);
+          XMLDocument pdfDoc = parser.getDocument();
+//        drillDownPreDefFaxes((XMLElement)pdfDoc.getDocumentElement(), preDefFaxes);
+          drillDownPreDefFaxes((XMLElement)pdfDoc.getDocumentElement(), root);
+        }
+      }
+      catch (Exception ex)
+      {
+        root.add(new DefaultMutableTreeNode("No pre-defined fax definition found.")); // LOCALIZE
+        System.out.println("No PreDefined faxes...");
+        ex.printStackTrace();
+      }
+    }
 
     nbFile = 0;
-    // Split if this is a path
-    String[] pathElem = path.split(File.pathSeparator);
-    DirectoryTreeNode[] insertedNodes = null;
-    if (pathElem.length > 1)
+    if (path != null)
     {
-      // Add node for the origin of the documents (directory they come from).
-      insertedNodes = new DirectoryTreeNode[pathElem.length];
-      for (int i=0; i<pathElem.length; i++)
+      // Split if this is a path
+      String[] pathElem = path.split(File.pathSeparator);
+      DirectoryTreeNode[] insertedNodes = null;
+      if (pathElem.length > 1)
       {
-        String name = pathElem[i].substring(pathElem[i].lastIndexOf("/") + 1);
-        insertedNodes[i] = new DirectoryTreeNode(pathElem[i], name, name);
-        if (localPatterns != null)
-          localPatterns.add(insertedNodes[i]);
-        else  
-          root.add(insertedNodes[i]);
-      }      
+        // Add node for the origin of the documents (directory they come from).
+        insertedNodes = new DirectoryTreeNode[pathElem.length];
+        for (int i=0; i<pathElem.length; i++)
+        {
+          String name = pathElem[i].substring(pathElem[i].lastIndexOf("/") + 1);
+          insertedNodes[i] = new DirectoryTreeNode(pathElem[i], name, name);
+          if (localPatterns != null)
+            localPatterns.add(insertedNodes[i]);
+          else  
+            root.add(insertedNodes[i]);
+        }      
+      }
+      for (int i=0; i<pathElem.length; i++)      
+      {
+  //    System.out.println("--> Drilling down " + pathElem[i]);
+        drillDown(new File(pathElem[i]), (insertedNodes != null?insertedNodes[i]:(localPatterns != null?localPatterns:root)), filter, regExp);
+      }
+      WWContext.getInstance().fireLogging("\n" + Integer.toString(nbFile) + " " + names[type] + ".");
     }
-    for (int i=0; i<pathElem.length; i++)      
-    {
-//    System.out.println("--> Drilling down " + pathElem[i]);
-      drillDown(new File(pathElem[i]), (insertedNodes != null?insertedNodes[i]:(localPatterns != null?localPatterns:root)), filter, regExp);
-    }
-    WWContext.getInstance().fireLogging("\n" + Integer.toString(nbFile) + " " + names[type] + ".");
   }
 
   public void reloadTree()
@@ -522,6 +563,27 @@ public class JTreeFilePanel
     {
       XMLElement elmt = (XMLElement)patternNodes.item(i);
       PatternFileTreeNode pftn = new PatternFileTreeNode("http://", elmt.getAttribute("fullpath"), elmt.getAttribute("bubble"));
+      parent.add(pftn);  
+    }    
+  }
+  
+  private void drillDownPreDefFaxes(XMLElement dir, DefaultMutableTreeNode parent) throws Exception
+  {
+    NodeList dirNodes = dir.selectNodes("./folder");
+    for (int i=0; i<dirNodes.getLength(); i++)
+    {
+      XMLElement elmt = (XMLElement)dirNodes.item(i);
+      String name = elmt.getAttribute("label");
+      DirectoryTreeNode node = new DirectoryTreeNode(name, name, name);
+      parent.add(node);
+      drillDownPreDefFaxes(elmt, node);
+    }
+    
+    NodeList predefNodes = dir.selectNodes("./dyn-fax");
+    for (int i=0; i<predefNodes.getLength(); i++)
+    {
+      XMLElement elmt = (XMLElement)predefNodes.item(i);
+      PredefinedFaxTreeNode pftn = new PredefinedFaxTreeNode("", elmt.getAttribute("title"), elmt.getAttribute("origin"));
       parent.add(pftn);  
     }    
   }
@@ -625,6 +687,9 @@ public class JTreeFilePanel
                       }
                     }
                   }
+                  break;
+                case JTreeFilePanel.PRE_DEF_FAX_TYPE:
+                  cond = true;
                   break;
                 default: // Not supposed to happen
                   cond = true;
@@ -947,7 +1012,7 @@ public class JTreeFilePanel
     {
       ApplicationEventListener l = WWContext.getInstance().getListeners().get(i);
       File f = new File(fName);
-      if (fName.startsWith("http://") || (!f.isDirectory() && f.exists()))
+      if (type != JTreeFilePanel.PRE_DEF_FAX_TYPE && (fName.startsWith("http://") || (!f.isDirectory() && f.exists())))
       {
         switch (type)
         {
@@ -967,6 +1032,10 @@ public class JTreeFilePanel
             l.patternFileOpen(fName);
             break;
         }
+      }
+      else if (type == JTreeFilePanel.PRE_DEF_FAX_TYPE)
+      {
+        l.predfinedFaxOpen(fName);
       }
       else // DEBUG
         System.out.println("Not doing anything for [" + fName + "]");
@@ -1043,6 +1112,14 @@ public class JTreeFilePanel
     }
   }  
 
+  public class PredefinedFaxTreeNode extends DataFileTreeNode
+  {
+    public PredefinedFaxTreeNode(String dir, String name, String bubble)
+    {
+      super(dir, name, bubble);
+    }
+  }  
+
   public class FaxFileTreeNode extends DataFileTreeNode
   {
     public FaxFileTreeNode(String dir, String name, String bubble)
@@ -1098,7 +1175,7 @@ public class JTreeFilePanel
                                          hasFocus); 
       if (value instanceof DataFileTreeNode && !(value instanceof DirectoryTreeNode))
       {
-        if (value instanceof FaxFileTreeNode)
+        if (value instanceof FaxFileTreeNode || value instanceof PredefinedFaxTreeNode)
           setIcon(new ImageIcon(this.getClass().getResource("script.png")));
         else if (value instanceof CompositeFileTreeNode)
         {

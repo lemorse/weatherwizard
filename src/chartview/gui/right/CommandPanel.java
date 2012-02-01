@@ -50,6 +50,7 @@ import chartview.gui.util.transparent.TransparentPanel;
 
 import chartview.routing.DatedGribCondition;
 
+import chartview.util.DynFaxUtil;
 import chartview.util.GoogleUtil;
 import chartview.util.SearchUtil;
 import chartview.util.progress.ProgressMonitor;
@@ -148,6 +149,8 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import jgrib.GribFile;
+
+import ocss.nmea.parser.GeoPos;
 
 import oracle.xml.parser.v2.DOMParser;
 import oracle.xml.parser.v2.XMLDocument;
@@ -854,6 +857,7 @@ public class CommandPanel
                               faxImage[i].faxOrigin,
                               faxImage[i].faxTitle,
                               faxImage[i].colorChange);
+          ft[i].setComment(faxImage[i].comment);
         }
       }
     }
@@ -2375,6 +2379,73 @@ public class CommandPanel
           }
         }
 
+        public void addFaxImage(CommandPanel.FaxImage fi)
+        {
+          if (parent != null && parent.isVisible())
+          {
+		        FaxImage[] newFaxImage;
+            int nbFax = 0;
+            if (faxImage == null)
+              newFaxImage = new FaxImage[1];
+            else
+            {
+              newFaxImage = new FaxImage[faxImage.length + 1];
+              nbFax = faxImage.length;
+            }
+            int i, j = 0;
+            for (i=0, j=0; i<nbFax; i++)
+            {
+              try
+              {
+                if (faxImage[i] != null)
+                  newFaxImage[j++] = faxImage[i].clone();
+                else
+                  System.out.println("Found null faxImage idx " + i);
+              }
+              catch (Exception ex)
+              {
+                ex.printStackTrace();
+              }
+            }
+//          newFaxImage[nbFax] = fi;
+            try
+            {
+              newFaxImage[j] = fi;
+            }
+            catch (Exception e)
+            {
+              e.printStackTrace();
+            }
+            faxImage = newFaxImage; 
+            // FaxTypes (for the checkBoxes)
+            FaxType[] ft = new FaxType[faxImage.length];
+            for (i=0; i<ft.length; i++)
+            {
+              ft[i] = new FaxType(faxImage[i].fileName, 
+                                  faxImage[i].color, 
+                                  Boolean.valueOf(true), 
+                                  faxImage[i].transparent, 
+                                  faxImage[i].imageRotationAngle, 
+                                  faxImage[i].faxOrigin, 
+                                  faxImage[i].faxTitle, 
+                                  faxImage[i].colorChange);
+              ft[i].setRank(i+1);
+              ft[i].setComment(faxImage[i].comment);
+              ft[i].setShow(true);
+              ft[i].setTransparent(faxImage[i].transparent);
+              repaint(); // Repaint between each fax
+            }
+            setCheckBoxes(ft);
+            if (ft.length > 0)
+            {
+              WWContext.getInstance().fireFaxLoaded();
+              WWContext.getInstance().fireFaxesLoaded(ft);
+            }
+            setCheckBoxes(ft);
+            repaint();
+          }
+        }
+        
         public void loadWithPattern(final String fileName) 
         {
           if (parent != null && parent.isVisible())
@@ -2878,13 +2949,48 @@ public class CommandPanel
         
         public void patternFileOpen(String str) 
         {
-         if (parent != null && parent.isVisible())
+          if (parent != null && parent.isVisible())
             loadWithPattern(str);
         }
         
+        public void predfinedFaxOpen(String str) 
+        {
+          if (parent != null && parent.isVisible())
+          {
+            DynFaxUtil.PreDefFax pdf = DynFaxUtil.findPredefFax(str);
+//          System.out.println(pdf);
+            if (pdf.getOrigin().toLowerCase().startsWith("http://"))
+			      {
+              try
+              {
+                File f = File.createTempFile("predef-fax_", ".png");
+                String fileName = f.getAbsolutePath(); //f.getName();  //  
+                String dir = f.getParent();
+//		          System.out.println("Generating " + fileName + " in " + dir);
+                Image img = HTTPClient.getChart(pdf.getOrigin(), dir, fileName, true);
+                if (pdf.isTransparent())
+                {
+                  if (pdf.changeColor())
+                    img = ImageUtil.switchColorAndMakeColorTransparent(img, Color.black, pdf.getColor(), Color.white, blurSharpOption);
+                  else
+                    img = ImageUtil.makeColorTransparent(img, Color.white, blurSharpOption);                  
+                }
+//			        System.out.println("Done.");
+                WWContext.getInstance().fireAddFaxImage(DynFaxUtil.getFaxImage(pdf, img, f.getAbsolutePath(), chartPanel));
+              }
+              catch (Exception ex)
+              {
+                ex.printStackTrace();
+              }
+            }
+            else
+              JOptionPane.showMessageDialog(instance, "Protocol for " + pdf.getOrigin() + " not there yet...");
+          }
+        }
+
         public void chartRepaintRequested()
         {
-         if (parent != null && parent.isVisible())
+          if (parent != null && parent.isVisible())
           {
             buildPlaces();
             chartPanel.repaint();
@@ -3010,11 +3116,15 @@ public class CommandPanel
         
         public void activeFaxChanged(FaxType ft) 
         {
-         if (parent != null && parent.isVisible())
+          if (parent != null && parent.isVisible())
           {
-  //        System.out.println("Active fax is now " + str);
             for (int i=0; faxImage!=null && i<faxImage.length; i++)
             {
+              if (faxImage[i] == null)
+              {
+                System.out.println("faxImage[" + i + "] is null");
+                continue;
+              }
               if (faxImage[i].comment.equals(ft.toString()))
               {
                 currentFaxIndex = i;
@@ -5629,6 +5739,90 @@ public class CommandPanel
         img  = faxImage[i].faxImage; 
         show = faxImage[i].show;
         transparentFax = faxImage[i].transparent;
+
+        if ("true".equals(System.getProperty("display.fax.coordinates", "false")))
+        {
+          int top    = (int)(faxImage[i].imageVOffset * faxImage[i].imageScale);
+          int bottom = (int)(faxImage[i].imageVOffset * faxImage[i].imageScale) + (int)(img.getHeight(null) * faxImage[i].imageScale);
+          int left   = (int)(faxImage[i].imageHOffset * faxImage[i].imageScale);
+          int right  = (int)(faxImage[i].imageHOffset * faxImage[i].imageScale) + (int)(img.getWidth(null) * faxImage[i].imageScale);
+          if (faxImage[i].imageRotationAngle != 0)
+          {
+            int xFaxCenter = left + ((right - left) / 2);
+            int yFaxCenter = top + ((bottom - top) / 2);
+            if (false)
+            {
+              // Original settings
+              g2d.setColor(Color.BLACK);
+              g2d.drawRect(left, 
+                           top,  
+                           (int)(img.getWidth(null) * faxImage[i].imageScale), // width 
+                           (int)(img.getHeight(null) * faxImage[i].imageScale)); // height
+        //          System.out.println("Fax Center:" + xFaxCenter + ", " + yFaxCenter + " (panel:" + chartPanel.getWidth() + "x" + chartPanel.getHeight() + ")");
+              g2d.fillOval(xFaxCenter - 4, yFaxCenter - 4, 8, 8);
+            }
+            // Rotation centree sur le centre du fax.
+            Point center = new Point(xFaxCenter, yFaxCenter);
+        //          g2d.setColor(Color.BLUE);
+        //          g2d.fillOval(right - 4, top - 4, 8, 8);
+        //          g2d.drawString("1", right + 5, top);
+            Point rotatedOne = WWGnlUtilities.rotate(new Point(right, 
+                                                               top), 
+                                                     center,
+                                                     faxImage[i].imageRotationAngle);            
+        //          g2d.fillOval(rotatedOne.x - 4, rotatedOne.y - 4, 8, 8);
+        //          g2d.drawString("2", rotatedOne.x + 5, rotatedOne.y);
+        //          g2d.drawLine(right, top, rotatedOne.x, rotatedOne.y);
+        //          g2d.drawLine(right, top, xFaxCenter, yFaxCenter);
+        //          g2d.drawLine(xFaxCenter, yFaxCenter, rotatedOne.x, rotatedOne.y);
+
+        //          g2d.setColor(Color.RED);
+        //          g2d.fillOval(left - 4, bottom - 4, 8, 8);
+        //          g2d.drawString("1", left, bottom - 10);
+            
+            Point rotatedTwo = WWGnlUtilities.rotate(new Point(left, 
+                                                               bottom), 
+                                                     center,
+                                                     faxImage[i].imageRotationAngle);
+        //          g2d.fillOval(rotatedTwo.x - 4, rotatedTwo.y - 4, 8, 8);
+        //          g2d.drawString("2", rotatedTwo.x, rotatedTwo.y - 10);
+        //          g2d.drawLine(left, bottom, rotatedTwo.x, rotatedTwo.y);
+        //          g2d.drawLine(left, bottom, xFaxCenter, yFaxCenter);
+        //          g2d.drawLine(xFaxCenter, yFaxCenter, rotatedTwo.x, rotatedTwo.y);
+            
+            top    = rotatedOne.y; // top
+            left   = rotatedOne.x; // left
+            bottom = rotatedTwo.y; // bottom
+            right  = rotatedTwo.x; // right
+        //          System.out.println("Top:" + top + ", bottom:" + bottom + ", left:" + left + ", right:" + right);
+          }          
+          GeoPoint topLeft     = chartPanel.getGeoPos(left, top);
+          GeoPoint bottomRight = chartPanel.getGeoPos(right, bottom);
+        //        System.out.println("TopLeft    :" + topLeft.toString());
+        //        System.out.println("BottomRight:" + bottomRight.toString());
+          // Display where the fax is set
+          System.out.println("<dyn-fax title=\"" + faxImage[i].faxTitle + "\"\n" + 
+                             "         rotation=\"" + faxImage[i].imageRotationAngle + "\"\n" +
+                             "         origin=\"" + faxImage[i].faxOrigin + "\"\n" +
+                             "         top=\"" + topLeft.getL() + "\"\n" + 
+                             "         left=\"" + topLeft.getG() + "\"\n" +
+                             "         bottom=\"" + bottomRight.getL() + "\"\n" +
+                             "         right=\"" + bottomRight.getG() + "\"\n" +
+                             "         transparent=\"" + faxImage[i].transparent + "\"\n" +
+                             "         change-color=\"" + faxImage[i].colorChange + "\"/>");
+          
+          // Frame around the fax.
+          g2d.setColor(faxImage[i].colorChange ? faxImage[i].color : Color.BLACK);
+          float[] dashPattern = { 5, 5, 5, 5 };
+          Stroke origStroke = g2d.getStroke();
+          g2d.setStroke(new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10, dashPattern, 0));
+          g2d.drawRect(left, 
+                       top,  
+                       (right - left), // (int)(img.getWidth(null) * faxImage[i].imageScale), // width 
+                       (bottom - top)); //(int)(img.getHeight(null) * faxImage[i].imageScale)); // height
+          g2d.setStroke(origStroke);
+        }
+
         if (!transparentFax)
           continue;
   //      System.out.println("Image:" + (img==null?"NULL":"ok") + " show:" + show);
@@ -5672,7 +5866,7 @@ public class CommandPanel
     //  tx.scale(1D, 1D);
         if (!faxImage[i].transparent) // Then reset transparency
           g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
-        g2d.drawImage(img, tx, this);
+        g2d.drawImage(img, tx, this); // Fax is drawn here
         if (!faxImage[i].transparent) // Then set it back
           g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
         // If fax is *not* transparent, set it to false      
@@ -8055,7 +8249,7 @@ public class CommandPanel
     this.chartPanel.repaint();    
   }
   
-  public class FaxImage
+  public static class FaxImage implements Cloneable
   {
     public Image faxImage;
     public String fileName;
@@ -8070,6 +8264,11 @@ public class CommandPanel
     public int imageHOffset = 0;
     public int imageVOffset = 0;
     public double imageRotationAngle = 0D;
+    
+    protected FaxImage clone() throws CloneNotSupportedException
+    {
+      return (FaxImage)super.clone();
+    }
   }
 
   /**
