@@ -3441,6 +3441,34 @@ public class WWGnlUtilities
     return angle;
   }
   
+  /**
+   *
+   * @param p point to rotate
+   * @param center rotation center
+   * @param angle In degrees, counter clockwise
+   * @return the rotated point
+   */
+  public static Point rotate(Point p, Point center, double angle)
+  {
+    int relativeX = p.x - center.x;
+    int relativeY = p.y - center.y;
+    
+    int rotatedX = (int)((relativeX *  Math.cos(Math.toRadians(angle))) + (relativeY * Math.sin(Math.toRadians(angle))));
+    int rotatedY = (int)((relativeX * -Math.sin(Math.toRadians(angle))) + (relativeY * Math.cos(Math.toRadians(angle))));
+    
+    Point r = new Point(center.x + rotatedX, 
+                        center.y + rotatedY);
+    return r;
+  }
+
+  public static void main(String[] args)
+  {
+    Point center = new Point(200, 100);
+    Point toRotate = new Point(50, 50);
+    Point rotated = rotate(toRotate, center, 90D);
+    System.out.println("Rotated:" + rotated.x + ", " + rotated.y);
+  }
+  
   public static void main0(String[] args)
   {
     DecimalFormat df = new DecimalFormat("##0.00");

@@ -1420,7 +1420,7 @@ public class AdjustFrame
                                              JOptionPane.PLAIN_MESSAGE);
     if (resp == JOptionPane.OK_OPTION)
     {
-      final boolean gribChanged =  haveGRIBOtpionsChanged(inputPanel, ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel());
+      final boolean gribChanged = haveGRIBOtpionsChanged(inputPanel, ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel());
       
       boolean[] gribOptions = inputPanel.getGRIBOptions();
 
@@ -1651,16 +1651,18 @@ public class AdjustFrame
             {
               for (int i = 0; i < faxes.length; i++)
               {
-      //        System.out.println("Rank: " + (i+1) + ", " + faxes[i].getValue() + ", " + faxes[i].getColor());
+//              System.out.println("Rank: " + (i+1) + ", " + faxes[i].getValue() + ", " + faxes[i].getColor() );
                 String comment = WWGnlUtilities.getHeader(faxes[i].getValue());
-                faxes[i].setComment(comment);
-                appendFrameTitle(comment);
+//              System.out.println("Current comment " + faxes[i].getComment());
+                if (faxes[i].getComment() == null || faxes[i].getComment().trim().length() == 0)
+                  faxes[i].setComment(comment);
+                appendFrameTitle(faxes[i].getComment());
               }
               ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().setFaxes(faxes);
             }
 
   //        System.out.println("End of loader thread.");
-          WWContext.getInstance().fireSetLoading(false);
+            WWContext.getInstance().fireSetLoading(false);
           }
         };
       loader.start();

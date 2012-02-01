@@ -27,6 +27,7 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EventObject;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -49,6 +50,8 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
@@ -819,23 +822,30 @@ public final class ParamPanel
 
   private void initTable()
   {
-    dataModel = new AbstractTableModel()
+    dataModel = new DefaultTableModel() // AbstractTableModel()
     {
+      @Override
       public int getColumnCount()
       { return names.length; }
+      @Override
       public int getRowCount()
       { return localData.length; }
+      @Override
       public Object getValueAt(int row, int col)
       { return localData[row][col]; }
+      @Override
       public String getColumnName(int column)
       { return names[column]; }
+      @Override
       public Class getColumnClass(int c)
       {
 //      System.out.println("Class requested column " + c + ", type:" + getValueAt(0, c).getClass());
         return getValueAt(0, c).getClass();
       }
+      @Override
       public boolean isCellEditable(int row, int col)
       { return (col == 1); } // Second column only
+      @Override
       public void setValueAt(Object aValue, int row, int column)
       { 
         localData[row][column] = aValue; 
@@ -870,20 +880,41 @@ public final class ParamPanel
       }
     };
     // Set a specific #Editor for a special column/line cell
+
+//  table.getColumn(KEY).setCellRenderer(new ValueTableCellRenderer());
+
     TableColumn secondColumn = table.getColumn(VALUE);
     secondColumn.setCellEditor(new ParamEditor());
-    secondColumn.setCellRenderer(new CustomTableCellRenderer());
+    secondColumn.setCellRenderer(new SpecialTableCellRenderer());
+//  secondColumn.setCellRenderer(new CustomTableCellRenderer());
 
     scrollPane = new JScrollPane(table);  
     centerPane.add(scrollPane, BorderLayout.CENTER);
     KeyboardFocusManager.getCurrentKeyboardFocusManager().addPropertyChangeListener(new JTableFocusChangeListener(table));
   }
 
-  public class CustomTableCellRenderer
+  public class CustomTableCellRenderer extends DefaultTableCellRenderer
+  {
+    @Override
+    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row,
+                                                   int column)
+    {
+      Component comp = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+      System.out.println("TableCellRenderer is a " + comp.getClass().getName());
+      return comp;
+    }
+  }
+  
+  public class SpecialTableCellRenderer
        extends JLabel
     implements TableCellRenderer
   {
-    Object curValue = null;
+    private final transient List<Color> rowColors = Arrays.asList(Color.WHITE, Color.LIGHT_GRAY);
+
+    private transient Object curValue = null;
+    private transient Color bgColor = null;
+    
+    private boolean bold = false;
 
     public Component getTableCellRendererComponent(JTable table,
                                                    Object value,
@@ -891,7 +922,8 @@ public final class ParamPanel
                                                    boolean hasFocus,
                                                    int row,
                                                    int column)
-    {
+    {      
+//    bold = (column == 1);
       if (value == null)
       {
         curValue = table.getValueAt(row, column);
@@ -899,6 +931,14 @@ public final class ParamPanel
       }
       else
         curValue = value;
+      
+      if (!isSelected)
+      {
+//      System.out.println("ROW Idx:" + (row % 2));
+        bgColor = rowColors.get(row % 2);
+//      this.setBackground(rowColors.get(row % 2)); // TODO Fix that
+//      ((AbstractTableModel)table.getModel()).fireTableRowsUpdated(row, row);
+      }
       return this;
     }
      
@@ -907,7 +947,16 @@ public final class ParamPanel
       if (curValue instanceof Color)
       {
         if (curValue != null)
+        {
+          if (false && bgColor != null)
+          {
+            Color c = g.getColor();
+            g.setColor(bgColor);
+            g.fillRect(0, 0, this.getWidth(), this.getHeight());
+            g.setColor(c);
+          }
           g.setColor((Color)curValue);
+        }
 //      g.fillRect(0, 0, getWidth() - 1, getHeight() - 1);        
         g.fillRect(2, 2, Math.min(getWidth() - 5, 20), getHeight() - 5);
         g.setColor(Color.black);
@@ -919,6 +968,15 @@ public final class ParamPanel
         {
 //        System.out.println("curValue is a " + curValue.getClass().getName());
 //        g.drawString((String)curValue, 1, getHeight() - 1);
+          if (false && bgColor != null)
+          {
+            Color c = g.getColor();
+            g.setColor(bgColor);
+            g.fillRect(0, 0, this.getWidth(), this.getHeight());
+            g.setColor(c);
+          }
+          if (bold)
+            g.setFont(g.getFont().deriveFont(Font.BOLD, g.getFont().getSize()));
           g.drawString(curValue.toString(), 1, getHeight() - 1);
         }
         else
@@ -928,6 +986,78 @@ public final class ParamPanel
       }
     }
   }
+
+//  public class ValueTableCellRenderer
+//       extends JTextField
+//    implements TableCellRenderer
+//  {
+//    private final transient List<Color> rowColors = Arrays.asList(Color.WHITE, Color.LIGHT_GRAY);
+//
+//    private transient Object curValue = null;
+//    private transient Color bgColor = null;
+//
+//    private JLabel colorComponent = new JLabel();
+//
+//    public Component getTableCellRendererComponent(JTable table,
+//                                                   Object value,
+//                                                   boolean isSelected,
+//                                                   boolean hasFocus,
+//                                                   int row,
+//                                                   int column)
+//    {      
+//      this.setEditable(false);
+//      if (value == null)
+//      {
+//        curValue = table.getValueAt(row, column);
+//        System.out.println("Defaulting to curValue [" + (curValue==null?"null":curValue.getClass().getName()) + "]");
+//      }
+//      else
+//        curValue = value;
+//      
+//      if (!isSelected)
+//      {
+////      System.out.println("ROW Idx:" + (row % 2));
+//        bgColor = rowColors.get(row % 2);
+////      this.setBackground(rowColors.get(row % 2)); // TODO Fix that
+////      ((AbstractTableModel)table.getModel()).fireTableRowsUpdated(row, row);
+//      }
+//      if (curValue instanceof Color)
+//        return colorComponent;        
+//      else
+//        return this;
+//    }
+//     
+//    public void paintComponent(Graphics g)
+//    {
+//      if (curValue instanceof Color)
+//      {
+//        if (curValue != null)
+//          g.setColor((Color)curValue);
+////      g.fillRect(0, 0, getWidth() - 1, getHeight() - 1);        
+//        g.fillRect(2, 2, Math.min(getWidth() - 5, 20), getHeight() - 5);
+//        g.setColor(Color.black);
+//        g.drawRect(2, 2, Math.min(getWidth() - 5, 20), getHeight() - 5);
+//      }
+//      else
+//      {
+//        if (curValue != null)
+//        {
+////        System.out.println("curValue is a " + curValue.getClass().getName());
+////        g.drawString((String)curValue, 1, getHeight() - 1);
+//          if (bgColor != null)
+//          {
+//            this.setBackground(bgColor);
+//          }
+////        g.setFont(g.getFont().deriveFont(Font.BOLD, g.getFont().getSize()));
+////        g.drawString(curValue.toString(), 1, getHeight() - 1);
+//        }
+//        else
+//        {
+//          System.out.println("Not a color, but null");
+//        }
+//      }
+//    }
+//  }
 
   protected static String[] lnfValues = null; // Populated in the constructor
   

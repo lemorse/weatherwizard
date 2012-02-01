@@ -493,7 +493,7 @@ public class CompositeDetailsInputPanel
   public void setFaxes(FaxType[] ft)
   {
     int fl = (ft==null?0:ft.length);
-    Object[][] faxData = new Object[fl][6];
+    Object[][] faxData = new Object[fl][7];
     try
     {
       for (int i=0; i<fl; i++)
@@ -504,6 +504,7 @@ public class CompositeDetailsInputPanel
         faxData[i][3] = ft[i].isTransparent();
         faxData[i][4] = ft[i].getOrigin();
         faxData[i][5] = ft[i].getTitle();
+        faxData[i][6] = ft[i].getComment();
       }
       faxTablePanel.setData(faxData);
     }
@@ -526,6 +527,9 @@ public class CompositeDetailsInputPanel
         ft.setRank(((Integer)faxData[i][0]).intValue());
         ft.setShow(((Boolean)faxData[i][2]).booleanValue());
         ft.setTransparent(((Boolean)faxData[i][3]).booleanValue());
+        ft.setOrigin((String)faxData[i][4]);
+        ft.setTitle((String)faxData[i][5]);
+        ft.setComment((String)faxData[i][6]);
         alft.add(ft);
         arrayLen++;
       }

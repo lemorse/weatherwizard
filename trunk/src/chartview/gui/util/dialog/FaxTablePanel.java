@@ -43,28 +43,28 @@ import javax.swing.table.TableModel;
 public final class FaxTablePanel
   extends JPanel
 {
-  BorderLayout borderLayout1 = new BorderLayout();
-  JPanel topPanel = new JPanel();
-  JPanel bottomPanel = new JPanel();
-  JPanel centerPane = new JPanel();
+  private BorderLayout borderLayout1 = new BorderLayout();
+  private JPanel topPanel = new JPanel();
+  private JPanel bottomPanel = new JPanel();
+  private JPanel centerPane = new JPanel();
 //JLabel fileNameLabel = new JLabel();
 
-  static final String RNK = WWGnlUtilities.buildMessage("rank");
-  static final String VALUE = WWGnlUtilities.buildMessage("path-color");
-  static final String SHOW = WWGnlUtilities.buildMessage("show");
-  static final String TRANSP = WWGnlUtilities.buildMessage("transparent");
+  private static final String RNK    = WWGnlUtilities.buildMessage("rank");
+  private static final String VALUE  = WWGnlUtilities.buildMessage("path-color");
+  private static final String SHOW   = WWGnlUtilities.buildMessage("show");
+  private static final String TRANSP = WWGnlUtilities.buildMessage("transparent");
 
-  static final String[] names = { RNK, VALUE, SHOW, TRANSP };
+  private static final String[] names = { RNK, VALUE, SHOW, TRANSP };
 
-  TableModel dataModel;
+  private transient TableModel dataModel;
 
   public static Object[][] data = new Object[0][0];
 
-  JTable table;
-  JScrollPane scrollPane;
-  BorderLayout borderLayout2 = new BorderLayout();
-  GridBagLayout gridBagLayout1 = new GridBagLayout();
-  JLabel titleLabel = new JLabel();
+  private JTable table;
+  private JScrollPane scrollPane;
+  private BorderLayout borderLayout2 = new BorderLayout();
+  private GridBagLayout gridBagLayout1 = new GridBagLayout();
+  private JLabel titleLabel = new JLabel();
   private JButton addButton = new JButton();
   private JButton removeButton = new JButton();
 
@@ -226,7 +226,7 @@ public final class FaxTablePanel
     extends JLabel
     implements TableCellRenderer
   {
-    Object curValue = null;
+    private transient Object curValue = null;
 
     public Component getTableCellRendererComponent(JTable table, 
                                                    Object value, 
