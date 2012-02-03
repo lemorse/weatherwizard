@@ -53,8 +53,10 @@ public final class FaxTablePanel
   private static final String VALUE  = WWGnlUtilities.buildMessage("path-color");
   private static final String SHOW   = WWGnlUtilities.buildMessage("show");
   private static final String TRANSP = WWGnlUtilities.buildMessage("transparent");
+  
+  private static final String ORIGIN = "<origin>", TITLE = "<title>", COMMENT = "<comment>";
 
-  private static final String[] names = { RNK, VALUE, SHOW, TRANSP };
+  private static final String[] names = { RNK, VALUE, SHOW, TRANSP, ORIGIN, TITLE, COMMENT }; // Warning: There are 3 extra columns (not shown).
 
   private transient TableModel dataModel;
 
@@ -203,6 +205,19 @@ public final class FaxTablePanel
     TableColumn fourthColumn = table.getColumn(TRANSP);
     fourthColumn.setMaxWidth(100);
     fourthColumn.setPreferredWidth(40);
+
+    TableColumn fifthColumn = table.getColumn(ORIGIN);
+    fifthColumn.setMaxWidth(0);
+    fifthColumn.setMinWidth(0);
+    fifthColumn.setPreferredWidth(0);
+    TableColumn sixthColumn = table.getColumn(TITLE);
+    sixthColumn.setMinWidth(0);
+    sixthColumn.setMaxWidth(0);
+    sixthColumn.setPreferredWidth(0);
+    TableColumn seventhColumn = table.getColumn(COMMENT);
+    seventhColumn.setMinWidth(0);
+    seventhColumn.setMaxWidth(0);
+    seventhColumn.setPreferredWidth(0);
 
     scrollPane = new JScrollPane(table);
     centerPane.add(scrollPane, BorderLayout.CENTER);
@@ -389,16 +404,19 @@ public final class FaxTablePanel
     int len = 0;
     if (d != null)
       len = d.length;
-    Object[][] newData = new Object[len + 1][names.length];
+    Object[][] newData = new Object[len + 1][names.length /*+ 3*/];
     for (int i = 0; i < len; i++)
     {
-      for (int j = 0; j < names.length; j++)
+      for (int j = 0; j < (names.length/* + 3*/); j++)
         newData[i][j] = d[i][j];
     }
     newData[len][0] = r;
     newData[len][1] = v;
     newData[len][2] = b;
     newData[len][3] = tr;
+    newData[len][4] = "";
+    newData[len][5] = "";
+    newData[len][6] = "";
     data = newData;
     ((AbstractTableModel) dataModel).fireTableDataChanged();
     return newData;
@@ -412,14 +430,14 @@ public final class FaxTablePanel
     else
     {
       int l = data.length;
-      Object[][] newData = new Object[l - 1][names.length];
+      Object[][] newData = new Object[l - 1][names.length/* + 3*/];
       int oldInd, newInd;
       newInd = 0;
       for (oldInd = 0; oldInd < l; oldInd++)
       {
         if (oldInd != selectedRow)
         {
-          for (int j = 0; j < names.length; j++)
+          for (int j = 0; j < names.length /*+ 3*/; j++)
             newData[newInd][j] = data[oldInd][j];
           newInd++;
         }

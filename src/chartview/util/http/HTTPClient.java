@@ -11,7 +11,9 @@ import chartview.util.gifutil.Gif;
 
 import coreutilities.Utilities;
 
+import java.awt.Color;
 import java.awt.Image;
+import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 
 import java.io.ByteArrayInputStream;
@@ -26,6 +28,7 @@ import java.net.URLConnection;
 
 import java.text.SimpleDateFormat;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 import javax.imageio.ImageIO;

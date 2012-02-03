@@ -40,6 +40,13 @@ import java.awt.image.Raster;
 import java.io.File;
 import java.io.InputStream;
 
+import java.util.ArrayList;
+
+import java.util.Collections;
+import java.util.HashMap;
+
+import java.util.Set;
+
 import javax.imageio.ImageIO;
 
 import javax.media.jai.RenderedImageAdapter;
@@ -799,6 +806,7 @@ public class ImageUtil
   {
     return switchColorAndMakeColorTransparent(img, turnThis, intoThat, colorToTransparent, option, null);
   }
+
   public static BufferedImage switchColorAndMakeColorTransparent(Image img, 
                                                                  Color turnThis,
                                                                  Color intoThat,
@@ -820,10 +828,18 @@ public class ImageUtil
     {
       for (int j = 0; j < dimg.getWidth(); j++)
       {
-        if (dimg.getRGB(j, i) == turnThis.getRGB())
+        if (turnThis != null && dimg.getRGB(j, i) == turnThis.getRGB())
           dimg.setRGB(j, i, intoThat.getRGB()); // Switch Color
-        if (dimg.getRGB(j, i) == colorToTransparent.getRGB())
-          dimg.setRGB(j, i, 0x008F1C1C); // 00 8f 1c 1c, Make transparent 
+        if ((dimg.getRGB(j, i) & 0x00FFFFFF) == (colorToTransparent.getRGB() & 0x00FFFFFF))
+        {
+//        System.out.println("Making " + Integer.toHexString(dimg.getRGB(j, i) & 0x00ffffff) + " transparent.");
+          dimg.setRGB(j, i, 0x008F1C1C); // 00 8f 1c 1c, Make transparent
+        }
+        else if (turnThis == null)
+        {
+//        System.out.println("Turning " + dimg.getRGB(j, i) + " into " + intoThat.getRGB());
+          dimg.setRGB(j, i, intoThat.getRGB()); // Switch Color
+        }
       }
     }
     if (option == SHARPEN)
@@ -831,6 +847,22 @@ public class ImageUtil
     else if (option == BLUR)
       dimg = blur(dimg);
     return dimg;
+  }
+
+  public static BufferedImage switchAnyColorAndMakeColorTransparent(Image img, 
+                                                                    Color intoThat,
+                                                                    Color colorToTransparent)
+  {
+    return switchAnyColorAndMakeColorTransparent(img, intoThat, colorToTransparent, NO_CHANGE);
+  }
+  
+  public static BufferedImage switchAnyColorAndMakeColorTransparent(Image img, 
+                                                                    Color intoThat,
+                                                                    Color colorToTransparent,
+                                                                    int option) //,
+                                                                  // String[] messElements) 
+  {
+    return switchColorAndMakeColorTransparent(img, null, intoThat, colorToTransparent, option, null);
   }
 
   /*
@@ -860,6 +892,84 @@ public class ImageUtil
     ImageIO.write(toBufferedImage(img), "png", new File("generated500.png"));    
   }
 
+  public static int countColors(Image img)
+  {
+    BufferedImage image = toBufferedImage(img);
+    ArrayList<Color> colors = new ArrayList<Color>();
+    if (image != null) // Count number of colors
+    {
+      int w = image.getWidth();
+      int h = image.getHeight();
+      for (int y = 0; y < h; y++)
+      {
+        for (int x = 0; x < w; x++)
+        {
+          int pixel = image.getRGB(x, y);
+//        String colorStr = Integer.toHexString(pixel);
+          int red   = (pixel & 0x00ff0000) >> 16;
+          int green = (pixel & 0x0000ff00) >> 8;
+          int blue  = pixel & 0x000000ff;
+          Color color = new Color(red, green, blue);
+          //add the first color on array
+          if (colors.size() == 0)
+          {
+            colors.add(color);            
+//          System.out.println("1. Added " + colorStr + " (" + color.getRGB() + ")");
+          }
+          // check for redudancy
+          else
+          {
+            if (!(colors.contains(color)))
+            {
+              colors.add(color);
+//            System.out.println("2. Added " + colorStr + " (" + color.getRGB() + ")");
+            }
+          }
+        }
+      }
+//    System.out.println("There are " + colors.size() + " colors in this image");
+    }
+    return colors.size();
+  }
+
+  public static Color mostUsedColor(Image img)
+  {
+    Color mostUsedColor = null;
+    BufferedImage image = toBufferedImage(img);
+    HashMap<Color, Integer> nbPixelPerColor = new HashMap<Color, Integer>();
+    if (image != null) // Count number of colors
+    {
+      int w = image.getWidth();
+      int h = image.getHeight();
+      for (int y = 0; y < h; y++)
+      {
+        for (int x = 0; x < w; x++)
+        {
+          int pixel = image.getRGB(x, y);
+//        String colorStr = Integer.toHexString(pixel);
+          int red   = (pixel & 0x00ff0000) >> 16;
+          int green = (pixel & 0x0000ff00) >> 8;
+          int blue  = pixel & 0x000000ff;
+          Color color = new Color(red, green, blue);
+          nbPixelPerColor.put(color, (nbPixelPerColor.get(color)==null)?1:nbPixelPerColor.get(color) + 1);
+        }
+      }
+      Set<Color> keys = nbPixelPerColor.keySet();
+      
+      int max = 0;
+      for (Color c : keys)
+      {
+//      System.out.println(Integer.toHexString(c.getRGB()) + " = " + nbPixelPerColor.get(c) + " pixel(s).");
+        if (nbPixelPerColor.get(c) > max)
+        {
+          max = nbPixelPerColor.get(c);
+          mostUsedColor = c;
+        }
+      }
+    }
+    return mostUsedColor;
+  }
+  
   public static void main(String[] args)
   {
     if (false)
@@ -873,11 +983,14 @@ public class ImageUtil
     if (true)
     {
 //    String imageLoc = "C:\\_myWork\\_ForExport\\dev-corner\\olivsoft\\all-scripts\\WeatherFaxes\\2010\\01\\sfc\\color_4_tests.png";
-      String imageLoc = "C:\\_myWork\\_ForExport\\dev-corner\\olivsoft\\all-scripts\\WeatherFaxes\\2008-gif\\sfc\\NOAA_Atl_sfc_2009_11_06_11_46_15_PST.png";
+      String imageLoc = "D:\\OlivSoft\\all-scripts\\WeatherFaxes\\faxes\\uk00.png";
       try
       {
         JPanel jp = new JPanel();
         Image original = ImageUtil.readImage(imageLoc);
+        System.out.println("White: 0x" + Integer.toHexString(Color.white.getRGB()).toUpperCase());
+        int nbColor = countColors(original);
+        
         Image img = null;
         if (false)
         {
@@ -899,6 +1012,22 @@ public class ImageUtil
           long before = System.currentTimeMillis();
           img = ImageUtil.switchColorAndMakeColorTransparent(original, Color.black, Color.red, Color.white);
           ImageIO.write(toBufferedImage(img), "png", new File("04.png"));    
+          long after = System.currentTimeMillis();
+          System.out.println("Done in " + Long.toString(after - before) + " ms.");
+        }
+        if (true)
+        {
+          long before = System.currentTimeMillis();
+          img = ImageUtil.switchAnyColorAndMakeColorTransparent(original, Color.red, Color.white);
+          ImageIO.write(toBufferedImage(img), "png", new File("05.png"));    
+          long after = System.currentTimeMillis();
+          System.out.println("Done in " + Long.toString(after - before) + " ms.");
+        }
+        if (true)
+        {
+          long before = System.currentTimeMillis();
+          img = ImageUtil.switchAnyColorAndMakeColorTransparent(original, Color.red, new Color(0xfffefefe));
+          ImageIO.write(toBufferedImage(img), "png", new File("06.png"));    
           long after = System.currentTimeMillis();
           System.out.println("Done in " + Long.toString(after - before) + " ms.");
         }
