@@ -85,6 +85,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
 import java.awt.print.PageFormat;
 import java.awt.print.PrinterJob;
 
@@ -1323,8 +1324,13 @@ public class CommandPanel
                   previousBlurSharpOption == blurSharpOption)      // Same fuzziness
                 faxImg = faxImage[i].faxImage;
               else
+              {
             //  faxImg = ImageUtil.makeTransparentImage(this, faxImg, faxes[i].getColor());
-                faxImg = ImageUtil.switchColorAndMakeColorTransparent(faxImg, Color.black, faxes[i].getColor(), Color.white, blurSharpOption);
+                if (ImageUtil.countColors(faxImg) > 2)
+                  faxImg = ImageUtil.switchAnyColorAndMakeColorTransparent(faxImg, faxes[i].getColor(), ImageUtil.mostUsedColor(faxImg), blurSharpOption);
+                else
+                  faxImg = ImageUtil.switchColorAndMakeColorTransparent(faxImg, Color.black, faxes[i].getColor(), Color.white, blurSharpOption);
+              }
             }
             else // Leave colors as they are, make the white transparent
               faxImg = ImageUtil.makeColorTransparent(faxImg, Color.white, blurSharpOption);
