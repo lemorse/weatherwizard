@@ -927,7 +927,7 @@ public class ImageUtil
           }
         }
       }
-//    System.out.println("There are " + colors.size() + " colors in this image");
+      System.out.println("There are " + colors.size() + " colors in this image");
     }
     return colors.size();
   }

@@ -5139,8 +5139,16 @@ public class CommandPanel
                 if (faxImage[i].transparent)
                 {
                   if (faxImage[i].colorChange)
+                  {
                //   faxImage[i].faxImage = ImageUtil.makeTransparentImage(this, ImageUtil.readImage(faxName), c);
-                    faxImage[i].faxImage = ImageUtil.switchColorAndMakeColorTransparent(ImageUtil.readImage(faxName), Color.black, c, Color.white, blurSharpOption);
+               //   faxImage[i].faxImage = ImageUtil.switchColorAndMakeColorTransparent(ImageUtil.readImage(faxName), Color.black, c, Color.white, blurSharpOption);
+                    Image faxImg = ImageUtil.readImage(faxName);
+                    if (ImageUtil.countColors(faxImg) > 2)
+                      faxImg = ImageUtil.switchAnyColorAndMakeColorTransparent(faxImg, c, ImageUtil.mostUsedColor(faxImg), blurSharpOption);
+                    else
+                      faxImg = ImageUtil.switchColorAndMakeColorTransparent(faxImg, Color.black, c, Color.white, blurSharpOption);
+                    faxImage[i].faxImage = faxImg;
+                  }
                   else
                     faxImage[i].faxImage = ImageUtil.makeColorTransparent(ImageUtil.readImage(faxName), Color.white, blurSharpOption);
                 }
