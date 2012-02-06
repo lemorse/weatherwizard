@@ -146,7 +146,7 @@ public class HTTPClient
     try
     {
       long before = System.currentTimeMillis();
-      if (verbose) System.out.println("...reading " + urlStr);
+      if (verbose) System.out.println("...reading (1) " + urlStr);
       String fName = fileName;
       if (fName == null) 
         fName = outputdir + File.separator + "Weather_" + sdf.format(new Date()) + ".jpg";
@@ -217,7 +217,7 @@ public class HTTPClient
     try
     {
       long before = System.currentTimeMillis();
-      if (verbose) System.out.println("...reading " + urlStr);
+      if (verbose) System.out.println("...reading (2) " + urlStr);
       String fName = fileName;
       if (fName == null) 
         fName = outputdir + File.separator + "GRIB" + sdf.format(new Date()) + ".grb";
