@@ -3113,6 +3113,7 @@ public class WWGnlUtilities
     return nb;
   }
   
+  @SuppressWarnings("serial")
   public static class FilePreviewer
               extends JComponent
            implements PropertyChangeListener

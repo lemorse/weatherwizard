@@ -45,6 +45,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+@SuppressWarnings("serial")
 public class GRIBSlicePanel
      extends JPanel
 {
@@ -64,6 +65,7 @@ public class GRIBSlicePanel
   private transient List<DatedGribCondition> data2plot;
   private transient List<DatedGribCondition> smoothedData;
   
+  @SuppressWarnings("serial")
   private JPanel checkBoxPanel = new JPanel()
   {
     @Override
@@ -744,6 +746,7 @@ public class GRIBSlicePanel
     return reversed;
   }
 
+  @SuppressWarnings("serial")
   private class GRIBSliceDataPanel extends JPanel
   {
     private int infoX = -1;

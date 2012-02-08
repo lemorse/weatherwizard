@@ -25,6 +25,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+@SuppressWarnings("serial")
 public class ProgressDialog
   extends JDialog
   implements ChangeListener

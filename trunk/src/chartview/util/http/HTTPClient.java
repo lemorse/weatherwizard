@@ -275,6 +275,7 @@ public class HTTPClient
     return content;
   }
   
+  @SuppressWarnings("serial")
   public static class NMEAServerException extends Exception
   {
     public NMEAServerException(Throwable cause)

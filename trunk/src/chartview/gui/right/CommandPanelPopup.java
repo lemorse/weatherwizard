@@ -48,6 +48,7 @@ import oracle.xml.parser.v2.XMLParser;
 
 import org.w3c.dom.NodeList;
 
+@SuppressWarnings("serial")
 public class CommandPanelPopup
   extends JPopupMenu
   implements ActionListener, PopupMenuListener

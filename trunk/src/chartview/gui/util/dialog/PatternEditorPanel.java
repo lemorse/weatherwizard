@@ -13,6 +13,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 
 
+@SuppressWarnings("serial")
 public class PatternEditorPanel
   extends JPanel
 {

@@ -1,5 +1,6 @@
 package chartview.util;
 
+@SuppressWarnings("serial")
 public class UserExitException
   extends Exception
 {

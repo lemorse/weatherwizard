@@ -43,6 +43,7 @@ import javax.swing.JPanel;
  * represented in Wavefront .obj format.
  * Adapted from ThreeD.java, delivered with the jdk 1.2.2
  */
+@SuppressWarnings("serial")
 public class ThreeDPanel
      extends JPanel
   implements Runnable, MouseListener, MouseMotionListener
@@ -1160,6 +1161,7 @@ public class ThreeDPanel
     }
   }
 
+  @SuppressWarnings("serial")
   class FileFormatException
     extends Exception
   {

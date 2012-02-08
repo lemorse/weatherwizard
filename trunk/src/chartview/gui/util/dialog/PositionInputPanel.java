@@ -18,6 +18,7 @@ import javax.swing.JTextField;
 import user.util.GeomUtil;
 
 
+@SuppressWarnings("serial")
 public class PositionInputPanel extends JPanel 
 {
   private GridBagLayout gridBagLayout1 = new GridBagLayout();

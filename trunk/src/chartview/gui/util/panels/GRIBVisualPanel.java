@@ -18,6 +18,7 @@ import java.awt.RenderingHints;
 
 import java.text.DecimalFormat;
 
+@SuppressWarnings("serial")
 public class GRIBVisualPanel extends TransparentPanel
 {
   private float truewindspeed = 0f;
