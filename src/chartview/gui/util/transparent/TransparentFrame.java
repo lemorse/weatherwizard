@@ -13,6 +13,7 @@ import java.awt.image.BufferedImage;
 
 import javax.swing.JFrame;
 
+@SuppressWarnings("serial")
 public class TransparentFrame extends JFrame
 {
   Robot robot;

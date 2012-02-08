@@ -39,6 +39,7 @@ import javax.swing.event.ChangeListener;
 
 import user.util.GeomUtil;
 
+@SuppressWarnings("serial")
 public class WhatIfRoutingPanel
   extends JPanel
 {
@@ -225,6 +226,7 @@ public class WhatIfRoutingPanel
     return Double.parseDouble(polarFactorTextField.getText());
   }
   
+  @SuppressWarnings("serial")
   class HeadingPanel extends JPanel
   {
     JTextField headingField = new JTextField();
@@ -266,6 +268,7 @@ public class WhatIfRoutingPanel
     }
   }
   
+  @SuppressWarnings("serial")
   class TWAPanel extends JPanel
   {
     JTextField twaField = new JTextField();
@@ -316,6 +319,7 @@ public class WhatIfRoutingPanel
     }
   }
   
+  @SuppressWarnings("serial")
   class DurationPanel extends JPanel
   {
     JTextField numField = new JTextField();
@@ -363,6 +367,7 @@ public class WhatIfRoutingPanel
     }
   }
   
+  @SuppressWarnings("serial")
   class GRIBExhaustedPanel extends JPanel
   {
     public GRIBExhaustedPanel()

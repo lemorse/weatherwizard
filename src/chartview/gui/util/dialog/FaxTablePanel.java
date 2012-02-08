@@ -40,6 +40,7 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 
+@SuppressWarnings("serial")
 public final class FaxTablePanel
   extends JPanel
 {
@@ -237,6 +238,7 @@ public final class FaxTablePanel
     removeCurrentLine();
   }
 
+  @SuppressWarnings("serial")
   public class CustomTableCellRenderer
     extends JLabel
     implements TableCellRenderer
@@ -275,6 +277,7 @@ public final class FaxTablePanel
     }
   }
 
+  @SuppressWarnings("serial")
   public class ParamEditor
     extends JComponent
     implements TableCellEditor

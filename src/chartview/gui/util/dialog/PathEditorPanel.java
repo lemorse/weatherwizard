@@ -44,6 +44,7 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 
+@SuppressWarnings("serial")
 public final class PathEditorPanel
   extends JPanel
 {
@@ -207,6 +208,7 @@ public final class PathEditorPanel
     removeCurrentLine();
   }
 
+  @SuppressWarnings("serial")
   public class CustomTableCellRenderer
     extends JLabel
     implements TableCellRenderer
@@ -242,6 +244,7 @@ public final class PathEditorPanel
     }
   }
 
+  @SuppressWarnings("serial")
   public class ParamEditor
     extends JComponent
     implements TableCellEditor

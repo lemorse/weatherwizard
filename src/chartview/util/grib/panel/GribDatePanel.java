@@ -13,6 +13,7 @@ import javax.swing.JTabbedPane;
 
 import user.util.GeomUtil;
 
+@SuppressWarnings("serial")
 public class GribDatePanel
   extends JPanel
 {

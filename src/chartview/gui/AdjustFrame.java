@@ -97,6 +97,7 @@ import org.w3c.dom.NodeList;
 import user.util.TimeUtil;
 
 
+@SuppressWarnings("serial")
 public class AdjustFrame
   extends JFrame
 {
@@ -108,6 +109,7 @@ public class AdjustFrame
   private FileTypeHolder allJTrees = new FileTypeHolder();
   
   int grayPanelY = 0;
+  @SuppressWarnings("serial")
   private JLayeredPane layers = new JLayeredPane()
     {
       @Override
@@ -122,6 +124,7 @@ public class AdjustFrame
 
   private JTabbedPane masterTabPane = new JTabbedPane();
   private String message2Display = "";
+  @SuppressWarnings("serial")
   private JPanel grayTransparentPanel = new JPanel()
     {
       @Override
@@ -2130,6 +2133,7 @@ public class AdjustFrame
     return allJTrees;
   }
 
+  @SuppressWarnings("serial")
   public class HelpOpenAction extends AbstractAction
   {
     public HelpOpenAction()
@@ -2144,6 +2148,7 @@ public class AdjustFrame
     }
   }
   
+  @SuppressWarnings("serial")
   public class ExitAction extends AbstractAction
   {
     public ExitAction()
@@ -2157,6 +2162,7 @@ public class AdjustFrame
     }        
   }
 
+  @SuppressWarnings("serial")
   public class OpenAction extends AbstractAction
   {
     public OpenAction()
@@ -2171,6 +2177,7 @@ public class AdjustFrame
     }        
   }
 
+  @SuppressWarnings("serial")
   public class SaveCompositeAction extends AbstractAction
   {
     public SaveCompositeAction()
@@ -2184,6 +2191,7 @@ public class AdjustFrame
     }
   }
 
+  @SuppressWarnings("serial")
   public class SaveCompositeAsAction extends AbstractAction
   {
     public SaveCompositeAsAction()

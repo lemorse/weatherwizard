@@ -5,10 +5,11 @@ import chartview.gui.util.param.widget.FieldPlusFinder;
 import javax.swing.JOptionPane;
 import javax.swing.JTextArea;
 
+@SuppressWarnings("serial")
 public class FieldPlusButtonCellEditor 
      extends FieldPlusFinder 
 {
-  Object object;
+  private transient Object object;
   public FieldPlusButtonCellEditor(Object o)
   {
     super(o);

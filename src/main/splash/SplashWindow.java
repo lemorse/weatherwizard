@@ -29,6 +29,7 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JWindow;
 
+@SuppressWarnings("serial")
 public class SplashWindow extends JWindow
 {
   private static SplashWindow instance;

@@ -164,6 +164,7 @@ import org.w3c.dom.Text;
 
 import user.util.GeomUtil;
 
+@SuppressWarnings("serial")
 public class CommandPanel 
      extends JPanel
   implements ChartPanelParentInterface_II, 

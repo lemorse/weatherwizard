@@ -29,6 +29,7 @@ import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
 
+@SuppressWarnings("serial")
 public class ChartCommandPanelToolBar
   extends JToolBar
 {

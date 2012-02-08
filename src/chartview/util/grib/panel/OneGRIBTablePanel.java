@@ -30,6 +30,7 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 
+@SuppressWarnings("serial")
 public class OneGRIBTablePanel
   extends JPanel
 {
@@ -41,8 +42,8 @@ public class OneGRIBTablePanel
   private float min, max;
 
   private String[] names = null;
-  private TableModel dataModel;
-  private Object[][] data = new Object[0][0];
+  private transient TableModel dataModel;
+  private transient Object[][] data = new Object[0][0];
 
   private JTable table;
   private JScrollPane scrollPane;

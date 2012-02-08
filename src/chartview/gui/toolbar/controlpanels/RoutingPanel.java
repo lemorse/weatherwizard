@@ -51,6 +51,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+@SuppressWarnings("serial")
 public class RoutingPanel extends JPanel
 {
   private int current_routing_mode = -1;

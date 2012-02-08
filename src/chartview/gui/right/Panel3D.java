@@ -34,6 +34,7 @@ import java.util.Vector;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 
+@SuppressWarnings("serial")
 public class Panel3D
   extends JPanel
 {

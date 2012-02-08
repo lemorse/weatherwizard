@@ -25,6 +25,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 
+@SuppressWarnings("serial")
 public class GribPanel
      extends JPanel
 {

@@ -13,7 +13,7 @@ import java.util.List;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-public class ProgressMonitor implements Serializable
+public class ProgressMonitor // implements Serializable
 {
   // current is not used for now.
   private int total, current = -1;

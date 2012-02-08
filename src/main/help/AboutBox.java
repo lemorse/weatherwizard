@@ -36,6 +36,7 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 
+@SuppressWarnings("serial")
 public class AboutBox
   extends JPanel
 {

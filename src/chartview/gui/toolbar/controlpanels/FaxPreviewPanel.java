@@ -18,6 +18,8 @@ import java.awt.geom.AffineTransform;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+
+@SuppressWarnings("serial")
 public class FaxPreviewPanel
   extends JPanel
 {
@@ -151,6 +153,7 @@ public class FaxPreviewPanel
              (2D * zoom) / imgRatio);
     jScrollPane1.getViewport().removeAll();
     // Draw rescaled image
+    @SuppressWarnings("serial")
     JPanel imgPanel = new JPanel()
     {
       public void paintComponent(Graphics g)

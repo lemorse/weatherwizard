@@ -66,6 +66,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
+@SuppressWarnings("serial")
 public final class ParamPanel 
            extends JPanel 
 {
@@ -893,6 +894,7 @@ public final class ParamPanel
     KeyboardFocusManager.getCurrentKeyboardFocusManager().addPropertyChangeListener(new JTableFocusChangeListener(table));
   }
 
+  @SuppressWarnings("serial")
   public class CustomTableCellRenderer extends DefaultTableCellRenderer
   {
     @Override
@@ -905,6 +907,7 @@ public final class ParamPanel
     }
   }
   
+  @SuppressWarnings("serial")
   public class SpecialTableCellRenderer
        extends JLabel
     implements TableCellRenderer
@@ -1061,6 +1064,7 @@ public final class ParamPanel
 
   protected static String[] lnfValues = null; // Populated in the constructor
   
+  @SuppressWarnings("serial")
   public class ParamEditor 
        extends JComponent 
     implements TableCellEditor
@@ -1720,6 +1724,7 @@ public final class ParamPanel
     { return getLabel(); }
   }
   
+  @SuppressWarnings("serial")
   private static class FaxBlurListComboBox extends JComboBox
   {
     public FaxBlurListComboBox()
@@ -1733,6 +1738,7 @@ public final class ParamPanel
     }
   }
   
+  @SuppressWarnings("serial")
   private static class WindOptionComboBox extends JComboBox
   {
     public WindOptionComboBox()
@@ -1746,6 +1752,7 @@ public final class ParamPanel
     }
   }
   
+  @SuppressWarnings("serial")
   private static class RoutingOptionComboBox extends JComboBox
   {
     public RoutingOptionComboBox()

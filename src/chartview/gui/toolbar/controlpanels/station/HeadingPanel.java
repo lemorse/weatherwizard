@@ -13,6 +13,7 @@ import java.awt.RenderingHints;
 
 import javax.swing.JPanel;
 
+@SuppressWarnings("serial")
 public class HeadingPanel
   extends JPanel
 {
