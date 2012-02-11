@@ -2232,6 +2232,12 @@ public class CommandPanel
               case ChartPanel.ANAXIMANDRE:
                 projection.setAttribute("type", ANAXIMANDRE);
                 break;
+              case ChartPanel.STEREOGRAPHIC:
+                projection.setAttribute("type", STEREO);
+                break;
+              case ChartPanel.POLAR_STEREOGRAPHIC:
+                projection.setAttribute("type", POLAR_STEREO);
+                break;
               case ChartPanel.LAMBERT:
                 projection.setAttribute("type", LAMBERT);
                 projection.setAttribute("contact-parallel", Double.toString(chartPanel.getContactParallel()));
@@ -3817,6 +3823,12 @@ public class CommandPanel
       case ChartPanel.ANAXIMANDRE:
         projection.setAttribute("type", ANAXIMANDRE);
         break;
+      case ChartPanel.POLAR_STEREOGRAPHIC:
+        projection.setAttribute("type", POLAR_STEREO);
+        break;
+      case ChartPanel.STEREOGRAPHIC:
+        projection.setAttribute("type", STEREO);
+        break;
       case ChartPanel.LAMBERT:
         projection.setAttribute("type", LAMBERT);
         projection.setAttribute("contact-parallel", Double.toString(chartPanel.getContactParallel()));
@@ -4413,6 +4425,8 @@ public class CommandPanel
   
   private final static String MERCATOR    = "MERCATOR";
   private final static String ANAXIMANDRE = "ANAXIMANDRE";
+  private final static String POLAR_STEREO = "POLAR_STEREO";
+  private final static String STEREO      = "STEREO";
   private final static String LAMBERT     = "LAMBERT";
   private final static String CONIC_EQU   = "CONIC_EQU";
   private final static String GLOBE       = "GLOBE";
@@ -4518,6 +4532,16 @@ public class CommandPanel
           chartPanel.setProjection(ChartPanel.GLOBE_VIEW);
           WWContext.getInstance().fireSetProjection(ChartPanel.GLOBE_VIEW);
   //      StaticObjects.getInstance().fireSetGlobeParameters();
+        }
+        else if  (projType.equals(STEREO))
+        {
+          chartPanel.setProjection(ChartPanel.STEREOGRAPHIC);
+          WWContext.getInstance().fireSetProjection(ChartPanel.STEREOGRAPHIC);
+        }
+        else if  (projType.equals(POLAR_STEREO))
+        {
+          chartPanel.setProjection(ChartPanel.POLAR_STEREOGRAPHIC);
+          WWContext.getInstance().fireSetProjection(ChartPanel.POLAR_STEREOGRAPHIC);
         }
         else if (projType.equals(SATELLITE))
         {
@@ -4643,8 +4667,16 @@ public class CommandPanel
                   if (faxImage[i].transparent)
                   {
                     if (faxImage[i].colorChange)
+                    {
                 //    faxImage[i].faxImage = ImageUtil.makeTransparentImage(this, ImageUtil.readImage(is, tif), c);
-                      faxImage[i].faxImage = ImageUtil.switchColorAndMakeColorTransparent(ImageUtil.readImage(is, tif), Color.black, c, Color.white, blurSharpOption);
+                   // faxImage[i].faxImage = ImageUtil.switchColorAndMakeColorTransparent(ImageUtil.readImage(is, tif), Color.black, c, Color.white, blurSharpOption);
+                      Image faxImg = ImageUtil.readImage(is, tif); //ImageUtil.readImage(faxName);
+                      if (ImageUtil.countColors(faxImg) > 2)
+                        faxImg = ImageUtil.switchAnyColorAndMakeColorTransparent(faxImg, c, ImageUtil.mostUsedColor(faxImg), blurSharpOption);
+                      else
+                        faxImg = ImageUtil.switchColorAndMakeColorTransparent(faxImg, Color.black, c, Color.white, blurSharpOption);
+                      faxImage[i].faxImage = faxImg;
+                    }
                     else
                       faxImage[i].faxImage = ImageUtil.makeColorTransparent(ImageUtil.readImage(is, tif), Color.white, blurSharpOption);
                   }

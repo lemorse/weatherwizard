@@ -31,22 +31,34 @@ public class ProjectionPanel
   extends JPanel
 {
   private GridBagLayout gridBagLayout1 = new GridBagLayout();
-  private AnaximandreMercatorPanel anaximandre = new AnaximandreMercatorPanel();
-  private AnaximandreMercatorPanel mercator    = new AnaximandreMercatorPanel();
-  private ConicPanel lambert                   = new ConicPanel();
-  private ConicPanel equidistant               = new ConicPanel();
-  private GlobePanel globe                     = new GlobePanel();
-  private SatellitePanel satellite             = new SatellitePanel();
+  private AnaximandreMercatorPanel anaximandre        = new AnaximandreMercatorPanel();
+  private AnaximandreMercatorPanel mercator           = new AnaximandreMercatorPanel();
+  private AnaximandreMercatorPanel stereographic      = new AnaximandreMercatorPanel();
+  private AnaximandreMercatorPanel polarStereographic = new AnaximandreMercatorPanel();
+  private ConicPanel lambert                          = new ConicPanel();
+  private ConicPanel equidistant                      = new ConicPanel();
+  private GlobePanel globe                            = new GlobePanel();
+  private SatellitePanel satellite                    = new SatellitePanel();
   private JButton applyButton = new JButton();
   private JTabbedPane projectionTabbedPane = new JTabbedPane();
 
-  private Projection[] projections = new Projection[] { new Projection(ChartPanel.ANAXIMANDRE,       "Anaximandre"),
-                                                        new Projection(ChartPanel.MERCATOR,          "Mercator"),
-                                                        new Projection(ChartPanel.LAMBERT,           "Lambert"),
-                                                        new Projection(ChartPanel.CONIC_EQUIDISTANT, "Conic Equ."),
-                                                        new Projection(ChartPanel.GLOBE_VIEW,        "Globe"),
-                                                        new Projection(ChartPanel.SATELLITE_VIEW,    "Satellite")};
-
+  private transient Projection[] projections = new Projection[] { new Projection(ChartPanel.ANAXIMANDRE,         "Anaximandre"),
+                                                                  new Projection(ChartPanel.MERCATOR,            "Mercator"),
+                                                                  new Projection(ChartPanel.POLAR_STEREOGRAPHIC, "Polar Stereo"),
+                                                                  new Projection(ChartPanel.STEREOGRAPHIC,       "Stereographic"),
+                                                                  new Projection(ChartPanel.LAMBERT,             "Lambert"),
+                                                                  new Projection(ChartPanel.CONIC_EQUIDISTANT,   "Conic Equ."),
+                                                                  new Projection(ChartPanel.GLOBE_VIEW,          "Globe"),
+                                                                  new Projection(ChartPanel.SATELLITE_VIEW,      "Satellite")};
+  private static final int ANAXIMANDRE_INDEX   = 0;
+  private static final int MERCATOR_INDEX      = 1;
+  private static final int POLAR_STEREO_INDEX  = 2;
+  private static final int STEREOGRAPHIC_INDEX = 3;
+  private static final int LAMBERT_INDEX       = 4;
+  private static final int CONIC_EQU_INDEX     = 5;
+  private static final int GLOBE_INDEX         = 6;
+  private static final int SATELLITE_INDEX     = 7;
+  
   public ProjectionPanel()
   {
     try
@@ -75,23 +87,29 @@ public class ProjectionPanel
           switch (p)
           {
             case ChartPanel.ANAXIMANDRE:
-              projectionTabbedPane.setSelectedIndex(0);
+              projectionTabbedPane.setSelectedIndex(ANAXIMANDRE_INDEX);
               break;
             case ChartPanel.LAMBERT:
-              projectionTabbedPane.setSelectedIndex(2);
+              projectionTabbedPane.setSelectedIndex(LAMBERT_INDEX);
               break;
             case ChartPanel.CONIC_EQUIDISTANT:
-              projectionTabbedPane.setSelectedIndex(3);
+              projectionTabbedPane.setSelectedIndex(CONIC_EQU_INDEX);
               break;
             case ChartPanel.GLOBE_VIEW:
-              projectionTabbedPane.setSelectedIndex(4);
+              projectionTabbedPane.setSelectedIndex(GLOBE_INDEX);
               break;
             case ChartPanel.SATELLITE_VIEW:
-              projectionTabbedPane.setSelectedIndex(5);
+              projectionTabbedPane.setSelectedIndex(SATELLITE_INDEX);
+              break;
+            case ChartPanel.STEREOGRAPHIC:
+              projectionTabbedPane.setSelectedIndex(STEREOGRAPHIC_INDEX);
+              break;
+            case ChartPanel.POLAR_STEREOGRAPHIC:
+              projectionTabbedPane.setSelectedIndex(POLAR_STEREO_INDEX);
               break;
             case ChartPanel.MERCATOR:
             default:
-              projectionTabbedPane.setSelectedIndex(1);
+              projectionTabbedPane.setSelectedIndex(MERCATOR_INDEX);
               break;              
           }
         }
@@ -133,12 +151,14 @@ public class ProjectionPanel
     lambert.setProjType(ChartPanel.LAMBERT);
     equidistant.setProjType(ChartPanel.CONIC_EQUIDISTANT);
     
-    projectionTabbedPane.add("Anaximandre", anaximandre);
-    projectionTabbedPane.add("Mercator",    mercator);
-    projectionTabbedPane.add("Lambert",     lambert);
-    projectionTabbedPane.add("Conic Equ.",  equidistant);
-    projectionTabbedPane.add("Globe",       globe);
-    projectionTabbedPane.add("Satellite",   satellite);
+    projectionTabbedPane.add("Anaximandre",   anaximandre);
+    projectionTabbedPane.add("Mercator",      mercator);
+    projectionTabbedPane.add("Polar Stereo",  polarStereographic);
+    projectionTabbedPane.add("Stereographic", stereographic);
+    projectionTabbedPane.add("Lambert",       lambert);
+    projectionTabbedPane.add("Conic Equ.",    equidistant);
+    projectionTabbedPane.add("Globe",         globe);
+    projectionTabbedPane.add("Satellite",     satellite);
 
 //  projectionTabbedPane.setEnabledAt(4, false);
     
@@ -235,7 +255,7 @@ public class ProjectionPanel
           ex.printStackTrace();
         }
       }
-      else // Mercator & Anaximandre
+      else // Mercator & Anaximandre, Stereo
       {
         // Do not need anything      
       }
