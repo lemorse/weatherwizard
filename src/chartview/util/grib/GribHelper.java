@@ -32,6 +32,7 @@ import java.util.GregorianCalendar;
 
 import java.util.HashMap;
 
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
 
@@ -104,7 +105,7 @@ public class GribHelper
             int yIdx = ar.get(0).intValue();
             int xIdx = ar.get(1).intValue();
             DataPoint[] dp = new DataPoint[4];
-    
+            // Wind
             float u =  gribData.getGribPointData()[yIdx][xIdx].getU();
             float v = -gribData.getGribPointData()[yIdx][xIdx].getV();
             double lat = gribData.getGribPointData()[yIdx][xIdx].getLat();
@@ -115,6 +116,16 @@ public class GribHelper
             speed *= 3.60D;
             speed /= 1.852D;
             double dir = WWGnlUtilities.getDir(u, v);
+            // Current (RTOFS Only)
+            float uC =  gribData.getGribPointData()[yIdx][xIdx].getUOgrd();
+            float vC = -gribData.getGribPointData()[yIdx][xIdx].getVOgrd();
+            double cSpeed = Math.sqrt(uC * uC + vC * vC);
+            cSpeed *= 3.60D;
+            cSpeed /= 1.852D;
+            double cDir = WWGnlUtilities.getDir(uC, vC);
+            cDir += 180;
+            while (cDir > 360) cDir -= 360;
+            
             double prmsl  = gribData.getGribPointData()[yIdx][xIdx].getPrmsl();
             double hgt500 = gribData.getGribPointData()[yIdx][xIdx].getHgt();
             double temp   = gribData.getGribPointData()[yIdx][xIdx].getAirtmp(); // TODO seatmp
@@ -124,8 +135,10 @@ public class GribHelper
             // Reset
             u = gribData.getGribPointData()[yIdx][xIdx].getU();
             v = gribData.getGribPointData()[yIdx][xIdx].getV();
+            uC = gribData.getGribPointData()[yIdx][xIdx].getUOgrd();
+            vC = gribData.getGribPointData()[yIdx][xIdx].getVOgrd();
     
-            dp[0] = new DataPoint(lng, lat, u, v, dir, speed, prmsl, hgt500, temp, whgt, rain);                 
+            dp[0] = new DataPoint(lng, lat, u, v, dir, speed, prmsl, hgt500, temp, whgt, rain, uC, vC, cDir, cSpeed);                 
                 
             u =  gribData.getGribPointData()[yIdx][xIdx + 1].getU();
             v = -gribData.getGribPointData()[yIdx][xIdx + 1].getV();
@@ -137,6 +150,16 @@ public class GribHelper
             speed *= 3.60D;
             speed /= 1.852D;
             dir = WWGnlUtilities.getDir(u, v);
+            
+            uC =  gribData.getGribPointData()[yIdx][xIdx + 1].getUOgrd();
+            vC = -gribData.getGribPointData()[yIdx][xIdx + 1].getVOgrd();
+            cSpeed = Math.sqrt(uC * uC + vC * vC);
+            cSpeed *= 3.60D;
+            cSpeed /= 1.852D;
+            cDir = WWGnlUtilities.getDir(uC, vC);
+            cDir += 180;
+            while (cDir > 360) cDir -= 360;
+            
             prmsl  = gribData.getGribPointData()[yIdx][xIdx + 1].getPrmsl();
             hgt500 = gribData.getGribPointData()[yIdx][xIdx + 1].getHgt();
             temp   = gribData.getGribPointData()[yIdx][xIdx + 1].getAirtmp();
@@ -145,8 +168,10 @@ public class GribHelper
     
             u = gribData.getGribPointData()[yIdx][xIdx + 1].getU();
             v = gribData.getGribPointData()[yIdx][xIdx + 1].getV();
+            uC = gribData.getGribPointData()[yIdx][xIdx + 1].getUOgrd();
+            vC = gribData.getGribPointData()[yIdx][xIdx + 1].getVOgrd();
 
-            dp[1] = new DataPoint(lng, lat, u, v, dir, speed, prmsl, hgt500, temp, whgt, rain);                 
+            dp[1] = new DataPoint(lng, lat, u, v, dir, speed, prmsl, hgt500, temp, whgt, rain, uC, vC, cDir, cSpeed);                 
     
             u =  gribData.getGribPointData()[yIdx + 1][xIdx].getU();
             v = -gribData.getGribPointData()[yIdx + 1][xIdx].getV();
@@ -158,6 +183,16 @@ public class GribHelper
             speed *= 3.60D;
             speed /= 1.852D;
             dir = WWGnlUtilities.getDir(u, v);
+
+            uC =  gribData.getGribPointData()[yIdx + 1][xIdx].getUOgrd();
+            vC = -gribData.getGribPointData()[yIdx + 1][xIdx].getVOgrd();
+            cSpeed = Math.sqrt(uC * uC + vC * vC);
+            cSpeed *= 3.60D;
+            cSpeed /= 1.852D;
+            cDir = WWGnlUtilities.getDir(uC, vC);
+            cDir += 180;
+            while (cDir > 360) cDir -= 360;
+
             prmsl  = gribData.getGribPointData()[yIdx + 1][xIdx].getPrmsl();
             hgt500 = gribData.getGribPointData()[yIdx + 1][xIdx].getHgt();
             temp   = gribData.getGribPointData()[yIdx + 1][xIdx].getAirtmp();
@@ -166,8 +201,10 @@ public class GribHelper
     
             u = gribData.getGribPointData()[yIdx + 1][xIdx].getU();
             v = gribData.getGribPointData()[yIdx + 1][xIdx].getV();
+            uC = gribData.getGribPointData()[yIdx + 1][xIdx].getUOgrd();
+            vC = gribData.getGribPointData()[yIdx + 1][xIdx].getVOgrd();
             
-            dp[2] = new DataPoint(lng, lat, u, v, dir, speed, prmsl, hgt500, temp, whgt, rain);                 
+            dp[2] = new DataPoint(lng, lat, u, v, dir, speed, prmsl, hgt500, temp, whgt, rain, uC, vC, cDir, cSpeed);                 
     
             u =  gribData.getGribPointData()[yIdx + 1][xIdx + 1].getU();
             v = -gribData.getGribPointData()[yIdx + 1][xIdx + 1].getV();
@@ -179,6 +216,14 @@ public class GribHelper
             speed *= 3.60D;
             speed /= 1.852D;
             dir = WWGnlUtilities.getDir(u, v);
+            uC =  gribData.getGribPointData()[yIdx + 1][xIdx + 1].getUOgrd();
+            vC = -gribData.getGribPointData()[yIdx + 1][xIdx + 1].getVOgrd();
+            cSpeed = Math.sqrt(uC * uC + vC * vC);
+            cSpeed *= 3.60D;
+            cSpeed /= 1.852D;
+            cDir = WWGnlUtilities.getDir(uC, vC);
+            cDir += 180;
+            while (cDir > 360) cDir -= 360;
             prmsl  = gribData.getGribPointData()[yIdx + 1][xIdx + 1].getPrmsl();
             hgt500 = gribData.getGribPointData()[yIdx + 1][xIdx + 1].getHgt();
             temp   = gribData.getGribPointData()[yIdx + 1][xIdx + 1].getAirtmp();
@@ -187,8 +232,10 @@ public class GribHelper
     
             u = gribData.getGribPointData()[yIdx + 1][xIdx + 1].getU();
             v = gribData.getGribPointData()[yIdx + 1][xIdx + 1].getV();
+            uC = gribData.getGribPointData()[yIdx + 1][xIdx + 1].getUOgrd();
+            vC = gribData.getGribPointData()[yIdx + 1][xIdx + 1].getVOgrd();
             
-            dp[3] = new DataPoint(lng, lat, u, v, dir, speed, prmsl, hgt500, temp, whgt, rain);                 
+            dp[3] = new DataPoint(lng, lat, u, v, dir, speed, prmsl, hgt500, temp, whgt, rain, uC, vC, cDir, cSpeed);                 
     
             boolean right  = false;
             boolean left   = false;
@@ -213,16 +260,21 @@ public class GribHelper
             List<Double> _ar = Smoothing.calculate(dp, _Lng, _Lat);
             if (_ar != null)
             {
-              double _dir    = _ar.get(0).doubleValue();
-              double _speed  = _ar.get(1).doubleValue();
-              double _prmsl  = _ar.get(2).doubleValue();
-              double _500hgt = _ar.get(3).doubleValue();
-              double _temp   = _ar.get(4).doubleValue();
-              double _whgt   = _ar.get(5).doubleValue();
-              double _rain   = _ar.get(6).doubleValue();
+              double _dir    = _ar.get(Smoothing.TWD_INDEX).doubleValue();
+              double _speed  = _ar.get(Smoothing.TWS_INDEX).doubleValue();
+              double _prmsl  = _ar.get(Smoothing.PRMSL_INDEX).doubleValue();
+              double _500hgt = _ar.get(Smoothing.HGT500_INDEX).doubleValue();
+              double _temp   = _ar.get(Smoothing.TEMP_INDEX).doubleValue();
+              double _whgt   = _ar.get(Smoothing.TEMP_INDEX).doubleValue();
+              double _rain   = _ar.get(Smoothing.RAIN_INDEX).doubleValue();
               
-              int _u = (int)(_ar.get(7).doubleValue());
-              int _v = (int)(_ar.get(8).doubleValue());
+              int _u = (int)(_ar.get(Smoothing.UWIND_INDEX).doubleValue());
+              int _v = (int)(_ar.get(Smoothing.VWIND_INDEX).doubleValue());
+              
+              int _uC = (int)(_ar.get(Smoothing.UCURRENT_INDEX).doubleValue());
+              int _vC = (int)(_ar.get(Smoothing.VCURRENT_INDEX).doubleValue());
+              double _Cdir    = _ar.get(Smoothing.CDR_INDEX).doubleValue();
+              double _Cspeed  = _ar.get(Smoothing.CSP_INDEX).doubleValue();
               
               GribPointData gpd = new GribPointData();
               gpd.setHgt((int)_500hgt);
@@ -243,6 +295,11 @@ public class GribHelper
               
               gpd.setU(_u);
               gpd.setV(_v);
+              
+              gpd.setUOgrd(_uC);
+              gpd.setVOgrd(_vC);
+              gpd.setCdr(_Cdir);
+              gpd.setCsp(_Cspeed);
               
               newGribPointData[h][w] = gpd;
 //            System.out.println("New GribPointData set at [" + h + ", " + w + "]");
@@ -297,6 +354,7 @@ public class GribHelper
           newData[idx].rain  = original[i].rain;
           newData[idx].wave  = original[i].wave;
           newData[idx].wind  = original[i].wind;
+          newData[idx].current  = original[i].current;
           GribPointData[][] gpd1 = original[i].getGribPointData();
           GribPointData[][] gpd2 = original[i + 1].getGribPointData();
           GribPointData[][] gpd = new GribPointData[gpd1.length][gpd1[0].length];
@@ -319,6 +377,10 @@ public class GribHelper
                 gpd[h][w].setU((float)getIntermediateValue(gpd1[h][w].getU(), gpd2[h][w].getU(), nbsteps, j));
                 gpd[h][w].setV((float)getIntermediateValue(gpd1[h][w].getV(), gpd2[h][w].getV(), nbsteps, j));
                 gpd[h][w].setWHgt((float)getIntermediateValue(gpd1[h][w].getWHgt(), gpd2[h][w].getWHgt(), nbsteps, j));
+                gpd[h][w].setUOgrd((float)getIntermediateValue(gpd1[h][w].getUOgrd(), gpd2[h][w].getUOgrd(), nbsteps, j));
+                gpd[h][w].setVOgrd((float)getIntermediateValue(gpd1[h][w].getVOgrd(), gpd2[h][w].getVOgrd(), nbsteps, j));
+                gpd[h][w].setCdr(getIntermediateValue(gpd1[h][w].getCdr(), gpd2[h][w].getCdr(), nbsteps, j));
+                gpd[h][w].setCsp(getIntermediateValue(gpd1[h][w].getCsp(), gpd2[h][w].getCsp(), nbsteps, j));
               }
               catch (ArrayIndexOutOfBoundsException aioobe)
               {
@@ -348,7 +410,7 @@ public class GribHelper
   {    
     try
     {
-      GribHelper.GribConditionData[] thisGRIB = GribHelper.getGribData(gribName);
+      GribHelper.GribConditionData[] thisGRIB = GribHelper.getGribData(gribName, false);
       GribFile gf = new GribFile(gribName);
       String mess = "Contains " + thisGRIB.length + " frame(s).";
       displayGRIBDetails(gf, mess);
@@ -433,6 +495,8 @@ public class GribHelper
     public float waves;
     public float temp;
     public float rain;
+    public float currentspeed;
+    public int currentdir;    
     
     public String comment = null;
 
@@ -448,7 +512,9 @@ public class GribHelper
                          float prmsl,
                          float waves,
                          float temp,
-                         float rain)
+                         float rain,
+                         float currentspeed,
+                         int currentdir)
     {
       this.windspeed = windspeed;
       this.winddir = winddir;
@@ -459,6 +525,8 @@ public class GribHelper
       this.waves = waves;
       this.temp = temp;
       this.rain = rain;
+      this.currentspeed = currentspeed;
+      this.currentdir = currentdir;
     }
   }
 
@@ -470,6 +538,7 @@ public class GribHelper
     public boolean hgt   = false;
     public boolean wave  = false;
     public boolean rain  = false;
+    public boolean current = false;
     
     private Date date;
     private double wLng;
@@ -624,8 +693,14 @@ public class GribHelper
     private float whgt;
     private float rain;
     
+    private float uOgrd;
+    private float vOgrd;
+    
     private double tws = -1D;
     private double twd = -1D;
+
+    private double csp = -1D;
+    private double cdr = -1D;
 
     public GribPointData()
     {
@@ -756,6 +831,46 @@ public class GribHelper
     {
       return seatmp;
     }
+
+    public void setUOgrd(float uOgrd)
+    {
+      this.uOgrd = uOgrd;
+    }
+
+    public float getUOgrd()
+    {
+      return uOgrd;
+    }
+
+    public void setVOgrd(float vOgrd)
+    {
+      this.vOgrd = vOgrd;
+    }
+
+    public float getVOgrd()
+    {
+      return vOgrd;
+    }
+
+    public void setCsp(double csp)
+    {
+      this.csp = csp;
+    }
+
+    public double getCsp()
+    {
+      return csp;
+    }
+
+    public void setCdr(double cdr)
+    {
+      this.cdr = cdr;
+    }
+
+    public double getCdr()
+    {
+      return cdr;
+    }
   }
 
   private static class TempGribData
@@ -824,6 +939,11 @@ public class GribHelper
 
   public static GribConditionData[] getGribData(String fileName) throws Exception
   {
+    return getGribData(fileName, false);
+  }
+  
+  public static GribConditionData[] getGribData(String fileName, boolean verb) throws Exception
+  {
     List<GribConditionData> wgd = null;
     try
     {
@@ -841,7 +961,7 @@ public class GribHelper
       GribFile gribFile = new GribFile(fileName);
       WWContext.getInstance().setGribFile(gribFile);
       int recordCount = gribFile.getRecordCount();
-      wgd = dumper(gribFile, fileName);
+      wgd = dumper(gribFile, fileName, verb);
     }
     catch(FileNotFoundException noFileError)
     {
@@ -874,7 +994,12 @@ public class GribHelper
 
   public static List<GribConditionData> dumper(GribFile gribFile, String fileName) throws Exception
   {
-    List<String> unrecognized = new ArrayList<String>();
+    return dumper(gribFile, fileName, false);
+  }
+  
+  public static List<GribConditionData> dumper(GribFile gribFile, String fileName, boolean verb) throws Exception
+  {
+    Map<String, String> unrecognized = new Hashtable<String, String>();
 
     List<GribConditionData> wgd = null;
     Map<String, Map<Date, TempGribData>> map = new HashMap<String, Map<Date, TempGribData>>();
@@ -1134,6 +1259,14 @@ public class GribHelper
                 {
                   wpd[i][j].setV(tgd2.data[i][j]);
                 }
+                else if (key.equals("uogrd"))
+                {
+                  wpd[i][j].setUOgrd(tgd2.data[i][j]);
+                }
+                else if (key.equals("vogrd"))
+                {
+                  wpd[i][j].setVOgrd(tgd2.data[i][j]);
+                }
                 else if (key.equals("prmsl"))
                 {
                   wpd[i][j].setPrmsl(tgd2.data[i][j]);
@@ -1161,12 +1294,13 @@ public class GribHelper
                 }
                 else
                 {
-                  if (!unrecognized.contains(key))
+                  if (!unrecognized.containsKey(key))
                   {
-                    unrecognized.add(key);
-                    System.err.println("Type [" + key + "] not recognized : [" + tgd2.type + "] " + tgd2.description);                    
+                    String mess = "Type [" + key + "] not manadged : " + tgd2.description;
+                    unrecognized.put(key, mess);
+                    System.err.println(mess);                    
                   }
-                  System.out.println(key + " value: " + Float.toString(tgd2.data[i][j]));
+//                System.out.println(key + " value: " + Float.toString(tgd2.data[i][j]));
                 }
               }
               catch (Exception exx)
@@ -1179,7 +1313,7 @@ public class GribHelper
         catch (RuntimeException rte)
         {
           String mess = rte.getMessage();
-          //                      System.out.println("RuntimeException getMessage(): [" + mess + "]");
+//        System.out.println("RuntimeException getMessage(): [" + mess + "]");
           if (mess.contains("DataArray (width) size mismatch") ||
               mess.contains("DataArray (height) size mismatch"))
             System.out.println(mess);
@@ -1203,6 +1337,15 @@ public class GribHelper
         wgd = new ArrayList<GribConditionData>(gribDates.size()); 
       wgd.add(cd);
     }
+    if (unrecognized.size() > 0 && verb)
+    {
+      String message = "<html>";
+      for (String s : unrecognized.keySet())
+        message += (unrecognized.get(s) + "<br>");
+      message += "</html>";
+      JOptionPane.showMessageDialog(null, message, "GRIB", JOptionPane.WARNING_MESSAGE);
+    }
+    
     return wgd;
   }
   
@@ -1306,6 +1449,17 @@ public class GribHelper
           gribCond.waves = wpd[l][g].getWHgt();
           gribCond.temp = wpd[l][g].getAirtmp(); // TODO seatmp
           gribCond.rain = wpd[l][g].getRain();
+
+          float xC = wpd[l][g].getUOgrd();
+          float yC = wpd[l][g].getVOgrd();
+          double cSpeed = Math.sqrt(xC * xC + yC * yC); // m/s
+          cSpeed *= 3.600D; // km/h
+          cSpeed /= 1.852D; // knots
+          double cDir = WWGnlUtilities.getDir(xC, yC);
+          cDir += 180;
+          while (cDir > 360) cDir -= 360;
+          gribCond.currentdir = (int)Math.round(cDir);
+          gribCond.currentspeed = (float)cSpeed;
 //        System.out.println("l:" + l + ",g:" + g + ", temp:" + (gribCond.temp - 273) + ", rain:" + (gribCond.rain * 3600f));
           if (alreadySaidTooOld) 
             gribCond.comment = "TOO_OLD";
@@ -1367,6 +1521,27 @@ public class GribHelper
             gribCond.waves = wpd[l][g].getWHgt();
             gribCond.temp = wpd[l][g].getAirtmp();
             gribCond.rain = wpd[l][g].getRain();
+            double cSpeed = 0D, cDir = 0D;
+            if (wpd[l][g].getCdr() != -1D && 
+                wpd[l][g].getCsp() != -1D)
+            {
+              cSpeed = wpd[l][g].getCsp();
+              cDir = wpd[l][g].getCdr();
+            }
+            else
+            {
+              float x = wpd[l][g].getUOgrd();
+              float y = wpd[l][g].getVOgrd();
+              speed = Math.sqrt(x * x + y * y); // m/s
+              speed *= 3.600D; // km/h
+              speed /= 1.852D; // knots
+              dir = WWGnlUtilities.getDir(x, y);
+              dir += 180;
+              while (dir > 360) dir -= 360;
+            }
+            gribCond.currentdir = (int)Math.round(dir);
+            gribCond.currentspeed = (float)speed;
+            
             return gribCond;
           }
         }

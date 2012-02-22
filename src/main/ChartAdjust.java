@@ -11,6 +11,7 @@ import chartview.gui.util.param.ParamPanel;
 import chartview.util.WWGnlUtilities;
 
 import coreutilities.CheckForUpdateThread;
+import coreutilities.NotificationCheck;
 import coreutilities.Utilities;
 
 import coreutilities.ctx.CoreContext;
@@ -24,6 +25,7 @@ import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -33,10 +35,20 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
+import java.util.TimeZone;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
@@ -51,12 +63,15 @@ import javax.swing.UIManager;
  */ 
 public class ChartAdjust
 {
+  protected final JFrame frame;
+  
   public ChartAdjust()
   {
 //  System.out.println("ClassLoader:" + this.getClass().getClassLoader().getClass().getName());
     // Cleanup from previous session if necessary
     WWGnlUtilities.deleteNow();
     // Find the compilation date...
+    String lastModified = "";
     String fullPath2Class = this.getClass().getName();
     // try manifest first
     // Count number of dots
@@ -72,7 +87,7 @@ public class ChartAdjust
         str = str.substring(i + 1);
       }
     }
-//  System.out.println("Found " + nbdots + " dot(s)");
+    //  System.out.println("Found " + nbdots + " dot(s)");
     String resource = "";
     for (i=0; i<nbdots; i++)
       resource += (".." + "/");
@@ -80,10 +95,8 @@ public class ChartAdjust
 
     String className = this.getClass().getName().substring(this.getClass().getName().lastIndexOf(".") + 1) + ".class";
     URL me = this.getClass().getResource(className);
-//  System.out.println("Resource:" + me);
+    //  System.out.println("Resource:" + me);
     String strURL = me.toString();
-    
-    String lastModified = "";
     
     String jarIdentifier = ".jar!/";
     if (strURL.indexOf(jarIdentifier) > -1)
@@ -91,7 +104,7 @@ public class ChartAdjust
       try 
       { 
         String jarFileURL = strURL.substring(0, strURL.indexOf(jarIdentifier) + jarIdentifier.length()); // Must end with ".jar!/"
-//      System.out.println("Trying to reach [" + jarFileURL + "]");
+    //      System.out.println("Trying to reach [" + jarFileURL + "]");
         URL jarURL = new URL(jarFileURL);
         JarFile myJar = ((JarURLConnection)jarURL.openConnection()).getJarFile();
         Manifest manifest = myJar.getManifest();
@@ -153,7 +166,7 @@ public class ChartAdjust
     }
     
     ParamPanel.setUserValues();
-    final JFrame frame = new AdjustFrame();
+/*  final JFrame */ frame = new AdjustFrame();
     
     boolean positioned = false;
     File propFile = new File("ww_position.properties");
@@ -195,6 +208,34 @@ public class ChartAdjust
 //  frame.setUndecorated(true);
     frame.setVisible(true);
     checkForUpdate();
+    // lastModified, like Thu 02/16/2012 18:11:14.08
+    Date compiledDate = null;
+    try
+    {
+      SimpleDateFormat sdf = new SimpleDateFormat("E MM/dd/yyyy HH:mm:ss.SS");
+      sdf.setTimeZone(TimeZone.getTimeZone("Pacific/Los_Angeles"));
+      compiledDate = sdf.parse(lastModified);
+    }
+    catch (ParseException pe)
+    {
+      // From the class ? like Sun, 19 Feb 2012 03:21:22 GMT 
+      try
+      {
+        SimpleDateFormat sdf = new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss Z");
+        sdf.setTimeZone(TimeZone.getTimeZone("Pacific/Los_Angeles"));
+        compiledDate = sdf.parse(lastModified);        
+      }
+      catch (ParseException pe2)
+      {
+        // Give up...
+        System.err.println(pe2.getLocalizedMessage());
+      }
+    }
+    catch (Exception ex)
+    {
+      ex.printStackTrace();
+    }
+    checkForNotification(compiledDate);
   }
   
   private static boolean proceed = false;
@@ -250,6 +291,91 @@ public class ChartAdjust
        }
      });
     checkForUpdate.start();
+  }
+
+  private final static String NOTIFICATION_PROP_FILE_NAME = "notification_" + WWContext.PRODUCT_KEY + ".properties";
+  private final static SimpleDateFormat SDF = new SimpleDateFormat("E dd MMM yyyy, HH:mm:ss z");
+  
+  public static void checkForNotification(final Date manifestDate)
+  {
+    // Checking for notification
+    proceed = ((Boolean)ParamPanel.data[ParamData.SHOW_NOTIFICATIONS][1]).booleanValue(); 
+    if (proceed)
+    {
+      Thread checkForNotification = new Thread()
+        {
+          public void run()
+          {
+            String notificationDate = "";
+            Date providedDate = manifestDate;
+            
+            Properties props = new Properties();
+            try
+            {
+              FileInputStream fis = new FileInputStream(NOTIFICATION_PROP_FILE_NAME);
+              props.load(fis);
+              fis.close();
+              notificationDate = props.getProperty("date"); // UTC date
+            }
+            catch (Exception ex)
+            {
+              System.out.println("Properties file [" + NOTIFICATION_PROP_FILE_NAME + "] not found");
+            }    
+            try
+            {
+              if (providedDate != null)
+              {
+                Date propertiesDate = null;
+                try
+                {
+                  propertiesDate = NotificationCheck.getDateFormat().parse(notificationDate);
+                }
+                catch (ParseException pe)
+                {
+                  System.err.println(pe.getLocalizedMessage());                  
+                }
+//              System.out.println("Properties Date:" + propertiesDate.toString() + ", Provided Date:" + providedDate.toString());
+                if (notificationDate == null || notificationDate.trim().length() == 0 || propertiesDate.before(providedDate))
+                  notificationDate = NotificationCheck.getDateFormat().format(providedDate);          
+              }
+              NotificationCheck nc = new NotificationCheck(WWContext.PRODUCT_KEY, notificationDate);
+              Map<Date, String> map = nc.check();
+              String productName = nc.getProductName();
+              // Display Notification Here.
+              if (map.size() > 0)
+              {
+                String content = "<html>";
+                Set<Date> keys = map.keySet();
+                Date[] da = keys.toArray(new Date[keys.size()]);
+                Arrays.sort(da);
+                for (Date d : da)
+                {
+                  String mess = map.get(d);
+                  content += ("<br><i><b>" + SDF.format(d) + "</b></i><br>" + mess + "<br>"); 
+  //              System.out.println(d.toString() + "\n" + mess);
+                }
+                content += "</html>";
+                String title = "Notifications";
+                if (productName.trim().length() > 0)
+                  title += (" for " + productName); // LOCALIZE
+                int resp = JOptionPane.showConfirmDialog(null, content, title, JOptionPane.OK_CANCEL_OPTION, JOptionPane.INFORMATION_MESSAGE);
+                if (resp == JOptionPane.OK_OPTION)
+                {
+                  props.setProperty("date", NotificationCheck.getDateFormat().format(new Date())); // Write UTC date
+                  FileOutputStream fos = new FileOutputStream(NOTIFICATION_PROP_FILE_NAME);
+                  props.store(fos, "Last notification date");
+                  fos.close();
+                }
+              }
+            }
+            catch (Exception ex)
+            {
+              ex.printStackTrace();
+            }    
+          }
+        };
+      checkForNotification.start();           
+    }
   }
 
   public static void main(String args[])

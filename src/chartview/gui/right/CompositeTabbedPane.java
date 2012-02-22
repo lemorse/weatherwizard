@@ -548,7 +548,7 @@ public class CompositeTabbedPane
                 {
                   try
                   {
-                    wgd = GribHelper.getGribData(grib);  // From a File
+                    wgd = GribHelper.getGribData(grib, true);  // From a File
                   }
                   catch (RuntimeException rte)
                   {

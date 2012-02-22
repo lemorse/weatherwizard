@@ -25,23 +25,29 @@ public class Smoothing
   {
     List<Double> data = null;
     double totalcoeff   = 0;
-    double totalangle   = 0;
-    double totalspeed   = 0;
+    double totalTWD   = 0;
+    double totalTWS   = 0;
     double totalprmsl   = 0D;
     double total500htg  = 0D;
     double totaltemp    = 0D;
     double totalwheight = 0D;
     double totalrain    = 0D;
     double totalu = 0, totalv = 0;
+    double totaluC = 0, totalvC = 0;
+    double totalCDR   = 0;
+    double totalCSP   = 0;
     
-    double finalangle   = 0D;
-    double finalspeed   = 0D;
+    double finalTWD   = 0D;
+    double finalTWS   = 0D;
     double finalprmsl   = 0D;
     double final500htg  = 0D;
     double finaltemp    = 0D;
     double finalwheight = 0D;
     double finalrain    = 0D;
     float finalu = 0, finalv = 0;
+    float finaluC = 0, finalvC = 0;
+    double finalCDR   = 0D;
+    double finalCSP   = 0D;
     
     boolean stuck = false;
 
@@ -50,8 +56,8 @@ public class Smoothing
       double dist = Smoothing.distance(dp[i].x, dp[i].y, x, y);
       if (dist == 0D)
       {
-        finalangle = dp[i].d;
-        finalspeed = dp[i].s;
+        finalTWD = dp[i].d;
+        finalTWS = dp[i].s;
         finalprmsl = dp[i].prmsl;
         final500htg = dp[i].hgt500;
         finaltemp = dp[i].temp;
@@ -59,6 +65,10 @@ public class Smoothing
         finalrain = dp[i].rain;
         finalu = dp[i].u;
         finalv = dp[i].v;
+        finaluC = dp[i].uC;
+        finalvC = dp[i].vC;
+        finalCDR = dp[i].dC;
+        finalCSP = dp[i].sC;
         stuck = true;
         break;
       }
@@ -66,8 +76,8 @@ public class Smoothing
       {
         double coeff = 1.0 / (dist * dist);                                     
         totalcoeff += coeff;
-        totalangle += (coeff * dp[i].d);
-        totalspeed += (coeff * dp[i].s);
+        totalTWD += (coeff * dp[i].d);
+        totalTWS += (coeff * dp[i].s);
         totalprmsl += (coeff * dp[i].prmsl);
         total500htg += (coeff * dp[i].hgt500);
         totaltemp += (coeff * dp[i].temp);
@@ -75,12 +85,16 @@ public class Smoothing
         totalrain += (coeff * dp[i].rain);
         totalu += (coeff * dp[i].u);
         totalv += (coeff * dp[i].v);
+        totaluC += (coeff * dp[i].uC);
+        totalvC += (coeff * dp[i].vC);
+        totalCDR += (coeff * dp[i].dC);
+        totalCSP += (coeff * dp[i].sC);
       }
     }
     if (!stuck)
     {
-      finalangle = totalangle / totalcoeff;
-      finalspeed = totalspeed / totalcoeff;
+      finalTWD = totalTWD / totalcoeff;
+      finalTWS = totalTWS / totalcoeff;
       finalprmsl = totalprmsl / totalcoeff;
       final500htg = total500htg / totalcoeff;
       finaltemp = totaltemp / totalcoeff;
@@ -88,12 +102,17 @@ public class Smoothing
       finalrain = totalrain / totalcoeff;
       finalu = (int)Math.round(totalu / totalcoeff);
       finalv = (int)Math.round(totalv / totalcoeff);
+      finaluC = (int)Math.round(totaluC / totalcoeff);
+      finalvC = (int)Math.round(totalvC / totalcoeff);
+      finalCDR = totalCDR / totalcoeff;
+      finalCSP = totalCSP / totalcoeff;
     }
-    while (finalangle > 360) finalangle -= 360;
+    while (finalTWD > 360) finalTWD -= 360;
+    while (finalCDR > 360) finalCDR -= 360;
     
     data = new ArrayList<Double>(2);
-    data.add(new Double(finalangle));
-    data.add(new Double(finalspeed));
+    data.add(new Double(finalTWD));
+    data.add(new Double(finalTWS));
     data.add(new Double(finalprmsl));
     data.add(new Double(final500htg));
     data.add(new Double(finaltemp));
@@ -102,7 +121,27 @@ public class Smoothing
     
     data.add(new Double(finalu));
     data.add(new Double(finalv));
+    
+    data.add(new Double(finaluC));
+    data.add(new Double(finalvC));
+    data.add(new Double(finalCDR));
+    data.add(new Double(finalCSP));
 
     return data;
   }  
+  
+  public final static int TWD_INDEX    = 0;
+  public final static int TWS_INDEX    = 1;
+  public final static int PRMSL_INDEX  = 2;
+  public final static int HGT500_INDEX = 3;
+  public final static int TEMP_INDEX   = 4;
+  public final static int WAVE_INDEX   = 5;
+  public final static int RAIN_INDEX   = 6;
+  public final static int UWIND_INDEX  = 7;
+  public final static int VWIND_INDEX  = 8;
+  
+  public final static int UCURRENT_INDEX  = 9;
+  public final static int VCURRENT_INDEX  = 10;
+  public final static int CDR_INDEX    = 11;
+  public final static int CSP_INDEX    = 12;
 }

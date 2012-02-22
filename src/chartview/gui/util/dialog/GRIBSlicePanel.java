@@ -462,7 +462,9 @@ public class GRIBSlicePanel
                                                                                    cond.prmsl,
                                                                                    cond.waves,
                                                                                    cond.temp,
-                                                                                   cond.rain));
+                                                                                   cond.rain,
+                                                                                   cond.currentspeed,
+                                                                                   cond.currentdir));
       dgc.setDate(cond.getDate());
       smoothedData.add(dgc);
     }
@@ -557,6 +559,7 @@ public class GRIBSlicePanel
       double wavesDeltaValue     = origData.get(i + 1).waves - origData.get(i).waves;
       double tempDeltaValue      = origData.get(i + 1).temp - origData.get(i).temp;
       double rainDeltaValue      = origData.get(i + 1).rain - origData.get(i).rain;
+      double currentspeedDeltaValue = origData.get(i + 1).currentspeed - origData.get(i).currentspeed;
       
       Date d1 = origData.get(i + 1).getDate();
       Date d2 = origData.get(i).getDate();
@@ -572,6 +575,7 @@ public class GRIBSlicePanel
         double wavesValue     = origData.get(i).waves + (wavesDeltaValue * ((double)j / (double)smoothFactor));
         double tempValue      = origData.get(i).temp + (tempDeltaValue * ((double)j / (double)smoothFactor));
         double rainValue      = origData.get(i).rain + (rainDeltaValue * ((double)j / (double)smoothFactor));
+        double currentSpeedValue = origData.get(i).currentspeed + (currentspeedDeltaValue * ((double)j / (double)smoothFactor));
         
         GribHelper.GribCondition gc = new GribHelper.GribCondition((float)windSpeedValue,
                                                                     origData.get(i + 1).winddir, // No smooth
@@ -581,7 +585,9 @@ public class GRIBSlicePanel
                                                                     (float)prmslValue,
                                                                     (float)wavesValue,
                                                                     (float)tempValue,
-                                                                    (float)rainValue);
+                                                                    (float)rainValue,
+                                                                    (float)currentSpeedValue,
+                                                                    origData.get(i + 1).currentdir); // no smooth
         DatedGribCondition dgc = new DatedGribCondition(gc);
         if (longDeltaDate != -1L)
         {

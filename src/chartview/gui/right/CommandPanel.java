@@ -227,17 +227,19 @@ public class CommandPanel
   protected JCheckBox[] contourCheckBox = null;
   
   protected static Color initialGribWindBaseColor = (Color) ParamPanel.data[ParamData.GRIB_WIND_COLOR][1];
+  protected static Color initialGribCurrentBaseColor = (Color) ParamPanel.data[ParamData.GRIB_CURRENT_COLOR][1];
   
   // Indexes of the above
-  private final static int WIND_SPEED  = 0; // Always displayed.
-  private final static int PRMSL       = 1;
-  private final static int HGT500      = 2;
-  private final static int TEMPERATURE = 3;
-  private final static int WAVES       = 4;
-  private final static int RAIN        = 5;
+  private final static int WIND_SPEED    = 0; // Always displayed.
+  private final static int PRMSL         = 1;
+  private final static int HGT500        = 2;
+  private final static int TEMPERATURE   = 3;
+  private final static int WAVES         = 4;
+  private final static int RAIN          = 5;
+  private final static int CURRENT_SPEED = 6;
   
-  private final static String[] dataLabels = { "WIND", "PRMSL", "500HGT", "AIRTMP", "WAVES", "RAIN" };
-  private final static String[] units      = { " kts", " mb",   " m",     "°C",     " m",    " mm/h" };
+  private final static String[] dataLabels = { "WIND", "PRMSL", "500HGT", "AIRTMP", "WAVES", "RAIN",  "CURRENT" };
+  private final static String[] units      = { " kts", " mb",   " m",     "°C",     " m",    " mm/h", " kts" };
   private double[][] boundaries = new double[dataLabels.length][2];
   
   private JLabel statusLabel = new JLabel("");
@@ -330,20 +332,23 @@ public class CommandPanel
   private boolean displayContourTemp  = false;
   private boolean displayContourPrate = false;
   
-  private boolean display3DTws   = true;
-  private boolean display3DPrmsl = true;
-  private boolean display3D500mb = true;
-  private boolean display3DWaves = true;
-  private boolean display3DTemperature = true;
-  private boolean display3DRain  = true;  
+  private boolean display3DTws   = false;
+  private boolean display3DPrmsl = false;
+  private boolean display3D500mb = false;
+  private boolean display3DWaves = false;
+  private boolean display3DTemperature = false;
+  private boolean display3DRain  = false;  
   
+  private boolean thereIsWind = true;
   private boolean thereIsPrmsl = true;
   private boolean thereIs500mb = true;
   private boolean thereIsWaves = true;
   private boolean thereIsTemperature = true;
   private boolean thereIsRain = true;
+  private boolean thereIsCurrent = true;
 
   private static boolean coloredWind = true;
+  private static boolean coloredCurrent = true;
   
   private transient List<List<List<GeoPoint>>> islandsPressure = null,
                                                islands500mb    = null,
@@ -2972,32 +2977,41 @@ public class CommandPanel
           {
             DynFaxUtil.PreDefFax pdf = DynFaxUtil.findPredefFax(str);
 //          System.out.println(pdf);
-            if (pdf.getOrigin().toLowerCase().startsWith("http://"))
-			      {
-              try
+            try
+            {
+              File f = File.createTempFile("predef-fax_", ".png");
+              String fileName = f.getAbsolutePath(); //f.getName();  //  
+              String dir = f.getParent();
+//		        System.out.println("Generating " + fileName + " in " + dir);
+              Image img = null;
+              if (pdf.getOrigin().toLowerCase().startsWith("http://"))
+                img = HTTPClient.getChart(pdf.getOrigin(), dir, fileName, true);
+              else if (pdf.getOrigin().startsWith(SearchUtil.SEARCH_PROTOCOL)) // (local search, for SailMail)               
               {
-                File f = File.createTempFile("predef-fax_", ".png");
-                String fileName = f.getAbsolutePath(); //f.getName();  //  
-                String dir = f.getParent();
-//		          System.out.println("Generating " + fileName + " in " + dir);
-                Image img = HTTPClient.getChart(pdf.getOrigin(), dir, fileName, true);
-                if (pdf.isTransparent())
+                // Parse Expression, like search:chartview.util.SearchUtil.findMostRecentFax(pattern, rootPath)
+                String faxName = SearchUtil.dynamicSearch(pdf.getOrigin());
+//              System.out.println("For [" + pdf.getOrigin() + "], search: found [" + faxName + "]");
+                if (faxName != null)
                 {
-                  if (pdf.changeColor())
-                    img = ImageUtil.switchColorAndMakeColorTransparent(img, Color.black, pdf.getColor(), Color.white, blurSharpOption);
-                  else
-                    img = ImageUtil.makeColorTransparent(img, Color.white, blurSharpOption);                  
+                  img = ImageUtil.readImage(faxName);
                 }
-//			        System.out.println("Done.");
-                WWContext.getInstance().fireAddFaxImage(DynFaxUtil.getFaxImage(pdf, img, f.getAbsolutePath(), chartPanel));
               }
-              catch (Exception ex)
+              else                  
+                JOptionPane.showMessageDialog(instance, "Protocol for " + pdf.getOrigin() + " not there yet...");
+              if (pdf.isTransparent() && img != null)
               {
-                ex.printStackTrace();
+                if (pdf.changeColor())
+                  img = ImageUtil.switchColorAndMakeColorTransparent(img, Color.black, pdf.getColor(), Color.white, blurSharpOption);
+                else
+                  img = ImageUtil.makeColorTransparent(img, Color.white, blurSharpOption);                  
               }
+//			        System.out.println("Done.");
+              WWContext.getInstance().fireAddFaxImage(DynFaxUtil.getFaxImage(pdf, img, f.getAbsolutePath(), chartPanel));
             }
-            else
-              JOptionPane.showMessageDialog(instance, "Protocol for " + pdf.getOrigin() + " not there yet...");
+            catch (Exception ex)
+            {
+              ex.printStackTrace();
+            }
           }
         }
 
@@ -3278,12 +3292,14 @@ public class CommandPanel
                 }
                 applyBoundariesChanges();
                 displayComboBox.setEnabled(true);
-                boundaries[WIND_SPEED] = GRIBDataUtil.getWindSpeedBoundaries(gribData);
+                boundaries[WIND_SPEED] = GRIBDataUtil.getWindSpeedBoundaries(gribData); // TODO Look into this
                 
                 String u = units[WIND_SPEED];
                 boundariesLabel.setText(WWGnlUtilities.buildMessage("from-to", new String[] { WWGnlUtilities.XX22.format(boundaries[0][0]) + u, WWGnlUtilities.XX22.format(boundaries[0][1]) + u }));            
                 boundariesLabel.setEnabled(true);
                 
+                if (WWGnlUtilities.isIn(dataLabels[WIND_SPEED], displayComboBox))
+                  boundaries[WIND_SPEED] = GRIBDataUtil.getWindSpeedBoundaries(gribData);
                 if (WWGnlUtilities.isIn(dataLabels[PRMSL], displayComboBox))
                   boundaries[PRMSL] = GRIBDataUtil.getPRMSLBoundaries(gribData);
                 if (WWGnlUtilities.isIn(dataLabels[HGT500], displayComboBox))
@@ -3294,6 +3310,8 @@ public class CommandPanel
                   boundaries[WAVES] = GRIBDataUtil.getWaveHgtBoundaries(gribData);
                 if (WWGnlUtilities.isIn(dataLabels[RAIN], displayComboBox))
                   boundaries[RAIN] = GRIBDataUtil.getRainBoundaries(gribData);
+                if (WWGnlUtilities.isIn(dataLabels[CURRENT_SPEED], displayComboBox))
+                  boundaries[CURRENT_SPEED] = GRIBDataUtil.getCurrentSpeedBoundaries(gribData);
   
                 boolean displaySomething = display3DTws || display3DPrmsl || display3D500mb || display3DWaves || display3DTemperature || display3DRain;
                 if (displaySomething)
@@ -3324,6 +3342,7 @@ public class CommandPanel
   
                 // Proceed for variation with gribFile
                 GribFile gf = WWContext.getInstance().getGribFile();
+                setThereIsWind(GRIBDataUtil.thereIsVariation(gf, GRIBDataUtil.TYPE_TWS));
 //              setThereIsPrmsl(GRIBDataUtil.thereIsVariation(gribData, GRIBDataUtil.TYPE_PRMSL));
                 setThereIsPrmsl(GRIBDataUtil.thereIsVariation(gf, GRIBDataUtil.TYPE_PRMSL));
 //              setThereIs500mb(GRIBDataUtil.thereIsVariation(gribData, GRIBDataUtil.TYPE_500MB));
@@ -3334,19 +3353,21 @@ public class CommandPanel
                 setThereIsWaves(GRIBDataUtil.thereIsVariation(gf, GRIBDataUtil.TYPE_WAVE));
 //              setThereIsRain(GRIBDataUtil.thereIsVariation(gribData, GRIBDataUtil.TYPE_RAIN));
                 setThereIsRain(GRIBDataUtil.thereIsVariation(gf, GRIBDataUtil.TYPE_RAIN));
+                setThereIsCurrent(GRIBDataUtil.thereIsVariation(gf, GRIBDataUtil.TYPE_CURRENT));
                 WWContext.getInstance().fireGribInfo(gribIndex, 
                                                      wgd.length, 
                                                      gribInfo2, 
                                                      gribInfo3, 
                                                      gribInfo4,
                                                      windOnly,
-                                                     gribData.wind,
+                                                     isThereWind(), // gribData.wind,
                                                      isTherePrmsl(),
                                                      isThere500mb(),
                                                      isThereTemperature(),
                                                      isThereWaves(),
                                                      isThereRain(),
-                                                     true, // Always display wind
+                                                     isThereCurrent(),
+                                                     gribData.wind,
                                                      windOnly?false:gribData.prmsl,
                                                      windOnly?false:gribData.hgt,
                                                      windOnly?false:gribData.temp,
@@ -3374,7 +3395,7 @@ public class CommandPanel
             WWContext.getInstance().fireNoTmpObj();
             WWContext.getInstance().fireNoWaveObj();
             WWContext.getInstance().fireNoRainObj();
-            WWContext.getInstance().fireGribInfo(0, 0, "", "", "", false, false, false, false, false, false, false, false, false, false, false, false, false);
+            WWContext.getInstance().fireGribInfo(0, 0, "", "", "", false, false, false, false, false, false, false, false, false, false, false, false, false, false);
             
             setCheckBoxes();
             fromGRIBSlice = null;
@@ -3395,6 +3416,7 @@ public class CommandPanel
                                 boolean thereIsTemp, 
                                 boolean thereIsWaves,
                                 boolean thereIsRain,
+                                boolean thereIsCurrent,
                                 boolean displayWind,
                                 boolean display3DPrmsl,
                                 boolean display3D500hgt,
@@ -3415,19 +3437,24 @@ public class CommandPanel
               displayComboBox.setEnabled(false);
   //          if (thereIs3D)
               displayComboBox.addItem("- None -"); // LOCALIZE
-          /*  if (thereIsWind) */ displayComboBox.addItem(dataLabels[WIND_SPEED]); // Always keep wind
+              if (thereIsWind)                       displayComboBox.addItem(dataLabels[WIND_SPEED]); 
               if (thereIsPrmsl && displayPrmsl)      displayComboBox.addItem(dataLabels[PRMSL]);
               if (thereIsHgt500 && display500mb)     displayComboBox.addItem(dataLabels[HGT500]);
               if (thereIsTemp && displayTemperature) displayComboBox.addItem(dataLabels[TEMPERATURE]);
               if (thereIsWaves && displayWaves)      displayComboBox.addItem(dataLabels[WAVES]);
               if (thereIsRain && displayRain)        displayComboBox.addItem(dataLabels[RAIN]);
+                            
+              boolean displayCurrent = true; // TODO Parameters
+              
+              if (thereIsCurrent && displayCurrent) displayComboBox.addItem(dataLabels[CURRENT_SPEED]); 
               settingGRIBInfo = false;
               
               displayComboBox.setEnabled((thereIsPrmsl && displayPrmsl) || 
                                          (thereIsHgt500 && display500mb) || 
                                          (thereIsTemp && displayTemperature) || 
                                          (thereIsWaves && displayWaves) || 
-                                         (thereIsRain && displayRain));
+                                         (thereIsRain && displayRain) ||
+                                         (thereIsCurrent && displayCurrent));
               
               // Reset current selection if available
               if (currentSelection != null && currentSelection.trim().length() > 0)
@@ -3443,6 +3470,8 @@ public class CommandPanel
                 }
                 if (contains)
                   displayComboBox.setSelectedItem(currentSelection);
+                else
+                  displayComboBox.setSelectedIndex(1);
               }
               
               setThereIsPrmsl(thereIsPrmsl);
@@ -3566,6 +3595,7 @@ public class CommandPanel
     displayComboBox.addItem("AIRTMP");
     displayComboBox.addItem("WAVES");
     displayComboBox.addItem("RAIN");
+    displayComboBox.addItem("CURRENT");
     
     displayComboBox.setEnabled(false);
     displayComboBox.addActionListener(new ActionListener()
@@ -3887,6 +3917,11 @@ public class CommandPanel
     Text chartheightText = storage.createTextNode("#text");
     chartheightText.setNodeValue(Integer.toString(chartPanel.getHeight()));
     chartheight.appendChild(chartheightText);
+
+    XMLElement scroll = (XMLElement)storage.createElement("scroll");    
+    root.appendChild(scroll);
+    scroll.setAttribute("x", Integer.toString(chartPanelScrollPane.getViewport().getViewPosition().x));
+    scroll.setAttribute("y", Integer.toString(chartPanelScrollPane.getViewport().getViewPosition().y));
     
     // Boat position?
     if (boatPosition != null)
@@ -4349,6 +4384,7 @@ public class CommandPanel
                            GeomUtil.decToSex(gribData.getELng(), GeomUtil.SWING, GeomUtil.EW);
 
         GribFile gf = WWContext.getInstance().getGribFile();
+        setThereIsWind(GRIBDataUtil.thereIsVariation(gf, GRIBDataUtil.TYPE_TWS));
 //      setThereIsPrmsl((gribData.getGribPointData()[0][0].getPrmsl() > 0));
 //      setThereIsPrmsl(GRIBDataUtil.thereIsVariation(gribData, GRIBDataUtil.TYPE_PRMSL));
         setThereIsPrmsl(GRIBDataUtil.thereIsVariation(gf, GRIBDataUtil.TYPE_PRMSL));
@@ -4362,6 +4398,7 @@ public class CommandPanel
         setThereIsWaves(GRIBDataUtil.thereIsVariation(gf, GRIBDataUtil.TYPE_WAVE));
 //      setThereIsRain(GRIBDataUtil.thereIsVariation(gribData, GRIBDataUtil.TYPE_RAIN));
         setThereIsRain(GRIBDataUtil.thereIsVariation(gf, GRIBDataUtil.TYPE_RAIN));
+        setThereIsCurrent(GRIBDataUtil.thereIsVariation(gf, GRIBDataUtil.TYPE_CURRENT));
 
         WWContext.getInstance().fireGribInfo(gribIndex, 
                                              wgd.length, 
@@ -4375,7 +4412,8 @@ public class CommandPanel
                                              isThereTemperature(),
                                              isThereWaves(),
                                              isThereRain(),
-                                             true, // Always display wind
+                                             isThereCurrent(),
+                                             isThereWind(),
                                              windOnly?false:gribData.prmsl,
                                              windOnly?false:gribData.hgt,
                                              windOnly?false:gribData.temp,
@@ -4423,14 +4461,14 @@ public class CommandPanel
     }
   }
   
-  private final static String MERCATOR    = "MERCATOR";
-  private final static String ANAXIMANDRE = "ANAXIMANDRE";
+  private final static String MERCATOR     = "MERCATOR";
+  private final static String ANAXIMANDRE  = "ANAXIMANDRE";
   private final static String POLAR_STEREO = "POLAR_STEREO";
-  private final static String STEREO      = "STEREO";
-  private final static String LAMBERT     = "LAMBERT";
-  private final static String CONIC_EQU   = "CONIC_EQU";
-  private final static String GLOBE       = "GLOBE";
-  private final static String SATELLITE   = "SATELLITE";
+  private final static String STEREO       = "STEREO";
+  private final static String LAMBERT      = "LAMBERT";
+  private final static String CONIC_EQU    = "CONIC_EQU";
+  private final static String GLOBE        = "GLOBE";
+  private final static String SATELLITE    = "SATELLITE";
   
   public void restoreComposite(String fileName)
   {
@@ -4565,6 +4603,19 @@ public class CommandPanel
         try { w = Integer.parseInt(doc.selectNodes("//chartwidth").item(0).getFirstChild().getNodeValue()); } catch (Exception ex) {}
         int h = 0;
         try { h = Integer.parseInt(doc.selectNodes("//chartheight").item(0).getFirstChild().getNodeValue()); } catch (Exception ex) {}
+        
+        int xScroll = 0, yScroll = 0;
+        try
+        {
+          XMLElement scroll = (XMLElement)(doc.selectNodes("//scroll").item(0));
+          xScroll = Integer.parseInt(scroll.getAttribute("x"));
+          yScroll = Integer.parseInt(scroll.getAttribute("y"));
+        }
+        catch (Exception ignore) 
+        {
+          ignore.printStackTrace();
+          doc.print(System.err);
+        }
         
         // Boat Position?
         if ((withBoatAndTrack || option.equals(TwoFilePanel.EVERY_THING)) && doc.selectNodes("//boat-position").getLength() == 1)
@@ -4836,7 +4887,7 @@ public class CommandPanel
                 }
               }
               else
-                wgd = GribHelper.getGribData(gribFileName);
+                wgd = GribHelper.getGribData(gribFileName, true);
               
               setGribData(wgd, displayFileName);
             }
@@ -4880,6 +4931,11 @@ public class CommandPanel
           {
             ex.printStackTrace();   
           }
+        }
+        
+        if (xScroll != 0 || yScroll != 0)
+        {
+          chartPanelScrollPane.getViewport().setViewPosition(new Point(xScroll, yScroll));
         }
       }
       catch (Exception e)
@@ -4980,12 +5036,30 @@ public class CommandPanel
           chartPanel.setTransparentGlobe(!opaque);
           WWContext.getInstance().fireSetSatelliteParameters(nl, ng, alt, opaque);
         }
+        else if  (projType.equals(STEREO))
+        {
+          chartPanel.setProjection(ChartPanel.STEREOGRAPHIC);
+          WWContext.getInstance().fireSetProjection(ChartPanel.STEREOGRAPHIC);
+        }
+        else if  (projType.equals(POLAR_STEREO))
+        {
+          chartPanel.setProjection(ChartPanel.POLAR_STEREOGRAPHIC);
+          WWContext.getInstance().fireSetProjection(ChartPanel.POLAR_STEREOGRAPHIC);
+        }
         nLat = Double.parseDouble(doc.selectNodes("//north").item(0).getFirstChild().getNodeValue());
         sLat = Double.parseDouble(doc.selectNodes("//south").item(0).getFirstChild().getNodeValue());
         wLong = Double.parseDouble(doc.selectNodes("//west").item(0).getFirstChild().getNodeValue());
         eLong = Double.parseDouble(doc.selectNodes("//east").item(0).getFirstChild().getNodeValue());
         int w = Integer.parseInt(doc.selectNodes("//chartwidth").item(0).getFirstChild().getNodeValue());
         int h = Integer.parseInt(doc.selectNodes("//chartheight").item(0).getFirstChild().getNodeValue());
+
+        int xScroll = 0, yScroll = 0;
+        try
+        {
+          xScroll = Integer.parseInt(((XMLElement)doc.selectNodes("//scroll").item(0)).getAttribute("x"));
+          yScroll = Integer.parseInt(((XMLElement)doc.selectNodes("//scroll").item(0)).getAttribute("y"));
+        }
+        catch (Exception ignore) { }
         
         if (chartPanel.getProjection() != ChartPanel.GLOBE_VIEW &&
             chartPanel.getProjection() != ChartPanel.SATELLITE_VIEW)
@@ -5001,7 +5075,7 @@ public class CommandPanel
         chartPanel.setBounds(0,0,w,h);
 
         chartPanel.repaint();  
-  
+        
         try 
         { 
           NodeList faxes = doc.selectNodes("//fax-collection/fax");
@@ -5270,7 +5344,7 @@ public class CommandPanel
               if (grib != null && grib.trim().length() > 0)
               {
                 gribFileName = grib;
-                GribHelper.GribConditionData wgd[] = GribHelper.getGribData(gribFileName);
+                GribHelper.GribConditionData wgd[] = GribHelper.getGribData(gribFileName, true);
                 setGribData(wgd, gribFileName);
               }
               else
@@ -5290,7 +5364,7 @@ public class CommandPanel
               // System.out.println("For " + hintName + ", search: found [" + gribFileName + "]");
               if (gribFileName != null && gribFileName.trim().length() > 0)
               {
-                GribHelper.GribConditionData wgd[] = GribHelper.getGribData(gribFileName);
+                GribHelper.GribConditionData wgd[] = GribHelper.getGribData(gribFileName, true);
                 setGribData(wgd, gribFileName);
               }
               else
@@ -5316,7 +5390,7 @@ public class CommandPanel
                 byte[] gribContent = HTTPClient.getGRIB(WWGnlUtilities.generateGRIBRequest(request), gribDir, gribFileName, true);
                 WWContext.getInstance().fireReloadGRIBTree();
                 GribHelper.GribConditionData wgd[] = GribHelper.getGribData(new ByteArrayInputStream(gribContent), request);
-                setGribData(wgd, gribFileName);
+                setGribData(wgd, gribFileName); 
               }
               catch (Exception ex)
               {
@@ -5337,6 +5411,11 @@ public class CommandPanel
 //        chartPanel.setW(w);
 //        chartPanel.setH(h);
 //        chartPanel.setBounds(0,0,w,h);
+
+        if (xScroll != 0 || yScroll != 0)
+        {
+          chartPanelScrollPane.getViewport().setViewPosition(new Point(xScroll, yScroll));
+        }
       }
     }
     catch (Exception e)
@@ -5354,7 +5433,10 @@ public class CommandPanel
            "W:" + WWGnlUtilities.XX14.format(wLong) + " " +
            "E:" + WWGnlUtilities.XX14.format(eLong) + " " +
            "w=" + chartPanel.getWidth() + " " + 
-           "h=" + chartPanel.getHeight();
+           "h=" + chartPanel.getHeight() + "    topleft:" +
+           "x=" + chartPanelScrollPane.getViewport().getViewPosition().x + 
+         ", y=" + chartPanelScrollPane.getViewport().getViewPosition().y;
+
     statusLabel.setText(mess);    
   }
   
@@ -5371,10 +5453,10 @@ public class CommandPanel
       if (!chartPanel.isTransparentGlobe() && chartPanel.isBehind(l, g))
         plot = false;
     }
+    else if (chartPanel.getProjection() == ChartPanelInterface.POLAR_STEREOGRAPHIC)
+      plot = chartPanel.contains(new GeoPoint(l, g));
     return plot;
   }
-  
-//private boolean wasHereAlready = false;
   
   private final boolean doItAfter = true;
   private boolean smoothingRequired = true;
@@ -5570,7 +5652,7 @@ public class CommandPanel
               double lat = gribData.getGribPointData()[h][w].getLat();
               double lng = gribData.getGribPointData()[h][w].getLng();
               Point gp = chartPanel.getPanelPoint(lat, lng);
-              
+              // Wind
               double speed = 0D, dir = 0D;
               if (gribData.getGribPointData()[h][w].getTwd() != -1D &&
                   gribData.getGribPointData()[h][w].getTws() != -1D)
@@ -5586,6 +5668,23 @@ public class CommandPanel
                 speed *= 3.60D;
                 speed /= 1.852D;
                 dir = WWGnlUtilities.getDir(x, y);
+              }
+              // Current
+              double cSpeed = 0D, cDir = 0D;
+              if (gribData.getGribPointData()[h][w].getCdr() != -1D &&
+                  gribData.getGribPointData()[h][w].getCsp() != -1D)
+              {
+                cSpeed = gribData.getGribPointData()[h][w].getCsp();
+                cDir = gribData.getGribPointData()[h][w].getCdr();
+              }
+              else
+              {
+                float x = gribData.getGribPointData()[h][w].getUOgrd();
+                float y = -gribData.getGribPointData()[h][w].getVOgrd();
+                cSpeed = Math.sqrt(x * x + y * y);
+                cSpeed *= 3.60D;
+                cSpeed /= 1.852D;
+                cDir = WWGnlUtilities.getDir(x, y);
               }
   //          gr.setColor(getWindColor(speed));
               // We have speed, direction, wind color
@@ -5756,6 +5855,64 @@ public class CommandPanel
                 }
 
                 WWGnlUtilities.drawGRIBData(gr, gp.x, gp.y, tl, br, tr, bl, gribUserOpacity);
+              }
+              else if ("CURRENT".equals(dataOption))
+              {
+//              gr.setColor(GnlUtilities.getWindColor(coloredWind, initialGribWindBaseColor, speed, false));
+                initialGribCurrentBaseColor = (Color) ParamPanel.data[ParamData.GRIB_CURRENT_COLOR][1];
+                if (drawWindColorBackground) 
+                {
+                  double stpY = (gribStepY); // / (double)smooth);
+                  double stpX = (gribStepX); //  / (double)smooth);
+              
+                  double topLeftLat = lat + (stpY / 2D);
+                  double topLeftLng = lng - (stpX / 2D);
+                  double bottomRightLat = topLeftLat - stpY;
+                  double bottomRightLng = topLeftLng + stpX;
+                  // TopLeft
+                  Point tl = chartPanel.getPanelPoint(topLeftLat, topLeftLng);
+                  // Bottom Right
+                  Point br = chartPanel.getPanelPoint(bottomRightLat, bottomRightLng);
+
+                  Point tr = null; // Top Right
+                  Point bl = null; // Bottom Left
+                  if (chartPanel.getProjection() != ChartPanel.ANAXIMANDRE &&
+                      chartPanel.getProjection() != ChartPanel.MERCATOR)
+                  {
+                    tr = chartPanel.getPanelPoint(topLeftLat, bottomRightLng);
+                    bl = chartPanel.getPanelPoint(bottomRightLat, topLeftLng);
+                  }
+
+                  WWGnlUtilities.drawCurrent(gr, 
+                                             gp.x, 
+                                             gp.y,                                       
+                                             cSpeed, // * 10, 
+                                             cDir, 
+                                             coloredCurrent, 
+                                             initialGribCurrentBaseColor, 
+                                             drawHeavyDot, 
+                                             drawWindColorBackground, 
+                                             displayWindSpeedValue, 
+                                             useThickWind,
+                                             tl, 
+                                             br,
+                                             tr,
+                                             bl,
+                                             gribUserOpacity);
+                }
+                else
+                  WWGnlUtilities.drawCurrent(gr, 
+                                             gp.x, 
+                                             gp.y,                                       
+                                             cSpeed, // * 10, 
+                                             cDir, 
+                                             coloredCurrent, 
+                                             initialGribCurrentBaseColor, 
+                                             drawHeavyDot, 
+                                             drawWindColorBackground, 
+                                             displayWindSpeedValue,
+                                             useThickWind,
+                                             gribUserOpacity); 
               }
             }
 //          else
@@ -7218,12 +7375,13 @@ public class CommandPanel
                                                     gribPoint.waves, 
                                                     gribPoint.temp, 
                                                     gribPoint.rain);
-            mess += ("wind " + Math.round(gribPoint.windspeed) + "kts@" + gribPoint.winddir + " (" + (!displayAltTooltip?"<b>":"") + "F " + WWGnlUtilities.getBeaufort(gribPoint.windspeed) + (!displayAltTooltip?"</b>":"") + ")" +
+            mess += ((isThereWind()?("wind:" + Math.round(gribPoint.windspeed) + "kts@" + gribPoint.winddir + " (" + (!displayAltTooltip?"<b>":"") + "F " + WWGnlUtilities.getBeaufort(gribPoint.windspeed) + (!displayAltTooltip?"</b>":"") + ")"):"") +
                     ((gribPoint.prmsl>0)?br  + "prmsl:" + WWGnlUtilities.DF2.format((gribPoint.prmsl / 100F)) + units[PRMSL]:"") +
                     ((gribPoint.waves>0)?br  + "waves:" + WWGnlUtilities.XXX12.format((gribPoint.waves / 100F)) + units[WAVES]:"") +
                     ((gribPoint.temp>0)?br   + "temp:" + WWGnlUtilities.XX22.format(gribPoint.temp - 273) + units[TEMPERATURE]:"") + // Originally in Kelvin
                     ((gribPoint.hgt500>0)?br + "500mb:" + WWGnlUtilities.DF2.format(gribPoint.hgt500) + units[HGT500]:"") + 
-                    ((gribPoint.rain>0)?br   + "prate:" + WWGnlUtilities.XX22.format(gribPoint.rain * 3600F) + units[RAIN]:""));
+                    ((gribPoint.rain>0)?br   + "prate:" + WWGnlUtilities.XX22.format(gribPoint.rain * 3600F) + units[RAIN]:"") +
+                     ((gribPoint.currentspeed>0)?br + "current:" + WWGnlUtilities.XXX12.format(gribPoint.currentspeed) + "kts@" + gribPoint.currentdir:""));
             if (!displayAltTooltip)
             {
               mess += "<hr>" +
@@ -7919,6 +8077,16 @@ public class CommandPanel
     return showPlaces;
   }
 
+  public void setThereIsWind(boolean thereIsWind)
+  {
+    this.thereIsWind = thereIsWind;
+  }
+
+  public boolean isThereWind()
+  {
+    return thereIsWind;
+  }
+
   public void setThereIsPrmsl(boolean thereIsPrmsl)
   {
     this.thereIsPrmsl = thereIsPrmsl;
@@ -7967,6 +8135,16 @@ public class CommandPanel
   public boolean isThereRain()
   {
     return thereIsRain;
+  }
+
+  public void setThereIsCurrent(boolean b)
+  {
+    this.thereIsCurrent = b;
+  }
+
+  public boolean isThereCurrent()
+  {
+    return thereIsCurrent;
   }
 
   public int getGribIndex()

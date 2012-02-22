@@ -48,6 +48,8 @@ public class WWContext
   public final static String VERSION_NUMBER = "0.9.0.6";
   public final static String PRODUCT_ID     = "weather_assistant." + VERSION_NUMBER;
   
+  public final static String PRODUCT_KEY    = "WW";
+
   private static int debugLevel = 0;
   
   public final static NumberFormat NF = NumberFormat.getInstance();
@@ -307,6 +309,7 @@ public class WWContext
                            boolean thereIsTemp,
                            boolean thereIsWaves,
                            boolean thereIsRain,
+                           boolean thereIsCurrent,
                            boolean displayWind,
                            boolean display3DPRMSL,
                            boolean display3D500hgt,
@@ -329,6 +332,7 @@ public class WWContext
                     thereIsTemp, 
                     thereIsWaves,
                     thereIsRain,
+                    thereIsCurrent,
                     displayWind,
                     display3DPRMSL,
                     display3D500hgt,

@@ -46,6 +46,7 @@ public class GRIBDataUtil
   public final static int TYPE_WAVE  = 3;
   public final static int TYPE_RAIN  = 4;
   public final static int TYPE_TWS   = 5; // That one involves calculation
+  public final static int TYPE_CURRENT = 6;
 
   /* Must ne in sync with the previous final statics */
   public final static String[] DATA_NAME = new String[] { 
@@ -69,6 +70,28 @@ public class GRIBDataUtil
         {
           float x = gribData.getGribPointData()[h][w].getU();
           float y = gribData.getGribPointData()[h][w].getV();
+          double speed = getGRIBWindSpeed(x, y);
+  
+          if (speed < minValue) minValue = speed;
+          if (speed > maxValue) maxValue = speed;
+        }
+      }
+    }
+    return new double[] { minValue, maxValue };
+  }
+    
+  public final static double[] getCurrentSpeedBoundaries(GribHelper.GribConditionData gribData)
+  {
+    double minValue = Integer.MAX_VALUE;
+    double maxValue = Integer.MIN_VALUE;
+    for (int h=0; gribData.getGribPointData() != null && h<gribData.getGribPointData().length; h++)
+    {
+      for (int w=0; w<gribData.getGribPointData()[h].length; w++)
+      {
+        if (gribData.getGribPointData()[h][w] != null)
+        {
+          float x = gribData.getGribPointData()[h][w].getUOgrd();
+          float y = gribData.getGribPointData()[h][w].getVOgrd();
           double speed = getGRIBWindSpeed(x, y);
   
           if (speed < minValue) minValue = speed;
@@ -442,8 +465,12 @@ public class GRIBDataUtil
         GribRecordBDS grbds = gr.getBDS(); 
         String type = grpds.getType();
 //      System.out.println("type:" + type);
-        if (option == TYPE_TWS)
-          throw new RuntimeException("Type TWS Not supported in this method");
+//        if (option == TYPE_TWS)
+//          throw new RuntimeException("Type TWS Not supported in this method");
+        if (option == TYPE_TWS && (type.equals("ugrd") || type.equals("vgrd")))
+        {
+          ok = !grbds.getIsConstant();
+        }
         else if (option == TYPE_500MB && type.equals("hgt"))
         {
           // float min = grbds.getMinValue();
@@ -477,6 +504,10 @@ public class GRIBDataUtil
           // float min = grbds.getMinValue();
           // float max = grbds.getMaxValue();
           // ok = (max - min) > 0f;
+          ok = !grbds.getIsConstant();
+        }
+        else if (option == TYPE_CURRENT && (type.equals("uogrd") || type.equals("vogrd")))
+        {
           ok = !grbds.getIsConstant();
         }
       }
