@@ -355,6 +355,10 @@ public class ChartAdjust
   //              System.out.println(d.toString() + "\n" + mess);
                 }
                 content += "</html>";
+                
+//              content = content.replace("<br>", "\n");
+//              System.out.println(content);
+                
                 String title = "Notifications";
                 if (productName.trim().length() > 0)
                   title += (" for " + productName); // LOCALIZE

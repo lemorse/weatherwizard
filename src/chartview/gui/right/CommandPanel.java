@@ -3425,7 +3425,7 @@ public class CommandPanel
                                 boolean display3DRain) 
         {
          if (parent != null && parent.isVisible())
-          {
+         {
             settingGRIBInfo = true;
             
             synchronized (displayComboBox)
@@ -3471,7 +3471,10 @@ public class CommandPanel
                 if (contains)
                   displayComboBox.setSelectedItem(currentSelection);
                 else
-                  displayComboBox.setSelectedIndex(1);
+                {
+                  if (displayComboBox.isEnabled() && displayComboBox.getItemCount() >= 1)
+                    displayComboBox.setSelectedIndex(1);
+                }
               }
               
               setThereIsPrmsl(thereIsPrmsl);
