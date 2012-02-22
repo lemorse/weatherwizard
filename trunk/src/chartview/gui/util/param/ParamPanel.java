@@ -177,6 +177,9 @@ public final class ParamPanel
       case ParamData.GRIB_WIND_COLOR:
         it = Color.red;
         break;
+      case ParamData.GRIB_CURRENT_COLOR:
+        it = Color.cyan;
+        break;
       case ParamData.PATTERN_DIR:
         it = new DataDirectory(WWGnlUtilities.buildMessage("pattern-button"), "." + File.separator + "patterns");  
         break;
@@ -200,6 +203,9 @@ public final class ParamPanel
         break;
       case ParamData.AUTO_UPDATES:
         it = Boolean.FALSE;
+        break;
+      case ParamData.SHOW_NOTIFICATIONS:
+        it = Boolean.TRUE;
         break;
       case ParamData.CONFIRM_DD_ZOOM:
         it = Boolean.FALSE;
@@ -358,6 +364,7 @@ public final class ParamPanel
                   i == ParamData.GRID_COLOR ||
                   i == ParamData.CHART_BG_COLOR ||
                   i == ParamData.GRIB_WIND_COLOR ||
+                  i == ParamData.GRIB_CURRENT_COLOR ||
                   i == ParamData.PRMSL_CONTOUR ||
                   i == ParamData.MB500_CONTOUR ||
                   i == ParamData.WAVES_CONTOUR ||
@@ -392,6 +399,7 @@ public final class ParamPanel
                 data[i][1] = new Double(s);
               else if (i == ParamData.ROUTING_FROM_CURR_LOC ||     // Booleans
                        i == ParamData.AUTO_UPDATES ||
+                       i == ParamData.SHOW_NOTIFICATIONS ||
                        i == ParamData.CONFIRM_DD_ZOOM ||
                        i == ParamData.STOP_ROUTING_ON_EXHAUSTED_GRIB ||
                        i == ParamData.CONFIRM_ON_EXIT ||
@@ -470,6 +478,7 @@ public final class ParamPanel
         ParamData.GRID_COLOR, 
         ParamData.CHART_BG_COLOR, 
         ParamData.GRIB_WIND_COLOR, 
+        ParamData.GRIB_CURRENT_COLOR,
         ParamData.USE_TRANSPARENT_GRIB_WIND, 
         ParamData.COLOR_RANGE, 
         ParamData.PRMSL_CONTOUR, 
@@ -521,6 +530,7 @@ public final class ParamPanel
         ParamData.CTX_FILES_LOC, 
         ParamData.PATTERN_DIR, 
         ParamData.AUTO_UPDATES, 
+        ParamData.SHOW_NOTIFICATIONS,
         ParamData.CONFIRM_DD_ZOOM, 
         ParamData.INTERVAL_BETWEEN_ISOBARS, 
         ParamData.ISOBARS_LIST, 
@@ -685,6 +695,7 @@ public final class ParamPanel
                    currentIndex == ParamData.GRID_COLOR ||
                    currentIndex == ParamData.CHART_BG_COLOR ||
                    currentIndex == ParamData.GRIB_WIND_COLOR ||
+                   currentIndex == ParamData.GRIB_CURRENT_COLOR ||
                    currentIndex == ParamData.PRMSL_CONTOUR ||
                    currentIndex == ParamData.MB500_CONTOUR ||
                    currentIndex == ParamData.WAVES_CONTOUR ||
@@ -715,6 +726,7 @@ public final class ParamPanel
           }
           else if (currentIndex == ParamData.ROUTING_FROM_CURR_LOC || // The boolean(s)
                    currentIndex == ParamData.AUTO_UPDATES ||
+                   currentIndex == ParamData.SHOW_NOTIFICATIONS ||
                    currentIndex == ParamData.CONFIRM_DD_ZOOM ||
                    currentIndex == ParamData.STOP_ROUTING_ON_EXHAUSTED_GRIB ||
                    currentIndex == ParamData.USE_TRANSPARENT_GRIB_WIND ||
@@ -750,7 +762,8 @@ public final class ParamPanel
             if (currentIndex == ParamData.CHART_LINE_THICK)
               WWContext.getInstance().fireChartLineThicknessChanged(((Integer) ParamPanel.data[ParamData.CHART_LINE_THICK][1]).intValue());
             if (currentIndex == ParamData.FAX_TRANSPARENCY ||
-                currentIndex == ParamData.GRIB_WIND_COLOR ||
+                currentIndex == ParamData.GRIB_WIND_COLOR || 
+                currentIndex == ParamData.GRIB_CURRENT_COLOR ||
                 currentIndex == ParamData.PRMSL_CONTOUR ||
                 currentIndex == ParamData.MB500_CONTOUR ||
                 currentIndex == ParamData.WAVES_CONTOUR ||

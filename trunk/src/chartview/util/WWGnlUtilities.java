@@ -147,6 +147,7 @@ public class WWGnlUtilities
   public final static DecimalFormat XX22   = new DecimalFormat("##00.00");
   public final static DecimalFormat XXX12  = new DecimalFormat("###0.00");
   public final static DecimalFormat XXXX12 = new DecimalFormat("####0.00");
+  public final static DecimalFormat X11    = new DecimalFormat("####0.0");
 
   public final static DecimalFormat BIG_DOUBLE = new DecimalFormat("####0.0000000000");
   static
@@ -935,6 +936,7 @@ public class WWGnlUtilities
     float alpha = 0.75f;
     WWGnlUtilities.drawWind(gr, x, y, speed, dir, coloredWind, initialGribWindBaseColor, drawHeavyDot, drawWindColorBackground, displayWindSpeed, useThickWind, tl, br, tr, bl, alpha);    
   }
+
   public static void drawWind(Graphics gr, 
                               int x, 
                               int y, 
@@ -1070,6 +1072,222 @@ public class WWGnlUtilities
       }
     }
     if (drawWindColorBackground || useThickWind)
+    {
+      if (gr instanceof Graphics2D)
+      {
+        ((Graphics2D) gr).setStroke(originalStroke);
+      }
+    }
+  }
+
+  public static void drawCurrent(Graphics gr, 
+                                 int x, 
+                                 int y, 
+                                 double speed, 
+                                 double dir,
+                                 boolean coloredWind, 
+                                 Color initialGribWindBaseColor)
+  {
+    WWGnlUtilities.drawCurrent(gr, x, y, speed, dir, coloredWind, initialGribWindBaseColor, false, false, false);
+  }
+
+  public static void drawCurrent(Graphics gr, 
+                                 int x, 
+                                 int y, 
+                                 double speed, 
+                                 double dir, 
+                                 boolean coloredWind, 
+                                 Color initialGribWindBaseColor, 
+                                 boolean drawHeavyDot, 
+                                 boolean drawWindColorBackground, 
+                                 boolean displayWindSpeed)
+  {
+    WWGnlUtilities.drawCurrent(gr, x, y, speed, dir, coloredWind, initialGribWindBaseColor, drawHeavyDot, drawWindColorBackground, displayWindSpeed, false);  
+  }
+
+  public static void drawCurrent(Graphics gr, 
+                                 int x, 
+                                 int y, 
+                                 double speed, 
+                                 double dir, 
+                                 boolean coloredWind, 
+                                 Color initialGribWindBaseColor, 
+                                 boolean drawHeavyDot, 
+                                 boolean drawWindColorBackground, 
+                                 boolean displayWindSpeed,
+                                 boolean useThickWind)
+  {
+    float alpha = 0.75f;
+    WWGnlUtilities.drawCurrent(gr, x, y, speed, dir, coloredWind, initialGribWindBaseColor, drawHeavyDot, drawWindColorBackground, displayWindSpeed, useThickWind, alpha);  
+  }
+
+  public static void drawCurrent(Graphics gr, 
+                                 int x, 
+                                 int y, 
+                                 double speed, 
+                                 double dir, 
+                                 boolean coloredWind, 
+                                 Color initialGribWindBaseColor, 
+                                 boolean drawHeavyDot, 
+                                 boolean drawWindColorBackground, 
+                                 boolean displayWindSpeed,
+                                 boolean useThickWind,
+                                 float alpha)
+  {
+    WWGnlUtilities.drawCurrent(gr, x, y, speed, dir, coloredWind, initialGribWindBaseColor, drawHeavyDot, drawWindColorBackground, displayWindSpeed, useThickWind, null, null, null, null, alpha);  
+  }
+
+  public static void drawCurrent(Graphics gr, 
+                                 int x, 
+                                 int y, 
+                                 double speed, 
+                                 double dir, 
+                                 boolean coloredWind, 
+                                 Color initialGribWindBaseColor, 
+                                 boolean drawHeavyDot, 
+                                 boolean drawWindColorBackground, 
+                                 boolean displayWindSpeed,
+                                 Point tl, 
+                                 Point br,
+                                 Point tr,
+                                 Point bl,
+                                 float alpha)
+  {
+    WWGnlUtilities.drawCurrent(gr, x, y, speed, dir, coloredWind, initialGribWindBaseColor, drawHeavyDot, drawWindColorBackground, displayWindSpeed, false, tl, br, tr, bl, alpha);    
+  }
+  
+  public static void drawCurrent(Graphics gr, 
+                                 int x, 
+                                 int y, 
+                                 double speed, 
+                                 double dir, 
+                                 boolean coloredWind, 
+                                 Color initialGribWindBaseColor, 
+                                 boolean drawHeavyDot, 
+                                 boolean drawWindColorBackground, 
+                                 boolean displayWindSpeed,
+                                 boolean useThickWind,
+                                 Point tl, 
+                                 Point br,
+                                 Point tr,
+                                 Point bl)
+  {
+    float alpha = 0.75f;
+    WWGnlUtilities.drawCurrent(gr, x, y, speed, dir, coloredWind, initialGribWindBaseColor, drawHeavyDot, drawWindColorBackground, displayWindSpeed, useThickWind, tl, br, tr, bl, alpha);    
+  }
+
+  public static void drawCurrent(Graphics gr, 
+                                 int x, 
+                                 int y, 
+                                 double speed, 
+                                 double dir, 
+                                 boolean coloredCurrent, 
+                                 Color initialGribCurrentBaseColor, 
+                                 boolean drawHeavyDot, 
+                                 boolean drawCurrentColorBackground, 
+                                 boolean displayCurrentSpeed,
+                                 boolean useThickCurrent,
+                                 Point tl, 
+                                 Point br,
+                                 Point tr,
+                                 Point bl,
+                                 float alpha)
+  {
+    boolean displayWindDirWithWindColorRange = ((Boolean)ParamPanel.data[ParamData.DISPLAY_WIND_WITH_COLOR_WIND_RANGE][1]).booleanValue();
+    
+    int discSize = 4; // Smallest
+    if (drawHeavyDot)
+      discSize = (int) Math.round(speed * 10/ (double) 2);
+    if (drawCurrentColorBackground)
+    {      
+      gr.setColor(getWindColor(coloredCurrent, initialGribCurrentBaseColor, speed * 10, true)); // Set transparency anyway
+      int w = Math.abs(br.x - tl.x);
+      int h = Math.abs(br.y - tl.y);
+      ((Graphics2D) gr).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
+      // Form non-square projections, use polygon
+      if (tr != null && bl != null)
+      {
+        Polygon plg = new Polygon(new int[] {tl.x, bl.x, br.x, tr.x},
+                                  new int[] {tl.y, bl.y, br.y, tr.y},
+                                  4);
+        gr.fillPolygon(plg);
+      }
+      else
+        gr.fillRect(tl.x, tl.y, w, h);
+  //    gr.setColor(Color.black);
+  //    gr.drawRect(tl.x, tl.y, w, h);
+    }
+    else
+    {
+      gr.setColor(getWindColor(coloredCurrent, initialGribCurrentBaseColor, speed * 10, false));  
+      gr.fillOval(x - discSize / 2, y - discSize / 2, discSize, discSize);
+    }
+    Stroke originalStroke = ((Graphics2D) gr).getStroke();
+    if (drawCurrentColorBackground)
+    {
+      ((Graphics2D) gr).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
+    }
+    if (useThickCurrent)
+    {
+      if (gr instanceof Graphics2D)
+      {
+        Stroke stroke =  new BasicStroke(((int)(speed) + 1), 
+                                         BasicStroke.CAP_BUTT,
+                                         BasicStroke.JOIN_BEVEL);
+        ((Graphics2D) gr).setStroke(stroke);  
+      }
+    }
+    int arrowLength = 20;
+    dir += 180;
+    while (dir > 360.0) dir -= 360;
+    double dCDR = Math.toRadians(dir);
+    int arrowX = (int) ((double) arrowLength * Math.sin(dCDR));
+    int arrowY = (int) ((double) arrowLength * Math.cos(dCDR));
+   
+    if (!WWContext.getInstance().getUseColorRangeForWindSpeed().booleanValue())
+      gr.setColor(getWindColor(coloredCurrent, initialGribCurrentBaseColor, speed * 10, false)); // Sets transparency if required (coloredWind = true)
+    else if (displayWindDirWithWindColorRange)
+      gr.setColor(Color.black);
+    
+    if (!WWContext.getInstance().getUseColorRangeForWindSpeed().booleanValue() || displayWindDirWithWindColorRange)
+      gr.drawLine(x, y, x + arrowX, y + arrowY);
+    
+    if (displayCurrentSpeed)
+    {
+      Font f = gr.getFont();
+      gr.setFont(new Font("Arial", Font.PLAIN, 10));
+      String speedStr = X11.format(speed);
+      int strWidth = gr.getFontMetrics(gr.getFont()).stringWidth(speedStr);
+      Color c = gr.getColor();
+      gr.setColor(Color.black);
+      gr.drawString(speedStr, x - strWidth / 2, y + 5);
+      gr.setColor(c);
+      gr.setFont(f);
+    }
+    // Arrow head
+    if (speed > 0.0D && (!WWContext.getInstance().getUseColorRangeForWindSpeed().booleanValue() || displayWindDirWithWindColorRange))
+    {
+      if (useThickCurrent)
+      {
+        if (gr instanceof Graphics2D)
+        {
+          Stroke stroke =  new BasicStroke(1, // Reset to 1 for the fethers
+                                           BasicStroke.CAP_BUTT,
+                                           BasicStroke.JOIN_BEVEL);
+          ((Graphics2D) gr).setStroke(stroke);  
+        }
+      }
+      int origin = arrowLength;
+      int featherStartX = x + (int) ((double) origin * Math.sin(dCDR));
+      int featherStartY = y + (int) ((double) origin * Math.cos(dCDR));
+      int featherEndX = featherStartX + (int) (7D * Math.sin(dCDR + Math.toRadians(150D)));
+      int featherEndY = featherStartY + (int) (7D * Math.cos(dCDR + Math.toRadians(150D)));
+      gr.drawLine(featherStartX, featherStartY, featherEndX, featherEndY);
+      featherEndX = featherStartX + (int) (7D * Math.sin(dCDR + Math.toRadians(-150D)));
+      featherEndY = featherStartY + (int) (7D * Math.cos(dCDR + Math.toRadians(-150D)));
+      gr.drawLine(featherStartX, featherStartY, featherEndX, featherEndY);
+    }
+    if (drawCurrentColorBackground || useThickCurrent)
     {
       if (gr instanceof Graphics2D)
       {

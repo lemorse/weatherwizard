@@ -73,8 +73,10 @@ public class ParamData
   public final static int AIRTMP_COLOR_IN_ROUTING        = 62;
   public final static int RAIN_COLOR_IN_ROUTING          = 63;
   public final static int BSP_COLOR_IN_ROUTING           = 64;
+  public final static int SHOW_NOTIFICATIONS             = 65;
+  public final static int GRIB_CURRENT_COLOR             = 66;
 
-  public final static int NB_PRFERENCES         = 65; 
+  public final static int NB_PRFERENCES         = 67; 
   
   private final static String[] labels = 
   { 
@@ -142,7 +144,9 @@ public class ParamData
     WWGnlUtilities.buildMessage("waves-color-in-routing"),
     WWGnlUtilities.buildMessage("airtmp-color-in-routing"),
     WWGnlUtilities.buildMessage("rain-color-in-routing"),
-    WWGnlUtilities.buildMessage("bsp-color-in-routing")
+    WWGnlUtilities.buildMessage("bsp-color-in-routing"),
+    WWGnlUtilities.buildMessage("show-notifications"),
+    WWGnlUtilities.buildMessage("current-color")
   };
 
   private final static String[] helptext = 
@@ -211,7 +215,9 @@ public class ParamData
     WWGnlUtilities.buildMessage("help-waves-color-in-routing"),
     WWGnlUtilities.buildMessage("help-airtmp-color-in-routing"),
     WWGnlUtilities.buildMessage("help-rain-color-in-routing"),
-    WWGnlUtilities.buildMessage("help-bsp-color-in-routing")
+    WWGnlUtilities.buildMessage("help-bsp-color-in-routing"),
+    WWGnlUtilities.buildMessage("help-show-notifications"),
+    WWGnlUtilities.buildMessage("help-current-color")
   };
     
   public static String[] getLabels()

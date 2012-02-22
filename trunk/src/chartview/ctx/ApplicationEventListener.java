@@ -100,6 +100,7 @@ public abstract class ApplicationEventListener implements EventListener
                           boolean temp,
                           boolean waves,
                           boolean rain,
+                          boolean current,
                           boolean displayWind,
                           boolean display3DPRMSL,
                           boolean display3D500hgt,

@@ -68,6 +68,24 @@ public class XSLUtil
     return str;
   }
   
+  public final static String initAllCap(String s)
+  {
+    String str = "";
+    try
+    {
+      str = s.toLowerCase();
+      char[] ca = str.toCharArray();
+      for (int i=0; i<ca.length; i++)
+      {
+        if (i == 0 || ca[i-1] == ' ')
+          ca[i] = new String(new char[] { ca[i] }).toUpperCase().toCharArray()[0]; 
+      }
+      str = new String(ca);
+    }
+    catch (Exception ignore) {}    
+    return str;
+  }
+  
   public final static String decToSex(double d, int a, int b)
   {
     return GeomUtil.decToSex(d, a, b);  
@@ -93,6 +111,7 @@ public class XSLUtil
   public static void main(String[] args)
   {
     System.out.println(initCap("akeu coucou"));
+    System.out.println(initAllCap("akeu coucou larigou"));
     System.out.println(decimalPartInMinutes(12.25));
   }
 

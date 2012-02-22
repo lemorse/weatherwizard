@@ -1619,7 +1619,7 @@ public class AdjustFrame
                 {
                   try
                   {
-                    wgd = GribHelper.getGribData(grib);  // From a File
+                    wgd = GribHelper.getGribData(grib, true);  // From a File
                   }
                   catch (RuntimeException rte)
                   {

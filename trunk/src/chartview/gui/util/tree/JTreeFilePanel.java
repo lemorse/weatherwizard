@@ -215,7 +215,7 @@ public class JTreeFilePanel
                           {
                             try
                             {
-                              GribHelper.GribConditionData[] wgd = GribHelper.getGribData(localFileName);
+                              GribHelper.GribConditionData[] wgd = GribHelper.getGribData(localFileName, false);
                               String bubble = 
                                     "<html>" + GribHelper.formatGMTDateTime(wgd[0].getDate()) + 
                                     "<br>Contains <b>" + Integer.toString(wgd.length) + "</b> frame(s)<br>" + 
