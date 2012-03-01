@@ -2377,7 +2377,7 @@ public class WWGnlUtilities
     }
 //  System.out.println("Found " + faxList.size() + " Fax(es)");
     // Scan Composites (xml, not waz)
-    String compositeDir = ((ParamPanel.DataDirectory)ParamPanel.data[ParamData.CTX_FILES_LOC][1]).toString();    
+    String compositeDir = ((ParamPanel.DataDirectory)ParamPanel.data[ParamData.COMPOSITE_ROOT_DIR][1]).toString();    
     FilenameFilter compositeFilter = new FilenameFilter()
       {
         public boolean accept(File dir, String name)

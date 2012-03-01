@@ -19,7 +19,7 @@ public class ParamData
   public final static int ROUTING_FROM_CURR_LOC          =  8;
   public final static int GRIB_FILES_LOC                 =  9;
   public final static int FAX_FILES_LOC                  = 10;
-  public final static int CTX_FILES_LOC                  = 11;
+  public final static int COMPOSITE_ROOT_DIR             = 11;
   public final static int CHART_LINE_THICK               = 12;
   public final static int FAX_TRANSPARENCY               = 13;
   public final static int CHART_BG_COLOR                 = 14;
@@ -75,8 +75,10 @@ public class ParamData
   public final static int BSP_COLOR_IN_ROUTING           = 64;
   public final static int SHOW_NOTIFICATIONS             = 65;
   public final static int GRIB_CURRENT_COLOR             = 66;
+  public final static int AUTO_SAVE_DEFAULT_COMPOSITE    = 67;
+  public final static int RELOAD_DEFAULT_COMPOSITE_INTERVAL = 68;
 
-  public final static int NB_PRFERENCES         = 67; 
+  public final static int NB_PRFERENCES         = 69; 
   
   private final static String[] labels = 
   { 
@@ -146,7 +148,9 @@ public class ParamData
     WWGnlUtilities.buildMessage("rain-color-in-routing"),
     WWGnlUtilities.buildMessage("bsp-color-in-routing"),
     WWGnlUtilities.buildMessage("show-notifications"),
-    WWGnlUtilities.buildMessage("current-color")
+    WWGnlUtilities.buildMessage("current-color"),
+    WWGnlUtilities.buildMessage("auto-save-pattern"),
+    WWGnlUtilities.buildMessage("auto-reload-interval")
   };
 
   private final static String[] helptext = 
@@ -217,7 +221,9 @@ public class ParamData
     WWGnlUtilities.buildMessage("help-rain-color-in-routing"),
     WWGnlUtilities.buildMessage("help-bsp-color-in-routing"),
     WWGnlUtilities.buildMessage("help-show-notifications"),
-    WWGnlUtilities.buildMessage("help-current-color")
+    WWGnlUtilities.buildMessage("help-current-color"),
+    WWGnlUtilities.buildMessage("help-auto-save-pattern"),
+    WWGnlUtilities.buildMessage("help-auto-reload-interval")
   };
     
   public static String[] getLabels()

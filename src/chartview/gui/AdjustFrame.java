@@ -350,7 +350,11 @@ public class AdjustFrame
             synchronized (me) { me.notify(); }
             if (resp == JOptionPane.YES_OPTION)
             {
-              WWContext.getInstance().fireLoadDynamicComposite(compositeName);
+              int interval = ((Integer) ParamPanel.data[ParamData.RELOAD_DEFAULT_COMPOSITE_INTERVAL][1]).intValue();
+              if (interval > 0)
+                enterReloadLoop(compositeName, interval);
+              else
+                WWContext.getInstance().fireLoadDynamicComposite(compositeName);
             }
           }
           catch (Exception e)
@@ -726,7 +730,7 @@ public class AdjustFrame
         {
           public void actionPerformed(ActionEvent ae)
           {
-            String compositeDir = ((ParamPanel.DataDirectory)ParamPanel.data[ParamData.CTX_FILES_LOC][1]).toString();
+            String compositeDir = ((ParamPanel.DataDirectory)ParamPanel.data[ParamData.COMPOSITE_ROOT_DIR][1]).toString();
             WWGnlUtilities.generateImagesFromComposites(compositeDir, ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel());
           }
         });
@@ -2131,6 +2135,31 @@ public class AdjustFrame
   public FileTypeHolder getAllJTrees()
   {
     return allJTrees;
+  }
+  
+  private void enterReloadLoop(final String compositeName, final int interval)
+  {
+    String threadName = Long.toString(new Date().getTime());
+    Thread t = new Thread("AutoLoad-" + threadName)
+      {
+        public void run()
+        {
+          while (true)
+          {
+            System.out.println("-- Auto load for [" + compositeName + "], thread " + this.getName());
+            WWContext.getInstance().fireLoadDynamicComposite(compositeName);
+            try 
+            { 
+              System.out.println("-- Taking a " + interval + " minute(s) nap (" + Long.toString(1000L * 60L * (long)interval) + " ms)");
+              Thread.sleep(1000L * 60L * interval); 
+              System.out.println("-- Thread " + this.getName() + " waking up.");
+            } 
+            catch (Exception ex) {} 
+          }
+        }
+      };
+    System.out.println("\n-- Starting reload thread...");
+    t.start();
   }
 
   @SuppressWarnings("serial")

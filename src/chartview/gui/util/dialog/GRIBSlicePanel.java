@@ -135,6 +135,12 @@ public class GRIBSlicePanel
     this.twa = twa;
     dataOption = opt;
     
+    // For tests
+    for (DatedGribCondition dgc : data)
+    {
+      System.out.println("wave for " + dgc.getDate() + ":" + dgc.waves);
+    }
+    
     try
     {
       jbInit();
@@ -402,7 +408,8 @@ public class GRIBSlicePanel
 //      if (ghgc.waves < gribMini.waves) gribMini.waves = ghgc.waves;
         gribMini.waves = Math.min(gribMini.waves, ghgc.waves);
 //      if (ghgc.temp < gribMini.temp) gribMini.temp = ghgc.temp;
-        if (ghgc.hgt500 < gribMini.hgt500) gribMini.hgt500 = ghgc.hgt500;
+        gribMini.temp = Math.min(gribMini.temp, ghgc.temp);
+//      if (ghgc.hgt500 < gribMini.hgt500) gribMini.hgt500 = ghgc.hgt500;
         gribMini.hgt500 = Math.min(gribMini.hgt500, ghgc.hgt500);
 //      if (ghgc.rain < gribMini.rain) gribMini.rain = ghgc.rain;
         gribMini.rain = Math.min(gribMini.rain, ghgc.rain);
@@ -900,7 +907,7 @@ public class GRIBSlicePanel
           heading   = smoothedHdg.get(dataIdx);
           windAngle = smoothedTwa.get(dataIdx);
         }
-        if (displayTWS)
+        if (displayTWS && !Float.isInfinite(windscale))
         {
           int y = (int)(this.getHeight() - (gribPoint.windspeed * windscale));
           postit(gr, 
@@ -918,7 +925,7 @@ public class GRIBSlicePanel
 //                 reverseColor((Color)ParamPanel.data[ParamData.TWS_COLOR_IN_ROUTING][1]), 
 //                 0.75f);
         }
-        if (displayPRMSL)
+        if (displayPRMSL && !Float.isInfinite(prmslscale))
         {
           int y = (int)(this.getHeight() - (((gribPoint.prmsl / 100f) - (gribMini.prmsl / 100f))* prmslscale));
           postit(gr, 
@@ -928,7 +935,7 @@ public class GRIBSlicePanel
                  reverseColor((Color)ParamPanel.data[ParamData.PRMSL_COLOR_IN_ROUTING][1]), 
                  0.75f);
         }
-        if (displayHGT500)
+        if (displayHGT500 && !Float.isInfinite(hgt500scale))
         {
           int y = (int)(this.getHeight() - ((gribPoint.hgt500 - (gribMini.hgt500))* hgt500scale));
           postit(gr, 
@@ -938,7 +945,7 @@ public class GRIBSlicePanel
                  reverseColor((Color)ParamPanel.data[ParamData.HGT500_COLOR_IN_ROUTING][1]), 
                  0.75f);
         }
-        if (displayWAVES)
+        if (displayWAVES && !Float.isInfinite(wavescale))
         {
           int y = (int)(this.getHeight() - ((gribPoint.waves / 100f) * wavescale));
           postit(gr, 
@@ -948,7 +955,7 @@ public class GRIBSlicePanel
                  reverseColor((Color)ParamPanel.data[ParamData.WAVES_COLOR_IN_ROUTING][1]), 
                  0.75f);
         }
-        if (displayTEMP)
+        if (displayTEMP && !Float.isInfinite(tempscale))
         {
           int y = (int)(this.getHeight() - (((gribPoint.temp - 273) - (gribMini.temp - 273))* tempscale));
           postit(gr, 
@@ -958,7 +965,7 @@ public class GRIBSlicePanel
                  reverseColor((Color)ParamPanel.data[ParamData.AIRTMP_COLOR_IN_ROUTING][1]), 
                  0.75f);
         }
-        if (displayRAIN)
+        if (displayRAIN && !Float.isInfinite(rainscale))
         {
 //        System.out.println("-> Rain (1) " + infoX + ":" + (gribPoint.rain * 3600f));
           int y = (int)(this.getHeight() - (((gribPoint.rain * 3600f) /* - (gribMini.rain * 3600f) */)* rainscale));
@@ -969,7 +976,7 @@ public class GRIBSlicePanel
                  reverseColor((Color)ParamPanel.data[ParamData.RAIN_COLOR_IN_ROUTING][1]), 
                  0.75f);
         }
-        if (displayBSP)
+        if (displayBSP && !Float.isInfinite(bspscale))
         {
           int y = (int)(this.getHeight() - (boatSpeed.doubleValue() * bspscale));
           postit(gr, 
@@ -1032,7 +1039,7 @@ public class GRIBSlicePanel
           int x, y;
           x = (int)((float)gribIdx * (float)this.getWidth() / (float)gribSize);
           // TWS
-          if (displayTWS)
+          if (displayTWS && !Float.isInfinite(windscale))
           {
       //    System.out.println("Idx:" + gribIdx + ", x:" + x + " for w:" + this.getWidth() + " and gSize:" + gribSize);
             y = (int)(this.getHeight() - (tws * windscale));
@@ -1043,7 +1050,7 @@ public class GRIBSlicePanel
             prevYtws = y;
           }
           // PRMSL
-          if (displayPRMSL)
+          if (displayPRMSL && !Float.isInfinite(prmslscale))
           {
             y = (int)(this.getHeight() - ((prmsl - (gribMini.prmsl / 100f))* prmslscale));
             gr.setColor((Color)ParamPanel.data[ParamData.PRMSL_COLOR_IN_ROUTING][1]);
@@ -1053,7 +1060,7 @@ public class GRIBSlicePanel
             prevYprmsl = y;
           }
           // HGT500
-          if (displayHGT500)
+          if (displayHGT500 && !Float.isInfinite(hgt500scale))
           {
             y = (int)(this.getHeight() - ((hgt500 - (gribMini.hgt500))* hgt500scale));
             gr.setColor((Color)ParamPanel.data[ParamData.HGT500_COLOR_IN_ROUTING][1]);
@@ -1063,7 +1070,7 @@ public class GRIBSlicePanel
             prevYhgt500 = y;        
           }
           // WAVES
-          if (displayWAVES)
+          if (displayWAVES && !Float.isInfinite(wavescale))
           {
             y = (int)(this.getHeight() - (waves * wavescale));
             gr.setColor((Color)ParamPanel.data[ParamData.WAVES_COLOR_IN_ROUTING][1]);
@@ -1073,7 +1080,7 @@ public class GRIBSlicePanel
             prevYwaves = y;        
           }
           // TEMP
-          if (displayTEMP)
+          if (displayTEMP && !Float.isInfinite(tempscale))
           {
             y = (int)(this.getHeight() - ((temp - (gribMini.temp - 273))* tempscale));
             gr.setColor((Color)ParamPanel.data[ParamData.AIRTMP_COLOR_IN_ROUTING][1]);
@@ -1083,7 +1090,7 @@ public class GRIBSlicePanel
             prevYtemp = y;                
           }
           // RAIN
-          if (displayRAIN)
+          if (displayRAIN && !Float.isInfinite(rainscale))
           {
 //          System.out.println("-> Rain (2) " + x + ":" + (rain));
             y = (int)(this.getHeight() - (((rain) /* - (gribMini.rain * 3600f) */)* rainscale));
