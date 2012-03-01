@@ -1680,7 +1680,7 @@ public class WWGnlUtilities
               String destination = update.getAttribute("destination");
               String origin = update.getAttribute("origin");
               // Backup, copy
-              System.out.println("Copying " + origin + " to " + destination);
+              System.out.println("*** Post Update: Copying " + origin + " to " + destination);
     
               OutputStream os = new FileOutputStream(new File(destination));
               File fis = new File(origin);
@@ -1695,11 +1695,12 @@ public class WWGnlUtilities
         catch (Exception ex)
         {
           System.out.println("Exiting...");
-  //      ex.printStackTrace();
+          ex.printStackTrace();
         }
         finally
         {
           // Delete if successful
+          System.out.println("Deleting " + updateFile.getAbsolutePath());
           updateFile.delete();
         }
       }
