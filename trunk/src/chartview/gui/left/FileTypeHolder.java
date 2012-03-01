@@ -30,7 +30,7 @@ public class FileTypeHolder
   private JTreeFilePanel gribTree      = new JTreeFilePanel(ParamPanel.data[ParamData.GRIB_FILES_LOC][1].toString(), 
                                                             JTreeFilePanel.GRIB_TYPE,        
                                                             this);
-  private JTreeFilePanel compositeTree = new JTreeFilePanel(ParamPanel.data[ParamData.CTX_FILES_LOC][1].toString(),  
+  private JTreeFilePanel compositeTree = new JTreeFilePanel(ParamPanel.data[ParamData.COMPOSITE_ROOT_DIR][1].toString(),  
                                                             JTreeFilePanel.COMPOSITE_TYPE,   
                                                             this);
   private JTreeFilePanel patternTree   = new JTreeFilePanel(ParamPanel.data[ParamData.PATTERN_DIR][1].toString(),    

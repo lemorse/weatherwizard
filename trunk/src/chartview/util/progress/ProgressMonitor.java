@@ -21,8 +21,8 @@ public class ProgressMonitor // implements Serializable
   private String status;
 
 //private transient Vector<ChangeListener> listeners = new Vector<ChangeListener>();
-  private transient List<ChangeListener> listeners = new ArrayList<ChangeListener>();
-  private transient List<ChangeListener> cll = Collections.synchronizedList(listeners);
+  private List<ChangeListener> listeners = new ArrayList<ChangeListener>();
+  private List<ChangeListener> cll = Collections.synchronizedList(listeners);
   private ChangeEvent ce; // = new ChangeEvent(this);
 
   public ProgressMonitor(int total, boolean indeterminate)

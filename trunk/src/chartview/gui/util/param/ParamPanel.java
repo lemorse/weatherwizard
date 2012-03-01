@@ -162,7 +162,7 @@ public final class ParamPanel
 //      it = new DataDirectory(GnlUtilities.buildMessage("faxes-button"), "." + File.separator + "faxDir");
         it = new DataPath("." + File.separator + "faxDir");
         break;
-      case ParamData.CTX_FILES_LOC:
+      case ParamData.COMPOSITE_ROOT_DIR:
         it = new DataDirectory(WWGnlUtilities.buildMessage("composite-button"), "." + File.separator + "compositeDir");  
         break;
       case ParamData.CHART_LINE_THICK:
@@ -330,6 +330,12 @@ public final class ParamPanel
       case ParamData.BSP_COLOR_IN_ROUTING:
         it = Color.orange;
         break;
+      case ParamData.AUTO_SAVE_DEFAULT_COMPOSITE:
+        it = "";
+        break;
+      case ParamData.RELOAD_DEFAULT_COMPOSITE_INTERVAL:
+        it = new Integer(0);
+        break;
       default:
         break;
     }
@@ -390,7 +396,8 @@ public final class ParamPanel
                        i == ParamData.AVOID_TWS_GT ||
                        i == ParamData.AVOID_TWA_LT || 
                        i == ParamData.INTERVAL_BETWEEN_ISOBARS ||
-                       i == ParamData.DEFAULT_FAX_INC_VALUE)
+                       i == ParamData.DEFAULT_FAX_INC_VALUE ||
+                       i == ParamData.RELOAD_DEFAULT_COMPOSITE_INTERVAL)
                 data[i][1] = new Integer(s);
               else if (i == ParamData.ROUTING_TIME_INTERVAL ||     // Doubles
                        i == ParamData.POLAR_SPEED_FACTOR ||
@@ -414,7 +421,7 @@ public final class ParamPanel
                 data[i][1] = new DataFile(new String[] {"xml"}, "Polars", s);
               else if (i == ParamData.LOAD_COMPOSITE_STARTUP)      // DataFiles, Patterns
                 data[i][1] = new DataFile(new String[] {"ptrn"}, "Patterns", s);
-              else if (i == ParamData.CTX_FILES_LOC)               // DataDirectories
+              else if (i == ParamData.COMPOSITE_ROOT_DIR)               // DataDirectories
                 data[i][1] = new DataDirectory(WWGnlUtilities.buildMessage("composite-button"), s);
               else if (i == ParamData.FAX_FILES_LOC)
   //            data[i][1] = new DataDirectory(GnlUtilities.buildMessage("faxes-button"), s);
@@ -527,7 +534,7 @@ public final class ParamPanel
       new int[] // Misc
       { ParamData.GRIB_FILES_LOC, 
         ParamData.FAX_FILES_LOC, 
-        ParamData.CTX_FILES_LOC, 
+        ParamData.COMPOSITE_ROOT_DIR, 
         ParamData.PATTERN_DIR, 
         ParamData.AUTO_UPDATES, 
         ParamData.SHOW_NOTIFICATIONS,
@@ -541,6 +548,8 @@ public final class ParamPanel
         ParamData.ISO_TWS_LIST,
         ParamData.CONFIRM_ON_EXIT,
         ParamData.LOAD_COMPOSITE_STARTUP,
+        ParamData.AUTO_SAVE_DEFAULT_COMPOSITE,
+        ParamData.RELOAD_DEFAULT_COMPOSITE_INTERVAL,
         ParamData.DEFAULT_ZOOM_VALUE,
         ParamData.DEFAULT_CHART_INC_VALUE,
         ParamData.DEFAULT_FAX_INC_VALUE }
@@ -642,7 +651,8 @@ public final class ParamPanel
               currentIndex == ParamData.CHART_LINE_THICK ||
               currentIndex == ParamData.AVOID_TWS_GT ||
               currentIndex == ParamData.AVOID_TWA_LT ||
-              currentIndex == ParamData.DEFAULT_FAX_INC_VALUE) // The int values
+              currentIndex == ParamData.DEFAULT_FAX_INC_VALUE ||
+              currentIndex == ParamData.RELOAD_DEFAULT_COMPOSITE_INTERVAL) // The int values
           {
             try { /* int x = */ Integer.parseInt(after); }
             catch (Exception e) 

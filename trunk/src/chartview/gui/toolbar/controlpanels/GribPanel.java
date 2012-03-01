@@ -136,6 +136,7 @@ public class GribPanel
                                 boolean b4, 
                                 boolean b5,
                                 boolean b6,
+                                boolean b7, // current
                                 boolean displayWind,
                                 boolean display3DPrmsl,
                                 boolean display3D500hgt,

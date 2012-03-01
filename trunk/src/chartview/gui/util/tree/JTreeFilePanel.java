@@ -416,35 +416,41 @@ public class JTreeFilePanel
     }
     WWContext.getInstance().fireLogging(WWGnlUtilities.buildMessage("loading2", new String[] { names[type] }));
 
-    DefaultMutableTreeNode onLinePatterns = null;
     DefaultMutableTreeNode localPatterns  = null;    
 //  DefaultMutableTreeNode preDefFaxes    = null;
     if (getType() == PATTERN_TYPE) // Add a node for the on-line patterns
     {
-      onLinePatterns = new DefaultMutableTreeNode(WWGnlUtilities.buildMessage("on-line-patterns"));
+      final DefaultMutableTreeNode onLinePatterns = new DefaultMutableTreeNode(WWGnlUtilities.buildMessage("on-line-patterns"));
       localPatterns = new DefaultMutableTreeNode(WWGnlUtilities.buildMessage("local-patterns"));
       root.add(localPatterns);
       root.add(onLinePatterns);
 //    jTree.setRootVisible(false);
-
-      try
-      {
-        URL url = new URL(OLP_URL);
-        DOMParser parser = WWContext.getInstance().getParser();
-        synchronized (parser)
+      
+      Thread olpThread = new Thread()
         {
-          parser.setValidationMode(XMLParser.NONVALIDATING);
-          parser.parse(url);
-          XMLDocument olpDoc = parser.getDocument();
-          drillDownWebPatterns((XMLElement)olpDoc.getDocumentElement(), onLinePatterns);
-       // onLinePatterns.add(new PatternFileTreeNode("http://", "weather.lediouris.net/patterns/01.Favorites/06.01.bis.AllPac.Faxes.Satellite.ptrn", "Web Pattern"));
-        }
-      }
-      catch (Exception ex)
-      {
-        root.remove(onLinePatterns);
-        System.out.println("No connection for OnLine patterns.");
-      }
+          public void run()
+          {
+            try
+            {
+              URL url = new URL(OLP_URL);
+              DOMParser parser = WWContext.getInstance().getParser();
+              synchronized (parser)
+              {
+                parser.setValidationMode(XMLParser.NONVALIDATING);
+                parser.parse(url);
+                XMLDocument olpDoc = parser.getDocument();
+                drillDownWebPatterns((XMLElement)olpDoc.getDocumentElement(), onLinePatterns);
+             // onLinePatterns.add(new PatternFileTreeNode("http://", "weather.lediouris.net/patterns/01.Favorites/06.01.bis.AllPac.Faxes.Satellite.ptrn", "Web Pattern"));
+              }
+            }
+            catch (Exception ex)
+            {
+              root.remove(onLinePatterns);
+              System.out.println("No connection for OnLine patterns.");
+            }
+          }
+        };
+      olpThread.start();
     }
     else if (getType() == PRE_DEF_FAX_TYPE)
     {

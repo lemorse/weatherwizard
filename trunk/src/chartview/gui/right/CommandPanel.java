@@ -2080,7 +2080,7 @@ public class CommandPanel
                                                                JFileChooser.FILES_ONLY, 
                                                                new String[] { "xml", "waz" }, 
                                                               "Composites", 
-                                                              ParamPanel.data[ParamData.CTX_FILES_LOC][1].toString(),
+                                                              ParamPanel.data[ParamData.COMPOSITE_ROOT_DIR][1].toString(),
                                                               "Save as", 
                                                               "Save Composite as");
           if (newFileName.trim().length() > 0)
@@ -2327,7 +2327,7 @@ public class CommandPanel
                 }
                 if (ok)
                 {
-  //s              pattern.print(System.out);
+  //              pattern.print(System.out);
                   pattern.print(new FileOutputStream(patt));
                   WWContext.getInstance().fireReloadPatternTree();
                 }
@@ -2350,7 +2350,7 @@ public class CommandPanel
                                                             JFileChooser.FILES_ONLY, 
                                                             new String[] { "xml", "waz" }, 
                                                             "Composites", 
-                                                            ParamPanel.data[ParamData.CTX_FILES_LOC][1].toString(),
+                                                            ParamPanel.data[ParamData.COMPOSITE_ROOT_DIR][1].toString(),
                                                             "Open", 
                                                             "Open Composite");
             if (fileName != null && fileName.trim().length() > 0)
@@ -2523,7 +2523,7 @@ public class CommandPanel
                     try
                     {
                       WWContext.getInstance().fireSetLoading(true);
-                      restoreFromPattern(fileName);
+                      createFromPattern(fileName);
                       WWContext.getInstance().fireSetLoading(false);
                     }
                     finally
@@ -2563,7 +2563,7 @@ public class CommandPanel
                   {
       //            System.out.println("Loader top");
                     WWContext.getInstance().fireSetLoading(true);
-                    restoreFromPattern(fileName); // TODO http protocol
+                    createFromPattern(fileName); // TODO http protocol
                     WWContext.getInstance().fireSetLoading(false);
       //            System.out.println("Loader bottom");
                   }
@@ -3653,7 +3653,7 @@ public class CommandPanel
   
   private void runStorageThread(boolean update, String compositeName)
   {
-    WWContext.getInstance().fireSetLoading(true, "Please wait...");
+    WWContext.getInstance().fireSetLoading(true, "Please wait, storing..."); // LOCALIZE
     XMLDocument storage = new XMLDocument();
     
     XMLElement root = (XMLElement)storage.createElement("storage");
@@ -3937,12 +3937,12 @@ public class CommandPanel
     }
     
     String fileName = "";    
-    if (!update)
+    if (!update && compositeName == null)
       fileName = WWGnlUtilities.chooseFile(instance, 
                                            JFileChooser.FILES_ONLY, 
                                            new String[] { "waz" }, // , "xml" }, 
                                            "Composites", 
-                                           ParamPanel.data[ParamData.CTX_FILES_LOC][1].toString(), 
+                                           ParamPanel.data[ParamData.COMPOSITE_ROOT_DIR][1].toString(), 
                                            "Save", 
                                            "Composite File");
     else
@@ -3991,7 +3991,8 @@ public class CommandPanel
       if (archiveRequired) // Archive here if necessary
       {
 //      System.out.println("Archiving " + fileName);
-        WWGnlUtilities.archiveComposite(fileName);
+        boolean autoDownloadAndSave = fileName != null && !update;
+        WWGnlUtilities.archiveComposite(fileName, autoDownloadAndSave); 
         WWContext.getInstance().fireReloadCompositeTree();
         WWContext.getInstance().fireReloadFaxTree();
         WWContext.getInstance().fireReloadGRIBTree();
@@ -4950,7 +4951,7 @@ public class CommandPanel
     return nbComponents;
   }
   
-  public void restoreFromPattern(String fileName)
+  public void createFromPattern(String fileName)
   {
     try
     {
@@ -5418,6 +5419,41 @@ public class CommandPanel
         if (xScroll != 0 || yScroll != 0)
         {
           chartPanelScrollPane.getViewport().setViewPosition(new Point(xScroll, yScroll));
+        }
+        // Done. Should we save it?
+        System.out.println("-- Composite [" + fileName + "] created. Saving?");
+//      System.out.println("Default Composite: [" + ((ParamPanel.DataFile) ParamPanel.data[ParamData.LOAD_COMPOSITE_STARTUP][1]).toString() + "]");
+        boolean autoSaveDefaultComposite = ((String)ParamPanel.data[ParamData.AUTO_SAVE_DEFAULT_COMPOSITE][1]).trim().length() > 0;
+        if (((ParamPanel.DataFile) ParamPanel.data[ParamData.LOAD_COMPOSITE_STARTUP][1]).toString().equals(fileName) && autoSaveDefaultComposite)
+        {
+          try
+          {
+            System.out.println("-- Created from [" + fileName + "]. Saving!");
+            String compositeDir = ((ParamPanel.DataDirectory)ParamPanel.data[ParamData.COMPOSITE_ROOT_DIR][1]).toString();
+            String bigPattern = ((String)ParamPanel.data[ParamData.AUTO_SAVE_DEFAULT_COMPOSITE][1]);
+            String[] patternElements = bigPattern.split("\\|");
+            String dir = compositeDir + patternElements[0].trim(); // "/yyyy/MM-MMM";
+            String prefix = patternElements[1].trim();             // "Auto_";
+            String pattern =patternElements[2].trim();             // "yyyy_MM_dd_HH_mm_ss_z";
+            String ext = patternElements[3].trim();                // "waz";
+            Date now = new Date();
+            dir = WWGnlUtilities.translatePath(dir, now).replace('/', File.separatorChar);
+            SimpleDateFormat sdf = new SimpleDateFormat(pattern);
+            String saveAsName = dir + File.separator + prefix + sdf.format(now) + "." + ext;
+            
+            File faxDir = new File(dir);
+            if (!faxDir.exists())
+              faxDir.mkdirs();
+            
+            runStorageThread(false, saveAsName);
+            System.out.println("-- Saved as [" + saveAsName + "]");
+          }
+          catch (Exception ex)
+          {
+            String message = "Error: " + ex.getLocalizedMessage() + "\nfor [" + 
+                            ((String)ParamPanel.data[ParamData.AUTO_SAVE_DEFAULT_COMPOSITE][1]) + "]";
+            JOptionPane.showMessageDialog(this, message, "Auto-save", JOptionPane.ERROR_MESSAGE);            
+          }
         }
       }
     }
