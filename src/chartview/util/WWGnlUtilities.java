@@ -1701,7 +1701,12 @@ public class WWGnlUtilities
         {
           // Delete if successful
           System.out.println("Deleting " + updateFile.getAbsolutePath());
-          updateFile.delete();
+          boolean b = updateFile.delete();
+          if (!b)
+          {
+            System.out.println("(Will delete on exit)");
+            updateFile.deleteOnExit();
+          }
         }
       }
       Object topFrame = WWContext.getInstance().getMasterTopFrame();
@@ -3679,6 +3684,31 @@ public class WWGnlUtilities
     Point r = new Point(center.x + rotatedX, 
                         center.y + rotatedY);
     return r;
+  }
+
+  public final static long NB_S_PER_MIN  = 60L;
+  public final static long NB_S_PER_HOUR = 60 * NB_S_PER_MIN;
+  public final static long NB_S_PER_DAY  = 24 * NB_S_PER_HOUR;
+  
+  /**
+   *
+   * @param diff in seconds
+   * @return
+   */
+  public static String formatTimeDiff(long diff)
+  {
+    String ret = "";
+    int nbDay  = (int)(diff / NB_S_PER_DAY);
+    int nbHour = (int)((diff - (nbDay * NB_S_PER_DAY)) / NB_S_PER_HOUR);
+    int nbMin  = (int)((diff - (nbDay * NB_S_PER_DAY) - (nbHour * NB_S_PER_HOUR)) / NB_S_PER_MIN);
+    if (nbDay > 0)
+      ret += (Integer.toString(nbDay) + " " + (nbDay>1?buildMessage("day_s"):buildMessage("day")) + " ");
+    if (nbHour > 0) // || nbDay > 0)
+      ret += (Integer.toString(nbHour) + " " + (nbHour>1?buildMessage("hour_s"):buildMessage("hour")) + " ");
+    if (nbMin > 0) // || nbHour > 0 || nbDay > 0)
+      ret += (Integer.toString(nbMin) + " " + (nbMin>1?buildMessage("minute_s"):buildMessage("minute")));
+  //  System.out.println("Diff:" + diff + ", :" + ret);
+    return ret;
   }
 
   public static void main(String[] args)

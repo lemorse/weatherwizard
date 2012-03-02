@@ -45,6 +45,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -212,7 +213,7 @@ public class ChartAdjust
     Date compiledDate = null;
     try
     {
-      SimpleDateFormat sdf = new SimpleDateFormat("E MM/dd/yyyy HH:mm:ss.SS");
+      SimpleDateFormat sdf = new SimpleDateFormat("E MM/dd/yyyy HH:mm:ss.SS", Locale.ENGLISH);
       sdf.setTimeZone(TimeZone.getTimeZone("Pacific/Los_Angeles"));
       compiledDate = sdf.parse(lastModified);
     }
@@ -221,7 +222,7 @@ public class ChartAdjust
       // From the class ? like Sun, 19 Feb 2012 03:21:22 GMT 
       try
       {
-        SimpleDateFormat sdf = new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss Z");
+        SimpleDateFormat sdf = new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
         sdf.setTimeZone(TimeZone.getTimeZone("Pacific/Los_Angeles"));
         compiledDate = sdf.parse(lastModified);        
       }
