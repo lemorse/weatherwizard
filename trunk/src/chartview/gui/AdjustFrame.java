@@ -2151,6 +2151,8 @@ public class AdjustFrame
             try 
             { 
               System.out.println("-- Taking a " + interval + " minute(s) nap (" + Long.toString(1000L * 60L * (long)interval) + " ms)");
+              String mess = WWGnlUtilities.buildMessage("next-download") + " " + WWGnlUtilities.formatTimeDiff(interval * 60); //"Next automatic download in " + Integer.toString(interval) + " minute(s)";
+              WWContext.getInstance().fireSetStatus(mess);
               Thread.sleep(1000L * 60L * interval); 
               System.out.println("-- Thread " + this.getName() + " waking up.");
             } 
