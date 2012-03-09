@@ -81,6 +81,7 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -224,7 +225,13 @@ public class CommandPanel
   private float gribUserOpacity         = 0.75f; // ((Float) ParamPanel.data[ParamData.FAX_TRANSPARENCY][1]).floatValue();
 
   protected JCheckBox[] compositeCheckBox = null;
+  protected JRadioButton[] compositeRadioButton = null;
+  protected ButtonGroup buttonGroup = new ButtonGroup();
   protected JCheckBox[] contourCheckBox = null;
+  
+  public final static int CHECKBOX_OPTION    = 0;
+  public final static int RADIOBUTTON_OPTION = 1;
+  private int checkBoxPanelOption = CHECKBOX_OPTION;
   
   protected static Color initialGribWindBaseColor = (Color) ParamPanel.data[ParamData.GRIB_WIND_COLOR][1];
   protected static Color initialGribCurrentBaseColor = (Color) ParamPanel.data[ParamData.GRIB_CURRENT_COLOR][1];
@@ -271,6 +278,7 @@ public class CommandPanel
   private boolean settingGRIBInfo = false;
 
   private CommandPanelPopup popup = null;
+  private CheckBoxPanelPopup cbpPopup = null;
   
   private String tooltipMess = null;
   private boolean replace = false;
@@ -722,6 +730,24 @@ public class CommandPanel
       });    
     
     checkBoxCompositePanel.setLayout(new GridBagLayout());
+    checkBoxCompositePanel.setToolTipText(WWGnlUtilities.buildMessage("check-box-panel-tooltip"));
+    checkBoxCompositePanel.addMouseListener(new MouseAdapter()
+      {
+        @Override
+        public void mouseClicked(MouseEvent me)
+        {
+//        super.mouseClicked(me);
+          int mask = me.getModifiers();
+          if ((mask & MouseEvent.BUTTON2_MASK) != 0 || (mask & MouseEvent.BUTTON3_MASK) != 0) // Right click
+          {
+            {
+              cbpPopup = new CheckBoxPanelPopup(instance, me.getX(), me.getY());
+            }
+            cbpPopup.show(checkBoxCompositePanel, me.getX(), me.getY());
+            me.consume();
+          }
+        }
+      });
     bottomPanel.setLayout(new BorderLayout());
     rightVerticalPanel.setLayout(new BorderLayout());
     
@@ -990,6 +1016,14 @@ public class CommandPanel
             checkBoxCompositePanel.remove(compositeCheckBox[i]);
         }
       }
+      if (compositeRadioButton != null)
+      {
+        for (int i=0; i<compositeRadioButton.length; i++)
+        {
+          if (compositeRadioButton[i] != null)
+            checkBoxCompositePanel.remove(compositeRadioButton[i]);
+        }
+      }
       checkBoxCompositePanel.repaint();
     }
   }
@@ -1025,42 +1059,94 @@ public class CommandPanel
     }
     gribOpacitySlider.setEnabled(wgd != null);
 
-    compositeCheckBox = new JCheckBox[nbFaxes + EXTRA_CHECK_BOXES + (wgd!=null?1:0)]; 
-
+    if (checkBoxPanelOption == CHECKBOX_OPTION)
+    {
+      compositeCheckBox = new JCheckBox[nbFaxes + EXTRA_CHECK_BOXES + (wgd!=null?1:0)]; 
+    }
+    if (checkBoxPanelOption == RADIOBUTTON_OPTION)
+    {
+      compositeRadioButton = new JRadioButton[nbFaxes];
+      compositeCheckBox = new JCheckBox[EXTRA_CHECK_BOXES + (wgd!=null?1:0)]; 
+    }
+    
     for (int i=0; faxes != null && faxes.length > 0 && i<faxes.length; i++)
     {
       if (faxes[i] == null)
         continue;
-      compositeCheckBox[i] = new JCheckBox("");
-      compositeCheckBox[i].setBackground(faxes[i].getColor());
-//    compositeCheckBox[i].setForeground(faxes[i].getColor());
-//    compositeCheckBox[i].setBorderPaintedFlat(false);
-      compositeCheckBox[i].setSelected(faxes[i].isShow());
-      final int fIdx = i;
-      compositeCheckBox[i].addActionListener(new ActionListener()
-          {
-            public void actionPerformed(ActionEvent e)
+      if (checkBoxPanelOption == CHECKBOX_OPTION)
+      {
+        compositeCheckBox[i] = new JCheckBox("");
+        compositeCheckBox[i].setBackground(faxes[i].getColor());
+  //    compositeCheckBox[i].setForeground(faxes[i].getColor());
+  //    compositeCheckBox[i].setBorderPaintedFlat(false);
+        compositeCheckBox[i].setSelected(faxes[i].isShow());
+        final int fIdx = i;
+        compositeCheckBox[i].addActionListener(new ActionListener()
             {
-//            System.out.println("Fax[] " + (faxCheckBox[fIdx].isSelected()?"show":"hide"));
-              faxImage[fIdx].show = compositeCheckBox[fIdx].isSelected();
-              chartPanel.repaint();
-            }
-          });          
-      String tooltip = faxes[i].getTitle();
-      if (tooltip == null || tooltip.trim().length() == 0)
-        tooltip = faxes[i].getComment();
-      if (tooltip.trim().length() == 0)
-        tooltip = faxes[i].getValue();
-      if (tooltip.indexOf("/") > -1)
-        tooltip = tooltip.substring(tooltip.lastIndexOf("/") + 1);
-      compositeCheckBox[i].setToolTipText(tooltip);
-      checkBoxCompositePanel.add(compositeCheckBox[i],
-                           new GridBagConstraints(0, i, 1, 1, 0.0, 0.0, 
-                                                  GridBagConstraints.CENTER, 
-                                                  GridBagConstraints.NONE, 
-                                                  new Insets(5, 5, 5, 5), 0, 0));
+              public void actionPerformed(ActionEvent e)
+              {
+  //            System.out.println("Fax[] " + (faxCheckBox[fIdx].isSelected()?"show":"hide"));
+                faxImage[fIdx].show = compositeCheckBox[fIdx].isSelected();
+                chartPanel.repaint();
+              }
+            });          
+        String tooltip = faxes[i].getTitle();
+        if (tooltip == null || tooltip.trim().length() == 0)
+          tooltip = faxes[i].getComment();
+        if (tooltip.trim().length() == 0)
+          tooltip = faxes[i].getValue();
+        if (tooltip.indexOf("/") > -1)
+          tooltip = tooltip.substring(tooltip.lastIndexOf("/") + 1);
+        compositeCheckBox[i].setToolTipText(tooltip);
+        checkBoxCompositePanel.add(compositeCheckBox[i],
+                             new GridBagConstraints(0, i, 1, 1, 0.0, 0.0, 
+                                                    GridBagConstraints.CENTER, 
+                                                    GridBagConstraints.NONE, 
+                                                    new Insets(5, 5, 5, 5), 0, 0));
+      }
+      if (checkBoxPanelOption == RADIOBUTTON_OPTION)
+      {
+        compositeRadioButton[i] = new JRadioButton("");
+        compositeRadioButton[i].setBackground(faxes[i].getColor());
+      //    compositeCheckBox[i].setForeground(faxes[i].getColor());
+      //    compositeCheckBox[i].setBorderPaintedFlat(false);
+        compositeRadioButton[i].setSelected(i == 0);
+        faxImage[i].show = (i == 0);
+        final int fIdx = i;
+        compositeRadioButton[i].addActionListener(new ActionListener()
+            {
+              public void actionPerformed(ActionEvent e)
+              {
+      //        System.out.println("Fax[] " + (faxCheckBox[fIdx].isSelected()?"show":"hide"));
+      //        faxImage[fIdx].show = compositeRadioButton[fIdx].isSelected(); 
+                for (int i = 0; i<faxImage.length; i++)
+                  faxImage[i].show = compositeRadioButton[i].isSelected();
+                chartPanel.repaint();
+              }
+            });          
+        String tooltip = faxes[i].getTitle();
+        if (tooltip == null || tooltip.trim().length() == 0)
+          tooltip = faxes[i].getComment();
+        if (tooltip.trim().length() == 0)
+          tooltip = faxes[i].getValue();
+        if (tooltip.indexOf("/") > -1)
+          tooltip = tooltip.substring(tooltip.lastIndexOf("/") + 1);
+        compositeRadioButton[i].setToolTipText(tooltip);
+        checkBoxCompositePanel.add(compositeRadioButton[i],
+                             new GridBagConstraints(0, i, 1, 1, 0.0, 0.0, 
+                                                    GridBagConstraints.CENTER, 
+                                                    GridBagConstraints.NONE, 
+                                                    new Insets(5, 5, 5, 5), 0, 0));
+        buttonGroup.add(compositeRadioButton[i]);
+      }
     }
-    int i = (faxes==null?0:faxes.length);
+    if (checkBoxPanelOption == RADIOBUTTON_OPTION)
+    {
+      for (int i=0; i<compositeRadioButton.length; i++)
+        compositeRadioButton[i].setSelected(i == 0);
+    }
+    int i = (faxes==null?0:(checkBoxPanelOption == CHECKBOX_OPTION?faxes.length:0));
+    int pos = (faxes==null?0:faxes.length);
     if (wgd != null) // One for the GRIBs
     {
       final int cbIdx = i;
@@ -1081,13 +1167,13 @@ public class CommandPanel
       compositeCheckBox[i].setToolTipText(tooltip);
       compositeCheckBox[i].setToolTipText("GRIB");
       checkBoxCompositePanel.add(compositeCheckBox[i],
-                           new GridBagConstraints(0, i, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, 
+                           new GridBagConstraints(0, pos++, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, 
                                                   new Insets(5, 5, 5, 5), 0, 0));      
     }
     // Add 5, for the chart, and for the grid, places, sailmail stations, weather stations
     if (compositeCheckBox == null)
       compositeCheckBox = new JCheckBox[EXTRA_CHECK_BOXES];
-    i = (faxes==null?0:faxes.length) + (wgd!=null?1:0);
+    i = (faxes==null?0:(checkBoxPanelOption == CHECKBOX_OPTION?faxes.length:0)) + (wgd!=null?1:0);
     { // Chart
       final int cbIdx = i;
       compositeCheckBox[i] = new JCheckBox("");
@@ -1104,7 +1190,7 @@ public class CommandPanel
       String tooltip = WWGnlUtilities.buildMessage("show-chart");
       compositeCheckBox[i].setToolTipText(tooltip);
       checkBoxCompositePanel.add(compositeCheckBox[i],
-                           new GridBagConstraints(0, i, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, 
+                           new GridBagConstraints(0, pos++, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, 
                                                   new Insets(5, 5, 5, 5), 0, 0));
     }
     i++;
@@ -1124,7 +1210,7 @@ public class CommandPanel
       String tooltip = WWGnlUtilities.buildMessage("show-grid");
       compositeCheckBox[i].setToolTipText(tooltip);
       checkBoxCompositePanel.add(compositeCheckBox[i],
-                           new GridBagConstraints(0, i, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, 
+                           new GridBagConstraints(0, pos++, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, 
                                                   new Insets(5, 5, 5, 5), 0, 0));
     }
     i++;
@@ -1144,7 +1230,7 @@ public class CommandPanel
       String tooltip = WWGnlUtilities.buildMessage("show-places");
       compositeCheckBox[i].setToolTipText(tooltip);
       checkBoxCompositePanel.add(compositeCheckBox[i],
-                           new GridBagConstraints(0, i, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, 
+                           new GridBagConstraints(0, pos++, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, 
                                                   new Insets(5, 5, 5, 5), 0, 0));
     }
     i++;
@@ -1164,7 +1250,7 @@ public class CommandPanel
       String tooltip = WWGnlUtilities.buildMessage("show-sailmail");
       compositeCheckBox[i].setToolTipText(tooltip);
       checkBoxCompositePanel.add(compositeCheckBox[i],
-                           new GridBagConstraints(0, i, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, 
+                           new GridBagConstraints(0, pos++, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, 
                                                   new Insets(5, 5, 5, 5), 0, 0));
     }
     i++;
@@ -1184,7 +1270,7 @@ public class CommandPanel
       String tooltip = WWGnlUtilities.buildMessage("show-weather-station");
       compositeCheckBox[i].setToolTipText(tooltip);
       checkBoxCompositePanel.add(compositeCheckBox[i],
-                           new GridBagConstraints(0, i, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, 
+                           new GridBagConstraints(0, pos++, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, 
                                                   new Insets(5, 5, 5, 5), 0, 0));
     }
   }
@@ -3926,6 +4012,10 @@ public class CommandPanel
     scroll.setAttribute("x", Integer.toString(chartPanelScrollPane.getViewport().getViewPosition().x));
     scroll.setAttribute("y", Integer.toString(chartPanelScrollPane.getViewport().getViewPosition().y));
     
+    XMLElement faxOption = (XMLElement)storage.createElement("fax-option");    
+    root.appendChild(faxOption);
+    faxOption.setAttribute("value", (getCheckBoxPanelOption() == CHECKBOX_OPTION?"CHECKBOX":"RADIOBUTTON"));
+
     // Boat position?
     if (boatPosition != null)
     {
@@ -4031,6 +4121,7 @@ public class CommandPanel
       else
         System.out.println("Ooops!");
     }
+    WWContext.getInstance().fireSetCompositeFileName(fileName);  
     WWContext.getInstance().fireSetLoading(false, "Please wait...");               
   }
   
@@ -4620,6 +4711,22 @@ public class CommandPanel
           ignore.printStackTrace();
           doc.print(System.err);
         }
+        try
+        {
+          XMLElement faxOption = (XMLElement)(doc.selectNodes("//fax-option").item(0));
+          String opt = faxOption.getAttribute("value");
+          if (opt.equals("CHECKBOX"))
+            setCheckBoxPanelOption(CHECKBOX_OPTION);
+          else if (opt.equals("RADIOBUTTON"))
+            setCheckBoxPanelOption(RADIOBUTTON_OPTION);
+          else
+            System.out.println("Unknown option [" + opt + "]");
+        }
+        catch (Exception ignore) 
+        {
+          ignore.printStackTrace();
+          doc.print(System.err);
+        }
         
         // Boat Position?
         if ((withBoatAndTrack || option.equals(TwoFilePanel.EVERY_THING)) && doc.selectNodes("//boat-position").getLength() == 1)
@@ -5065,6 +5172,21 @@ public class CommandPanel
         }
         catch (Exception ignore) { }
         
+        try
+        {
+          XMLElement faxOption = (XMLElement)(doc.selectNodes("//fax-option").item(0));
+          String opt = faxOption.getAttribute("value");
+          if (opt.equals("CHECKBOX"))
+            setCheckBoxPanelOption(CHECKBOX_OPTION);
+          else if (opt.equals("RADIOBUTTON"))
+            setCheckBoxPanelOption(RADIOBUTTON_OPTION);
+          else
+            System.out.println("Unknown option [" + opt + "]");
+        }
+        catch (Exception ignore) 
+        {
+        }        
+        
         if (chartPanel.getProjection() != ChartPanel.GLOBE_VIEW &&
             chartPanel.getProjection() != ChartPanel.SATELLITE_VIEW)
           chartPanel.setWidthFromChart(nLat, sLat, wLong, eLong);
@@ -5157,6 +5279,8 @@ public class CommandPanel
                     internStr = WWContext.BG_MERCATOR_GREENWICH_CENTERED; 
                   else if (internStr.equals(WWContext.BG_MERCATOR_ANTIMERIDIAN_CENTERED_ALIAS))
                     internStr = WWContext.BG_MERCATOR_ANTIMERIDIAN_CENTERED; 
+                  else if (internStr.equals(WWContext.BG_MERCATOR_NE_ATLANTIC_ALIAS))
+                    internStr = WWContext.BG_MERCATOR_NE_ATLANTIC; 
                   URL intern = new URL(internStr);
                   Image image = null;
                   try
@@ -5681,282 +5805,303 @@ public class CommandPanel
                 
         double gribStepX = gribData.getStepX(), gribStepY = gribData.getStepY();
 //      System.out.println("GRIB Rendering: stepX=" + gribStepX + ", stepY=" + gribStepY);
-        for (int h=0; gribData.getGribPointData() != null && h<gribData.getGribPointData().length; h++)
+        try
         {
-          // TASK It seems that the next lines throws an NPE some times, or an IndexOutOfBoundsException...
-          for (int w=0; gribData.getGribPointData()[h] != null && w<gribData.getGribPointData()[h].length; w++)
+          for (int h=0; gribData.getGribPointData() != null && h<gribData.getGribPointData().length; h++)
           {
-            if (gribData.getGribPointData()[h][w] != null) // Border of the smoothed frame
+            try
             {
-              double lat = gribData.getGribPointData()[h][w].getLat();
-              double lng = gribData.getGribPointData()[h][w].getLng();
-              Point gp = chartPanel.getPanelPoint(lat, lng);
-              // Wind
-              double speed = 0D, dir = 0D;
-              if (gribData.getGribPointData()[h][w].getTwd() != -1D &&
-                  gribData.getGribPointData()[h][w].getTws() != -1D)
+              // TASK It seems that the next lines throws an NPE some times, or an IndexOutOfBoundsException...
+              for (int w=0; gribData.getGribPointData()[h] != null && w<gribData.getGribPointData()[h].length; w++)
               {
-                speed = gribData.getGribPointData()[h][w].getTws();
-                dir = gribData.getGribPointData()[h][w].getTwd();
-              }
-              else
-              {
-                float x = gribData.getGribPointData()[h][w].getU();
-                float y = -gribData.getGribPointData()[h][w].getV();
-                speed = Math.sqrt(x * x + y * y);
-                speed *= 3.60D;
-                speed /= 1.852D;
-                dir = WWGnlUtilities.getDir(x, y);
-              }
-              // Current
-              double cSpeed = 0D, cDir = 0D;
-              if (gribData.getGribPointData()[h][w].getCdr() != -1D &&
-                  gribData.getGribPointData()[h][w].getCsp() != -1D)
-              {
-                cSpeed = gribData.getGribPointData()[h][w].getCsp();
-                cDir = gribData.getGribPointData()[h][w].getCdr();
-              }
-              else
-              {
-                float x = gribData.getGribPointData()[h][w].getUOgrd();
-                float y = -gribData.getGribPointData()[h][w].getVOgrd();
-                cSpeed = Math.sqrt(x * x + y * y);
-                cSpeed *= 3.60D;
-                cSpeed /= 1.852D;
-                cDir = WWGnlUtilities.getDir(x, y);
-              }
-  //          gr.setColor(getWindColor(speed));
-              // We have speed, direction, wind color
-              if ("WIND".equals(dataOption))
-              {
-  //            gr.setColor(GnlUtilities.getWindColor(coloredWind, initialGribWindBaseColor, speed, false));
-                if (drawWindColorBackground)
+                if (gribData.getGribPointData()[h][w] != null) // Border of the smoothed frame
                 {
-                  double stpY = (gribStepY); // / (double)smooth);
-                  double stpX = (gribStepX); //  / (double)smooth);
-  
-                  double topLeftLat = lat + (stpY / 2D);
-                  double topLeftLng = lng - (stpX / 2D);
-                  double bottomRightLat = topLeftLat - stpY;
-                  double bottomRightLng = topLeftLng + stpX;
-                  // TopLeft
-                  Point tl = chartPanel.getPanelPoint(topLeftLat, topLeftLng);
-                  // Bottom Right
-                  Point br = chartPanel.getPanelPoint(bottomRightLat, bottomRightLng);
-
-                  Point tr = null; // Top Right
-                  Point bl = null; // Bottom Left
-                  if (chartPanel.getProjection() != ChartPanel.ANAXIMANDRE &&
-                      chartPanel.getProjection() != ChartPanel.MERCATOR)
+                  double lat = gribData.getGribPointData()[h][w].getLat();
+                  double lng = gribData.getGribPointData()[h][w].getLng();
+                  Point gp = chartPanel.getPanelPoint(lat, lng);
+                  // Wind
+                  double speed = 0D, dir = 0D;
+                  if (gribData.getGribPointData()[h][w].getTwd() != -1D &&
+                      gribData.getGribPointData()[h][w].getTws() != -1D)
                   {
-                    tr = chartPanel.getPanelPoint(topLeftLat, bottomRightLng);
-                    bl = chartPanel.getPanelPoint(bottomRightLat, topLeftLng);
+                    speed = gribData.getGribPointData()[h][w].getTws();
+                    dir = gribData.getGribPointData()[h][w].getTwd();
                   }
-
-                  WWGnlUtilities.drawWind(gr, 
-                                          gp.x, 
-                                          gp.y,                                       
-                                          speed, 
-                                          dir, 
-                                          coloredWind, 
-                                          initialGribWindBaseColor, 
-                                          drawHeavyDot, 
-                                          drawWindColorBackground, 
-                                          displayWindSpeedValue, 
-                                          useThickWind,
-                                          tl, 
-                                          br,
-                                          tr,
-                                          bl,
-                                          gribUserOpacity);
-                }
-                else
-                  WWGnlUtilities.drawWind(gr, 
-                                        gp.x, 
-                                        gp.y,                                       
-                                        speed, 
-                                        dir, 
-                                        coloredWind, 
-                                        initialGribWindBaseColor, 
-                                        drawHeavyDot, 
-                                        drawWindColorBackground, 
-                                        displayWindSpeedValue,
-                                        useThickWind,
-                                        gribUserOpacity); 
-              }
-              else if ("AIRTMP".equals(dataOption))
-              {
-                double temperature = /*(double)*/(gribData.getGribPointData()[h][w].getAirtmp() - 273D);
-                gr.setColor(WWGnlUtilities.getTemperatureColor(temperature, boundaries[TEMPERATURE][1], boundaries[TEMPERATURE][0]));
-                // 
-                double topLeftLat = lat + (gribStepY / 2D);
-                double topLeftLng = lng - (gribStepX / 2D);
-                double bottomRightLat = topLeftLat - (gribStepY);
-                double bottomRightLng = topLeftLng + (gribStepX);
-                Point tl = chartPanel.getPanelPoint(topLeftLat, topLeftLng);
-                Point br = chartPanel.getPanelPoint(bottomRightLat, bottomRightLng);
-                Point tr = null; // Top Right
-                Point bl = null; // Bottom Left
-                if (chartPanel.getProjection() != ChartPanel.ANAXIMANDRE &&
-                    chartPanel.getProjection() != ChartPanel.MERCATOR)
-                {
-                  tr = chartPanel.getPanelPoint(topLeftLat, bottomRightLng);
-                  bl = chartPanel.getPanelPoint(bottomRightLat, topLeftLng);
-                }
-
-                WWGnlUtilities.drawGRIBData(gr, gp.x, gp.y, tl, br, tr, bl, gribUserOpacity); 
-              }
-              else if ("500HGT".equals(dataOption))
-              {
-                double altitude = /*(double)*/(gribData.getGribPointData()[h][w].getHgt());
-                gr.setColor(WWGnlUtilities.get500mbColor(altitude, boundaries[HGT500][1], boundaries[HGT500][0]));
-                // 
-                double topLeftLat = lat + (gribStepY / 2D);
-                double topLeftLng = lng - (gribStepX / 2D);
-                double bottomRightLat = topLeftLat - (gribStepY);
-                double bottomRightLng = topLeftLng + (gribStepX);
-                Point tl = chartPanel.getPanelPoint(topLeftLat, topLeftLng);
-                Point br = chartPanel.getPanelPoint(bottomRightLat, bottomRightLng);
-                Point tr = null; // Top Right
-                Point bl = null; // Bottom Left
-                if (chartPanel.getProjection() != ChartPanel.ANAXIMANDRE &&
-                    chartPanel.getProjection() != ChartPanel.MERCATOR)
-                {
-                  tr = chartPanel.getPanelPoint(topLeftLat, bottomRightLng);
-                  bl = chartPanel.getPanelPoint(bottomRightLat, topLeftLng);
-                }
-
-                WWGnlUtilities.drawGRIBData(gr, gp.x, gp.y, tl, br, tr, bl, gribUserOpacity);
-              }
-              else if ("WAVES".equals(dataOption))
-              {
-                // TASK What if array size is noyte is not the same?
-                double height = /*(double)*/(gribData.getGribPointData()[h][w].getWHgt());
-                gr.setColor(WWGnlUtilities.getWavesColor(height / 100D, boundaries[WAVES][1], boundaries[WAVES][0]));
-                // 
-                double topLeftLat = lat + (gribStepY / 2D);
-                double topLeftLng = lng - (gribStepX / 2D);
-                double bottomRightLat = topLeftLat - (gribStepY);
-                double bottomRightLng = topLeftLng + (gribStepX);
-                Point tl = chartPanel.getPanelPoint(topLeftLat, topLeftLng);
-                Point br = chartPanel.getPanelPoint(bottomRightLat, bottomRightLng);
-                Point tr = null; // Top Right
-                Point bl = null; // Bottom Left
-                if (chartPanel.getProjection() != ChartPanel.ANAXIMANDRE &&
-                    chartPanel.getProjection() != ChartPanel.MERCATOR)
-                {
-                  tr = chartPanel.getPanelPoint(topLeftLat, bottomRightLng);
-                  bl = chartPanel.getPanelPoint(bottomRightLat, topLeftLng);
-                }
-
-                WWGnlUtilities.drawGRIBData(gr, gp.x, gp.y, tl, br, tr, bl, gribUserOpacity); 
-              }
-              else if ("RAIN".equals(dataOption)) 
-              {
-                double height = /*(double)*/(gribData.getGribPointData()[h][w].getRain() * 3600D);
-                gr.setColor(WWGnlUtilities.getRainColor(height, boundaries[RAIN][1], boundaries[RAIN][0]));
-                // 
-                double topLeftLat = lat + ((gribStepY) / 2D);
-                double topLeftLng = lng - ((gribStepX) / 2D);
-                double bottomRightLat = topLeftLat - (gribStepY);
-                double bottomRightLng = topLeftLng + (gribStepX);
-                Point tl = chartPanel.getPanelPoint(topLeftLat, topLeftLng);
-                Point br = chartPanel.getPanelPoint(bottomRightLat, bottomRightLng);
-                Point tr = null; // Top Right
-                Point bl = null; // Bottom Left
-                if (chartPanel.getProjection() != ChartPanel.ANAXIMANDRE &&
-                    chartPanel.getProjection() != ChartPanel.MERCATOR)
-                {
-                  tr = chartPanel.getPanelPoint(topLeftLat, bottomRightLng);
-                  bl = chartPanel.getPanelPoint(bottomRightLat, topLeftLng);
-                }
-
-                WWGnlUtilities.drawGRIBData(gr, gp.x, gp.y, tl, br, tr, bl, gribUserOpacity);
-              }
-              else if ("PRMSL".equals(dataOption))
-              {
-                double pressure = (double)gribData.getGribPointData()[h][w].getPrmsl() / 100D;
-                gr.setColor(WWGnlUtilities.getPressureColor(pressure, boundaries[PRMSL][1], boundaries[PRMSL][0]));
-                // 
-                double topLeftLat = lat + ((gribStepY) / 2D);
-                double topLeftLng = lng - ((gribStepX) / 2D);
-                double bottomRightLat = topLeftLat - (gribStepY);
-                double bottomRightLng = topLeftLng + (gribStepX);
-                Point tl = chartPanel.getPanelPoint(topLeftLat, topLeftLng);
-                Point br = chartPanel.getPanelPoint(bottomRightLat, bottomRightLng);
-                Point tr = null; // Top Right
-                Point bl = null; // Bottom Left
-                if (chartPanel.getProjection() != ChartPanel.ANAXIMANDRE &&
-                    chartPanel.getProjection() != ChartPanel.MERCATOR)
-                {
-                  tr = chartPanel.getPanelPoint(topLeftLat, bottomRightLng);
-                  bl = chartPanel.getPanelPoint(bottomRightLat, topLeftLng);
-                }
-
-                WWGnlUtilities.drawGRIBData(gr, gp.x, gp.y, tl, br, tr, bl, gribUserOpacity);
-              }
-              else if ("CURRENT".equals(dataOption))
-              {
-//              gr.setColor(GnlUtilities.getWindColor(coloredWind, initialGribWindBaseColor, speed, false));
-                initialGribCurrentBaseColor = (Color) ParamPanel.data[ParamData.GRIB_CURRENT_COLOR][1];
-                if (drawWindColorBackground) 
-                {
-                  double stpY = (gribStepY); // / (double)smooth);
-                  double stpX = (gribStepX); //  / (double)smooth);
-              
-                  double topLeftLat = lat + (stpY / 2D);
-                  double topLeftLng = lng - (stpX / 2D);
-                  double bottomRightLat = topLeftLat - stpY;
-                  double bottomRightLng = topLeftLng + stpX;
-                  // TopLeft
-                  Point tl = chartPanel.getPanelPoint(topLeftLat, topLeftLng);
-                  // Bottom Right
-                  Point br = chartPanel.getPanelPoint(bottomRightLat, bottomRightLng);
-
-                  Point tr = null; // Top Right
-                  Point bl = null; // Bottom Left
-                  if (chartPanel.getProjection() != ChartPanel.ANAXIMANDRE &&
-                      chartPanel.getProjection() != ChartPanel.MERCATOR)
+                  else
                   {
-                    tr = chartPanel.getPanelPoint(topLeftLat, bottomRightLng);
-                    bl = chartPanel.getPanelPoint(bottomRightLat, topLeftLng);
+                    float x = gribData.getGribPointData()[h][w].getU();
+                    float y = -gribData.getGribPointData()[h][w].getV();
+                    speed = Math.sqrt(x * x + y * y);
+                    speed *= 3.60D;
+                    speed /= 1.852D;
+                    dir = WWGnlUtilities.getDir(x, y);
                   }
-
-                  WWGnlUtilities.drawCurrent(gr, 
-                                             gp.x, 
-                                             gp.y,                                       
-                                             cSpeed, // * 10, 
-                                             cDir, 
-                                             coloredCurrent, 
-                                             initialGribCurrentBaseColor, 
-                                             drawHeavyDot, 
-                                             drawWindColorBackground, 
-                                             displayWindSpeedValue, 
-                                             useThickWind,
-                                             tl, 
-                                             br,
-                                             tr,
-                                             bl,
-                                             gribUserOpacity);
+                  // Current
+                  double cSpeed = 0D, cDir = 0D;
+                  if (gribData.getGribPointData()[h][w].getCdr() != -1D &&
+                      gribData.getGribPointData()[h][w].getCsp() != -1D)
+                  {
+                    cSpeed = gribData.getGribPointData()[h][w].getCsp();
+                    cDir = gribData.getGribPointData()[h][w].getCdr();
+                  }
+                  else
+                  {
+                    float x = gribData.getGribPointData()[h][w].getUOgrd();
+                    float y = -gribData.getGribPointData()[h][w].getVOgrd();
+                    cSpeed = Math.sqrt(x * x + y * y);
+                    cSpeed *= 3.60D;
+                    cSpeed /= 1.852D;
+                    cDir = WWGnlUtilities.getDir(x, y);
+                  }
+      //          gr.setColor(getWindColor(speed));
+                  // We have speed, direction, wind color
+                  if ("WIND".equals(dataOption))
+                  {
+      //            gr.setColor(GnlUtilities.getWindColor(coloredWind, initialGribWindBaseColor, speed, false));
+                    if (drawWindColorBackground)
+                    {
+                      double stpY = (gribStepY); // / (double)smooth);
+                      double stpX = (gribStepX); //  / (double)smooth);
+      
+                      double topLeftLat = lat + (stpY / 2D);
+                      double topLeftLng = lng - (stpX / 2D);
+                      double bottomRightLat = topLeftLat - stpY;
+                      double bottomRightLng = topLeftLng + stpX;
+                      // TopLeft
+                      Point tl = chartPanel.getPanelPoint(topLeftLat, topLeftLng);
+                      // Bottom Right
+                      Point br = chartPanel.getPanelPoint(bottomRightLat, bottomRightLng);
+    
+                      Point tr = null; // Top Right
+                      Point bl = null; // Bottom Left
+                      if (chartPanel.getProjection() != ChartPanel.ANAXIMANDRE &&
+                          chartPanel.getProjection() != ChartPanel.MERCATOR)
+                      {
+                        tr = chartPanel.getPanelPoint(topLeftLat, bottomRightLng);
+                        bl = chartPanel.getPanelPoint(bottomRightLat, topLeftLng);
+                      }
+    
+                      WWGnlUtilities.drawWind(gr, 
+                                              gp.x, 
+                                              gp.y,                                       
+                                              speed, 
+                                              dir, 
+                                              coloredWind, 
+                                              initialGribWindBaseColor, 
+                                              drawHeavyDot, 
+                                              drawWindColorBackground, 
+                                              displayWindSpeedValue, 
+                                              useThickWind,
+                                              tl, 
+                                              br,
+                                              tr,
+                                              bl,
+                                              gribUserOpacity);
+                    }
+                    else
+                      WWGnlUtilities.drawWind(gr, 
+                                            gp.x, 
+                                            gp.y,                                       
+                                            speed, 
+                                            dir, 
+                                            coloredWind, 
+                                            initialGribWindBaseColor, 
+                                            drawHeavyDot, 
+                                            drawWindColorBackground, 
+                                            displayWindSpeedValue,
+                                            useThickWind,
+                                            gribUserOpacity); 
+                  }
+                  else if ("AIRTMP".equals(dataOption))
+                  {
+                    double temperature = /*(double)*/(gribData.getGribPointData()[h][w].getAirtmp() - 273D);
+                    gr.setColor(WWGnlUtilities.getTemperatureColor(temperature, boundaries[TEMPERATURE][1], boundaries[TEMPERATURE][0]));
+                    // 
+                    double topLeftLat = lat + (gribStepY / 2D);
+                    double topLeftLng = lng - (gribStepX / 2D);
+                    double bottomRightLat = topLeftLat - (gribStepY);
+                    double bottomRightLng = topLeftLng + (gribStepX);
+                    Point tl = chartPanel.getPanelPoint(topLeftLat, topLeftLng);
+                    Point br = chartPanel.getPanelPoint(bottomRightLat, bottomRightLng);
+                    Point tr = null; // Top Right
+                    Point bl = null; // Bottom Left
+                    if (chartPanel.getProjection() != ChartPanel.ANAXIMANDRE &&
+                        chartPanel.getProjection() != ChartPanel.MERCATOR)
+                    {
+                      tr = chartPanel.getPanelPoint(topLeftLat, bottomRightLng);
+                      bl = chartPanel.getPanelPoint(bottomRightLat, topLeftLng);
+                    }
+    
+                    WWGnlUtilities.drawGRIBData(gr, gp.x, gp.y, tl, br, tr, bl, gribUserOpacity); 
+                  }
+                  else if ("500HGT".equals(dataOption))
+                  {
+                    double altitude = /*(double)*/(gribData.getGribPointData()[h][w].getHgt());
+                    gr.setColor(WWGnlUtilities.get500mbColor(altitude, boundaries[HGT500][1], boundaries[HGT500][0]));
+                    // 
+                    double topLeftLat = lat + (gribStepY / 2D);
+                    double topLeftLng = lng - (gribStepX / 2D);
+                    double bottomRightLat = topLeftLat - (gribStepY);
+                    double bottomRightLng = topLeftLng + (gribStepX);
+                    Point tl = chartPanel.getPanelPoint(topLeftLat, topLeftLng);
+                    Point br = chartPanel.getPanelPoint(bottomRightLat, bottomRightLng);
+                    Point tr = null; // Top Right
+                    Point bl = null; // Bottom Left
+                    if (chartPanel.getProjection() != ChartPanel.ANAXIMANDRE &&
+                        chartPanel.getProjection() != ChartPanel.MERCATOR)
+                    {
+                      tr = chartPanel.getPanelPoint(topLeftLat, bottomRightLng);
+                      bl = chartPanel.getPanelPoint(bottomRightLat, topLeftLng);
+                    }
+    
+                    WWGnlUtilities.drawGRIBData(gr, gp.x, gp.y, tl, br, tr, bl, gribUserOpacity);
+                  }
+                  else if ("WAVES".equals(dataOption))
+                  {
+                    // TASK What if array size is noyte is not the same?
+                    double height = /*(double)*/(gribData.getGribPointData()[h][w].getWHgt());
+                    gr.setColor(WWGnlUtilities.getWavesColor(height / 100D, boundaries[WAVES][1], boundaries[WAVES][0]));
+                    // 
+                    double topLeftLat = lat + (gribStepY / 2D);
+                    double topLeftLng = lng - (gribStepX / 2D);
+                    double bottomRightLat = topLeftLat - (gribStepY);
+                    double bottomRightLng = topLeftLng + (gribStepX);
+                    Point tl = chartPanel.getPanelPoint(topLeftLat, topLeftLng);
+                    Point br = chartPanel.getPanelPoint(bottomRightLat, bottomRightLng);
+                    Point tr = null; // Top Right
+                    Point bl = null; // Bottom Left
+                    if (chartPanel.getProjection() != ChartPanel.ANAXIMANDRE &&
+                        chartPanel.getProjection() != ChartPanel.MERCATOR)
+                    {
+                      tr = chartPanel.getPanelPoint(topLeftLat, bottomRightLng);
+                      bl = chartPanel.getPanelPoint(bottomRightLat, topLeftLng);
+                    }
+    
+                    WWGnlUtilities.drawGRIBData(gr, gp.x, gp.y, tl, br, tr, bl, gribUserOpacity); 
+                  }
+                  else if ("RAIN".equals(dataOption)) 
+                  {
+                    double height = /*(double)*/(gribData.getGribPointData()[h][w].getRain() * 3600D);
+                    gr.setColor(WWGnlUtilities.getRainColor(height, boundaries[RAIN][1], boundaries[RAIN][0]));
+                    // 
+                    double topLeftLat = lat + ((gribStepY) / 2D);
+                    double topLeftLng = lng - ((gribStepX) / 2D);
+                    double bottomRightLat = topLeftLat - (gribStepY);
+                    double bottomRightLng = topLeftLng + (gribStepX);
+                    Point tl = chartPanel.getPanelPoint(topLeftLat, topLeftLng);
+                    Point br = chartPanel.getPanelPoint(bottomRightLat, bottomRightLng);
+                    Point tr = null; // Top Right
+                    Point bl = null; // Bottom Left
+                    if (chartPanel.getProjection() != ChartPanel.ANAXIMANDRE &&
+                        chartPanel.getProjection() != ChartPanel.MERCATOR)
+                    {
+                      tr = chartPanel.getPanelPoint(topLeftLat, bottomRightLng);
+                      bl = chartPanel.getPanelPoint(bottomRightLat, topLeftLng);
+                    }
+    
+                    WWGnlUtilities.drawGRIBData(gr, gp.x, gp.y, tl, br, tr, bl, gribUserOpacity);
+                  }
+                  else if ("PRMSL".equals(dataOption))
+                  {
+                    double pressure = (double)gribData.getGribPointData()[h][w].getPrmsl() / 100D;
+                    gr.setColor(WWGnlUtilities.getPressureColor(pressure, boundaries[PRMSL][1], boundaries[PRMSL][0]));
+                    // 
+                    double topLeftLat = lat + ((gribStepY) / 2D);
+                    double topLeftLng = lng - ((gribStepX) / 2D);
+                    double bottomRightLat = topLeftLat - (gribStepY);
+                    double bottomRightLng = topLeftLng + (gribStepX);
+                    Point tl = chartPanel.getPanelPoint(topLeftLat, topLeftLng);
+                    Point br = chartPanel.getPanelPoint(bottomRightLat, bottomRightLng);
+                    Point tr = null; // Top Right
+                    Point bl = null; // Bottom Left
+                    if (chartPanel.getProjection() != ChartPanel.ANAXIMANDRE &&
+                        chartPanel.getProjection() != ChartPanel.MERCATOR)
+                    {
+                      tr = chartPanel.getPanelPoint(topLeftLat, bottomRightLng);
+                      bl = chartPanel.getPanelPoint(bottomRightLat, topLeftLng);
+                    }
+    
+                    WWGnlUtilities.drawGRIBData(gr, gp.x, gp.y, tl, br, tr, bl, gribUserOpacity);
+                  }
+                  else if ("CURRENT".equals(dataOption))
+                  {
+    //              gr.setColor(GnlUtilities.getWindColor(coloredWind, initialGribWindBaseColor, speed, false));
+                    initialGribCurrentBaseColor = (Color) ParamPanel.data[ParamData.GRIB_CURRENT_COLOR][1];
+                    if (drawWindColorBackground) 
+                    {
+                      double stpY = (gribStepY); // / (double)smooth);
+                      double stpX = (gribStepX); //  / (double)smooth);
+                  
+                      double topLeftLat = lat + (stpY / 2D);
+                      double topLeftLng = lng - (stpX / 2D);
+                      double bottomRightLat = topLeftLat - stpY;
+                      double bottomRightLng = topLeftLng + stpX;
+                      // TopLeft
+                      Point tl = chartPanel.getPanelPoint(topLeftLat, topLeftLng);
+                      // Bottom Right
+                      Point br = chartPanel.getPanelPoint(bottomRightLat, bottomRightLng);
+    
+                      Point tr = null; // Top Right
+                      Point bl = null; // Bottom Left
+                      if (chartPanel.getProjection() != ChartPanel.ANAXIMANDRE &&
+                          chartPanel.getProjection() != ChartPanel.MERCATOR)
+                      {
+                        tr = chartPanel.getPanelPoint(topLeftLat, bottomRightLng);
+                        bl = chartPanel.getPanelPoint(bottomRightLat, topLeftLng);
+                      }
+    
+                      WWGnlUtilities.drawCurrent(gr, 
+                                                 gp.x, 
+                                                 gp.y,                                       
+                                                 cSpeed, // * 10, 
+                                                 cDir, 
+                                                 coloredCurrent, 
+                                                 initialGribCurrentBaseColor, 
+                                                 drawHeavyDot, 
+                                                 drawWindColorBackground, 
+                                                 displayWindSpeedValue, 
+                                                 useThickWind,
+                                                 tl, 
+                                                 br,
+                                                 tr,
+                                                 bl,
+                                                 gribUserOpacity);
+                    }
+                    else
+                      WWGnlUtilities.drawCurrent(gr, 
+                                                 gp.x, 
+                                                 gp.y,                                       
+                                                 cSpeed, // * 10, 
+                                                 cDir, 
+                                                 coloredCurrent, 
+                                                 initialGribCurrentBaseColor, 
+                                                 drawHeavyDot, 
+                                                 drawWindColorBackground, 
+                                                 displayWindSpeedValue,
+                                                 useThickWind,
+                                                 gribUserOpacity); 
+                  }
                 }
-                else
-                  WWGnlUtilities.drawCurrent(gr, 
-                                             gp.x, 
-                                             gp.y,                                       
-                                             cSpeed, // * 10, 
-                                             cDir, 
-                                             coloredCurrent, 
-                                             initialGribCurrentBaseColor, 
-                                             drawHeavyDot, 
-                                             drawWindColorBackground, 
-                                             displayWindSpeedValue,
-                                             useThickWind,
-                                             gribUserOpacity); 
+    //          else
+    //            System.out.println("Null DataPoint for [" + h + ", " + w + "]");
               }
             }
-//          else
-//            System.out.println("Null DataPoint for [" + h + ", " + w + "]");
+            catch (Exception ex1)
+            {
+              System.err.println("---------------------------------------------");
+              System.err.println("From thread [" + Thread.currentThread().getName() + "]");
+              System.err.println("gribData.getGribPointData():" + 
+                                 (gribData.getGribPointData()==null?"":"not ") + "null, h=" + 
+                                 Integer.toString(h) + ", gribData.getGribPointData().length:" + 
+                                 Integer.toString(gribData.getGribPointData().length));
+              ex1.printStackTrace();
+              System.err.println("---------------------------------------------");
+            }
           }
+        }
+        catch (Exception ex)
+        {
+          ex.printStackTrace();
         }
       } // gribData != null
 //    else
@@ -6232,7 +6377,7 @@ public class CommandPanel
       {
         if (showPlacesArray[i].booleanValue())
         {
-          chartPanel.postit(gr, ptLabels[i], gp.x, gp.y, Color.yellow);
+          chartPanel.postit(gr, ptLabels[i].replace("\\n", "\n"), gp.x, gp.y, Color.yellow);
           Color orig = gr.getColor();
           gr.setColor(Color.red);
           gr.drawOval(gp.x - 5, gp.y - 5, 10, 10);
@@ -6557,8 +6702,18 @@ public class CommandPanel
             thisPoint = next;
 //        System.out.println("ThisPoint now " + thisPoint.getPosition().toString());
         }
-      }      
-      String postit = WWGnlUtilities.SDF_UT_3.format(thisPoint.getDate());
+      }    
+      RoutingPoint previous = thisPoint.getAncestor();
+//      try { System.out.println("ThisPoint:" + WWGnlUtilities.SDF_UT_3.format(thisPoint.getDate()) + ", Next:" + WWGnlUtilities.SDF_UT_3.format(thisPoint.getAncestor().getDate())); }
+//      catch (Exception ex)
+//      { ex.printStackTrace(); }
+      String postit = "";
+      if (previous != null)
+      {
+        postit += (WWGnlUtilities.buildMessage("from") + ":" + WWGnlUtilities.SDF_UT_3.format(previous.getDate()) + "\n" +
+                   WWGnlUtilities.buildMessage("to")   + ":");
+      }
+      postit += WWGnlUtilities.SDF_UT_3.format(thisPoint.getDate());
       postit += ("\nWind:" + WWGnlUtilities.XXX12.format(thisPoint.getTws()) + " kts @ " + Integer.toString(thisPoint.getTwd()) + "\272t");
       postit += ("\nBSP :" + WWGnlUtilities.XXX12.format(thisPoint.getBsp()) + " kts");
       postit += ("\nHDG :" + Integer.toString(thisPoint.getHdg()) + "\272t");
@@ -8512,7 +8667,18 @@ public class CommandPanel
     this.gribFileName = "";
     this.chartPanel.repaint();    
   }
-  
+
+  public void setCheckBoxPanelOption(int checkBoxPanelOption)
+  {
+    this.checkBoxPanelOption = checkBoxPanelOption;
+    setCheckBoxes();
+  }
+
+  public int getCheckBoxPanelOption()
+  {
+    return checkBoxPanelOption;
+  }
+
   public static class FaxImage implements Cloneable
   {
     public Image faxImage;

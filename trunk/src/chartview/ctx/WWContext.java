@@ -63,6 +63,9 @@ public class WWContext
   public final static String BG_MERCATOR_ANTIMERIDIAN_CENTERED = CommandPanel.class.getResource("background/world.2.jpg").toString();
   public final static String BG_MERCATOR_ANTIMERIDIAN_CENTERED_ALIAS = "180_CENTERED_MERCATOR_BG";
   
+  public final static String BG_MERCATOR_NE_ATLANTIC = CommandPanel.class.getResource("background/NEAtlantic.png").toString();
+  public final static String BG_MERCATOR_NE_ATLANTIC_ALIAS = "BG_MERCATOR_NE_ATLANTIC_ALIAS";
+
   public final static String SAILMAIL_STATIONS = "sailmail-stations.xml";
   public final static String NOAA_STATIONS     = "noaa-stations.xml";
   
@@ -269,6 +272,16 @@ public class WWContext
       l.activeFaxChanged(ft);
     }    
   }
+  
+  public void fireSetCompositeFileName(String s)
+  {
+    for (int i=0; i < this.getListeners().size(); i++)
+    {
+      ApplicationEventListener l = this.getListeners().get(i);
+      l.setCompositeFileName(s);
+    }    
+  }
+  
   
   public void fireAllFaxesSelected()
   {

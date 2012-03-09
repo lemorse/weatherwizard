@@ -114,6 +114,7 @@ public abstract class ApplicationEventListener implements EventListener
   
   public void faxFileOpen(String str) {}
   public void compositeFileOpen(String str) {}
+  public void setCompositeFileName(String str) {}
   public void patternFileOpen(String str) {}
   public void predfinedFaxOpen(String str) {}
   public void addFaxImage(CommandPanel.FaxImage fi) {}

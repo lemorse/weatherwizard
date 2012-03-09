@@ -1115,6 +1115,20 @@ public class AdjustFrame
           // Activate save as menu item
           scaa.setEnabled(true);
         }
+        @Override
+        public void setCompositeFileName(final String fileName) // fileName : full path to the file
+        {
+          String justFileName = fileName; 
+          if (fileName.lastIndexOf(File.separatorChar) > 0)
+            justFileName = justFileName.substring(fileName.lastIndexOf(File.separatorChar) + 1);        
+        //        System.out.println("JustFileName:" + justFileName + " (idx:" + fileName.lastIndexOf(File.separatorChar) + ")");
+          masterTabPane.setTitleAt(masterTabPane.getSelectedIndex(), justFileName);
+          ((CompositeTabComponent)masterTabPane.getTabComponentAt(masterTabPane.getSelectedIndex())).setTabTitle(justFileName);
+        //        ((CompositeTabComponent)masterTabPane.getTabComponentAt(masterTabPane.getSelectedIndex())).setToolTipText(JTreeFilePanel.getCompositeBubble(justFileName, fileName));
+          masterTabPane.setToolTipTextAt(masterTabPane.getSelectedIndex(), JTreeFilePanel.getCompositeBubble(justFileName, fileName));
+          // Activate save as menu item
+          scaa.setEnabled(true);
+        }        
         
         @Override
         public void store()
@@ -1139,7 +1153,7 @@ public class AdjustFrame
           else
           {
 //          WWContext.getInstance().fireInterruptProcess();
-            if (false)
+            if (((Boolean)ParamPanel.data[ParamData.USE_GRAY_PANEL_SHIFT][1]).booleanValue())
             {
               synchronized (layers)
               {
@@ -1149,7 +1163,8 @@ public class AdjustFrame
                   try { Thread.sleep(5L); } catch (InterruptedException ex) {}
   //              System.out.print("," + i);
                   grayPanelY = i;
-                  layers.repaint();
+//                layers.repaint();
+                  grayTransparentPanel.repaint();
                 }
               }
             }
