@@ -336,6 +336,9 @@ public final class ParamPanel
       case ParamData.RELOAD_DEFAULT_COMPOSITE_INTERVAL:
         it = new Integer(0);
         break;
+      case ParamData.USE_GRAY_PANEL_SHIFT:
+        it = Boolean.TRUE;
+        break;
       default:
         break;
     }
@@ -415,7 +418,8 @@ public final class ParamPanel
                        i == ParamData.DISPLAY_WIND_WITH_COLOR_WIND_RANGE ||
                        i == ParamData.CLICK_SCROLL ||
                        i == ParamData.SHOW_ROUTING_LABELS ||
-                       i == ParamData.SHOW_ISOCHRONS)
+                       i == ParamData.SHOW_ISOCHRONS ||
+                       i == ParamData.USE_GRAY_PANEL_SHIFT)
                 data[i][1] = new Boolean(s);    
               else if (i == ParamData.POLAR_FILE_LOC)              // DataFiles, Polars
                 data[i][1] = new DataFile(new String[] {"xml"}, "Polars", s);
@@ -552,7 +556,8 @@ public final class ParamPanel
         ParamData.RELOAD_DEFAULT_COMPOSITE_INTERVAL,
         ParamData.DEFAULT_ZOOM_VALUE,
         ParamData.DEFAULT_CHART_INC_VALUE,
-        ParamData.DEFAULT_FAX_INC_VALUE }
+        ParamData.DEFAULT_FAX_INC_VALUE,
+        ParamData.USE_GRAY_PANEL_SHIFT}
     };
   
   private Object[][] mkDataArray(int idx)
@@ -742,7 +747,8 @@ public final class ParamPanel
                    currentIndex == ParamData.USE_TRANSPARENT_GRIB_WIND ||
                    currentIndex == ParamData.COLOR_RANGE ||
                    currentIndex == ParamData.DISPLAY_WIND_WITH_COLOR_WIND_RANGE ||
-                   currentIndex == ParamData.CLICK_SCROLL)
+                   currentIndex == ParamData.CLICK_SCROLL ||
+                   currentIndex == ParamData.USE_GRAY_PANEL_SHIFT)
           {
             try { /* boolean b = */ new Boolean(after); }
             catch (Exception e) 

@@ -17,16 +17,22 @@ import coreutilities.Utilities;
 import coreutilities.ctx.CoreContext;
 import coreutilities.ctx.CoreEventListener;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 
@@ -54,9 +60,15 @@ import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
+import javax.swing.JEditorPane;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.UIManager;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
 
 
 /**
@@ -236,7 +248,13 @@ public class ChartAdjust
     {
       ex.printStackTrace();
     }
+    
+//    Date now = new Date();
+//    compiledDate = new Date(now.getTime() - (30L * 24L * 3600L * 1000L)); // 30 days before now
+//    System.out.println("Compiled Date:" + compiledDate);
+    
     checkForNotification(compiledDate);
+    startMemoryProbe();
   }
   
   private static boolean proceed = false;
@@ -345,25 +363,10 @@ public class ChartAdjust
               // Display Notification Here.
               if (map.size() > 0)
               {
-                String content = "<html>";
-                Set<Date> keys = map.keySet();
-                Date[] da = keys.toArray(new Date[keys.size()]);
-                Arrays.sort(da);
-                for (Date d : da)
-                {
-                  String mess = map.get(d);
-                  content += ("<br><i><b>" + SDF.format(d) + "</b></i><br>" + mess + "<br>"); 
-  //              System.out.println(d.toString() + "\n" + mess);
-                }
-                content += "</html>";
-                
-//              content = content.replace("<br>", "\n");
-//              System.out.println(content);
-                
                 String title = "Notifications";
                 if (productName.trim().length() > 0)
                   title += (" for " + productName); // LOCALIZE
-                int resp = JOptionPane.showConfirmDialog(null, content, title, JOptionPane.OK_CANCEL_OPTION, JOptionPane.INFORMATION_MESSAGE);
+                int resp = displayNotification(title, nc);
                 if (resp == JOptionPane.OK_OPTION)
                 {
                   props.setProperty("date", NotificationCheck.getDateFormat().format(new Date())); // Write UTC date
@@ -383,6 +386,142 @@ public class ChartAdjust
     }
   }
 
+  private static int displayNotification(String title, NotificationCheck nc)
+  {    
+    String result = 
+    "<html><head><style type='text/css'>" +
+    "body { background : #efefef; color : #000000; font-size: 10pt; font-family: Arial, Helvetica, Geneva, Swiss, SunSans-Regular }\n" + 
+    "h1 { color: white; font-style: italic; font-size: 14pt; font-family: Arial, Helvetica, Geneva, Swiss, SunSans-Regular; background-color: black; padding-left: 5pt }\n" + 
+    "h2 { font-size: 12pt; font-family: Arial, Helvetica, Geneva, Swiss, SunSans-Regular }\n" + 
+    "h3 { font-style: italic; font-weight: bold; font-size: 10pt; font-family: Arial, Helvetica, Geneva, Swiss, SunSans-Regular; bold:  }\n" + 
+    "li { font-size: 10pt; font-family: Arial, Helvetica, Geneva, Swiss, SunSans-Regular }\n" + 
+    "p { font-size: 10pt; font-family: Arial, Helvetica, Geneva, Swiss, SunSans-Regular }\n" + 
+    "td { font-size: 10pt; font-family: Arial, Helvetica, Geneva, Swiss, SunSans-Regular }\n" + 
+    "small { font-size: 8pt; font-family: Arial, Helvetica, Geneva, Swiss, SunSans-Regular }\n" + 
+    "blockquote{ font-style: italic; font-size: 10pt; font-family: Arial, Helvetica, Geneva, Swiss, SunSans-Regular }-->\n" + 
+    "em { font-size: 10pt; font-style: italic; font-weight: bold; font-family: Arial, Helvetica, Geneva, Swiss, SunSans-Regular }\n" + 
+    "pre { font-size: 9pt; font-family: Courier New, Helvetica, Geneva, Swiss, SunSans-Regular }\n" + 
+    "address { font-size: 8pt; font-family: Arial, Helvetica, Geneva, Swiss, SunSans-Regular }\n" + 
+    "a:link { color : #000000} \n" + 
+    "a:active { color: #000000} \n" + 
+    "a:visited { color : #000000}\n" +
+    "</style></head><body>\n";
+    Map<Date, String> map = nc.check();
+    // Display Notification Here.
+    if (map.size() > 0)
+    {
+      Set<Date> keys = map.keySet();
+      Date[] da = keys.toArray(new Date[keys.size()]);
+      Arrays.sort(da);
+      for (Date d : da)
+      {
+        String mess = map.get(d);
+        result += ("<br><i><b>" + SDF.format(d) + "</b></i><br>" + mess + "<br>"); 
+      }
+    }
+    // Display list
+    result += ("</body></html>");
+    // Produce clickable list here
+    JPanel notificationPanel = new JPanel();
+    notificationPanel.setPreferredSize(new Dimension(500, 300));
+    JEditorPane jEditorPane = new JEditorPane();
+    JScrollPane jScrollPane = new JScrollPane();
+    notificationPanel.setLayout(new BorderLayout());
+    jEditorPane.setEditable(false);
+    jEditorPane.setFocusable(false);
+    jEditorPane.setFont(new Font("Verdana", 0, 10));
+    jEditorPane.setBackground(Color.lightGray);
+    jScrollPane.getViewport().add(jEditorPane, null);
+    jEditorPane.addHyperlinkListener(new HyperlinkListener()
+      {
+        public void hyperlinkUpdate(HyperlinkEvent he)
+        {
+          try
+          {
+            if (he.getEventType() == HyperlinkEvent.EventType.ACTIVATED)
+            {
+    //            System.out.println("URL Activated:" + he.getURL().toString());
+              String activatedURL = he.getURL().toString();
+              String value = activatedURL.substring(activatedURL.lastIndexOf("/") + 1);
+              if (value.startsWith("showDate("))
+              {
+                System.out.println("Value:" + value);
+                value = value.substring("showDate(".length(), value.length() - 1);
+                System.out.println("arg:" + value);
+                long date = Long.parseLong(value);
+                // Broadcast
+                System.out.println("Broadcasting Date " + date + ":" + new Date(date).toString());
+                // TODO ...la suite
+              }
+            }
+          }
+          catch (Exception ioe)
+          {
+            ioe.printStackTrace();
+          }
+        }
+      });
+
+    try
+    {
+      File tempFile = File.createTempFile("data", ".html");
+      tempFile.deleteOnExit();
+      BufferedWriter bw = new BufferedWriter(new FileWriter(tempFile));
+      bw.write(result);
+      bw.flush();
+      bw.close();              
+      jEditorPane.setPage(tempFile.toURI().toURL());
+      jEditorPane.repaint();
+    }
+    catch (Exception ex)
+    {
+      ex.printStackTrace();
+    }
+    notificationPanel.add(jScrollPane, BorderLayout.CENTER);
+//  JLabel nbDayLabel = new JLabel();
+//  nbDayLabel.setText("Blah-blah-blah.");
+//  notificationPanel.add(nbDayLabel, BorderLayout.SOUTH);
+
+    int resp = JOptionPane.showConfirmDialog(null, notificationPanel, title, JOptionPane.OK_CANCEL_OPTION, JOptionPane.INFORMATION_MESSAGE);
+
+    return resp;
+  }
+
+  private void startMemoryProbe()
+  {
+    Thread memoryProbeThread = new Thread()
+      {
+        public void run()
+        {
+          boolean ok = true;
+          while (ok)
+          {
+            try
+            {
+              long mem = WWGnlUtilities.memoryProbe();
+              String memMess = "Memory used:" + WWGnlUtilities.formatMem(mem); // LOCALIZE
+              WWContext.getInstance().fireSetStatus(memMess);
+              try { Thread.sleep(5000L); } catch (Exception ignore) {}
+            }
+            catch (NoClassDefFoundError ncdfe)
+            {
+              ok = false;
+              System.err.println("--------------------------------------------------------------------------------------");
+              System.err.println("** Warning: You must add tools.jar in your classpath for the memory probe to work...\n");
+              System.err.println("** Your java.home is [" + System.getProperty("java.home") + "]");
+              System.err.println("--------------------------------------------------------------------------------------");
+            }
+            catch (Exception ex)
+            {
+              ok = false;
+              ex.printStackTrace();
+            }
+          }
+        }
+      };
+    memoryProbeThread.start();
+  }
+  
   public static void main(String args[])
   {
     System.out.println("=======\nIn the main, " + args.length + " arguments:");

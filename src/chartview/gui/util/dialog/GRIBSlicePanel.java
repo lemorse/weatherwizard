@@ -136,10 +136,10 @@ public class GRIBSlicePanel
     dataOption = opt;
     
     // For tests
-    for (DatedGribCondition dgc : data)
-    {
-      System.out.println("wave for " + dgc.getDate() + ":" + dgc.waves);
-    }
+//    for (DatedGribCondition dgc : data)
+//    {
+//      System.out.println("wave for " + dgc.getDate() + ":" + dgc.waves);
+//    }
     
     try
     {

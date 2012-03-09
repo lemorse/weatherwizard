@@ -1,5 +1,6 @@
 package chartview.gui.util.dialog;
 
+
 import astro.calc.GeoPoint;
 
 import chartview.gui.util.param.ParamData;
@@ -9,15 +10,7 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-
 import java.awt.Insets;
-
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyVetoException;
-import java.beans.VetoableChangeListener;
 
 import java.text.DecimalFormat;
 
@@ -28,16 +21,15 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JSeparator;
-
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
-
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import user.util.GeomUtil;
+
 
 @SuppressWarnings("serial")
 public class WhatIfRoutingPanel

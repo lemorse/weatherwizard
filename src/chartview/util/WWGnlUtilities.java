@@ -81,6 +81,10 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringReader;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryMXBean;
+import java.lang.management.RuntimeMXBean;
+
 import java.net.URL;
 import java.net.URLConnection;
 
@@ -100,6 +104,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -109,6 +114,12 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 //import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
+
+import javax.management.MBeanServerConnection;
+import javax.management.ObjectName;
+import javax.management.remote.JMXConnector;
+import javax.management.remote.JMXConnectorFactory;
+import javax.management.remote.JMXServiceURL;
 
 import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
@@ -134,6 +145,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
+
+// import com.sun.tools.attach.VirtualMachine;
 
 public class WWGnlUtilities
 {
@@ -166,7 +179,15 @@ public class WWGnlUtilities
   public final static SimpleDateFormat SDF_2    = new SimpleDateFormat("yyyy MMM d (HH:mm z)");
   public final static SimpleDateFormat SDF_SOLAR = new SimpleDateFormat("d MMM yyyy HH:mm");
   public final static SimpleDateFormat SDF_DMY  = new SimpleDateFormat("d MMM yyyy");
-
+  static 
+  {
+    SDF_UT.setTimeZone(TimeZone.getTimeZone("UTC"));
+    SDF_UT_bis.setTimeZone(TimeZone.getTimeZone("UTC"));
+    SDF_UT_day.setTimeZone(TimeZone.getTimeZone("UTC"));
+    SDF_UT_2.setTimeZone(TimeZone.getTimeZone("UTC"));
+    SDF_UT_3.setTimeZone(TimeZone.getTimeZone("UTC"));
+  }
+  
   public final static Color PURPLE = new Color(165, 0, 165);
   
   public final static String USEREXITS_FILE_NAME = "." + File.separator + "config" + File.separator + "user-exit.xml";
@@ -3709,6 +3730,68 @@ public class WWGnlUtilities
       ret += (Integer.toString(nbMin) + " " + (nbMin>1?buildMessage("minute_s"):buildMessage("minute")));
   //  System.out.println("Diff:" + diff + ", :" + ret);
     return ret;
+  }
+
+  public static long memoryProbe()
+  {
+    long memoryUsed = 0L;
+    
+    RuntimeMXBean runtimeMXBean = ManagementFactory.getRuntimeMXBean();
+    String beanName = runtimeMXBean.getName();
+    String pidStr = beanName.substring(0, beanName.indexOf("@"));
+    String pid2look4 = pidStr;
+
+    try
+    {
+      com.sun.tools.attach.VirtualMachine vm = com.sun.tools.attach.VirtualMachine.attach(pid2look4);
+      String connectorAddr = vm.getAgentProperties().getProperty("com.sun.management.jmxremote.localConnectorAddress");
+      if (connectorAddr == null)
+      {
+        String agent = vm.getSystemProperties().getProperty("java.home") + File.separator + "lib" + File.separator + "management-agent.jar";
+        vm.loadAgent(agent);
+        connectorAddr = vm.getAgentProperties().getProperty("com.sun.management.jmxremote.localConnectorAddress");
+      }
+      JMXServiceURL serviceURL = new JMXServiceURL(connectorAddr);
+      JMXConnector connector = JMXConnectorFactory.connect(serviceURL);
+      MBeanServerConnection mbsc = connector.getMBeanServerConnection();
+      
+      ObjectName objName = new ObjectName(ManagementFactory.MEMORY_MXBEAN_NAME);
+      Set<ObjectName> mbeans = mbsc.queryNames(objName, null);
+      for (ObjectName name: mbeans)
+      {
+        MemoryMXBean mxBean;
+        mxBean = ManagementFactory.newPlatformMXBeanProxy(mbsc, name.toString(), MemoryMXBean.class);
+        memoryUsed = mxBean.getHeapMemoryUsage().getUsed();
+  //    System.out.println("MemoryUsed:" + memoryUsed + " bytes (" + formatMem(memoryUsed).trim() + ")");
+      }      
+    }
+    catch (Exception ex)
+    {
+      System.err.println("Oops 3 - " + ex.getLocalizedMessage());
+      throw new RuntimeException(ex);
+    }
+    return memoryUsed;
+  }
+  
+  public static String formatMem(long amount)
+  {
+    String str = "";
+    String[] units = new String[] { "Tb", "Gb", "Mb", "Kb", "b" };
+    long remainder = amount;
+    for (int i = 0; i<units.length; i++)
+    {
+      long divider = 1;
+      for (int j=0; j<(units.length - i - 1); j++)
+        divider *= 1024;
+  //    System.out.println("Divider for [" + units[i] + "]:" + divider);
+      long temp = remainder / divider;
+      if (temp != 0)
+      {
+        str += (Long.toString(temp) + " " + units[i] + " ");
+        remainder -= (temp * divider);
+      }
+    }
+    return str;
   }
 
   public static void main(String[] args)

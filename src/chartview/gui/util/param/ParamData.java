@@ -77,8 +77,9 @@ public class ParamData
   public final static int GRIB_CURRENT_COLOR             = 66;
   public final static int AUTO_SAVE_DEFAULT_COMPOSITE    = 67;
   public final static int RELOAD_DEFAULT_COMPOSITE_INTERVAL = 68;
+  public final static int USE_GRAY_PANEL_SHIFT           = 69;
 
-  public final static int NB_PRFERENCES         = 69; 
+  public final static int NB_PRFERENCES         = 70; 
   
   private final static String[] labels = 
   { 
@@ -150,7 +151,8 @@ public class ParamData
     WWGnlUtilities.buildMessage("show-notifications"),
     WWGnlUtilities.buildMessage("current-color"),
     WWGnlUtilities.buildMessage("auto-save-pattern"),
-    WWGnlUtilities.buildMessage("auto-reload-interval")
+    WWGnlUtilities.buildMessage("auto-reload-interval"),
+    WWGnlUtilities.buildMessage("shift-down-gray-panel")
   };
 
   private final static String[] helptext = 
@@ -223,7 +225,8 @@ public class ParamData
     WWGnlUtilities.buildMessage("help-show-notifications"),
     WWGnlUtilities.buildMessage("help-current-color"),
     WWGnlUtilities.buildMessage("help-auto-save-pattern"),
-    WWGnlUtilities.buildMessage("help-auto-reload-interval")
+    WWGnlUtilities.buildMessage("help-auto-reload-interval"),
+    WWGnlUtilities.buildMessage("help-shift-down-gray-panel")
   };
     
   public static String[] getLabels()
