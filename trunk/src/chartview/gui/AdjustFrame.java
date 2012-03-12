@@ -136,7 +136,8 @@ public class AdjustFrame
                                          RenderingHints.VALUE_ANTIALIAS_ON);      
         this.setOpaque(false);      
         this.setSize(masterTabPane.getSize());
-        ((Graphics2D)g).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.75f));
+        ((Graphics2D)g).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 
+                                                                ((Float) ParamPanel.data[ParamData.GRAY_PANEL_OPACITY][1]).floatValue()));
         
 //      g.setColor(Color.LIGHT_GRAY);
 //      g.setColor(Color.GRAY);
@@ -248,7 +249,7 @@ public class AdjustFrame
       final String compositeName = ((ParamPanel.DataFile) ParamPanel.data[ParamData.LOAD_COMPOSITE_STARTUP][1]).toString();
       if (compositeName.trim().length() > 0)
       {
-        askAndWaitForLoadAtStartup(compositeName, 30); //  TODO, the 30 as a preference
+        askAndWaitForLoadAtStartup(compositeName, ((Integer) ParamPanel.data[ParamData.WAIT_ON_STARTUP][1]).intValue());
       }
     }
     else
@@ -749,7 +750,7 @@ public class AdjustFrame
                   WWContext.getInstance().fireSetLoading(false, "Detecting..."); // LOCALIZE
                 }
               };
-          WWContext.getInstance().fireSetLoading(true, "Detecting..."); // LOCALIZE
+            WWContext.getInstance().fireSetLoading(true, "Detecting..."); // LOCALIZE
             t.start();
           }
         });

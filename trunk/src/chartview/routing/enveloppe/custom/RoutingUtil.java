@@ -229,7 +229,11 @@ public class RoutingUtil
                                              dist, 
                                              bearing);
                 GeoPoint forecast = new GeoPoint(Math.toDegrees(dr.getL()), Math.toDegrees(dr.getG()));
-                Point forecastPoint = chartPanel.getPanelPoint(forecast);
+                Point forecastPoint = null;
+                if (chartPanel != null)
+                  forecastPoint = chartPanel.getPanelPoint(forecast);
+                else
+                  forecastPoint = new Point((int)Math.round(forecast.getG() * 1000), (int)Math.round(forecast.getL() * 1000));
                 RoutingPoint ip = new RoutingPoint(forecastPoint);
                 
                 // Add to Data
@@ -402,7 +406,8 @@ public class RoutingUtil
         WWContext.getInstance().fireLogging("Isochrone # " + Integer.toString(allIsochrons.size()) + ", smallest distance:" + WWGnlUtilities.XXXX12.format(smallestDist) + ". Processing:" + keepLooping + "\n");          
         WWContext.getInstance().fireProgressing("Isochrone # " + Integer.toString(allIsochrons.size()) + "...");
 
-        caller.routingNotification(allIsochrons, finalClosest);
+        if (caller != null)
+          caller.routingNotification(allIsochrons, finalClosest);
 //      timer = logDiffTime(timer, "Milestone 13");
       }
       if (interruptRouting)
