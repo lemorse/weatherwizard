@@ -339,6 +339,12 @@ public final class ParamPanel
       case ParamData.USE_GRAY_PANEL_SHIFT:
         it = Boolean.TRUE;
         break;
+      case ParamData.GRAY_PANEL_OPACITY:
+        it = new Float(0.75);
+        break;
+      case ParamData.WAIT_ON_STARTUP:
+        it = new Integer(30);
+        break;
       default:
         break;
     }
@@ -400,7 +406,8 @@ public final class ParamPanel
                        i == ParamData.AVOID_TWA_LT || 
                        i == ParamData.INTERVAL_BETWEEN_ISOBARS ||
                        i == ParamData.DEFAULT_FAX_INC_VALUE ||
-                       i == ParamData.RELOAD_DEFAULT_COMPOSITE_INTERVAL)
+                       i == ParamData.RELOAD_DEFAULT_COMPOSITE_INTERVAL ||
+                       i == ParamData.WAIT_ON_STARTUP)
                 data[i][1] = new Integer(s);
               else if (i == ParamData.ROUTING_TIME_INTERVAL ||     // Doubles
                        i == ParamData.POLAR_SPEED_FACTOR ||
@@ -435,7 +442,8 @@ public final class ParamPanel
                 data[i][1] = new DataPath(s);
               else if (i == ParamData.PATTERN_DIR)
                 data[i][1] = new DataDirectory(WWGnlUtilities.buildMessage("pattern-button"), s);
-              else if (i == ParamData.FAX_TRANSPARENCY)            // Float
+              else if (i == ParamData.FAX_TRANSPARENCY ||
+                       i == ParamData.GRAY_PANEL_OPACITY)          // Float
                 data[i][1] = new Float(s);
               else if (i == ParamData.LOOK_AND_FEEL)               // Look and Feel (list)
                 data[i][1] = new ListOfLookAndFeel(s);
@@ -516,7 +524,8 @@ public final class ParamPanel
         ParamData.PREFERRED_WIND_DISPLAY,
         ParamData.DISPLAY_WIND_WITH_COLOR_WIND_RANGE,
         ParamData.DEFAULT_FAX_BLUR,
-        ParamData.CLICK_SCROLL }, 
+        ParamData.CLICK_SCROLL,
+        ParamData.WAIT_ON_STARTUP }, 
       new int[] // Routing
       { ParamData.NMEA_SERVER_URL, 
         ParamData.SERIAL_PORT,
@@ -557,7 +566,8 @@ public final class ParamPanel
         ParamData.DEFAULT_ZOOM_VALUE,
         ParamData.DEFAULT_CHART_INC_VALUE,
         ParamData.DEFAULT_FAX_INC_VALUE,
-        ParamData.USE_GRAY_PANEL_SHIFT}
+        ParamData.USE_GRAY_PANEL_SHIFT,
+        ParamData.GRAY_PANEL_OPACITY}
     };
   
   private Object[][] mkDataArray(int idx)
@@ -657,7 +667,8 @@ public final class ParamPanel
               currentIndex == ParamData.AVOID_TWS_GT ||
               currentIndex == ParamData.AVOID_TWA_LT ||
               currentIndex == ParamData.DEFAULT_FAX_INC_VALUE ||
-              currentIndex == ParamData.RELOAD_DEFAULT_COMPOSITE_INTERVAL) // The int values
+              currentIndex == ParamData.RELOAD_DEFAULT_COMPOSITE_INTERVAL ||
+              currentIndex == ParamData.WAIT_ON_STARTUP) // The int values
           {
             try { /* int x = */ Integer.parseInt(after); }
             catch (Exception e) 
@@ -682,17 +693,21 @@ public final class ParamPanel
               ok2go = false; 
             }           
           }
-          if (currentIndex == ParamData.FAX_TRANSPARENCY) // The float values
+          if (currentIndex == ParamData.FAX_TRANSPARENCY || 
+              currentIndex == ParamData.GRAY_PANEL_OPACITY) // The float values
           {
             try 
             { 
               float f = Float.parseFloat(after); 
               // Specific to some line:
-              if (currentIndex == ParamData.FAX_TRANSPARENCY)
+              if (currentIndex == ParamData.FAX_TRANSPARENCY|| 
+                  currentIndex == ParamData.GRAY_PANEL_OPACITY)
               {
                 if (f < 0.0f || f > 1.0f)
                 {
-                  JOptionPane.showMessageDialog(this, WWGnlUtilities.buildMessage("fax-transparency"), WWGnlUtilities.buildMessage("modifying-parameters"), 
+                  JOptionPane.showMessageDialog(this, 
+                                                WWGnlUtilities.buildMessage("fax-transparency"), 
+                                                WWGnlUtilities.buildMessage("modifying-parameters"), 
                                                 JOptionPane.ERROR_MESSAGE);
                   ok2go = false; 
                 }

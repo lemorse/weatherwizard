@@ -1406,7 +1406,7 @@ public class GribHelper
       {
         if (!alreadySaidTooOld)
         {
-          System.out.println("Last GRIB record might be too old, using it anyway...");
+//        System.out.println("Last GRIB record might be too old, using it anyway...");
           alreadySaidTooOld = true;
         }
       } 

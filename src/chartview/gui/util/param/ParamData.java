@@ -8,6 +8,7 @@ public class ParamData
 {
   public final static String PARAM_FILE_NAME   = "config" + File.separator + "app-properties.xml";
 
+// TODO Replace with an Enumeration
   public final static int CHART_COLOR                    =  0;
   public final static int GRID_COLOR                     =  1;
   public final static int NMEA_SERVER_URL                =  2;
@@ -78,8 +79,10 @@ public class ParamData
   public final static int AUTO_SAVE_DEFAULT_COMPOSITE    = 67;
   public final static int RELOAD_DEFAULT_COMPOSITE_INTERVAL = 68;
   public final static int USE_GRAY_PANEL_SHIFT           = 69;
+  public final static int GRAY_PANEL_OPACITY             = 70;
+  public final static int WAIT_ON_STARTUP                = 71;
 
-  public final static int NB_PRFERENCES         = 70; 
+  public final static int NB_PRFERENCES         = 72; 
   
   private final static String[] labels = 
   { 
@@ -152,7 +155,9 @@ public class ParamData
     WWGnlUtilities.buildMessage("current-color"),
     WWGnlUtilities.buildMessage("auto-save-pattern"),
     WWGnlUtilities.buildMessage("auto-reload-interval"),
-    WWGnlUtilities.buildMessage("shift-down-gray-panel")
+    WWGnlUtilities.buildMessage("shift-down-gray-panel"),
+    WWGnlUtilities.buildMessage("gray-panel-opacity"),
+    WWGnlUtilities.buildMessage("startup-wait")
   };
 
   private final static String[] helptext = 
@@ -226,7 +231,9 @@ public class ParamData
     WWGnlUtilities.buildMessage("help-current-color"),
     WWGnlUtilities.buildMessage("help-auto-save-pattern"),
     WWGnlUtilities.buildMessage("help-auto-reload-interval"),
-    WWGnlUtilities.buildMessage("help-shift-down-gray-panel")
+    WWGnlUtilities.buildMessage("help-shift-down-gray-panel"),
+    WWGnlUtilities.buildMessage("help-gray-panel-opacity"),
+    WWGnlUtilities.buildMessage("help-startup-wait")
   };
     
   public static String[] getLabels()
