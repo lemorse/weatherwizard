@@ -265,7 +265,10 @@ public class RoutingUtil
         if (!interruptRouting)
         {
 //        timer = logDiffTime(timer, "Milestone 8-bis");
+//        WWContext.getInstance().fireLogging("Reducing...");
+//        long before = System.currentTimeMillis();
           finalCurve = calculateEnveloppe(data, center);          
+//        WWContext.getInstance().fireLogging("Reducing completed in " + Long.toString(System.currentTimeMillis() - before) + " ms\n");
         }
         // Calculate distance to destination, from the final curve
         Iterator<RoutingPoint> finalIterator = null;
@@ -303,7 +306,7 @@ public class RoutingUtil
         {
           smallestDist = localSmallOne;
           finalClosest = closest;
-          WWContext.getInstance().fireLogging("Still progressing...\n");                  
+//        WWContext.getInstance().fireLogging("Still progressing...\n");                  
         }
         else if (localSmallOne == smallestDist)
         {
@@ -403,7 +406,7 @@ public class RoutingUtil
           data.add(finalCurve);
           currentDate = arrivalDate;
         }
-        WWContext.getInstance().fireLogging("Isochrone # " + Integer.toString(allIsochrons.size()) + ", smallest distance:" + WWGnlUtilities.XXXX12.format(smallestDist) + ". Processing:" + keepLooping + "\n");          
+        WWContext.getInstance().fireLogging("Isochrone # " + Integer.toString(allIsochrons.size()) + ", smallest distance to arrival:" + WWGnlUtilities.XXXX12.format(smallestDist) + " nm. Still processing:" + keepLooping + "\n");          
         WWContext.getInstance().fireProgressing("Isochrone # " + Integer.toString(allIsochrons.size()) + "...");
 
         if (caller != null)
@@ -445,7 +448,7 @@ public class RoutingUtil
          returnCurve.add(newPoint);
        }
     }
-    String mess = "From " + returnCurve.size() + " point(s)... ";
+    String mess = "Reducing from " + returnCurve.size() + " point(s)... ";
     // Calculate final curve - Here is the skill
     dimOne = bulkPoints.iterator();
     while (!interruptRouting && dimOne.hasNext())
@@ -484,7 +487,7 @@ public class RoutingUtil
       }
     }
     long after = System.currentTimeMillis();
-    WWContext.getInstance().fireLogging(mess + "to " + returnCurve.size() + " point(s), curve calculated in " + Long.toString(after - before) + " ms");
+    WWContext.getInstance().fireLogging(mess + "to " + returnCurve.size() + " point(s), curve reducing calculated in " + Long.toString(after - before) + " ms");
     
     return returnCurve;
   }

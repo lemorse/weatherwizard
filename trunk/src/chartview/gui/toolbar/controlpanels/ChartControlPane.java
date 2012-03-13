@@ -194,6 +194,11 @@ public class ChartControlPane
     chartControl = new SingleControlPane(WWGnlUtilities.buildMessage("chart-control"), chartControlPanelHolder, false);
     componentHolder.add(chartControl, new GridBagConstraints(0, 1, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
 
+    // Projection Controls
+    projectionControlPanelHolder.add(projectionPanel, BorderLayout.CENTER);
+    projectionControl = new SingleControlPane(WWGnlUtilities.buildMessage("projection-control"), projectionControlPanelHolder, false);
+    componentHolder.add(projectionControl, new GridBagConstraints(0, 2, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+
     // Fax Controls
     JPanel intermediateFaxPanel = new JPanel();
     intermediateFaxPanel.setLayout(new BorderLayout());
@@ -210,26 +215,22 @@ public class ChartControlPane
     imageCommandPanel.setEnabled(false);
     rotationPanel.setEnabled(false);
     faxControlPanelHolder.add(rotationPanel, BorderLayout.SOUTH);
+    
     faxControl = new SingleControlPane(WWGnlUtilities.buildMessage("fax-control"), faxControlPanelHolder, false);
-    componentHolder.add(faxControl, new GridBagConstraints(0, 2, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+    componentHolder.add(faxControl, new GridBagConstraints(0, 3, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
     faxControl.setEnabled(false);
-
-    // GRIB Controls
-    gribControlPanelHolder.add(gribPanel, BorderLayout.CENTER);
-    gribControl = new SingleControlPane(WWGnlUtilities.buildMessage("grib-control"), gribControlPanelHolder, false);
-    componentHolder.add(gribControl, new GridBagConstraints(0, 3, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
-    gribControl.setEnabled(false);
-
-    // Projection Controls
-    projectionControlPanelHolder.add(projectionPanel, BorderLayout.CENTER);
-    projectionControl = new SingleControlPane(WWGnlUtilities.buildMessage("projection-control"), projectionControlPanelHolder, false);
-    componentHolder.add(projectionControl, new GridBagConstraints(0, 4, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
 
     // Fax Preview
     faxPreviewControlPanelHolder.add(faxPreviewPanel, BorderLayout.CENTER);
     faxPreviewControl = new SingleControlPane(WWGnlUtilities.buildMessage("fax-preview"), faxPreviewControlPanelHolder, false);
-    componentHolder.add(faxPreviewControl, new GridBagConstraints(0, 5, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));        
+    componentHolder.add(faxPreviewControl, new GridBagConstraints(0, 4, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));        
     
+    // GRIB Controls
+    gribControlPanelHolder.add(gribPanel, BorderLayout.CENTER);
+    gribControl = new SingleControlPane(WWGnlUtilities.buildMessage("grib-control"), gribControlPanelHolder, false);
+    componentHolder.add(gribControl, new GridBagConstraints(0, 5, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+    gribControl.setEnabled(false);
+
     // Routing Controls
     routingControlPanelHolder.add(routingPanel, BorderLayout.CENTER);
     routingPreviewControl = new SingleControlPane(WWGnlUtilities.buildMessage("routing-details"), routingControlPanelHolder, false);
