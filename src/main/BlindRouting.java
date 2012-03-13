@@ -23,6 +23,7 @@ import java.awt.datatransfer.StringSelection;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 
 import java.text.NumberFormat;
@@ -35,6 +36,8 @@ import java.util.List;
 import java.util.Locale;
 
 
+import java.util.TimeZone;
+
 import jgrib.GribFile;
 
 import ocss.nmea.parser.StringParsers;
@@ -46,15 +49,28 @@ public class BlindRouting implements RoutingClientInterface
   private RoutingPoint closestPoint = null;
   private boolean verbose = false;
 
-  // Prms -fromL -fromG -toL -toG -startTime -grib -polars -output
-  // Optional prms:
-  // -verbose default false
-  // -timeInterval default 24
-  // -routingForkWidth default 140
-  // -routingStep default 10
-  // -limitTWS default -1
-  // -limitTWA default -1
-  // -speedCoeff default 1.0
+  /* 
+   * Mandatory prms:
+   * ---------------
+   * -fromL     Start latitude, decimal format 
+   * -fromG     Start longitude, decimal format
+   * -toL       Arrival latitude, decimal format
+   * -toG       Arrival longitude, decimal format
+   * -startTime Start date, xsd:duration format, like 2012-03-13T12:00:00, UTC time
+   * -grib      [gribFileName]
+   * -polars    [polarFileName]
+   * -output    [outputFileName]. Supported extensions are gpx, csv, txt.
+   * 
+   * Optional prms:
+   * --------------
+   * -verbose          default false (set to true, y, or yes)
+   * -timeInterval     default 24 (in hours)
+   * -routingForkWidth default 140 (in degrees)
+   * -routingStep      default 10 (in degrees)
+   * -limitTWS         default -1 (in knots. -1 means no limit)
+   * -limitTWA         default -1 (in degrees. -1 means no limit)
+   * -speedCoeff       default 1.0 used to multiply the speed computed with the polars.
+   */
   
   public static void main(String[] args) throws Exception
   {
@@ -126,7 +142,11 @@ public class BlindRouting implements RoutingClientInterface
         System.out.println("-limitTWA default -1");
         System.out.println("-speedCoeff default 1.0");
         System.out.println("-----------------------");
-        System.out.println("Example: java " + this.getClass().getName() + " -fromL 37.122 -fromG -122.5 -toL -9.75 -toG -139.10 -startTime \"2012-03-10T12:00:00\" -grib \"D:\\OlivSoft\\all-scripts\\GRIBFiles\\2012\\03\\GRIB_2012_03_01_08_22_55_PST.grb\" -polars \"D:\\OlivSoft\\all-scripts\\polars\\cheoy-lee-42-polar-coeff.xml\" -output \"my.routing.gpx\" -speedCoeff 0.75");
+        System.out.println("Example: java " + this.getClass().getName() +
+                           " -fromL 37.122 -fromG -122.5 -toL -9.75 -toG -139.10 -startTime \"2012-03-10T12:00:00\" -grib \"." + 
+                           File.separator + "GRIBFiles" + File.separator + "2012" + File.separator + "03" + File.separator + 
+                           "GRIB_2012_03_01_08_22_55_PST.grb\" -polars \"." + File.separator + "polars" + File.separator + 
+                           "cheoy-lee-42-polar-coeff.xml\" -output \"my.routing.gpx\" -speedCoeff 0.75");
 
         System.exit(0);
       }
@@ -136,12 +156,30 @@ public class BlindRouting implements RoutingClientInterface
     List<GeoPoint> intermediateRoutingWP = null;
     List<List<RoutingPoint>> allCalculatedIsochrons = new ArrayList<List<RoutingPoint>>();
 
-    GribFile gf = new GribFile(gribName);
+    GribFile gf = null;
+    try
+    {
+      File f = new File(gribName);
+      if (!f.exists())
+      {
+        System.out.println("GRIB file [" + gribName + "] not found, exiting.");
+        System.exit(1);
+      }
+      FileInputStream fis = new FileInputStream(f);
+      gf = new GribFile(fis);
+    }
+    catch (Exception ex)
+    {
+      ex.printStackTrace();
+      System.exit(1);
+    }
     List<GribHelper.GribConditionData> agcd = GribHelper.dumper(gf, "");
     GribHelper.GribConditionData gribData[] = agcd.toArray(new GribHelper.GribConditionData[agcd.size()]);
 
-    long _time = StringParsers.durationToDate(startTime);
-    Date startDate = new Date(_time);
+    long _time = StringParsers.durationToDate(startTime, "Etc/UTC");
+    Calendar startCal = GregorianCalendar.getInstance(TimeZone.getTimeZone("Etc/UTC"));
+    startCal.setTime(new Date(_time));
+    Date startDate = startCal.getTime();
     
     boolean stopIfTooOld = false;
 
@@ -185,12 +223,12 @@ public class BlindRouting implements RoutingClientInterface
         public void log(String str) 
         {
           if (verbose) 
-            System.out.println("Routing-> " + str);
+            System.out.print("Routing-> " + str + (str.endsWith("\n")?"":"\n"));
         }
         public void log(String str, int i) 
         {
           if (verbose) 
-            System.out.println("Routing-> " + str);
+            System.out.print("Routing-> " + str + (str.endsWith("\n")?"":"\n"));
         }
       });
           
@@ -264,6 +302,7 @@ public class BlindRouting implements RoutingClientInterface
     if (closestPoint != null && allCalculatedIsochrons != null)
     {
       Calendar cal = new GregorianCalendar();
+      cal.setTimeZone(TimeZone.getTimeZone("Etc/UTC"));
       List<RoutingPoint> bestRoute = new ArrayList<RoutingPoint>(allCalculatedIsochrons.size());
       boolean go = true;
       RoutingPoint start = closestPoint;
@@ -406,6 +445,8 @@ public class BlindRouting implements RoutingClientInterface
           BufferedWriter bw = new BufferedWriter(new FileWriter(f));              
           bw.write(clipboardContent + "\n");
           bw.close();
+          System.out.println("");
+          System.out.println("Generated " + allCalculatedIsochrons.size() + " isochrones.");
           System.out.println("Output file [" + f.getAbsolutePath() + "] is ready.");
         }
         catch (Exception ex)
