@@ -345,6 +345,9 @@ public final class ParamPanel
       case ParamData.WAIT_ON_STARTUP:
         it = new Integer(30);
         break;
+      case ParamData.EXPAND_CONTROLS_BY_DEFAULT:
+        it = Boolean.TRUE;
+        break;
       default:
         break;
     }
@@ -426,7 +429,8 @@ public final class ParamPanel
                        i == ParamData.CLICK_SCROLL ||
                        i == ParamData.SHOW_ROUTING_LABELS ||
                        i == ParamData.SHOW_ISOCHRONS ||
-                       i == ParamData.USE_GRAY_PANEL_SHIFT)
+                       i == ParamData.USE_GRAY_PANEL_SHIFT ||
+                       i == ParamData.EXPAND_CONTROLS_BY_DEFAULT)
                 data[i][1] = new Boolean(s);    
               else if (i == ParamData.POLAR_FILE_LOC)              // DataFiles, Polars
                 data[i][1] = new DataFile(new String[] {"xml"}, "Polars", s);
@@ -525,7 +529,8 @@ public final class ParamPanel
         ParamData.DISPLAY_WIND_WITH_COLOR_WIND_RANGE,
         ParamData.DEFAULT_FAX_BLUR,
         ParamData.CLICK_SCROLL,
-        ParamData.WAIT_ON_STARTUP }, 
+        ParamData.WAIT_ON_STARTUP,
+        ParamData.EXPAND_CONTROLS_BY_DEFAULT }, 
       new int[] // Routing
       { ParamData.NMEA_SERVER_URL, 
         ParamData.SERIAL_PORT,
@@ -763,7 +768,8 @@ public final class ParamPanel
                    currentIndex == ParamData.COLOR_RANGE ||
                    currentIndex == ParamData.DISPLAY_WIND_WITH_COLOR_WIND_RANGE ||
                    currentIndex == ParamData.CLICK_SCROLL ||
-                   currentIndex == ParamData.USE_GRAY_PANEL_SHIFT)
+                   currentIndex == ParamData.USE_GRAY_PANEL_SHIFT ||
+                   currentIndex == ParamData.EXPAND_CONTROLS_BY_DEFAULT)
           {
             try { /* boolean b = */ new Boolean(after); }
             catch (Exception e) 

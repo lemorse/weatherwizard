@@ -49,7 +49,7 @@ public class ChartCommandPanelToolBar
   
   private JButton expandCollapseControlButton = new JButton();
   private JButton scrollThruOpenTabsButton = new JButton();
-  private boolean controlExpanded = false;
+  private boolean controlExpanded = ((Boolean)ParamPanel.data[ParamData.EXPAND_CONTROLS_BY_DEFAULT][1]).booleanValue();
 
   public static final int DD_ZOOM           = 0;
   public static final int GRAB_SCROLL       = 1;
