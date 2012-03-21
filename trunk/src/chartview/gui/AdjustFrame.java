@@ -65,7 +65,6 @@ import javax.swing.AbstractAction;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
@@ -2180,6 +2179,16 @@ public class AdjustFrame
     t.start();
   }
 
+  public int getDividerLocation()
+  {
+    return jSplitPane.getDividerLocation();
+  }
+
+  public void setDividerLocation(int i)
+  {
+    jSplitPane.setDividerLocation(i);
+  }
+  
   @SuppressWarnings("serial")
   public class HelpOpenAction extends AbstractAction
   {

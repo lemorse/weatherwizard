@@ -1637,7 +1637,7 @@ public class WWGnlUtilities
     return comment;
   }
 
-  public static void doOnExit(JFrame frame)
+  public static void doOnExit(AdjustFrame frame)
   {
     boolean confirm = ((Boolean)ParamPanel.data[ParamData.CONFIRM_ON_EXIT][1]).booleanValue();
     boolean go = false;
@@ -1670,6 +1670,7 @@ public class WWGnlUtilities
         props.setProperty("frame.height", Integer.toString(frame.getHeight()));
         props.setProperty("frame.x.pos", Integer.toString(frame.getX()));
         props.setProperty("frame.y.pos", Integer.toString(frame.getY()));
+        props.setProperty("divider.location", Integer.toString(frame.getDividerLocation()));
         props.store(new FileWriter("ww_position.properties"), "Generated " + new Date().toString());
 //      props.storeToXML(new FileOutputStream("ww_position.properties"), "Generated " + new Date().toString());
         

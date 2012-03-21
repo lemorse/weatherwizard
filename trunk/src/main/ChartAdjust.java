@@ -76,7 +76,7 @@ import javax.swing.event.HyperlinkListener;
  */ 
 public class ChartAdjust
 {
-  protected final JFrame frame;
+  protected final AdjustFrame frame;
   
   public ChartAdjust()
   {
@@ -189,12 +189,14 @@ public class ChartAdjust
       {
         Properties props = new Properties();
         props.load(new FileReader(propFile));
-        int w = Integer.parseInt(props.getProperty("frame.width"));
-        int h = Integer.parseInt(props.getProperty("frame.height"));
-        int x = Integer.parseInt(props.getProperty("frame.x.pos"));
-        int y = Integer.parseInt(props.getProperty("frame.y.pos"));
+        int w  = Integer.parseInt(props.getProperty("frame.width"));
+        int h  = Integer.parseInt(props.getProperty("frame.height"));
+        int x  = Integer.parseInt(props.getProperty("frame.x.pos"));
+        int y  = Integer.parseInt(props.getProperty("frame.y.pos"));
+        int dl = Integer.parseInt(props.getProperty("divider.location", "175"));
         frame.setSize(w, h);
         frame.setLocation(x, y);
+        frame.setDividerLocation(dl);
         positioned = true;
       }
       catch (Exception forgetit) 

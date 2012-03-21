@@ -14,6 +14,7 @@ import chartview.gui.util.dialog.CompositeDetailsInputPanel;
 import chartview.gui.util.dialog.FaxType;
 import chartview.gui.util.dialog.InternetFax;
 import chartview.gui.util.dialog.InternetGRIB;
+import chartview.gui.util.param.ParamData;
 import chartview.gui.util.param.ParamPanel;
 
 import chartview.util.GPXUtil;
@@ -185,7 +186,7 @@ public class CompositeTabbedPane
     controlPaneScrollPane.getViewport().add(ccp, null);
     
     commandPanelHolder.add(chartPanelControlPaneHolder, BorderLayout.EAST);    
-    chartPanelControlPaneHolder.setVisible(false);
+    chartPanelControlPaneHolder.setVisible(((Boolean)ParamPanel.data[ParamData.EXPAND_CONTROLS_BY_DEFAULT][1]).booleanValue());
     threeDGRIBPanel = new Panel3D();
 
     try
