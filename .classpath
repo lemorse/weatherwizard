@@ -13,5 +13,7 @@
 	<classpathentry kind="lib" path="C:/_mywork/dev-corner/olivsoft/all-3rd-party/jai_windows-i586.jar"/>
 	<classpathentry kind="lib" path="C:/_mywork/dev-corner/olivsoft/all-3rd-party/rxtx.distrib/RXTXcomm.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/FullNMEAConsole"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/PolarSmoother_v2"/>
+	<classpathentry kind="lib" path="C:/JDev.11.1.1.5.0/jdk160_24/lib/tools.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>

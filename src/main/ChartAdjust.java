@@ -264,7 +264,7 @@ public class ChartAdjust
   public static void checkForUpdate()
   {
     // Checking for update
-    proceed = ((Boolean)ParamPanel.data[ParamData.AUTO_UPDATES][1]).booleanValue();
+    proceed = ((Boolean)ParamPanel.data[ParamData.AUTO_UPDATES][ParamData.VALUE_INDEX]).booleanValue();
     Thread checkForUpdate = // new CheckForUpdateThread("weather_assistant");
       new CheckForUpdateThread(WWContext.PRODUCT_ID, 
                                WWContext.getInstance().getParser(), 
@@ -320,7 +320,7 @@ public class ChartAdjust
   public static void checkForNotification(final Date manifestDate)
   {
     // Checking for notification
-    proceed = ((Boolean)ParamPanel.data[ParamData.SHOW_NOTIFICATIONS][1]).booleanValue(); 
+    proceed = ((Boolean)ParamPanel.data[ParamData.SHOW_NOTIFICATIONS][ParamData.VALUE_INDEX]).booleanValue(); 
     if (proceed)
     {
       Thread checkForNotification = new Thread()

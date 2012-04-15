@@ -3,9 +3,11 @@ package chartview.gui.util.panels;
 import chartview.ctx.ApplicationEventListener;
 import chartview.ctx.WWContext;
 
+import chartview.gui.toolbar.controlpanels.ControlPane;
 import chartview.gui.util.transparent.TransparentPanel;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GradientPaint;
 import java.awt.Graphics;
@@ -18,16 +20,18 @@ import java.awt.RenderingHints;
 
 import java.text.DecimalFormat;
 
+import javax.swing.JPanel;
+
 @SuppressWarnings("serial")
-public class GRIBVisualPanel extends TransparentPanel
+public class GRIBVisualPanel extends JPanel // TransparentPanel 
 {
-  private float truewindspeed = 0f;
-  private int truewinddir = 0;
-  private float prmslValue = 0f;
-  private float hgt500Value = 0f;
+  private float truewindspeed   = 0f;
+  private int   truewinddir     = 0;
+  private float prmslValue      = 0f;
+  private float hgt500Value     = 0f;
   private float waveHeightValue = 0f;
-  private float tempValue = 0f;
-  private float prateValue = 0f;              
+  private float tempValue       = 0f;
+  private float prateValue      = 0f;              
   
   public GRIBVisualPanel()
   {
@@ -43,8 +47,10 @@ public class GRIBVisualPanel extends TransparentPanel
 
   private void jbInit() throws Exception
   {
-    this.setLayout( null );
-    this.setOpaque(false);
+    this.setLayout(null);
+    this.setOpaque(true);
+    this.setSize(new Dimension(400, 250));
+    this.setPreferredSize(new Dimension(ControlPane.WIDTH, 250));
 
     WWContext.getInstance().addApplicationListener(new ApplicationEventListener()
      {
@@ -105,7 +111,7 @@ public class GRIBVisualPanel extends TransparentPanel
 
   private final static int BORDER_TICKNESS = 5;
   private final static int COLOR_OPACITY   = 200; // 0-255
-  private final static int FONT_SIZE = 8;
+  private final static int FONT_SIZE       = 8;
 
   private final static DecimalFormat[] FMTS = { 
                                                 new DecimalFormat("##0.0 'kts'"), 
@@ -123,7 +129,7 @@ public class GRIBVisualPanel extends TransparentPanel
     ((Graphics2D)g).setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
                                      RenderingHints.VALUE_TEXT_ANTIALIAS_ON);      
     ((Graphics2D)g).setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                                     RenderingHints.VALUE_ANTIALIAS_ON);      
+                                     RenderingHints.VALUE_ANTIALIAS_ON);    
     int xOffset = BORDER_TICKNESS, 
         yOffset = BORDER_TICKNESS;
     int w = this.getWidth() - (2 * BORDER_TICKNESS);
@@ -224,10 +230,20 @@ public class GRIBVisualPanel extends TransparentPanel
                2 * (displayRadius - 4),
                2 * (displayRadius - 4));
     // Rose
-    int externalCircleRadius = (int)((double)displayRadius * 0.85);
+    int externalCircleRadius = (int)((double)displayRadius * 0.95);
     int internalCircleRadius = (int)((double)displayRadius * 0.25);
     g.setColor(new Color(0, 0, 0, displayBackGroundOpacity));
-    for (int d=0; d<360; d+=90)
+
+    for (int i = 0; i < 360; i += 10)
+    {
+      int x1 = displayCenterX + (int) ((externalCircleRadius - 10) * Math.cos(Math.toRadians(i)));
+      int y1 = displayCenterY + (int) ((externalCircleRadius - 10) * Math.sin(Math.toRadians(i)));
+      int x2 = displayCenterX + (int) ((externalCircleRadius) * Math.cos(Math.toRadians(i)));
+      int y2 = displayCenterY + (int) ((externalCircleRadius) * Math.sin(Math.toRadians(i)));
+      g.drawLine(x1, y1, x2, y2);
+    }
+
+    for (int d=0; false && d<360; d+=90) // Kind of a rose. Sux.
     {
       Point one   = new Point(displayCenterX, 
                               displayCenterY);
@@ -241,7 +257,7 @@ public class GRIBVisualPanel extends TransparentPanel
     }
     g.setColor(Color.white);
     int fontSize = h / 10;
-    Font cardFont = new Font(origFont.getName(), origFont.getStyle(), fontSize);
+    Font cardFont = new Font(origFont.getName(), Font.BOLD /* origFont.getStyle()*/, fontSize);
     g.setFont(cardFont);
     String card = "N";
     int l = g.getFontMetrics(cardFont).stringWidth(card);

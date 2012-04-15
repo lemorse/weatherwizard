@@ -142,9 +142,9 @@ public class ProjectionPanel
         
       });
     this.setLayout(gridBagLayout1);
-    this.setPreferredSize(new Dimension(ChartControlPane.WIDTH, 180));
-    this.setMinimumSize(new Dimension(ChartControlPane.WIDTH, 180));
-    this.setSize(new Dimension(ChartControlPane.WIDTH, 180));
+    this.setPreferredSize(new Dimension(ControlPane.WIDTH, 180));
+    this.setMinimumSize(new Dimension(ControlPane.WIDTH, 180));
+    this.setSize(new Dimension(ControlPane.WIDTH, 180));
 
     projectionTabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
 

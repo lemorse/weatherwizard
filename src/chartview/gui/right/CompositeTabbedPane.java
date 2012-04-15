@@ -7,7 +7,7 @@ import chartview.ctx.ApplicationEventListener;
 import chartview.ctx.WWContext;
 
 import chartview.gui.toolbar.controlpanels.ChartCommandPanelToolBar;
-import chartview.gui.toolbar.controlpanels.ChartControlPane;
+import chartview.gui.toolbar.controlpanels.ControlPane;
 import chartview.gui.toolbar.controlpanels.LoggingPanel;
 import chartview.gui.util.dialog.AutoDownloadTablePanel;
 import chartview.gui.util.dialog.CompositeDetailsInputPanel;
@@ -74,7 +74,7 @@ public class CompositeTabbedPane
   
   private JPanel chartPanelControlPaneHolder = new JPanel(new BorderLayout()); 
   private JScrollPane controlPaneScrollPane  = new JScrollPane();
-  private ChartControlPane ccp               = new ChartControlPane();
+  private ControlPane ccp               = new ControlPane();
 
   private transient ApplicationEventListener ael = new ApplicationEventListener()
         {
@@ -186,7 +186,7 @@ public class CompositeTabbedPane
     controlPaneScrollPane.getViewport().add(ccp, null);
     
     commandPanelHolder.add(chartPanelControlPaneHolder, BorderLayout.EAST);    
-    chartPanelControlPaneHolder.setVisible(((Boolean)ParamPanel.data[ParamData.EXPAND_CONTROLS_BY_DEFAULT][1]).booleanValue());
+    chartPanelControlPaneHolder.setVisible(((Boolean)ParamPanel.data[ParamData.EXPAND_CONTROLS_BY_DEFAULT][ParamData.VALUE_INDEX]).booleanValue());
     threeDGRIBPanel = new Panel3D();
 
     try

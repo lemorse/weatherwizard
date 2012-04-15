@@ -7,8 +7,11 @@ import java.io.File;
 public class ParamData 
 {
   public final static String PARAM_FILE_NAME   = "config" + File.separator + "app-properties.xml";
+  
+  public final static int NAME_INDEX  = 0;
+  public final static int VALUE_INDEX = 1;
 
-// TODO Replace with an Enumeration
+// TODO Replace with an Enumeration?
   public final static int CHART_COLOR                    =  0;
   public final static int GRID_COLOR                     =  1;
   public final static int NMEA_SERVER_URL                =  2;

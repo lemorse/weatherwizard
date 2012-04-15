@@ -128,7 +128,7 @@ public class RoutingPanel extends JPanel
   {
     this.setLayout(new BorderLayout());
     this.setSize(new Dimension(400, 340));
-    this.setPreferredSize(new Dimension(ChartControlPane.WIDTH, 340));
+    this.setPreferredSize(new Dimension(ControlPane.WIDTH, 340));
     this.add(tabbedPane, BorderLayout.CENTER);
     
     tabbedPane.add(WWGnlUtilities.buildMessage("summary"), summaryPanelHolder);

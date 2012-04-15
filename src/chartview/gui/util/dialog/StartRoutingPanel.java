@@ -13,6 +13,8 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import java.text.DecimalFormat;
+
 import java.util.Calendar;
 import java.util.Date;
 
@@ -22,6 +24,7 @@ import java.util.TimeZone;
 
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -72,7 +75,8 @@ public class StartRoutingPanel
   private JCheckBox gribExhaustedCheckBox = new JCheckBox();
   private JCheckBox withTheGribCheckBox = new JCheckBox();
   private JLabel jLabel2 = new JLabel();
-  private JTextField polarFactorTextField = new JTextField();
+  private DecimalFormat df = new DecimalFormat("#0.00");
+  private JFormattedTextField polarFactorTextField = new JFormattedTextField(df);
 
   public StartRoutingPanel()
   {
@@ -371,14 +375,14 @@ public class StartRoutingPanel
 
   public void setPolarFactor(double d)
   {
-    polarFactorTextField.setText(Double.toString(d));
+    polarFactorTextField.setText(df.format(d));
   }
   
   public double getPolarFactor()
   {
     double d = 1.0;
-    try { d = Double.parseDouble(polarFactorTextField.getText()); }
-    catch (NumberFormatException nfe) 
+    try { d = df.parse(polarFactorTextField.getText()).doubleValue(); }
+    catch (Exception nfe) 
     { 
       System.out.println(polarFactorTextField.getText() + " is not a valid double."); 
       d = 1.0;

@@ -586,7 +586,7 @@ public class DataFilePopup
         String dir =  pftn.dir;
         String name = pftn.name;
         // Get the Pattern Default directory
-        String patternDir = ParamPanel.data[ParamData.PATTERN_DIR][1].toString() + File.separator + FAVORITE_DIRECTORY_NAME;
+        String patternDir = ParamPanel.data[ParamData.PATTERN_DIR][ParamData.VALUE_INDEX].toString() + File.separator + FAVORITE_DIRECTORY_NAME;
         try
         {
           // Prompt for new name
@@ -633,7 +633,7 @@ public class DataFilePopup
     else if (event.getActionCommand().equals(COPY_LOCALLY))
     {
       // Choose the file name for "save as"
-      String patternDirectory = ParamPanel.data[ParamData.PATTERN_DIR][1].toString();
+      String patternDirectory = ParamPanel.data[ParamData.PATTERN_DIR][ParamData.VALUE_INDEX].toString();
       String fileName = WWGnlUtilities.chooseFile(this, JFileChooser.FILES_ONLY, 
                                                   new String[] { "ptrn" }, 
                                                   "Patterns", 
@@ -748,7 +748,7 @@ public class DataFilePopup
     }
     else if (event.getActionCommand().equals(UNARCHIVE_COMPOSITE))
     {
-//    String compositeLocation = ParamPanel.data[ParamData.CTX_FILES_LOC][1].toString();
+//    String compositeLocation = ParamPanel.data[ParamData.CTX_FILES_LOC][ParamData.VALUE_INDEX].toString();
       JTreeFilePanel.CompositeFileTreeNode dftn = (JTreeFilePanel.CompositeFileTreeNode)dtn;
       String where = WWGnlUtilities.unarchiveComposite(dftn.dir + File.separator + dftn.name);
       WWContext.getInstance().fireReloadCompositeTree();

@@ -86,7 +86,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.geom.AffineTransform;
-import java.awt.image.BufferedImage;
 import java.awt.print.PageFormat;
 import java.awt.print.PrinterJob;
 
@@ -139,6 +138,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -151,8 +151,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import jgrib.GribFile;
-
-import ocss.nmea.parser.GeoPos;
 
 import oracle.xml.parser.v2.DOMParser;
 import oracle.xml.parser.v2.XMLDocument;
@@ -181,7 +179,7 @@ public class CommandPanel
   private Cursor cursorOverWayPoint = null;
   private Cursor cusorDraggingWayPoint = null;
   
-  private int defaultWindOption = Integer.parseInt(((ParamPanel.WindOptionList)(ParamPanel.data[ParamData.PREFERRED_WIND_DISPLAY][1])).getStringIndex());
+  private int defaultWindOption = Integer.parseInt(((ParamPanel.WindOptionList)(ParamPanel.data[ParamData.PREFERRED_WIND_DISPLAY][ParamData.VALUE_INDEX])).getStringIndex());
   
   private BorderLayout borderLayout1;
   private JScrollPane chartPanelScrollPane;  
@@ -219,10 +217,10 @@ public class CommandPanel
   private JLabel boundariesLabel    = new JLabel(" - ");
   
   private JSlider faxOpacitySlider     = new JSlider();  
-  private float faxUserOpacity         = ((Float) ParamPanel.data[ParamData.FAX_TRANSPARENCY][1]).floatValue();
+  private float faxUserOpacity         = ((Float) ParamPanel.data[ParamData.FAX_TRANSPARENCY][ParamData.VALUE_INDEX]).floatValue();
 
   private JSlider gribOpacitySlider     = new JSlider();  
-  private float gribUserOpacity         = 0.75f; // ((Float) ParamPanel.data[ParamData.FAX_TRANSPARENCY][1]).floatValue();
+  private float gribUserOpacity         = 0.75f; // ((Float) ParamPanel.data[ParamData.FAX_TRANSPARENCY][ParamData.VALUE_INDEX]).floatValue();
 
   protected JCheckBox[] compositeCheckBox = null;
   protected JRadioButton[] compositeRadioButton = null;
@@ -233,8 +231,8 @@ public class CommandPanel
   public final static int RADIOBUTTON_OPTION = 1;
   private int checkBoxPanelOption = CHECKBOX_OPTION;
   
-  protected static Color initialGribWindBaseColor = (Color) ParamPanel.data[ParamData.GRIB_WIND_COLOR][1];
-  protected static Color initialGribCurrentBaseColor = (Color) ParamPanel.data[ParamData.GRIB_CURRENT_COLOR][1];
+  protected static Color initialGribWindBaseColor = (Color) ParamPanel.data[ParamData.GRIB_WIND_COLOR][ParamData.VALUE_INDEX];
+  protected static Color initialGribCurrentBaseColor = (Color) ParamPanel.data[ParamData.GRIB_CURRENT_COLOR][ParamData.VALUE_INDEX];
   
   // Indexes of the above
   private final static int WIND_SPEED    = 0; // Always displayed.
@@ -253,8 +251,8 @@ public class CommandPanel
 
   private MainZoomPanel dataPanel = null;
   
-  private double lgInc = ((Double) ParamPanel.data[ParamData.DEFAULT_CHART_INC_VALUE][1]).doubleValue();  
-  private int faxInc   = ((Integer) ParamPanel.data[ParamData.DEFAULT_FAX_INC_VALUE][1]).intValue();  
+  private double lgInc = ((Double) ParamPanel.data[ParamData.DEFAULT_CHART_INC_VALUE][ParamData.VALUE_INDEX]).doubleValue();  
+  private int faxInc   = ((Integer) ParamPanel.data[ParamData.DEFAULT_FAX_INC_VALUE][ParamData.VALUE_INDEX]).intValue();  
   
   protected String gribFileName = "";
   protected String gribRequest = "";
@@ -269,7 +267,7 @@ public class CommandPanel
   private boolean alreadyAskedAboutGRIB = false;
   
   private boolean drawChart = true;
-  private boolean drawIsochrons = ((Boolean)ParamPanel.data[ParamData.SHOW_ISOCHRONS][1]).booleanValue();
+  private boolean drawIsochrons = ((Boolean)ParamPanel.data[ParamData.SHOW_ISOCHRONS][ParamData.VALUE_INDEX]).booleanValue();
 
   private boolean drawBestRoute = true;
   private boolean drawGRIB = true;
@@ -297,18 +295,18 @@ public class CommandPanel
   private transient GeoPoint wp2highlight = null;
   private transient GeoPoint wpBeingDragged = null;
   
-  private int nmeaPollingInterval = ((Integer) ParamPanel.data[ParamData.NMEA_POLLING_FREQ][1]).intValue();
+  private int nmeaPollingInterval = ((Integer) ParamPanel.data[ParamData.NMEA_POLLING_FREQ][ParamData.VALUE_INDEX]).intValue();
   private boolean goNmea          = false;
   private transient Thread nmeaThread       = null;
   
   protected boolean routingMode         = false;
   protected boolean routingForecastMode = false;
   protected boolean routingOnItsWay     = false;
-  private boolean postitOnRoute         = ((Boolean)ParamPanel.data[ParamData.SHOW_ROUTING_LABELS][1]).booleanValue();;
+  private boolean postitOnRoute         = ((Boolean)ParamPanel.data[ParamData.SHOW_ROUTING_LABELS][ParamData.VALUE_INDEX]).booleanValue();;
 
-//private double timeInterval         = ((Double) ParamPanel.data[ParamData.ROUTING_TIME_INTERVAL][1]).doubleValue(); // 6.0;
-//private static int routingForkWidth = ((Integer) ParamPanel.data[ParamData.ROUTING_FORK_WIDTH][1]).intValue(); // 50;
-//private static int routingStep      = ((Integer) ParamPanel.data[ParamData.ROUTING_STEP][1]).intValue(); // 10;
+//private double timeInterval         = ((Double) ParamPanel.data[ParamData.ROUTING_TIME_INTERVAL][ParamData.VALUE_INDEX]).doubleValue(); // 6.0;
+//private static int routingForkWidth = ((Integer) ParamPanel.data[ParamData.ROUTING_FORK_WIDTH][ParamData.VALUE_INDEX]).intValue(); // 50;
+//private static int routingStep      = ((Integer) ParamPanel.data[ParamData.ROUTING_STEP][ParamData.VALUE_INDEX]).intValue(); // 10;
     
   protected transient List<List<RoutingPoint>> allCalculatedIsochrons = new ArrayList<List<RoutingPoint>>();
   
@@ -617,7 +615,7 @@ public class CommandPanel
     blurSharpGroup.add(noChangeRadioButton);
     blurSharpGroup.add(sharpRadioButton);
     {
-      int blurIndex = Integer.parseInt(((ParamPanel.FaxBlurList)(ParamPanel.data[ParamData.DEFAULT_FAX_BLUR][1])).getStringIndex());
+      int blurIndex = Integer.parseInt(((ParamPanel.FaxBlurList)(ParamPanel.data[ParamData.DEFAULT_FAX_BLUR][ParamData.VALUE_INDEX])).getStringIndex());
       blurRadioButton.setSelected(blurIndex == -1);
       noChangeRadioButton.setSelected(blurIndex == 0);
       sharpRadioButton.setSelected(blurIndex == 1);
@@ -1154,7 +1152,7 @@ public class CommandPanel
         compositeCheckBox = new JCheckBox[EXTRA_CHECK_BOXES + 1]; // + 1 pour le GRIB
       compositeCheckBox[i] = new JCheckBox("");
       compositeCheckBox[i].setSelected(this.isDrawChart());
-      compositeCheckBox[i].setBackground((Color) ParamPanel.data[ParamData.GRIB_WIND_COLOR][1]);
+      compositeCheckBox[i].setBackground((Color) ParamPanel.data[ParamData.GRIB_WIND_COLOR][ParamData.VALUE_INDEX]);
       compositeCheckBox[i].addActionListener(new ActionListener()
           {
             public void actionPerformed(ActionEvent e)
@@ -1178,7 +1176,7 @@ public class CommandPanel
       final int cbIdx = i;
       compositeCheckBox[i] = new JCheckBox("");
       compositeCheckBox[i].setSelected(this.isDrawChart());
-      compositeCheckBox[i].setBackground((Color) ParamPanel.data[ParamData.CHART_COLOR][1]);
+      compositeCheckBox[i].setBackground((Color) ParamPanel.data[ParamData.CHART_COLOR][ParamData.VALUE_INDEX]);
       compositeCheckBox[i].addActionListener(new ActionListener()
           {
             public void actionPerformed(ActionEvent e)
@@ -1198,7 +1196,7 @@ public class CommandPanel
       final int cbIdx = i;
       compositeCheckBox[i] = new JCheckBox("");
       compositeCheckBox[i].setSelected(chartPanel.isWithGrid());
-      compositeCheckBox[i].setBackground((Color) ParamPanel.data[ParamData.GRID_COLOR][1]);
+      compositeCheckBox[i].setBackground((Color) ParamPanel.data[ParamData.GRID_COLOR][ParamData.VALUE_INDEX]);
       compositeCheckBox[i].addActionListener(new ActionListener()
           {
             public void actionPerformed(ActionEvent e)
@@ -1218,7 +1216,7 @@ public class CommandPanel
       final int cbIdx = i;
       compositeCheckBox[i] = new JCheckBox("");
       compositeCheckBox[i].setSelected(isShowPlaces());
-//    compositeCheckBox[i].setBackground((Color) ParamPanel.data[ParamData.GRID_COLOR][1]);
+//    compositeCheckBox[i].setBackground((Color) ParamPanel.data[ParamData.GRID_COLOR][ParamData.VALUE_INDEX]);
       compositeCheckBox[i].addActionListener(new ActionListener()
           {
             public void actionPerformed(ActionEvent e)
@@ -1238,7 +1236,7 @@ public class CommandPanel
       final int cbIdx = i;
       compositeCheckBox[i] = new JCheckBox("");
       compositeCheckBox[i].setSelected(isShowSMStations());
-//    compositeCheckBox[i].setBackground((Color) ParamPanel.data[ParamData.GRID_COLOR][1]);
+//    compositeCheckBox[i].setBackground((Color) ParamPanel.data[ParamData.GRID_COLOR][ParamData.VALUE_INDEX]);
       compositeCheckBox[i].addActionListener(new ActionListener()
           {
             public void actionPerformed(ActionEvent e)
@@ -1258,7 +1256,7 @@ public class CommandPanel
       final int cbIdx = i;
       compositeCheckBox[i] = new JCheckBox("");
       compositeCheckBox[i].setSelected(isShowSMStations());
-//    compositeCheckBox[i].setBackground((Color) ParamPanel.data[ParamData.GRID_COLOR][1]);
+//    compositeCheckBox[i].setBackground((Color) ParamPanel.data[ParamData.GRID_COLOR][ParamData.VALUE_INDEX]);
       compositeCheckBox[i].addActionListener(new ActionListener()
           {
             public void actionPerformed(ActionEvent e)
@@ -1310,32 +1308,32 @@ public class CommandPanel
         switch (dataType) // LOCALIZE tooltips
         {
           case GRIBDataUtil.TYPE_TWS:
-            contourCheckBox[i].setBackground((Color) ParamPanel.data[ParamData.GRIB_WIND_COLOR][1]);
+            contourCheckBox[i].setBackground((Color) ParamPanel.data[ParamData.GRIB_WIND_COLOR][ParamData.VALUE_INDEX]);
             tooltip = "GRIB Contour TWS";
             contourCheckBox[i].setToolTipText(tooltip);
             break;
           case GRIBDataUtil.TYPE_PRMSL:
-            contourCheckBox[i].setBackground((Color) ParamPanel.data[ParamData.PRMSL_CONTOUR][1]);
+            contourCheckBox[i].setBackground((Color) ParamPanel.data[ParamData.PRMSL_CONTOUR][ParamData.VALUE_INDEX]);
             tooltip = "GRIB Contour PRMSL";
             contourCheckBox[i].setToolTipText(tooltip);
             break;
           case GRIBDataUtil.TYPE_500MB:
-            contourCheckBox[i].setBackground((Color) ParamPanel.data[ParamData.MB500_CONTOUR][1]);
+            contourCheckBox[i].setBackground((Color) ParamPanel.data[ParamData.MB500_CONTOUR][ParamData.VALUE_INDEX]);
             tooltip = "GRIB Contour 500mb";
             contourCheckBox[i].setToolTipText(tooltip);
             break;
           case GRIBDataUtil.TYPE_WAVE:
-            contourCheckBox[i].setBackground((Color) ParamPanel.data[ParamData.WAVES_CONTOUR][1]);
+            contourCheckBox[i].setBackground((Color) ParamPanel.data[ParamData.WAVES_CONTOUR][ParamData.VALUE_INDEX]);
             tooltip = "GRIB Contour WAVES";
             contourCheckBox[i].setToolTipText(tooltip);
             break;
           case GRIBDataUtil.TYPE_TMP:
-            contourCheckBox[i].setBackground((Color) ParamPanel.data[ParamData.TEMP_CONTOUR][1]);
+            contourCheckBox[i].setBackground((Color) ParamPanel.data[ParamData.TEMP_CONTOUR][ParamData.VALUE_INDEX]);
             tooltip = "GRIB Contour TEMP";
             contourCheckBox[i].setToolTipText(tooltip);
             break;
           case GRIBDataUtil.TYPE_RAIN:
-            contourCheckBox[i].setBackground((Color) ParamPanel.data[ParamData.PRATE_CONTOUR][1]);
+            contourCheckBox[i].setBackground((Color) ParamPanel.data[ParamData.PRATE_CONTOUR][ParamData.VALUE_INDEX]);
             tooltip = "GRIB Contour PRATE";
             contourCheckBox[i].setToolTipText(tooltip);
             break;
@@ -1482,9 +1480,6 @@ public class CommandPanel
 
   private ImageIcon greenFlagImage = null;
   
-  private boolean showGRIBPointPanel = false;
-  private TransparentFrame gribDataPanel = null;
-  
   private transient ApplicationEventListener ael = null;
   
   private void jbInit()
@@ -1498,23 +1493,6 @@ public class CommandPanel
     image = toolkit.getImage(ChartPanel.class.getResource(imgFileName));
     cusorDraggingWayPoint = toolkit.createCustomCursor(image , new Point(15,15), imgFileName);
     
-    TransparentPanel tp = new GRIBVisualPanel();
-    tp.setBgColor(new Color(Color.yellow.getRed(), Color.yellow.getGreen(), Color.yellow.getBlue(), 150));
-    gribDataPanel = new TransparentFrame(tp);
-//  gribDataPanel.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-    gribDataPanel.addWindowListener(new WindowAdapter() 
-      {
-        public void windowClosing(WindowEvent e)
-        {
-          showGRIBPointPanel = !showGRIBPointPanel;
-          WWContext.getInstance().fireGribDataPanelClosed();
-        }
-      });
-    gribDataPanel.setTitle(WWGnlUtilities.buildMessage("grib-point"));
-    gribDataPanel.setBounds(100, 100, 200, 250);
-    gribDataPanel.setVisible(showGRIBPointPanel && wgd != null);
-    gribDataPanel.setAlwaysOnTop(true);
-
     ael = new ApplicationEventListener()
       {
         public String toString()
@@ -2166,7 +2144,7 @@ public class CommandPanel
                                                                JFileChooser.FILES_ONLY, 
                                                                new String[] { "xml", "waz" }, 
                                                               "Composites", 
-                                                              ParamPanel.data[ParamData.COMPOSITE_ROOT_DIR][1].toString(),
+                                                              ParamPanel.data[ParamData.COMPOSITE_ROOT_DIR][ParamData.VALUE_INDEX].toString(),
                                                               "Save as", 
                                                               "Save Composite as");
           if (newFileName.trim().length() > 0)
@@ -2230,12 +2208,12 @@ public class CommandPanel
               String s = Integer.toString(i+1) + " - " + faxImage[i].fileName.substring(faxImage[i].fileName.lastIndexOf(File.separator) + 1);
               Color c  = faxImage[i].color;
               data[i][0] = new FaxPatternType(s, c);
-              data[i][1] = "";
+              data[i][ParamData.VALUE_INDEX] = "";
             }
             if (nbGrib == 1)
             {
               data[faxImage.length][0] = "GRIB Zone";
-              data[faxImage.length][1] = "";
+              data[faxImage.length][ParamData.VALUE_INDEX] = "";
             }
             fptp.setData(data);
             int resp = JOptionPane.showConfirmDialog(instance, fptp, WWGnlUtilities.buildMessage("pattern-generation"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
@@ -2248,7 +2226,7 @@ public class CommandPanel
             {
               XMLElement fax = (XMLElement)pattern.createElement("fax");
               faxcollection.appendChild(fax);
-              fax.setAttribute("hint", (String)data[i][1]); // store the hint here
+              fax.setAttribute("hint", (String)data[i][ParamData.VALUE_INDEX]); // store the hint here
               fax.setAttribute("color", WWGnlUtilities.colorToString(faxImage[i].color));
               if (whRatio != 1D)
                 fax.setAttribute("wh-ratio", Double.toString(whRatio));
@@ -2309,7 +2287,7 @@ public class CommandPanel
             Text gribText = pattern.createTextNode("#text");
             String gribHint = "";
             if (nbGrib == 1)
-              gribHint = (String)data[faxImage.length][1];
+              gribHint = (String)data[faxImage.length][ParamData.VALUE_INDEX];
             gribText.setNodeValue(gribHint);
             grib.appendChild(gribText);
            
@@ -2392,7 +2370,7 @@ public class CommandPanel
                                                       JFileChooser.FILES_ONLY, 
                                                       new String[] { "ptrn" }, 
                                                       "Patterns", 
-                                                      ParamPanel.data[ParamData.PATTERN_DIR][1].toString(), 
+                                                      ParamPanel.data[ParamData.PATTERN_DIR][ParamData.VALUE_INDEX].toString(), 
                                                       "Save", 
                                                       "Create Pattern");
             if (fileName != null && fileName.trim().length() > 0)
@@ -2436,7 +2414,7 @@ public class CommandPanel
                                                             JFileChooser.FILES_ONLY, 
                                                             new String[] { "xml", "waz" }, 
                                                             "Composites", 
-                                                            ParamPanel.data[ParamData.COMPOSITE_ROOT_DIR][1].toString(),
+                                                            ParamPanel.data[ParamData.COMPOSITE_ROOT_DIR][ParamData.VALUE_INDEX].toString(),
                                                             "Open", 
                                                             "Open Composite");
             if (fileName != null && fileName.trim().length() > 0)
@@ -2476,7 +2454,7 @@ public class CommandPanel
                                                               JFileChooser.FILES_ONLY, 
                                                               new String[] { "ptrn" }, 
                                                               "Patterns", 
-                                                              ParamPanel.data[ParamData.PATTERN_DIR][1].toString(), 
+                                                              ParamPanel.data[ParamData.PATTERN_DIR][ParamData.VALUE_INDEX].toString(), 
                                                               "Open", 
                                                               "Use Pattern");
             loadWithPattern(fileName);
@@ -3116,7 +3094,7 @@ public class CommandPanel
           {
             if (b) // Start
             {
-              nmeaPollingInterval = ((Integer) ParamPanel.data[ParamData.NMEA_POLLING_FREQ][1]).intValue();
+              nmeaPollingInterval = ((Integer) ParamPanel.data[ParamData.NMEA_POLLING_FREQ][ParamData.VALUE_INDEX]).intValue();
               final boolean KEEP_LOOPING = false;
               nmeaThread = new Thread("nmea-data-thread")
               {
@@ -3346,7 +3324,6 @@ public class CommandPanel
             if (wgd != null)
             {
               originalWgd = null;
-              gribDataPanel.setVisible(showGRIBPointPanel && wgd != null);
               gribIndex = 0;
   //          if (gribIndex == -1) gribIndex = 0;
               smoothingRequired = true;
@@ -3381,7 +3358,7 @@ public class CommandPanel
                 boundaries[WIND_SPEED] = GRIBDataUtil.getWindSpeedBoundaries(gribData); // TODO Look into this
                 
                 String u = units[WIND_SPEED];
-                boundariesLabel.setText(WWGnlUtilities.buildMessage("from-to", new String[] { WWGnlUtilities.XX22.format(boundaries[0][0]) + u, WWGnlUtilities.XX22.format(boundaries[0][1]) + u }));            
+                boundariesLabel.setText(WWGnlUtilities.buildMessage("from-to", new String[] { WWGnlUtilities.XX22.format(boundaries[0][0]) + u, WWGnlUtilities.XX22.format(boundaries[0][ParamData.VALUE_INDEX]) + u }));            
                 boundariesLabel.setEnabled(true);
                 
                 if (WWGnlUtilities.isIn(dataLabels[WIND_SPEED], displayComboBox))
@@ -3469,7 +3446,6 @@ public class CommandPanel
         {
          if (parent != null && parent.isVisible())
           {
-            gribDataPanel.setVisible(false);
             gribIndex = 0;
   
             displayComboBox.setEnabled(false);
@@ -3657,18 +3633,18 @@ public class CommandPanel
     chartPanel.setNorthL(nLat);
     chartPanel.setSouthL(sLat);
     
-    chartPanel.setChartColor((Color) ParamPanel.data[ParamData.CHART_COLOR][1]);
-    chartPanel.setGridColor((Color) ParamPanel.data[ParamData.GRID_COLOR][1]);
-    chartPanel.setChartBackGround((Color) ParamPanel.data[ParamData.CHART_BG_COLOR][1]);
+    chartPanel.setChartColor((Color) ParamPanel.data[ParamData.CHART_COLOR][ParamData.VALUE_INDEX]);
+    chartPanel.setGridColor((Color) ParamPanel.data[ParamData.GRID_COLOR][ParamData.VALUE_INDEX]);
+    chartPanel.setChartBackGround((Color) ParamPanel.data[ParamData.CHART_BG_COLOR][ParamData.VALUE_INDEX]);
     chartPanel.setHorizontalGridInterval(10D);
     chartPanel.setVerticalGridInterval(10D);
     chartPanel.setWithScale(false);
     chartPanel.setMouseDraggedEnabled(true);
     chartPanel.setMouseDraggedType(ChartPanel.MOUSE_DRAG_ZOOM);
     chartPanel.setPositionToolTipEnabled(true);
-    chartPanel.setConfirmDDZoom(((Boolean) ParamPanel.data[ParamData.CONFIRM_DD_ZOOM][1]).booleanValue());
-    chartPanel.setDdRectColor((Color) ParamPanel.data[ParamData.DD_ZOOM_COLOR][1]);
-    chartPanel.setMouseEdgeProximityDetectionEnabled(((Boolean) ParamPanel.data[ParamData.CLICK_SCROLL][1]).booleanValue());
+    chartPanel.setConfirmDDZoom(((Boolean) ParamPanel.data[ParamData.CONFIRM_DD_ZOOM][ParamData.VALUE_INDEX]).booleanValue());
+    chartPanel.setDdRectColor((Color) ParamPanel.data[ParamData.DD_ZOOM_COLOR][ParamData.VALUE_INDEX]);
+    chartPanel.setMouseEdgeProximityDetectionEnabled(((Boolean) ParamPanel.data[ParamData.CLICK_SCROLL][ParamData.VALUE_INDEX]).booleanValue());
     
     chartPanel.setOpaque(false);
     chartPanel.setCleanFirst(true);
@@ -3714,7 +3690,7 @@ public class CommandPanel
     
     dataPanel.setLatLongInc(lgInc);
     dataPanel.setFaxInc(faxInc);
-    double z = ((Double) ParamPanel.data[ParamData.DEFAULT_ZOOM_VALUE][1]).doubleValue();  
+    double z = ((Double) ParamPanel.data[ParamData.DEFAULT_ZOOM_VALUE][ParamData.VALUE_INDEX]).doubleValue();  
     chartPanel.setZoomFactor(z);
     dataPanel.setZoomFactor(chartPanel.getZoomFactor());
     chartPanelScrollPane.getViewport().add(chartPanel, null);
@@ -3888,7 +3864,7 @@ public class CommandPanel
           }
           else // File approach
           {
-            String gribDir = ParamPanel.data[ParamData.GRIB_FILES_LOC][1].toString().split(File.pathSeparator)[0] + File.separator + "inline-requests";
+            String gribDir = ParamPanel.data[ParamData.GRIB_FILES_LOC][ParamData.VALUE_INDEX].toString().split(File.pathSeparator)[0] + File.separator + "inline-requests";
             String gribFileName = WWGnlUtilities.SDF.format(new Date()) + ".in-line-grb";
             File dir = new File(gribDir);
             if (!dir.exists())
@@ -4032,7 +4008,7 @@ public class CommandPanel
                                            JFileChooser.FILES_ONLY, 
                                            new String[] { "waz" }, // , "xml" }, 
                                            "Composites", 
-                                           ParamPanel.data[ParamData.COMPOSITE_ROOT_DIR][1].toString(), 
+                                           ParamPanel.data[ParamData.COMPOSITE_ROOT_DIR][ParamData.VALUE_INDEX].toString(), 
                                            "Save", 
                                            "Composite File");
     else
@@ -4148,12 +4124,12 @@ public class CommandPanel
         }
       /*  boundaries[WIND_SPEED] = */ GRIBDataUtil.generate3dFile(gribData, GRIBDataUtil.TYPE_TWS, 1.0, 15.0, chartPanel);
  //     boundaries[WIND_SPEED][0] /= 10D;
- //     boundaries[WIND_SPEED][1] /= 10D;
+ //     boundaries[WIND_SPEED][ParamData.VALUE_INDEX] /= 10D;
       }
       else
       {
         WWContext.getInstance().fireNoTWSObj();
-      //  boundaries[2][0] = boundaries[2][1] = 0D;
+      //  boundaries[2][0] = boundaries[2][ParamData.VALUE_INDEX] = 0D;
       }
       // 500mb and other data.
       if (display3DPrmsl)
@@ -4165,12 +4141,12 @@ public class CommandPanel
         }
         boundaries[PRMSL] = GRIBDataUtil.generate3dFile(gribData, GRIBDataUtil.TYPE_PRMSL, 1.0,  1.0, chartPanel);
         boundaries[PRMSL][0] /= 10D;
-        boundaries[PRMSL][1] /= 10D;
+        boundaries[PRMSL][ParamData.VALUE_INDEX] /= 10D;
       }
       else
       {
         WWContext.getInstance().fireNoPrmslObj();
-    //  boundaries[1][0] = boundaries[1][1] = 0D;
+    //  boundaries[1][0] = boundaries[1][ParamData.VALUE_INDEX] = 0D;
       }
       if (display3D500mb)
       {
@@ -4181,12 +4157,12 @@ public class CommandPanel
         }
         boundaries[HGT500] = GRIBDataUtil.generate3dFile(gribData, GRIBDataUtil.TYPE_500MB, 1.0,  1.0, chartPanel);
         boundaries[HGT500][0] /= 10D;
-        boundaries[HGT500][1] /= 10D;
+        boundaries[HGT500][ParamData.VALUE_INDEX] /= 10D;
       }
       else
       {
         WWContext.getInstance().fireNo500mbObj();
-    //  boundaries[2][0] = boundaries[2][1] = 0D;
+    //  boundaries[2][0] = boundaries[2][ParamData.VALUE_INDEX] = 0D;
       }
       if (display3DTemperature)
       {
@@ -4197,12 +4173,12 @@ public class CommandPanel
         }
         boundaries[TEMPERATURE] = GRIBDataUtil.generate3dFile(gribData, GRIBDataUtil.TYPE_TMP,   1.0, 10.0, chartPanel);
         boundaries[TEMPERATURE][0] -= 273.6D;
-        boundaries[TEMPERATURE][1] -= 273.6D;
+        boundaries[TEMPERATURE][ParamData.VALUE_INDEX] -= 273.6D;
       }
       else
       {
         WWContext.getInstance().fireNoTmpObj();
-    //  boundaries[3][0] = boundaries[3][1] = 0D;
+    //  boundaries[3][0] = boundaries[3][ParamData.VALUE_INDEX] = 0D;
       }
       if (display3DWaves)
       {
@@ -4213,7 +4189,7 @@ public class CommandPanel
         }
         boundaries[WAVES] = GRIBDataUtil.generate3dFile(gribData, GRIBDataUtil.TYPE_WAVE,  1.0, 10.0, chartPanel);
         boundaries[WAVES][0] /= 10D;
-        boundaries[WAVES][1] /= 10D;
+        boundaries[WAVES][ParamData.VALUE_INDEX] /= 10D;
       }
       else
       {
@@ -4228,12 +4204,12 @@ public class CommandPanel
         }
         boundaries[RAIN] = GRIBDataUtil.generate3dFile(gribData, GRIBDataUtil.TYPE_RAIN,  1.0, 50.0, chartPanel);
     //  boundaries[RAIN][0] *= 3600D;
-    //  boundaries[RAIN][1] *= 3600D;
+    //  boundaries[RAIN][ParamData.VALUE_INDEX] *= 3600D;
       }
       else
       {
         WWContext.getInstance().fireNoRainObj();
-    //  boundaries[RAIN4][0] = boundaries[RAIN][1] = 0D;
+    //  boundaries[RAIN4][0] = boundaries[RAIN][ParamData.VALUE_INDEX] = 0D;
       }
     }
   }
@@ -4441,7 +4417,7 @@ public class CommandPanel
         }
         boundaries[WIND_SPEED] = GRIBDataUtil.getWindSpeedBoundaries(gribData);
         String u = units[WIND_SPEED];
-        boundariesLabel.setText(WWGnlUtilities.buildMessage("from-to", new String[] { WWGnlUtilities.XX22.format(boundaries[0][0]) + u, WWGnlUtilities.XX22.format(boundaries[0][1]) + u }));            
+        boundariesLabel.setText(WWGnlUtilities.buildMessage("from-to", new String[] { WWGnlUtilities.XX22.format(boundaries[0][0]) + u, WWGnlUtilities.XX22.format(boundaries[0][ParamData.VALUE_INDEX]) + u }));            
         boundariesLabel.setEnabled(true);
         if (!windOnly)
         {
@@ -5303,7 +5279,7 @@ public class CommandPanel
             else // Non dynamic, prompt the user.
             {
               // Prompt for the file          
-              String firstDir = ((ParamPanel.DataPath) ParamPanel.data[ParamData.FAX_FILES_LOC][1]).toString().split(File.pathSeparator)[0];
+              String firstDir = ((ParamPanel.DataPath) ParamPanel.data[ParamData.FAX_FILES_LOC][ParamData.VALUE_INDEX]).toString().split(File.pathSeparator)[0];
               faxName = WWGnlUtilities.chooseFile(instance, JFileChooser.FILES_ONLY, 
                                                   new String[] { "gif", "jpg", "jpeg", "tif", "tiff", "png" }, 
                                                   hintName, 
@@ -5464,7 +5440,7 @@ public class CommandPanel
             String gribHint = gribNode.getFirstChild().getNodeValue();
             if (gribHint.trim().length() > 0)
             {
-              String firstDir = ((ParamPanel.DataPath) ParamPanel.data[ParamData.GRIB_FILES_LOC][1]).toString().split(File.pathSeparator)[0];
+              String firstDir = ((ParamPanel.DataPath) ParamPanel.data[ParamData.GRIB_FILES_LOC][ParamData.VALUE_INDEX]).toString().split(File.pathSeparator)[0];
               String grib = WWGnlUtilities.chooseFile(instance, JFileChooser.FILES_ONLY, 
                                                     new String[] { "grb", "grib" }, gribHint, 
                                                     firstDir, WWGnlUtilities.buildMessage("open"), 
@@ -5546,15 +5522,15 @@ public class CommandPanel
         }
         // Done. Should we save it?
         System.out.println("-- Composite [" + fileName + "] created. Saving?");
-//      System.out.println("Default Composite: [" + ((ParamPanel.DataFile) ParamPanel.data[ParamData.LOAD_COMPOSITE_STARTUP][1]).toString() + "]");
-        boolean autoSaveDefaultComposite = ((String)ParamPanel.data[ParamData.AUTO_SAVE_DEFAULT_COMPOSITE][1]).trim().length() > 0;
-        if (((ParamPanel.DataFile) ParamPanel.data[ParamData.LOAD_COMPOSITE_STARTUP][1]).toString().equals(fileName) && autoSaveDefaultComposite)
+//      System.out.println("Default Composite: [" + ((ParamPanel.DataFile) ParamPanel.data[ParamData.LOAD_COMPOSITE_STARTUP][ParamData.VALUE_INDEX]).toString() + "]");
+        boolean autoSaveDefaultComposite = ((String)ParamPanel.data[ParamData.AUTO_SAVE_DEFAULT_COMPOSITE][ParamData.VALUE_INDEX]).trim().length() > 0;
+        if (((ParamPanel.DataFile) ParamPanel.data[ParamData.LOAD_COMPOSITE_STARTUP][ParamData.VALUE_INDEX]).toString().equals(fileName) && autoSaveDefaultComposite)
         {
           try
           {
             System.out.println("-- Created from [" + fileName + "]. Saving!");
-            String compositeDir = ((ParamPanel.DataDirectory)ParamPanel.data[ParamData.COMPOSITE_ROOT_DIR][1]).toString();
-            String bigPattern = ((String)ParamPanel.data[ParamData.AUTO_SAVE_DEFAULT_COMPOSITE][1]);
+            String compositeDir = ((ParamPanel.DataDirectory)ParamPanel.data[ParamData.COMPOSITE_ROOT_DIR][ParamData.VALUE_INDEX]).toString();
+            String bigPattern = ((String)ParamPanel.data[ParamData.AUTO_SAVE_DEFAULT_COMPOSITE][ParamData.VALUE_INDEX]);
             String[] patternElements = bigPattern.split("\\|");
             String dir = compositeDir + patternElements[0].trim(); // "/yyyy/MM-MMM";
             String prefix = patternElements[1].trim();             // "Auto_";
@@ -5575,7 +5551,7 @@ public class CommandPanel
           catch (Exception ex)
           {
             String message = "Error: " + ex.getLocalizedMessage() + "\nfor [" + 
-                            ((String)ParamPanel.data[ParamData.AUTO_SAVE_DEFAULT_COMPOSITE][1]) + "]";
+                            ((String)ParamPanel.data[ParamData.AUTO_SAVE_DEFAULT_COMPOSITE][ParamData.VALUE_INDEX]) + "]";
             JOptionPane.showMessageDialog(this, message, "Auto-save", JOptionPane.ERROR_MESSAGE);            
           }
         }
@@ -5681,7 +5657,7 @@ public class CommandPanel
       g2d = (Graphics2D)gr;
     
     // Transparency
-    float alpha = faxUserOpacity; // ((Float) ParamPanel.data[ParamData.FAX_TRANSPARENCY][1]).floatValue();
+    float alpha = faxUserOpacity; // ((Float) ParamPanel.data[ParamData.FAX_TRANSPARENCY][ParamData.VALUE_INDEX]).floatValue();
 //  System.out.println("Transparency set to " + Float.toString(alpha));
     g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
 
@@ -5777,25 +5753,25 @@ public class CommandPanel
   //      System.out.println("After: GribIndex:" + gribIndex + ", gribData is " + (gribData==null?"":"not ") + "null, smootingRequired " + smoothingRequired + ", smooth:" + smooth);
           if (displayGribTWSContour && islandsTws != null && displayContourTWS)
           {
-            WWGnlUtilities.drawIsoPoints(gr, chartPanel, islandsTws, (Color)ParamPanel.data[ParamData.GRIB_WIND_COLOR][1], ((ParamPanel.ContourLinesList)ParamPanel.data[ParamData.ISO_TWS_LIST][1]).getBoldIndexes()); 
+            WWGnlUtilities.drawIsoPoints(gr, chartPanel, islandsTws, (Color)ParamPanel.data[ParamData.GRIB_WIND_COLOR][ParamData.VALUE_INDEX], ((ParamPanel.ContourLinesList)ParamPanel.data[ParamData.ISO_TWS_LIST][ParamData.VALUE_INDEX]).getBoldIndexes()); 
        //   WWGnlUtilities.drawBumps(gr, chartPanel, twsBumps);
           }
           if (displayGribPRMSLContour && islandsPressure != null && displayContourPRMSL)
           {
-            WWGnlUtilities.drawIsoPoints(gr, chartPanel, islandsPressure, (Color)ParamPanel.data[ParamData.PRMSL_CONTOUR][1], ((ParamPanel.ContourLinesList)ParamPanel.data[ParamData.ISOBARS_LIST][1]).getBoldIndexes()); 
+            WWGnlUtilities.drawIsoPoints(gr, chartPanel, islandsPressure, (Color)ParamPanel.data[ParamData.PRMSL_CONTOUR][ParamData.VALUE_INDEX], ((ParamPanel.ContourLinesList)ParamPanel.data[ParamData.ISOBARS_LIST][ParamData.VALUE_INDEX]).getBoldIndexes()); 
             WWGnlUtilities.drawBumps(gr, chartPanel, prmslBumps); // Labels
           }
           if (displayGribWavesContour && islandsWave != null && displayContourWaves)
-            WWGnlUtilities.drawIsoPoints(gr, chartPanel, islandsWave, (Color)ParamPanel.data[ParamData.WAVES_CONTOUR][1], ((ParamPanel.ContourLinesList)ParamPanel.data[ParamData.ISOHEIGHTWAVES_LIST][1]).getBoldIndexes()); 
+            WWGnlUtilities.drawIsoPoints(gr, chartPanel, islandsWave, (Color)ParamPanel.data[ParamData.WAVES_CONTOUR][ParamData.VALUE_INDEX], ((ParamPanel.ContourLinesList)ParamPanel.data[ParamData.ISOHEIGHTWAVES_LIST][ParamData.VALUE_INDEX]).getBoldIndexes()); 
           if (displayGrib500HGTContour && islands500mb != null && displayContour500mb)
           {
-            WWGnlUtilities.drawIsoPoints(gr, chartPanel, islands500mb, (Color)ParamPanel.data[ParamData.MB500_CONTOUR][1], ((ParamPanel.ContourLinesList)ParamPanel.data[ParamData.ISOHEIGHT500_LIST][1]).getBoldIndexes());
+            WWGnlUtilities.drawIsoPoints(gr, chartPanel, islands500mb, (Color)ParamPanel.data[ParamData.MB500_CONTOUR][ParamData.VALUE_INDEX], ((ParamPanel.ContourLinesList)ParamPanel.data[ParamData.ISOHEIGHT500_LIST][ParamData.VALUE_INDEX]).getBoldIndexes());
             WWGnlUtilities.drawBumps(gr, chartPanel, hgt500Bumps);  // Labels
           }
           if (displayGribTempContour && islandsTemp != null && displayContourTemp)
-            WWGnlUtilities.drawIsoPoints(gr, chartPanel, islandsTemp, (Color)ParamPanel.data[ParamData.TEMP_CONTOUR][1], ((ParamPanel.ContourLinesList)ParamPanel.data[ParamData.ISOTEMP_LIST][1]).getBoldIndexes());
+            WWGnlUtilities.drawIsoPoints(gr, chartPanel, islandsTemp, (Color)ParamPanel.data[ParamData.TEMP_CONTOUR][ParamData.VALUE_INDEX], ((ParamPanel.ContourLinesList)ParamPanel.data[ParamData.ISOTEMP_LIST][ParamData.VALUE_INDEX]).getBoldIndexes());
           if (displayGribPrateContour && islandsPrate != null && displayContourPrate)
-            WWGnlUtilities.drawIsoPoints(gr, chartPanel, islandsPrate, (Color)ParamPanel.data[ParamData.PRATE_CONTOUR][1], ((ParamPanel.ContourLinesList)ParamPanel.data[ParamData.ISOPRATE_LIST][1]).getBoldIndexes());
+            WWGnlUtilities.drawIsoPoints(gr, chartPanel, islandsPrate, (Color)ParamPanel.data[ParamData.PRATE_CONTOUR][ParamData.VALUE_INDEX], ((ParamPanel.ContourLinesList)ParamPanel.data[ParamData.ISOPRATE_LIST][ParamData.VALUE_INDEX]).getBoldIndexes());
         }
         // Real points - from the GRIB
         String dataOption = (String)displayComboBox.getSelectedItem();
@@ -5915,7 +5891,7 @@ public class CommandPanel
                   else if ("AIRTMP".equals(dataOption))
                   {
                     double temperature = /*(double)*/(gribData.getGribPointData()[h][w].getAirtmp() - 273D);
-                    gr.setColor(WWGnlUtilities.getTemperatureColor(temperature, boundaries[TEMPERATURE][1], boundaries[TEMPERATURE][0]));
+                    gr.setColor(WWGnlUtilities.getTemperatureColor(temperature, boundaries[TEMPERATURE][ParamData.VALUE_INDEX], boundaries[TEMPERATURE][0]));
                     // 
                     double topLeftLat = lat + (gribStepY / 2D);
                     double topLeftLng = lng - (gribStepX / 2D);
@@ -5937,7 +5913,7 @@ public class CommandPanel
                   else if ("500HGT".equals(dataOption))
                   {
                     double altitude = /*(double)*/(gribData.getGribPointData()[h][w].getHgt());
-                    gr.setColor(WWGnlUtilities.get500mbColor(altitude, boundaries[HGT500][1], boundaries[HGT500][0]));
+                    gr.setColor(WWGnlUtilities.get500mbColor(altitude, boundaries[HGT500][ParamData.VALUE_INDEX], boundaries[HGT500][0]));
                     // 
                     double topLeftLat = lat + (gribStepY / 2D);
                     double topLeftLng = lng - (gribStepX / 2D);
@@ -5960,7 +5936,7 @@ public class CommandPanel
                   {
                     // TASK What if array size is noyte is not the same?
                     double height = /*(double)*/(gribData.getGribPointData()[h][w].getWHgt());
-                    gr.setColor(WWGnlUtilities.getWavesColor(height / 100D, boundaries[WAVES][1], boundaries[WAVES][0]));
+                    gr.setColor(WWGnlUtilities.getWavesColor(height / 100D, boundaries[WAVES][ParamData.VALUE_INDEX], boundaries[WAVES][0]));
                     // 
                     double topLeftLat = lat + (gribStepY / 2D);
                     double topLeftLng = lng - (gribStepX / 2D);
@@ -5982,7 +5958,7 @@ public class CommandPanel
                   else if ("RAIN".equals(dataOption)) 
                   {
                     double height = /*(double)*/(gribData.getGribPointData()[h][w].getRain() * 3600D);
-                    gr.setColor(WWGnlUtilities.getRainColor(height, boundaries[RAIN][1], boundaries[RAIN][0]));
+                    gr.setColor(WWGnlUtilities.getRainColor(height, boundaries[RAIN][ParamData.VALUE_INDEX], boundaries[RAIN][0]));
                     // 
                     double topLeftLat = lat + ((gribStepY) / 2D);
                     double topLeftLng = lng - ((gribStepX) / 2D);
@@ -6004,7 +5980,7 @@ public class CommandPanel
                   else if ("PRMSL".equals(dataOption))
                   {
                     double pressure = (double)gribData.getGribPointData()[h][w].getPrmsl() / 100D;
-                    gr.setColor(WWGnlUtilities.getPressureColor(pressure, boundaries[PRMSL][1], boundaries[PRMSL][0]));
+                    gr.setColor(WWGnlUtilities.getPressureColor(pressure, boundaries[PRMSL][ParamData.VALUE_INDEX], boundaries[PRMSL][0]));
                     // 
                     double topLeftLat = lat + ((gribStepY) / 2D);
                     double topLeftLng = lng - ((gribStepX) / 2D);
@@ -6026,7 +6002,7 @@ public class CommandPanel
                   else if ("CURRENT".equals(dataOption))
                   {
     //              gr.setColor(GnlUtilities.getWindColor(coloredWind, initialGribWindBaseColor, speed, false));
-                    initialGribCurrentBaseColor = (Color) ParamPanel.data[ParamData.GRIB_CURRENT_COLOR][1];
+                    initialGribCurrentBaseColor = (Color) ParamPanel.data[ParamData.GRIB_CURRENT_COLOR][ParamData.VALUE_INDEX];
                     if (drawWindColorBackground) 
                     {
                       double stpY = (gribStepY); // / (double)smooth);
@@ -6110,7 +6086,7 @@ public class CommandPanel
     
     // Transparent faxes
     // Transparency
-    alpha = faxUserOpacity; // ((Float) ParamPanel.data[ParamData.FAX_TRANSPARENCY][1]).floatValue();
+    alpha = faxUserOpacity; // ((Float) ParamPanel.data[ParamData.FAX_TRANSPARENCY][ParamData.VALUE_INDEX]).floatValue();
     //  System.out.println("Transparency set to " + Float.toString(alpha));
     g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
 
@@ -6272,7 +6248,7 @@ public class CommandPanel
     if (gr instanceof Graphics2D)
     {
       originalStroke = g2d.getStroke();
-      Stroke stroke =  new BasicStroke(((Integer) ParamPanel.data[ParamData.CHART_LINE_THICK][1]).intValue(), 
+      Stroke stroke =  new BasicStroke(((Integer) ParamPanel.data[ParamData.CHART_LINE_THICK][ParamData.VALUE_INDEX]).intValue(), 
                                        BasicStroke.CAP_BUTT,
                                        BasicStroke.JOIN_BEVEL);
       g2d.setStroke(stroke);  
@@ -6439,7 +6415,9 @@ public class CommandPanel
                            Color.black };
     
         // Draw Routing
-        boolean isochronLine = false;
+        boolean isochronLine = true;   // TODO Preference
+        boolean drawRadii    = true;  // TODO Preference
+        boolean plotPoints   = false;  // TODO Preference
         if (allCalculatedIsochrons != null && drawIsochrons)
         {
           try
@@ -6458,25 +6436,31 @@ public class CommandPanel
                 Point ancestor = null;
                 try { ancestor = chartPanel.getPanelPoint(p.getAncestor().getPosition()); } catch (Exception ex) {}
                 
-                if (isochronLine)
+                if (isochronLine && plotPoints)
                   gr.fillOval(pp.x - 2, pp.y - 2, 4, 4);
                 
                 if (ancestor != null)
                 {
-                  Color c = gr.getColor();
-                  gr.setColor((Color) ParamPanel.data[ParamData.OLD_ISOCHRONS_COLOR][1]);
-                  gr.drawLine(ancestor.x, ancestor.y, pp.x, pp.y);
-                  gr.setColor(c);
+                  if (drawRadii)
+                  {
+                    Color c = gr.getColor();
+                    gr.setColor((Color) ParamPanel.data[ParamData.OLD_ISOCHRONS_COLOR][ParamData.VALUE_INDEX]);
+                    gr.drawLine(ancestor.x, ancestor.y, pp.x, pp.y);
+                    gr.setColor(c);
+                  }
                 }
                 if (!isochronLine)
                 {
-                  Color c = gr.getColor();
-                  if (p.isGribTooOld())
-                    gr.setColor((Color) ParamPanel.data[ParamData.OLD_ISOCHRONS_COLOR][1]); 
-                  else
-                    gr.setColor(colors[colorIndex]);
-                  gr.fillOval(pp.x - 2, pp.y - 2, 4, 4);
-                  gr.setColor(c);
+                  if (plotPoints)
+                  {
+                    Color c = gr.getColor();
+                    if (p.isGribTooOld())
+                      gr.setColor((Color) ParamPanel.data[ParamData.OLD_ISOCHRONS_COLOR][ParamData.VALUE_INDEX]); 
+                    else
+                      gr.setColor(colors[colorIndex]);
+                    gr.fillOval(pp.x - 2, pp.y - 2, 4, 4);
+                    gr.setColor(c);
+                  }
                 }
                 else
                 {
@@ -6484,7 +6468,7 @@ public class CommandPanel
                   {
                     Color c = gr.getColor();
                     if (p.isGribTooOld())
-                      gr.setColor(Color.lightGray);
+                      gr.setColor((Color) ParamPanel.data[ParamData.OLD_ISOCHRONS_COLOR][ParamData.VALUE_INDEX]);
                     else
                       gr.setColor(colors[colorIndex]);
                     gr.drawLine(previous.x, previous.y, pp.x, pp.y);
@@ -6504,7 +6488,7 @@ public class CommandPanel
               Color c = gr.getColor();
               gr.setColor(Color.green);
 //            gr.fillOval(xc - 3, yc - 3, 6, 6);
-              gr.fillOval(xc - 5, yc - 5, 10, 10);
+              gr.fillOval(xc - 5, yc - 5, 10, 10); 
               gr.setColor(c);
             }
           }
@@ -6516,7 +6500,7 @@ public class CommandPanel
         if (closestPoint != null && drawBestRoute)
         {
           Graphics2D g2 = (Graphics2D)gr;
-          g2.setColor((Color) ParamPanel.data[ParamData.ROUTE_COLOR][1]);
+          g2.setColor((Color) ParamPanel.data[ParamData.ROUTE_COLOR][ParamData.VALUE_INDEX]);
 //        g2.setColor(Color.blue); // Route Color
           originalStroke = g2.getStroke();
           Stroke stroke = new BasicStroke(4f, 0, 2);
@@ -6658,7 +6642,7 @@ public class CommandPanel
     if (boatPosition != null) 
     {
       WWGnlUtilities.drawBoat((Graphics2D)gr, 
-                            (Color)ParamPanel.data[ParamData.GPS_BOAT_COLOR][1], 
+                            (Color)ParamPanel.data[ParamData.GPS_BOAT_COLOR][ParamData.VALUE_INDEX], 
                             chartPanel.getPanelPoint(boatPosition.getL(), 
                                                      boatPosition.getG()), 
                             30, 
@@ -6671,7 +6655,7 @@ public class CommandPanel
     if (routingPoint != null)
     {      
       WWGnlUtilities.drawBoat((Graphics2D)gr, 
-                             (Color)ParamPanel.data[ParamData.ROUTING_BOAT_COLOR][1],
+                             (Color)ParamPanel.data[ParamData.ROUTING_BOAT_COLOR][ParamData.VALUE_INDEX],
                              chartPanel.getPanelPoint(routingPoint.getL(), 
                                                       routingPoint.getG()), 
                              30, 
@@ -6890,9 +6874,9 @@ public class CommandPanel
   private transient GeoPoint isoFrom;
   private transient GeoPoint isoTo;
 
-  private double timeInterval     = ((Double) ParamPanel.data[ParamData.ROUTING_TIME_INTERVAL][1]).doubleValue(); // 6.0;
-  private int routingForkWidth    = ((Integer) ParamPanel.data[ParamData.ROUTING_FORK_WIDTH][1]).intValue();      // 50;
-  private int routingStep         = ((Integer) ParamPanel.data[ParamData.ROUTING_STEP][1]).intValue();            // 10;
+  private double timeInterval  = ((Double) ParamPanel.data[ParamData.ROUTING_TIME_INTERVAL][ParamData.VALUE_INDEX]).doubleValue(); // 6.0;
+  private int routingForkWidth = ((Integer) ParamPanel.data[ParamData.ROUTING_FORK_WIDTH][ParamData.VALUE_INDEX]).intValue();      // 50;
+  private int routingStep      = ((Integer) ParamPanel.data[ParamData.ROUTING_STEP][ParamData.VALUE_INDEX]).intValue();            // 10;
 
   public void startIsochronComputation()
   {
@@ -6902,9 +6886,9 @@ public class CommandPanel
     boolean init = true;
     TimeZone.setDefault(TimeZone.getTimeZone("127"));
 
-    int borderTWS           = ((Integer) ParamPanel.data[ParamData.AVOID_TWS_GT][1]).intValue();            // -1;
-    int borderTWA           = ((Integer) ParamPanel.data[ParamData.AVOID_TWA_LT][1]).intValue();            // -1;
-    boolean stopOnExhausted = ((Boolean) ParamPanel.data[ParamData.STOP_ROUTING_ON_EXHAUSTED_GRIB][1]).booleanValue();
+    int borderTWS           = ((Integer) ParamPanel.data[ParamData.AVOID_TWS_GT][ParamData.VALUE_INDEX]).intValue();            // -1;
+    int borderTWA           = ((Integer) ParamPanel.data[ParamData.AVOID_TWA_LT][ParamData.VALUE_INDEX]).intValue();            // -1;
+    boolean stopOnExhausted = ((Boolean) ParamPanel.data[ParamData.STOP_ROUTING_ON_EXHAUSTED_GRIB][ParamData.VALUE_INDEX]).booleanValue();
     double polarFactor = 1.0;
 
     Date gribFrom    = wgd[0].getDate();
@@ -6962,7 +6946,7 @@ public class CommandPanel
       startRoutingPanel.setMaxTWS(borderTWS);
       startRoutingPanel.setMinTWA(borderTWA);
       startRoutingPanel.setStopRoutingOnExhaustedGRIB(stopOnExhausted);
-      startRoutingPanel.setPolarFactor(((Double) ParamPanel.data[ParamData.POLAR_SPEED_FACTOR][1]).doubleValue());
+      startRoutingPanel.setPolarFactor(((Double) ParamPanel.data[ParamData.POLAR_SPEED_FACTOR][ParamData.VALUE_INDEX]).doubleValue());
     }
     
     int resp = JOptionPane.showConfirmDialog(this, 
@@ -7103,7 +7087,7 @@ public class CommandPanel
                                                                   stopIfTooOld,
                                                                   pf);
           
-          int clipboardOption = Integer.parseInt(((ParamPanel.RoutingOutputList)(ParamPanel.data[ParamData.ROUTING_OUTPUT_FLAVOR][1])).getStringIndex());
+          int clipboardOption = Integer.parseInt(((ParamPanel.RoutingOutputList)(ParamPanel.data[ParamData.ROUTING_OUTPUT_FLAVOR][ParamData.VALUE_INDEX])).getStringIndex());
           String fileOutput = null;
           
           i = allCalculatedIsochrons.size();
@@ -7411,7 +7395,7 @@ public class CommandPanel
             GeoPoint here = chartPanel.getGeoPos(x, y);
     //      boatPosition = here;
     //      boatHeading = 45;
-            if (boatPosition != null && ((Boolean) ParamPanel.data[ParamData.ROUTING_FROM_CURR_LOC][1]).booleanValue())
+            if (boatPosition != null && ((Boolean) ParamPanel.data[ParamData.ROUTING_FROM_CURR_LOC][ParamData.VALUE_INDEX]).booleanValue())
             {
               if (allCalculatedIsochrons != null && !insertRoutingWP) // reset
                 shutOffRouting(); // Caution: this one resets from & to.         
@@ -8380,17 +8364,6 @@ public class CommandPanel
     return enableGRIBSlice;
   }
 
-  public void setShowGRIBPointPanel(boolean showGRIBPointPanel)
-  {
-    this.showGRIBPointPanel = showGRIBPointPanel;
-    gribDataPanel.setVisible(showGRIBPointPanel && wgd != null);
-  }
-
-  public boolean isShowGRIBPointPanel()
-  {
-    return showGRIBPointPanel;
-  }
-
   public void setUseThickWind(boolean useThickWind)
   {
     this.useThickWind = useThickWind;
@@ -8724,13 +8697,13 @@ public class CommandPanel
 //    List<ArrayList<GeoPoint>> isopoints = null;
       // TWS
       if (gribData != null && displayContourTWS)
-        islandsTws = GRIBDataUtil.generateIsoTWS(gribData, ((ParamPanel.ContourLinesList)ParamPanel.data[ParamData.ISO_TWS_LIST][1]).getIntValues()); 
+        islandsTws = GRIBDataUtil.generateIsoTWS(gribData, ((ParamPanel.ContourLinesList)ParamPanel.data[ParamData.ISO_TWS_LIST][ParamData.VALUE_INDEX]).getIntValues()); 
       else
         islandsTws = null;
       // Pressure
       if (isTherePrmsl() && displayContourPRMSL)
       {
-        islandsPressure = GRIBDataUtil.generateIsobars(gribData, ((ParamPanel.ContourLinesList)ParamPanel.data[ParamData.ISOBARS_LIST][1]).getIntValues());
+        islandsPressure = GRIBDataUtil.generateIsobars(gribData, ((ParamPanel.ContourLinesList)ParamPanel.data[ParamData.ISOBARS_LIST][ParamData.VALUE_INDEX]).getIntValues());
         prmslBumps = CurveUtil.getBumps(gribData, CurveUtil.PRMSL);
       }
       else
@@ -8738,24 +8711,24 @@ public class CommandPanel
       // 500mb  
       if (isThere500mb() && displayContour500mb)
       {                                       
-        islands500mb = GRIBDataUtil.generateIso500(gribData, ((ParamPanel.ContourLinesList)ParamPanel.data[ParamData.ISOHEIGHT500_LIST][1]).getIntValues());
+        islands500mb = GRIBDataUtil.generateIso500(gribData, ((ParamPanel.ContourLinesList)ParamPanel.data[ParamData.ISOHEIGHT500_LIST][ParamData.VALUE_INDEX]).getIntValues());
         hgt500Bumps = CurveUtil.getBumps(gribData, CurveUtil.HGT500);
       }
       else
         islands500mb = null;
       // Waves  
       if (isThereWaves() && displayContourWaves)
-        islandsWave = GRIBDataUtil.generateIsowaves(gribData, ((ParamPanel.ContourLinesList)ParamPanel.data[ParamData.ISOHEIGHTWAVES_LIST][1]).getIntValues());
+        islandsWave = GRIBDataUtil.generateIsowaves(gribData, ((ParamPanel.ContourLinesList)ParamPanel.data[ParamData.ISOHEIGHTWAVES_LIST][ParamData.VALUE_INDEX]).getIntValues());
       else
         islandsWave = null;
       // Temperature  
       if (isThereTemperature() && displayContourTemp)
-        islandsTemp = GRIBDataUtil.generateIsotherm(gribData, ((ParamPanel.ContourLinesList)ParamPanel.data[ParamData.ISOTEMP_LIST][1]).getIntValues());
+        islandsTemp = GRIBDataUtil.generateIsotherm(gribData, ((ParamPanel.ContourLinesList)ParamPanel.data[ParamData.ISOTEMP_LIST][ParamData.VALUE_INDEX]).getIntValues());
       else
         islandsTemp = null;
       //Prate
       if (isThereRain() && displayContourPrate)
-        islandsPrate = GRIBDataUtil.generateIsorain(gribData, ((ParamPanel.ContourLinesList)ParamPanel.data[ParamData.ISOPRATE_LIST][1]).getIntValues());
+        islandsPrate = GRIBDataUtil.generateIsorain(gribData, ((ParamPanel.ContourLinesList)ParamPanel.data[ParamData.ISOPRATE_LIST][ParamData.VALUE_INDEX]).getIntValues());
       else
         islandsPrate = null;
       long after = System.currentTimeMillis();

@@ -125,7 +125,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
-import javax.swing.JFrame;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -975,7 +974,7 @@ public class WWGnlUtilities
                               Point bl,
                               float alpha)
   {
-    boolean displayWindDirWithWindColorRange = ((Boolean)ParamPanel.data[ParamData.DISPLAY_WIND_WITH_COLOR_WIND_RANGE][1]).booleanValue();
+    boolean displayWindDirWithWindColorRange = ((Boolean)ParamPanel.data[ParamData.DISPLAY_WIND_WITH_COLOR_WIND_RANGE][ParamData.VALUE_INDEX]).booleanValue();
     
     int discSize = 4; // Smallest
     if (drawHeavyDot)
@@ -1214,7 +1213,7 @@ public class WWGnlUtilities
                                  Point bl,
                                  float alpha)
   {
-    boolean displayWindDirWithWindColorRange = ((Boolean)ParamPanel.data[ParamData.DISPLAY_WIND_WITH_COLOR_WIND_RANGE][1]).booleanValue();
+    boolean displayWindDirWithWindColorRange = ((Boolean)ParamPanel.data[ParamData.DISPLAY_WIND_WITH_COLOR_WIND_RANGE][ParamData.VALUE_INDEX]).booleanValue();
     
     int discSize = 4; // Smallest
     if (drawHeavyDot)
@@ -1639,7 +1638,7 @@ public class WWGnlUtilities
 
   public static void doOnExit(AdjustFrame frame)
   {
-    boolean confirm = ((Boolean)ParamPanel.data[ParamData.CONFIRM_ON_EXIT][1]).booleanValue();
+    boolean confirm = ((Boolean)ParamPanel.data[ParamData.CONFIRM_ON_EXIT][ParamData.VALUE_INDEX]).booleanValue();
     boolean go = false;
     if (confirm)
     {
@@ -1653,7 +1652,7 @@ public class WWGnlUtilities
         go = true;
         if (exitPanel.shutUpNextTime())
         {
-          ParamPanel.data[ParamData.CONFIRM_ON_EXIT][1] = Boolean.valueOf(false);
+          ParamPanel.data[ParamData.CONFIRM_ON_EXIT][ParamData.VALUE_INDEX] = Boolean.valueOf(false);
           ParamPanel.saveParameters();
         }
       }
@@ -2371,7 +2370,7 @@ public class WWGnlUtilities
         }
       };
     gribList = new ArrayList<String>();
-    String gribPath = ((ParamPanel.DataPath)ParamPanel.data[ParamData.GRIB_FILES_LOC][1]).toString();
+    String gribPath = ((ParamPanel.DataPath)ParamPanel.data[ParamData.GRIB_FILES_LOC][ParamData.VALUE_INDEX]).toString();
     String[] pe = gribPath.split(File.pathSeparator);
     for (int i=0; i<pe.length; i++)
     {
@@ -2396,7 +2395,7 @@ public class WWGnlUtilities
         }
       };
     faxList = new ArrayList<String>();
-    String faxPath = ((ParamPanel.DataPath)ParamPanel.data[ParamData.FAX_FILES_LOC][1]).toString();
+    String faxPath = ((ParamPanel.DataPath)ParamPanel.data[ParamData.FAX_FILES_LOC][ParamData.VALUE_INDEX]).toString();
     pe = faxPath.split(File.pathSeparator);
     for (int i=0; i<pe.length; i++)
     {
@@ -2405,7 +2404,7 @@ public class WWGnlUtilities
     }
 //  System.out.println("Found " + faxList.size() + " Fax(es)");
     // Scan Composites (xml, not waz)
-    String compositeDir = ((ParamPanel.DataDirectory)ParamPanel.data[ParamData.COMPOSITE_ROOT_DIR][1]).toString();    
+    String compositeDir = ((ParamPanel.DataDirectory)ParamPanel.data[ParamData.COMPOSITE_ROOT_DIR][ParamData.VALUE_INDEX]).toString();    
     FilenameFilter compositeFilter = new FilenameFilter()
       {
         public boolean accept(File dir, String name)
@@ -2523,8 +2522,8 @@ public class WWGnlUtilities
   
   public static void cleanupBackups()
   {
+    String[] dir2scan = new String[] { "all-libs", "all-user-exits" };
     List<String> toDelete = new ArrayList<String>();
-    File from = new File(".." + File.separator + "all-libs");
     String ptrn = "\\.jar_[0-9]+$";
     final Pattern pattern = Pattern.compile(ptrn);
     FilenameFilter fnf = new FilenameFilter()
@@ -2538,22 +2537,26 @@ public class WWGnlUtilities
           else
           {
             Matcher m = pattern.matcher(name);
+//          System.out.println(" --> [" + name + "] ?");
             if (m.find())
               accept = true;
           }
-//        System.out.println("name [" + name + "] is " + (accept?"":"not ") + "matching");
+    //    System.out.println("name [" + name + "] is " + (accept?"":"not ") + "matching");
           return accept;
-        }
-        
+        }        
       };
-    toDelete = recurseDirectory(from, toDelete, fnf);
+    for (String dir : dir2scan)
+    {
+      File from = new File(".." + File.separator + dir);
+      System.out.println("Scanning [" + from.getAbsolutePath() + "]...");
+      toDelete = recurseDirectory(from, toDelete, fnf);
+    }
     if (toDelete.size() > 0)
     {
       String mess = WWGnlUtilities.buildMessage("will-delete") + "\n";
       for (String s : toDelete)
         mess += (s + "\n");
-      mess += ("\n" +
-          WWGnlUtilities.buildMessage("proceed"));
+      mess += ("\n" + WWGnlUtilities.buildMessage("proceed"));
       int resp = JOptionPane.showConfirmDialog(WWContext.getInstance().getMasterTopFrame(), 
                                                mess, WWGnlUtilities.buildMessage("cleanup-backup"), 
                                                JOptionPane.YES_NO_OPTION,
@@ -2568,7 +2571,9 @@ public class WWGnlUtilities
       }
     }
     else
-      JOptionPane.showMessageDialog(WWContext.getInstance().getMasterTopFrame(), WWGnlUtilities.buildMessage("nothing-to-delete"), WWGnlUtilities.buildMessage("cleanup-backup"), 
+      JOptionPane.showMessageDialog(WWContext.getInstance().getMasterTopFrame(), 
+                                    WWGnlUtilities.buildMessage("nothing-to-delete"), 
+                                    WWGnlUtilities.buildMessage("cleanup-backup"), 
                                     JOptionPane.INFORMATION_MESSAGE);
   }
   
@@ -3562,7 +3567,7 @@ public class WWGnlUtilities
     BoatPosition bp = null;
     try
     {
-      String nmeaPayload = HTTPClient.getContent((String) ParamPanel.data[ParamData.NMEA_SERVER_URL][1]);
+      String nmeaPayload = HTTPClient.getContent((String) ParamPanel.data[ParamData.NMEA_SERVER_URL][ParamData.VALUE_INDEX]);
       StringReader sr = new StringReader(nmeaPayload);
       DOMParser parser = WWContext.getInstance().getParser();
       XMLDocument doc = null;
@@ -3795,7 +3800,7 @@ public class WWGnlUtilities
     return str;
   }
 
-  public static void main(String[] args)
+  public static void main_(String[] args)
   {
     Point center = new Point(200, 100);
     Point toRotate = new Point(50, 50);

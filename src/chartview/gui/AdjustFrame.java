@@ -136,7 +136,7 @@ public class AdjustFrame
         this.setOpaque(false);      
         this.setSize(masterTabPane.getSize());
         ((Graphics2D)g).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 
-                                                                ((Float) ParamPanel.data[ParamData.GRAY_PANEL_OPACITY][1]).floatValue()));
+                                                                ((Float) ParamPanel.data[ParamData.GRAY_PANEL_OPACITY][ParamData.VALUE_INDEX]).floatValue()));
         
 //      g.setColor(Color.LIGHT_GRAY);
 //      g.setColor(Color.GRAY);
@@ -187,7 +187,6 @@ public class AdjustFrame
   private JMenuItem menuFileLoadFromPattern = new JMenuItem();
 
   private JMenu menuTools = new JMenu();
-  private JCheckBoxMenuItem showGRIBPointData = new JCheckBoxMenuItem();
   private JMenu menuCharts = new JMenu();
   private JMenuItem managePredefinedZones = new JMenuItem();
 
@@ -245,10 +244,10 @@ public class AdjustFrame
     String displayComposite = System.getProperty("display.composite", "");
     if (displayComposite.trim().length() == 0)
     {
-      final String compositeName = ((ParamPanel.DataFile) ParamPanel.data[ParamData.LOAD_COMPOSITE_STARTUP][1]).toString();
+      final String compositeName = ((ParamPanel.DataFile) ParamPanel.data[ParamData.LOAD_COMPOSITE_STARTUP][ParamData.VALUE_INDEX]).toString();
       if (compositeName.trim().length() > 0)
       {
-        askAndWaitForLoadAtStartup(compositeName, ((Integer) ParamPanel.data[ParamData.WAIT_ON_STARTUP][1]).intValue());
+        askAndWaitForLoadAtStartup(compositeName, ((Integer) ParamPanel.data[ParamData.WAIT_ON_STARTUP][ParamData.VALUE_INDEX]).intValue());
       }
     }
     else
@@ -350,7 +349,7 @@ public class AdjustFrame
             synchronized (me) { me.notify(); }
             if (resp == JOptionPane.YES_OPTION)
             {
-              int interval = ((Integer) ParamPanel.data[ParamData.RELOAD_DEFAULT_COMPOSITE_INTERVAL][1]).intValue();
+              int interval = ((Integer) ParamPanel.data[ParamData.RELOAD_DEFAULT_COMPOSITE_INTERVAL][ParamData.VALUE_INDEX]).intValue();
               if (interval > 0)
                 enterReloadLoop(compositeName, interval);
               else
@@ -706,8 +705,6 @@ public class AdjustFrame
     menuBar.add(menuTools);
 //  menuTools.setText(WWGnlUtilities.buildMessage("tools"));
     WWGnlUtilities.setLabelAndMnemonic("tools", menuTools);
-    menuTools.add(showGRIBPointData);
-    menuTools.add(new JSeparator());
     menuTools.add(menuCharts); // Externalized
     menuTools.add(new JSeparator());
     menuTools.add(menuRouting);
@@ -730,7 +727,7 @@ public class AdjustFrame
         {
           public void actionPerformed(ActionEvent ae)
           {
-            String compositeDir = ((ParamPanel.DataDirectory)ParamPanel.data[ParamData.COMPOSITE_ROOT_DIR][1]).toString();
+            String compositeDir = ((ParamPanel.DataDirectory)ParamPanel.data[ParamData.COMPOSITE_ROOT_DIR][ParamData.VALUE_INDEX]).toString();
             WWGnlUtilities.generateImagesFromComposites(compositeDir, ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel());
           }
         });
@@ -755,12 +752,13 @@ public class AdjustFrame
         });
     menuAdmin.add(menuCleanOldBackups);
     menuCleanOldBackups.setText(WWGnlUtilities.buildMessage("cleanup-backup"));
+    menuCleanOldBackups.setToolTipText(WWGnlUtilities.buildMessage("cleanup-backup-tt"));
     menuCleanOldBackups.setIcon(new ImageIcon(this.getClass().getResource("img/smrtdata.png")));
     menuCleanOldBackups.addActionListener(new ActionListener()
         {
           public void actionPerformed(ActionEvent ae)
           {
-          WWGnlUtilities.cleanupBackups();
+            WWGnlUtilities.cleanupBackups();
           }
         });
        
@@ -803,17 +801,6 @@ public class AdjustFrame
     menuTools.add(new JSeparator());
     menuTools.add(menuToolsPreferences);
     
-    showGRIBPointData.setText(WWGnlUtilities.buildMessage("show-grib-datapoint"));
-    showGRIBPointData.setIcon(new ImageIcon(instance.getClass().getResource("img/greydot.png")));
-    showGRIBPointData.setSelected(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().isShowGRIBPointPanel());
-    showGRIBPointData.addActionListener(new ActionListener()
-        {
-          public void actionPerformed(ActionEvent ae)
-          {
-            ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().setShowGRIBPointPanel(showGRIBPointData.isSelected());
-          }
-        });
-
     menuCharts.setText(WWGnlUtilities.buildMessage("predefined-zones"));
     menuCharts.setIcon(new ImageIcon(instance.getClass().getResource("img/greydot.png")));
     buildChartMenu();
@@ -908,7 +895,7 @@ public class AdjustFrame
                 WWContext.getInstance().getGreatCircle().setArrival(new GeoPoint(Math.toRadians(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().getTo().getL()), Math.toRadians(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().getTo().getG())));                
                 double gcDist = Math.toDegrees(WWContext.getInstance().getGreatCircle().getDistance()) * 60.0;
 
-                int interval = ((Integer) ParamPanel.data[ParamData.INTERVAL_BETWEEN_ISOBARS][1]).intValue();
+                int interval = ((Integer) ParamPanel.data[ParamData.INTERVAL_BETWEEN_ISOBARS][ParamData.VALUE_INDEX]).intValue();
                 double gws = WWGnlUtilities.getGeostrophicWindSpeed(gcDist, Math.abs((((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().getFrom().getL() + ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().getTo().getL())/ 2D), interval);
                 // Display result
                 String result = WWGnlUtilities.buildMessage("geostrophic-wind-speed") + WWGnlUtilities.DF2.format(gws)       + " kts.\n" +
@@ -974,7 +961,8 @@ public class AdjustFrame
 //            showHelp();
 //          }
 //        });
-    menuHelp.add(new HelpOpenAction()).setAccelerator(KeyStroke.getKeyStroke("F1"));
+    // Removed
+//  menuHelp.add(new HelpOpenAction()).setAccelerator(KeyStroke.getKeyStroke("F1"));
     
     menuHelpContact.setText(WWGnlUtilities.buildMessage("contact-dev-team-dot"));
     menuHelpContact.setIcon(new ImageIcon(this.getClass().getResource("img/onecamel.png")));
@@ -1153,7 +1141,7 @@ public class AdjustFrame
           else
           {
 //          WWContext.getInstance().fireInterruptProcess();
-            if (((Boolean)ParamPanel.data[ParamData.USE_GRAY_PANEL_SHIFT][1]).booleanValue())
+            if (((Boolean)ParamPanel.data[ParamData.USE_GRAY_PANEL_SHIFT][ParamData.VALUE_INDEX]).booleanValue())
             {
               synchronized (layers)
               {
@@ -2189,20 +2177,20 @@ public class AdjustFrame
     jSplitPane.setDividerLocation(i);
   }
   
-  @SuppressWarnings("serial")
-  public class HelpOpenAction extends AbstractAction
-  {
-    public HelpOpenAction()
-    {
-      super(WWGnlUtilities.buildMessage("content"),
-            new ImageIcon(instance.getClass().getResource("img/comment.png")));
-    }
-
-    public void actionPerformed(ActionEvent ae)
-    {
-      showHelp();
-    }
-  }
+//  @SuppressWarnings("serial")
+//  public class HelpOpenAction extends AbstractAction
+//  {
+//    public HelpOpenAction()
+//    {
+//      super(WWGnlUtilities.buildMessage("content"),
+//            new ImageIcon(instance.getClass().getResource("img/comment.png")));
+//    }
+//
+//    public void actionPerformed(ActionEvent ae)
+//    {
+//      showHelp();
+//    }
+//  }
   
   @SuppressWarnings("serial")
   public class ExitAction extends AbstractAction

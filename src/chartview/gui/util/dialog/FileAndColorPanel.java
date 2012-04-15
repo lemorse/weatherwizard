@@ -96,7 +96,7 @@ public class FileAndColorPanel
 
   private void browseButton_actionPerformed(ActionEvent e)
   {
-    String firstDir = ((ParamPanel.DataPath) ParamPanel.data[ParamData.FAX_FILES_LOC][1]).toString().split(File.pathSeparator)[0];
+    String firstDir = ((ParamPanel.DataPath) ParamPanel.data[ParamData.FAX_FILES_LOC][ParamData.VALUE_INDEX]).toString().split(File.pathSeparator)[0];
     String fax = WWGnlUtilities.chooseFile(this, 
                                          JFileChooser.FILES_ONLY, 
                                          new String[] { "gif", "jpg", "jpeg", "tif", "tiff", "png" }, WWGnlUtilities.buildMessage("splash-faxes"), 

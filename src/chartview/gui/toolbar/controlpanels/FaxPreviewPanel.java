@@ -51,9 +51,9 @@ public class FaxPreviewPanel
   {
     this.setLayout(borderLayout1);
 
-    this.setPreferredSize(new Dimension(ChartControlPane.WIDTH, 200));
-    this.setMinimumSize(new Dimension(ChartControlPane.WIDTH, 200));
-    this.setSize(new Dimension(ChartControlPane.WIDTH, 200));
+    this.setPreferredSize(new Dimension(ControlPane.WIDTH, 200));
+    this.setMinimumSize(new Dimension(ControlPane.WIDTH, 200));
+    this.setSize(new Dimension(ControlPane.WIDTH, 200));
 
     jScrollPane1.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
     this.add(jScrollPane1, BorderLayout.CENTER);

@@ -140,7 +140,7 @@ public class ThreeDPanel
               setPainted();
               run();
             }
-            addModel("temp" + File.separator + GRIBDataUtil.DATA_NAME[GRIBDataUtil.TYPE_TWS] + ".obj", (Color)ParamPanel.data[ParamData.GRIB_WIND_COLOR][1], "tws");            
+            addModel("temp" + File.separator + GRIBDataUtil.DATA_NAME[GRIBDataUtil.TYPE_TWS] + ".obj", (Color)ParamPanel.data[ParamData.GRIB_WIND_COLOR][ParamData.VALUE_INDEX], "tws");            
             if (displayTws)
             {
               repaint();
@@ -169,7 +169,7 @@ public class ThreeDPanel
               setPainted();
               run();
             }
-            addModel("temp" + File.separator + GRIBDataUtil.DATA_NAME[GRIBDataUtil.TYPE_500MB] + ".obj", (Color)ParamPanel.data[ParamData.MB500_CONTOUR][1], "500mb");            
+            addModel("temp" + File.separator + GRIBDataUtil.DATA_NAME[GRIBDataUtil.TYPE_500MB] + ".obj", (Color)ParamPanel.data[ParamData.MB500_CONTOUR][ParamData.VALUE_INDEX], "500mb");            
             if (display500mb)
             {
               repaint();
@@ -197,7 +197,7 @@ public class ThreeDPanel
               setPainted();
               run();
             }
-            addModel("temp" + File.separator + GRIBDataUtil.DATA_NAME[GRIBDataUtil.TYPE_PRMSL] + ".obj", (Color)ParamPanel.data[ParamData.PRMSL_CONTOUR][1], "prmsl");
+            addModel("temp" + File.separator + GRIBDataUtil.DATA_NAME[GRIBDataUtil.TYPE_PRMSL] + ".obj", (Color)ParamPanel.data[ParamData.PRMSL_CONTOUR][ParamData.VALUE_INDEX], "prmsl");
             if (displayPrmsl)
             {
               repaint();
@@ -224,7 +224,7 @@ public class ThreeDPanel
               setPainted();
               run();
             }
-            addModel("temp" + File.separator + GRIBDataUtil.DATA_NAME[GRIBDataUtil.TYPE_TMP] + ".obj", (Color)ParamPanel.data[ParamData.TEMP_CONTOUR][1], "temp");
+            addModel("temp" + File.separator + GRIBDataUtil.DATA_NAME[GRIBDataUtil.TYPE_TMP] + ".obj", (Color)ParamPanel.data[ParamData.TEMP_CONTOUR][ParamData.VALUE_INDEX], "temp");
             if (displayTemp)
             {
               repaint();
@@ -251,7 +251,7 @@ public class ThreeDPanel
               setPainted();
               run();
             }
-            addModel("temp" + File.separator + GRIBDataUtil.DATA_NAME[GRIBDataUtil.TYPE_WAVE] + ".obj", (Color)ParamPanel.data[ParamData.WAVES_CONTOUR][1], "waves");
+            addModel("temp" + File.separator + GRIBDataUtil.DATA_NAME[GRIBDataUtil.TYPE_WAVE] + ".obj", (Color)ParamPanel.data[ParamData.WAVES_CONTOUR][ParamData.VALUE_INDEX], "waves");
             if (displayWaves)
             {
               repaint();

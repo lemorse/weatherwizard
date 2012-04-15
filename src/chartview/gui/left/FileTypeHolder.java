@@ -24,16 +24,16 @@ import javax.swing.JPanel;
 public class FileTypeHolder
      extends JPanel
 {
-  private JTreeFilePanel faxTree       = new JTreeFilePanel(ParamPanel.data[ParamData.FAX_FILES_LOC][1].toString(),  
+  private JTreeFilePanel faxTree       = new JTreeFilePanel(ParamPanel.data[ParamData.FAX_FILES_LOC][ParamData.VALUE_INDEX].toString(),  
                                                             JTreeFilePanel.FAX_TYPE,         
                                                             this);
-  private JTreeFilePanel gribTree      = new JTreeFilePanel(ParamPanel.data[ParamData.GRIB_FILES_LOC][1].toString(), 
+  private JTreeFilePanel gribTree      = new JTreeFilePanel(ParamPanel.data[ParamData.GRIB_FILES_LOC][ParamData.VALUE_INDEX].toString(), 
                                                             JTreeFilePanel.GRIB_TYPE,        
                                                             this);
-  private JTreeFilePanel compositeTree = new JTreeFilePanel(ParamPanel.data[ParamData.COMPOSITE_ROOT_DIR][1].toString(),  
+  private JTreeFilePanel compositeTree = new JTreeFilePanel(ParamPanel.data[ParamData.COMPOSITE_ROOT_DIR][ParamData.VALUE_INDEX].toString(),  
                                                             JTreeFilePanel.COMPOSITE_TYPE,   
                                                             this);
-  private JTreeFilePanel patternTree   = new JTreeFilePanel(ParamPanel.data[ParamData.PATTERN_DIR][1].toString(),    
+  private JTreeFilePanel patternTree   = new JTreeFilePanel(ParamPanel.data[ParamData.PATTERN_DIR][ParamData.VALUE_INDEX].toString(),    
                                                             JTreeFilePanel.PATTERN_TYPE,     
                                                             this);
   private JTreeFilePanel preDefFaxTree = new JTreeFilePanel(null,                                                    

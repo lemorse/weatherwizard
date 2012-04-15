@@ -171,9 +171,9 @@ public class GribPanel
         }
         
       });
-    this.setSize(new Dimension(ChartControlPane.WIDTH, 270));
-    this.setPreferredSize(new Dimension(ChartControlPane.WIDTH, 270));
-    this.setMinimumSize(new Dimension(ChartControlPane.WIDTH, 270));
+    this.setSize(new Dimension(ControlPane.WIDTH, 270));
+    this.setPreferredSize(new Dimension(ControlPane.WIDTH, 270));
+    this.setMinimumSize(new Dimension(ControlPane.WIDTH, 270));
     this.setMaximumSize(new Dimension(1000, 1000));
     this.setLayout(gridBagLayout1);
     this.setEnabled(false);

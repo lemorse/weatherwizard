@@ -173,7 +173,7 @@ public class InternetFax extends JPanel
 
   private void browseButton_actionPerformed(ActionEvent e)
   {
-    String firstDir = ((ParamPanel.DataPath) ParamPanel.data[ParamData.FAX_FILES_LOC][1]).toString().split(File.pathSeparator)[0];
+    String firstDir = ((ParamPanel.DataPath) ParamPanel.data[ParamData.FAX_FILES_LOC][ParamData.VALUE_INDEX]).toString().split(File.pathSeparator)[0];
     String fName = WWGnlUtilities.chooseFile(this, JFileChooser.FILES_ONLY, 
                                             new String[] {"jpg", "png", "gif"}, 
                                             "Faxes", 
