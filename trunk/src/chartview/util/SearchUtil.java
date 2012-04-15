@@ -246,11 +246,11 @@ public class SearchUtil
     String ret = str;
     if ("${fax.path}".equals(ret))
     {
-      ret = ParamPanel.data[ParamData.FAX_FILES_LOC][1].toString();
+      ret = ParamPanel.data[ParamData.FAX_FILES_LOC][ParamData.VALUE_INDEX].toString();
     }
     else if ("${grib.path}".equals(ret))
     {
-      ret = ParamPanel.data[ParamData.GRIB_FILES_LOC][1].toString();
+      ret = ParamPanel.data[ParamData.GRIB_FILES_LOC][ParamData.VALUE_INDEX].toString();
     }
     // else if, else...
     

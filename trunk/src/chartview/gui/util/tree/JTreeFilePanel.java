@@ -21,6 +21,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.io.InputStream;
 
@@ -883,6 +884,7 @@ public class JTreeFilePanel
   public static synchronized String getCompositeBubble(String fName, String fPath)
   {
     String bubble = fName;
+    boolean go = true;
     try
     {
       String str = "<html>";
@@ -891,62 +893,83 @@ public class JTreeFilePanel
       synchronized (parser)
       {
         parser.setValidationMode(XMLParser.NONVALIDATING);
-        if (fName.endsWith(".xml"))
+        File f = new File(fPath);
+        if (!f.exists())
         {
-          parser.parse(new File(fPath).toURI().toURL());
+          if (fPath.endsWith(".xml"))
+          {
+            System.out.print("Swapping from [" + fPath + "]...");
+            fPath = fPath.substring(0, fPath.length() - ".xml".length()) + ".waz"; // Swapping pointers?
+            fName = fName.substring(0, fName.length() - ".xml".length()) + ".waz"; // Swapping pointers?
+            System.out.println("... to [" + fPath + "]");
+          }
+        }
+        if (fPath.endsWith(".xml"))
+        {
+          try { parser.parse(new File(fPath).toURI().toURL()); }
+          catch (FileNotFoundException fnfe)
+          {
+            System.err.println(fnfe.getLocalizedMessage());
+            go = false;
+          }
         }
         else // .waz
         {
+//        System.out.println("Looking for archive [" + fPath + "] name [" + fName + "]");
           ZipFile waz = new ZipFile(fPath);
           InputStream is = waz.getInputStream(waz.getEntry("composite.xml"));
           parser.parse(is);
         }
-        XMLDocument doc = parser.getDocument();
-        NodeList comment = doc.selectNodes("//composite-comment");
-        if (comment.getLength() > 0)
+        XMLDocument doc = null;
+        if (go)
         {
-          String commentStr = Utilities.superTrim(comment.item(0).getFirstChild().getNodeValue());
-          if (commentStr.trim().length() > 200)
-            commentStr = commentStr.trim().substring(0, 200) + " ...";
-          str += commentStr.replaceAll("\n", "<br>");
-          str += "<br>";
-        }
-        NodeList faxes = doc.selectNodes("//fax-collection/fax");
-        if (faxes.getLength() > 0)
-        {
-          str += ("<b>Faxes</b><br>");
-          for (int i=0; i<faxes.getLength(); i++)
+          doc = parser.getDocument();
+          NodeList comment = doc.selectNodes("//composite-comment");
+          if (comment.getLength() > 0)
           {
-            XMLElement fax = (XMLElement)faxes.item(i);
-            String faxName = fax.getAttribute("file"); 
-            XMLElement faxTtl = null;
-            try { faxTtl = (XMLElement)fax.selectNodes("./faxTitle").item(0); } catch (Exception ignore) {}
-            if (faxTtl != null)
-              str += (faxTtl.getTextContent() + " - ");             
-            str += (WWGnlUtilities.truncateBigFileName(faxName) + "<br>");
+            String commentStr = Utilities.superTrim(comment.item(0).getFirstChild().getNodeValue());
+            if (commentStr.trim().length() > 200)
+              commentStr = commentStr.trim().substring(0, 200) + " ...";
+            str += commentStr.replaceAll("\n", "<br>");
+            str += "<br>";
           }
-        }
-        NodeList grib = doc.selectNodes("//grib[./* | ./text() | @in-line-request]");
-        if (grib.getLength() > 0)
-        {
-          str += ("<b>GRIB</b><br>");
-          for (int i=0; i<grib.getLength(); i++)
+          NodeList faxes = doc.selectNodes("//fax-collection/fax");
+          if (faxes.getLength() > 0)
           {
-            XMLElement grb = (XMLElement)grib.item(i);
-            String gribName = "";
-            String ilr = grb.getAttribute("in-line-request");
-            if (ilr != null && ilr.trim().length() > 0)
-              str += (ilr + "<br>");
-            else
-            {  
-              try 
-              { 
-                gribName = grb.getFirstChild().getNodeValue();
-                str += (WWGnlUtilities.truncateBigFileName(gribName) + "<br>");
-              }
-              catch (Exception ex)
-              {
-            //  System.out.println("Composite Bubble:" + ex.toString());
+            str += ("<b>Faxes</b><br>");
+            for (int i=0; i<faxes.getLength(); i++)
+            {
+              XMLElement fax = (XMLElement)faxes.item(i);
+              String faxName = fax.getAttribute("file"); 
+              XMLElement faxTtl = null;
+              try { faxTtl = (XMLElement)fax.selectNodes("./faxTitle").item(0); } catch (Exception ignore) {}
+              if (faxTtl != null)
+                str += (faxTtl.getTextContent() + " - ");             
+              str += (WWGnlUtilities.truncateBigFileName(faxName) + "<br>");
+            }
+          }
+          NodeList grib = doc.selectNodes("//grib[./* | ./text() | @in-line-request]");
+          if (grib.getLength() > 0)
+          {
+            str += ("<b>GRIB</b><br>");
+            for (int i=0; i<grib.getLength(); i++)
+            {
+              XMLElement grb = (XMLElement)grib.item(i);
+              String gribName = "";
+              String ilr = grb.getAttribute("in-line-request");
+              if (ilr != null && ilr.trim().length() > 0)
+                str += (ilr + "<br>");
+              else
+              {  
+                try 
+                { 
+                  gribName = grb.getFirstChild().getNodeValue();
+                  str += (WWGnlUtilities.truncateBigFileName(gribName) + "<br>");
+                }
+                catch (Exception ex)
+                {
+              //  System.out.println("Composite Bubble:" + ex.toString());
+                }
               }
             }
           }
@@ -1043,8 +1066,8 @@ public class JTreeFilePanel
       {
         l.predfinedFaxOpen(fName);
       }
-      else // DEBUG
-        System.out.println("Not doing anything for [" + fName + "]");
+//      else // DEBUG
+//        System.out.println("Not doing anything for [" + fName + "]");
     }    
   }
 

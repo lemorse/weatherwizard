@@ -34,20 +34,24 @@ public class SelectFaxPanel
   private JLabel faxLabel = new JLabel();
   private JCheckBox allFaxesCheckBox = new JCheckBox();
 
-  private ListCellRenderer colorRenderer = new ListCellRenderer()
+  private transient ListCellRenderer colorRenderer = new ListCellRenderer()
   {
     public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus)
     {
       FaxType ft = (FaxType)value;
-      String val = ft.getValue();
-      Color c = ft.getColor();
-      JLabel label = new JLabel(val);
-      if (isSelected)
-        label.setBackground(list.getSelectionBackground());
-      else
-        label.setBackground(Color.white);
-      label.setForeground(c);
-      label.setOpaque(true);
+      JLabel label = null;
+      if (ft != null)
+      {
+        String val = ft.getValue();
+        Color c = ft.getColor();
+        label = new JLabel(val);
+        if (isSelected)
+          label.setBackground(list.getSelectionBackground());
+        else
+          label.setBackground(Color.white);
+        label.setForeground(c);
+        label.setOpaque(true);
+      }
       return label;
     }
   };

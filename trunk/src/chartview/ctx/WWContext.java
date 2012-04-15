@@ -80,7 +80,7 @@ public class WWContext
   
   private DOMParser parser = null;
   private GreatCircle greatCircle = null;
-  private transient List<ApplicationEventListener> applicationListeners = null;
+  private List<ApplicationEventListener> applicationListeners = null;
   private ProgressMonitor monitor = null;
   private ApplicationEventListener ael4monitor = null;
   
@@ -1077,7 +1077,7 @@ public class WWContext
   public Boolean getUseGRIBWindSpeedTransparency()
   {
     if (useGRIBWindSpeedTransparency == null)
-      useGRIBWindSpeedTransparency = ((Boolean)ParamPanel.data[ParamData.USE_TRANSPARENT_GRIB_WIND][1]);
+      useGRIBWindSpeedTransparency = ((Boolean)ParamPanel.data[ParamData.USE_TRANSPARENT_GRIB_WIND][ParamData.VALUE_INDEX]);
     return useGRIBWindSpeedTransparency;
   }
 
@@ -1099,7 +1099,7 @@ public class WWContext
   public Boolean getUseColorRangeForWindSpeed()
   {
     if (useColorRangeForWindSpeed == null)
-      useColorRangeForWindSpeed = ((Boolean)ParamPanel.data[ParamData.COLOR_RANGE][1]);
+      useColorRangeForWindSpeed = ((Boolean)ParamPanel.data[ParamData.COLOR_RANGE][ParamData.VALUE_INDEX]);
     return useColorRangeForWindSpeed;
   }
 
@@ -1291,7 +1291,7 @@ public class WWContext
           if (filters != null)
           {
             fullDescription += " (";
-            Enumeration extensions = filters.keys();
+            Enumeration<String> extensions = filters.keys();
             if (extensions != null)
               for (fullDescription += "." + (String)extensions.nextElement(); extensions.hasMoreElements(); fullDescription += ", " + (String)extensions.nextElement());
             fullDescription += ")";
@@ -1324,8 +1324,8 @@ public class WWContext
       return useExtensionsInDescription;
     }
 
-    private String TYPE_UNKNOWN;
-    private String HIDDEN_FILE;
+//  private String TYPE_UNKNOWN;
+//  private String HIDDEN_FILE;
     private Hashtable<String, Object> filters;
     private String description;
     private String fullDescription;
@@ -1353,8 +1353,8 @@ public class WWContext
 
     public ToolFileFilter(String filter[], String description)
     {
-      TYPE_UNKNOWN = "Type Unknown";
-      HIDDEN_FILE = "Hidden File";
+//    TYPE_UNKNOWN = "Type Unknown";
+//    HIDDEN_FILE = "Hidden File";
       this.filters = null;
       this.description = null;
       fullDescription = null;

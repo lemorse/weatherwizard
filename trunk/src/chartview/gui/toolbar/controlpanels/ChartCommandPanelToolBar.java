@@ -49,7 +49,7 @@ public class ChartCommandPanelToolBar
   
   private JButton expandCollapseControlButton = new JButton();
   private JButton scrollThruOpenTabsButton = new JButton();
-  private boolean controlExpanded = ((Boolean)ParamPanel.data[ParamData.EXPAND_CONTROLS_BY_DEFAULT][1]).booleanValue();
+  private boolean controlExpanded = ((Boolean)ParamPanel.data[ParamData.EXPAND_CONTROLS_BY_DEFAULT][ParamData.VALUE_INDEX]).booleanValue();
 
   public static final int DD_ZOOM           = 0;
   public static final int GRAB_SCROLL       = 1;
@@ -141,7 +141,7 @@ public class ChartCommandPanelToolBar
     reloadButton.setToolTipText(WWGnlUtilities.buildMessage("load-reload-defaut"));
     reloadButton.setPreferredSize(new Dimension(24, 24));
     reloadButton.setBorderPainted(false);
-    final String compositeName = ((ParamPanel.DataFile) ParamPanel.data[ParamData.LOAD_COMPOSITE_STARTUP][1]).toString();
+    final String compositeName = ((ParamPanel.DataFile) ParamPanel.data[ParamData.LOAD_COMPOSITE_STARTUP][ParamData.VALUE_INDEX]).toString();
     reloadButton.setEnabled(compositeName.trim().length() > 0); // TODO Event, if that name is modified
     reloadButton.addActionListener(new ActionListener()
       {

@@ -5,18 +5,34 @@ import chartview.gui.util.param.ParamData;
 import chartview.gui.util.param.ParamPanel;
 import java.io.File;
 
+import java.util.List;
+
 import oracle.xml.parser.v2.DOMParser;
 import oracle.xml.parser.v2.NSResolver;
 import oracle.xml.parser.v2.XMLDocument;
 import oracle.xml.parser.v2.XMLParser;
 
+import polarmaker.polars.smooth.gui.components.PolarUtilities;
+import polarmaker.polars.smooth.gui.components.polars.CoeffForPolars;
+
 public class PolarHelper
 {
   private static double coeff[][] = null;
+  private static List<CoeffForPolars> coeffList = null;
+  
+  private static int polarVersion = 0;
+  
+  public final static int POLAR_V1 = 1;
+  public final static int POLAR_V2 = 2;
 
   public static void refreshCoeffs()
   {
-    String fName = ((ParamPanel.DataFile) ParamPanel.data[ParamData.POLAR_FILE_LOC][1]).toString();
+    String fName = ((ParamPanel.DataFile) ParamPanel.data[ParamData.POLAR_FILE_LOC][ParamData.VALUE_INDEX]).toString();
+    if (fName.toLowerCase().endsWith(".xml"))
+      polarVersion = POLAR_V1;
+    else if (fName.toLowerCase().endsWith(".polar-coeff"))
+      polarVersion = POLAR_V2;
+    
     WWContext.getInstance().fireLogging("Parsing " + fName);
     DOMParser parser = WWContext.getInstance().getParser();
     try
@@ -26,24 +42,32 @@ public class PolarHelper
         parser.setValidationMode(XMLParser.NONVALIDATING);
         parser.parse(new File(fName).toURI().toURL());
         XMLDocument doc = parser.getDocument();
-        NSResolver nsr = new NSResolver()
-          {
-            public String resolveNamespacePrefix(String string)
-            {
-              return "http://www.logisail.com/polars";
-            }
-          };
         
-        int w = Integer.parseInt(doc.selectNodes("/pol:polar-coeff-function/@polar-degree", nsr).item(0).getNodeValue()) + 1;
-        int h = Integer.parseInt(doc.selectNodes("/pol:polar-coeff-function/@polar-coeff-degree", nsr).item(0).getNodeValue()) + 1;
-  //    System.out.println("H:" + h + ", W:"+ w);
-        coeff = new double[w][h];
-        for (int i=0; i<w; i++)
+        if (polarVersion == POLAR_V1)
         {
-          for (int j=0; j<h; j++)
+          NSResolver nsr = new NSResolver()
+            {
+              public String resolveNamespacePrefix(String string)
+              {
+                return "http://www.logisail.com/polars";
+              }
+            };
+          
+          int w = Integer.parseInt(doc.selectNodes("/pol:polar-coeff-function/@polar-degree", nsr).item(0).getNodeValue()) + 1;
+          int h = Integer.parseInt(doc.selectNodes("/pol:polar-coeff-function/@polar-coeff-degree", nsr).item(0).getNodeValue()) + 1;
+    //    System.out.println("H:" + h + ", W:"+ w);
+          coeff = new double[w][h];
+          for (int i=0; i<w; i++)
           {
-            coeff[i][j] = Double.parseDouble(doc.selectNodes("/pol:polar-coeff-function/pol:polar-coeff[@degree=" + (w - i - 1) + "]/pol:coeff[@degree=" + (h - j - 1) + "]", nsr).item(0).getFirstChild().getNodeValue());
+            for (int j=0; j<h; j++)
+            {
+              coeff[i][j] = Double.parseDouble(doc.selectNodes("/pol:polar-coeff-function/pol:polar-coeff[@degree=" + (w - i - 1) + "]/pol:coeff[@degree=" + (h - j - 1) + "]", nsr).item(0).getFirstChild().getNodeValue());
+            }
           }
+        }
+        else
+        {
+          coeffList = PolarUtilities.buildCoeffList(doc);
         }
       }
     }
@@ -61,20 +85,32 @@ public class PolarHelper
   
   public static double getSpeed(double tws, double twa, double speedCoeff)
   {
-    if (coeff == null)
+    if (coeff == null && coeffList == null)
       refreshCoeffs();
       
     double speed = 0.0D;
-    double[] metaCoeff = new double[coeff.length];
-    for (int i=0; i<coeff.length; i++)
-    {
-      metaCoeff[i] = f(tws, coeff[i]);
-    }
-    double angle = twa;
-    if (angle > 180D)
-      angle = 360D - angle;
-    speed = f(angle, metaCoeff) * speedCoeff;
     
+    if (polarVersion == POLAR_V1)
+    {
+      double[] metaCoeff = new double[coeff.length];
+      for (int i=0; i<coeff.length; i++)
+      {
+        metaCoeff[i] = f(tws, coeff[i]);
+      }
+      double angle = twa;
+      if (angle > 180D)
+        angle = 360D - angle;
+      speed = f(angle, metaCoeff) * speedCoeff;
+    }
+    else
+    {
+      double angle = twa;
+      if (angle > 180D)
+        angle = 360D - angle;
+      speed = PolarUtilities.getBSP(coeffList, tws, angle);
+      speed *= speedCoeff;
+//    System.out.println("Speed for TWS " + tws + " and TWA " + twa + " -> " + speed);
+    }
     return speed;
   }
   

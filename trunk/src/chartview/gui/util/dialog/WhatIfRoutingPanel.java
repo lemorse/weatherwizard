@@ -69,9 +69,10 @@ public class WhatIfRoutingPanel
   private JLabel polarFactorLabel = new JLabel();
   private JLabel stepLabel = new JLabel();
   
-  private JFormattedTextField polarFactorTextField = new JFormattedTextField(new DecimalFormat("#0.00"));
-  private int defaultStep = (int)(((Double) ParamPanel.data[ParamData.ROUTING_TIME_INTERVAL][1]).doubleValue());
-  private SpinnerModel model = new SpinnerNumberModel(defaultStep, 1, 48, 1);
+  private DecimalFormat df = new DecimalFormat("#0.00");
+  private JFormattedTextField polarFactorTextField = new JFormattedTextField(df);
+  private int defaultStep = (int)(((Double) ParamPanel.data[ParamData.ROUTING_TIME_INTERVAL][ParamData.VALUE_INDEX]).doubleValue());
+  private transient SpinnerModel model = new SpinnerNumberModel(defaultStep, 1, 48, 1);
   private JSpinner stepJSpinner = new JSpinner(model);
 
   public WhatIfRoutingPanel()
@@ -86,8 +87,6 @@ public class WhatIfRoutingPanel
     }
   }
 
-  // TODO Polar Factor
-  // TODO Step (in hours)
   // LOCALIZE
   private void jbInit()
     throws Exception
@@ -192,7 +191,7 @@ public class WhatIfRoutingPanel
     jPanelTwo.add(polarFactorLabel, new GridBagConstraints(0, 7, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE,
           new Insets(0, 0, 0, 0), 0, 0));
     polarFactorTextField.setHorizontalAlignment(JTextField.RIGHT);
-    polarFactorTextField.setText(((Double)ParamPanel.data[ParamData.POLAR_SPEED_FACTOR][1]).toString());
+    polarFactorTextField.setText(df.format(((Double)ParamPanel.data[ParamData.POLAR_SPEED_FACTOR][ParamData.VALUE_INDEX]).doubleValue()));
     jPanelTwo.add(polarFactorTextField, new GridBagConstraints(1, 7, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
           new Insets(0, 0, 0, 0), 0, 0));
     jPanelTwo.add(stepLabel, new GridBagConstraints(0, 8, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE,
@@ -215,7 +214,8 @@ public class WhatIfRoutingPanel
   
   public double getPolarFactor() throws Exception
   {
-    return Double.parseDouble(polarFactorTextField.getText());
+//  return Double.parseDouble(polarFactorTextField.getText());
+    return df.parse(polarFactorTextField.getText()).doubleValue();
   }
   
   @SuppressWarnings("serial")

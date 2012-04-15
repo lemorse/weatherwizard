@@ -3,6 +3,8 @@ package chartview.gui.util.param.widget;
 import chartview.ctx.JTableFocusChangeListener;
 import chartview.ctx.WWContext;
 
+import chartview.gui.util.param.ParamData;
+
 import chartview.util.WWGnlUtilities;
 
 import java.awt.BorderLayout;
@@ -229,7 +231,7 @@ public final class ContourLineTablePanel
         newData[i][j] = d[i][j];
     }
     newData[len][0] = value;
-    newData[len][1] = bold;
+    newData[len][ParamData.VALUE_INDEX] = bold;
     data = newData;
     ((AbstractTableModel) dataModel).fireTableDataChanged();
     return newData;

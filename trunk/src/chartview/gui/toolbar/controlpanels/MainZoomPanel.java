@@ -51,9 +51,9 @@ public class MainZoomPanel
     throws Exception
   {
     this.setLayout(new BorderLayout());
-    this.setPreferredSize(new Dimension(ChartControlPane.WIDTH, 90));
-    this.setMinimumSize(new Dimension(ChartControlPane.WIDTH, 90));
-    this.setSize(new Dimension(ChartControlPane.WIDTH, 90));
+    this.setPreferredSize(new Dimension(ControlPane.WIDTH, 90));
+    this.setMinimumSize(new Dimension(ControlPane.WIDTH, 90));
+    this.setSize(new Dimension(ControlPane.WIDTH, 90));
     centerPanel.setLayout(new GridBagLayout());
     if (centerPanelVisible)
       this.add(centerPanel, BorderLayout.CENTER);

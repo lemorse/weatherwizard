@@ -141,6 +141,7 @@ public class RoutingUtil
         Iterator<List<RoutingPoint>> dimOne = data.iterator();
         int nbNonZeroSpeed = 0;
         boolean allowOtherRoute = false;
+        long before = System.currentTimeMillis();
         while (!interruptRouting && dimOne.hasNext() && keepLooping)
         {
 //        timer = logDiffTime(timer, "Milestone 2");
@@ -256,7 +257,9 @@ public class RoutingUtil
             if (!interruptRouting)
               temp.add(oneCurve);
           }
-        }        
+        }      
+        long after = System.currentTimeMillis();
+        System.out.println("Isochron calculated in " + Long.toString(after - before) + " ms.");
         // Start from the finalCurve, the previous enveloppe, for the next calculation
         // Flip data
 //      timer = logDiffTime(timer, "Milestone 8");
@@ -266,9 +269,11 @@ public class RoutingUtil
         {
 //        timer = logDiffTime(timer, "Milestone 8-bis");
 //        WWContext.getInstance().fireLogging("Reducing...");
-//        long before = System.currentTimeMillis();
+//        System.out.print("Reducing...");
+//        before = System.currentTimeMillis();
           finalCurve = calculateEnveloppe(data, center);          
 //        WWContext.getInstance().fireLogging("Reducing completed in " + Long.toString(System.currentTimeMillis() - before) + " ms\n");
+//        System.out.println(" completed in " + Long.toString(System.currentTimeMillis() - before) + " ms\n");
         }
         // Calculate distance to destination, from the final curve
         Iterator<RoutingPoint> finalIterator = null;
@@ -432,6 +437,7 @@ public class RoutingUtil
     return after;
   }
      
+  // TASK Needs optimization   
   private static List<RoutingPoint> calculateEnveloppe(List<List<RoutingPoint>> bulkPoints, RoutingPoint center)
   {
     List<RoutingPoint> returnCurve = new ArrayList<RoutingPoint>();
@@ -464,7 +470,6 @@ public class RoutingUtil
                                 newPoint.getPoint().y);
       }
       currentPolygon.addPoint(center.getPoint().x, center.getPoint().y); // close
-      
       Iterator<List<RoutingPoint>> dimOneBis = bulkPoints.iterator();
       while (!interruptRouting && dimOneBis.hasNext())
       {
@@ -477,7 +482,7 @@ public class RoutingUtil
           if (currentPolygon.contains(isop.getPoint())) 
           {
             // Remove from the final Curve if it's inside (and not removed already)
-            if (returnCurve.contains(isop.getPoint()))
+//          if (returnCurve.contains(isop.getPoint())) // Demanding...
             {
               returnCurve.remove(isop.getPoint());
   //          System.out.println("Removing point, len now " + returnCurve.size());
@@ -488,6 +493,7 @@ public class RoutingUtil
     }
     long after = System.currentTimeMillis();
     WWContext.getInstance().fireLogging(mess + "to " + returnCurve.size() + " point(s), curve reducing calculated in " + Long.toString(after - before) + " ms");
+    System.out.println(mess + "to " + returnCurve.size() + " point(s), curve reducing calculated in " + Long.toString(after - before) + " ms");
     
     return returnCurve;
   }

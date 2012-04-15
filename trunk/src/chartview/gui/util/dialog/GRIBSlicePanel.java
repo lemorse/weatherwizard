@@ -220,7 +220,7 @@ public class GRIBSlicePanel
 
     prmslCheckBox.setText("PRMSL");
     prmslCheckBox.setToolTipText("PRMSL");
-    Color c = (Color)ParamPanel.data[ParamData.PRMSL_COLOR_IN_ROUTING][1];
+    Color c = (Color)ParamPanel.data[ParamData.PRMSL_COLOR_IN_ROUTING][ParamData.VALUE_INDEX];
     prmslCheckBox.setBackground(c);
     prmslCheckBox.setForeground(reverseColor(c));
     prmslCheckBox.addActionListener(new ActionListener()
@@ -232,7 +232,7 @@ public class GRIBSlicePanel
       });
     hgt500CheckBox.setText("HGT500");
     hgt500CheckBox.setToolTipText("HGT500");
-    c = (Color)ParamPanel.data[ParamData.HGT500_COLOR_IN_ROUTING][1];
+    c = (Color)ParamPanel.data[ParamData.HGT500_COLOR_IN_ROUTING][ParamData.VALUE_INDEX];
     hgt500CheckBox.setBackground(c);
     hgt500CheckBox.setForeground(reverseColor(c));
     hgt500CheckBox.addActionListener(new ActionListener()
@@ -244,7 +244,7 @@ public class GRIBSlicePanel
       });
     twsCheckBox.setText("TWS");
     twsCheckBox.setToolTipText("TWS");
-    c = (Color)ParamPanel.data[ParamData.TWS_COLOR_IN_ROUTING][1];
+    c = (Color)ParamPanel.data[ParamData.TWS_COLOR_IN_ROUTING][ParamData.VALUE_INDEX];
     twsCheckBox.setBackground(c);
     twsCheckBox.setForeground(reverseColor(c));
     twsCheckBox.addActionListener(new ActionListener()
@@ -256,7 +256,7 @@ public class GRIBSlicePanel
       });
     wavesCheckBox.setText("WAVES");
     wavesCheckBox.setToolTipText("WAVES");
-    wavesCheckBox.setBackground((Color)ParamPanel.data[ParamData.WAVES_COLOR_IN_ROUTING][1]);
+    wavesCheckBox.setBackground((Color)ParamPanel.data[ParamData.WAVES_COLOR_IN_ROUTING][ParamData.VALUE_INDEX]);
     wavesCheckBox.addActionListener(new ActionListener()
       {
         public void actionPerformed(ActionEvent e)
@@ -266,7 +266,7 @@ public class GRIBSlicePanel
       });
     tempCheckBox.setText("AIRTMP");
     tempCheckBox.setToolTipText("AIRTMP");
-    c = (Color)ParamPanel.data[ParamData.AIRTMP_COLOR_IN_ROUTING][1];
+    c = (Color)ParamPanel.data[ParamData.AIRTMP_COLOR_IN_ROUTING][ParamData.VALUE_INDEX];
     tempCheckBox.setBackground(c);
     tempCheckBox.setForeground(reverseColor(c));
     tempCheckBox.addActionListener(new ActionListener()
@@ -278,7 +278,7 @@ public class GRIBSlicePanel
       });
     rainCheckBox.setText("RAIN");
     rainCheckBox.setToolTipText("RAIN");
-    c = (Color)ParamPanel.data[ParamData.RAIN_COLOR_IN_ROUTING][1];
+    c = (Color)ParamPanel.data[ParamData.RAIN_COLOR_IN_ROUTING][ParamData.VALUE_INDEX];
     rainCheckBox.setBackground(c);
     rainCheckBox.setForeground(reverseColor(c));
     rainCheckBox.addActionListener(new ActionListener()
@@ -291,7 +291,7 @@ public class GRIBSlicePanel
     
     bspCheckBox.setText("BSP");
     bspCheckBox.setToolTipText("BSP");
-    c = (Color)ParamPanel.data[ParamData.BSP_COLOR_IN_ROUTING][1];
+    c = (Color)ParamPanel.data[ParamData.BSP_COLOR_IN_ROUTING][ParamData.VALUE_INDEX];
     bspCheckBox.setBackground(c);
     bspCheckBox.setForeground(reverseColor(c));
     bspCheckBox.addActionListener(new ActionListener()
@@ -913,16 +913,16 @@ public class GRIBSlicePanel
           postit(gr, 
                  " " + speedFormat.format(gribPoint.windspeed),
                  infoX, y, 
-                 (Color)ParamPanel.data[ParamData.TWS_COLOR_IN_ROUTING][1], 
-                 reverseColor((Color)ParamPanel.data[ParamData.TWS_COLOR_IN_ROUTING][1]), 
+                 (Color)ParamPanel.data[ParamData.TWS_COLOR_IN_ROUTING][ParamData.VALUE_INDEX], 
+                 reverseColor((Color)ParamPanel.data[ParamData.TWS_COLOR_IN_ROUTING][ParamData.VALUE_INDEX]), 
                  0.75f);
 
 //          y = (int)(this.getHeight() - (windAngle * dirScale));
 //          postit(gr, 
 //                 " TWA:" + windAngle + "\272",
 //                 infoX, y, 
-//                 (Color)ParamPanel.data[ParamData.TWS_COLOR_IN_ROUTING][1], 
-//                 reverseColor((Color)ParamPanel.data[ParamData.TWS_COLOR_IN_ROUTING][1]), 
+//                 (Color)ParamPanel.data[ParamData.TWS_COLOR_IN_ROUTING][ParamData.VALUE_INDEX], 
+//                 reverseColor((Color)ParamPanel.data[ParamData.TWS_COLOR_IN_ROUTING][ParamData.VALUE_INDEX]), 
 //                 0.75f);
         }
         if (displayPRMSL && !Float.isInfinite(prmslscale))
@@ -931,8 +931,8 @@ public class GRIBSlicePanel
           postit(gr, 
                  " " + prmslFormat.format(gribPoint.prmsl / 100f), 
                  infoX, y, 
-                 (Color)ParamPanel.data[ParamData.PRMSL_COLOR_IN_ROUTING][1], 
-                 reverseColor((Color)ParamPanel.data[ParamData.PRMSL_COLOR_IN_ROUTING][1]), 
+                 (Color)ParamPanel.data[ParamData.PRMSL_COLOR_IN_ROUTING][ParamData.VALUE_INDEX], 
+                 reverseColor((Color)ParamPanel.data[ParamData.PRMSL_COLOR_IN_ROUTING][ParamData.VALUE_INDEX]), 
                  0.75f);
         }
         if (displayHGT500 && !Float.isInfinite(hgt500scale))
@@ -941,8 +941,8 @@ public class GRIBSlicePanel
           postit(gr, 
                  " " + hgt500Format.format(gribPoint.hgt500), 
                  infoX, y, 
-                 (Color)ParamPanel.data[ParamData.HGT500_COLOR_IN_ROUTING][1], 
-                 reverseColor((Color)ParamPanel.data[ParamData.HGT500_COLOR_IN_ROUTING][1]), 
+                 (Color)ParamPanel.data[ParamData.HGT500_COLOR_IN_ROUTING][ParamData.VALUE_INDEX], 
+                 reverseColor((Color)ParamPanel.data[ParamData.HGT500_COLOR_IN_ROUTING][ParamData.VALUE_INDEX]), 
                  0.75f);
         }
         if (displayWAVES && !Float.isInfinite(wavescale))
@@ -951,8 +951,8 @@ public class GRIBSlicePanel
           postit(gr, 
                  " " + wavesFormat.format(gribPoint.waves / 100f), 
                  infoX, y, 
-                 (Color)ParamPanel.data[ParamData.WAVES_COLOR_IN_ROUTING][1], 
-                 reverseColor((Color)ParamPanel.data[ParamData.WAVES_COLOR_IN_ROUTING][1]), 
+                 (Color)ParamPanel.data[ParamData.WAVES_COLOR_IN_ROUTING][ParamData.VALUE_INDEX], 
+                 reverseColor((Color)ParamPanel.data[ParamData.WAVES_COLOR_IN_ROUTING][ParamData.VALUE_INDEX]), 
                  0.75f);
         }
         if (displayTEMP && !Float.isInfinite(tempscale))
@@ -961,8 +961,8 @@ public class GRIBSlicePanel
           postit(gr, 
                  " " + tempFormat.format(gribPoint.temp - 273), 
                  infoX, y, 
-                 (Color)ParamPanel.data[ParamData.AIRTMP_COLOR_IN_ROUTING][1], 
-                 reverseColor((Color)ParamPanel.data[ParamData.AIRTMP_COLOR_IN_ROUTING][1]), 
+                 (Color)ParamPanel.data[ParamData.AIRTMP_COLOR_IN_ROUTING][ParamData.VALUE_INDEX], 
+                 reverseColor((Color)ParamPanel.data[ParamData.AIRTMP_COLOR_IN_ROUTING][ParamData.VALUE_INDEX]), 
                  0.75f);
         }
         if (displayRAIN && !Float.isInfinite(rainscale))
@@ -972,8 +972,8 @@ public class GRIBSlicePanel
           postit(gr, 
                  " " + prateFormat.format(gribPoint.rain * 3600f), 
                  infoX, y, 
-                 (Color)ParamPanel.data[ParamData.RAIN_COLOR_IN_ROUTING][1], 
-                 reverseColor((Color)ParamPanel.data[ParamData.RAIN_COLOR_IN_ROUTING][1]), 
+                 (Color)ParamPanel.data[ParamData.RAIN_COLOR_IN_ROUTING][ParamData.VALUE_INDEX], 
+                 reverseColor((Color)ParamPanel.data[ParamData.RAIN_COLOR_IN_ROUTING][ParamData.VALUE_INDEX]), 
                  0.75f);
         }
         if (displayBSP && !Float.isInfinite(bspscale))
@@ -982,8 +982,8 @@ public class GRIBSlicePanel
           postit(gr, 
                  " " + speedFormat.format(boatSpeed.doubleValue()), 
                  infoX, y, 
-                 (Color)ParamPanel.data[ParamData.BSP_COLOR_IN_ROUTING][1], 
-                 reverseColor((Color)ParamPanel.data[ParamData.BSP_COLOR_IN_ROUTING][1]), 
+                 (Color)ParamPanel.data[ParamData.BSP_COLOR_IN_ROUTING][ParamData.VALUE_INDEX], 
+                 reverseColor((Color)ParamPanel.data[ParamData.BSP_COLOR_IN_ROUTING][ParamData.VALUE_INDEX]), 
                  0.75f);
         }
         if (dataOption == ROUTING_OPTION && displayTWS)
@@ -1043,7 +1043,7 @@ public class GRIBSlicePanel
           {
       //    System.out.println("Idx:" + gribIdx + ", x:" + x + " for w:" + this.getWidth() + " and gSize:" + gribSize);
             y = (int)(this.getHeight() - (tws * windscale));
-            gr.setColor((Color)ParamPanel.data[ParamData.TWS_COLOR_IN_ROUTING][1]);
+            gr.setColor((Color)ParamPanel.data[ParamData.TWS_COLOR_IN_ROUTING][ParamData.VALUE_INDEX]);
             if (prevXtws > -1 && prevYtws > -1)
               gr.drawLine(prevXtws, prevYtws, x, y);
             prevXtws = x;
@@ -1053,7 +1053,7 @@ public class GRIBSlicePanel
           if (displayPRMSL && !Float.isInfinite(prmslscale))
           {
             y = (int)(this.getHeight() - ((prmsl - (gribMini.prmsl / 100f))* prmslscale));
-            gr.setColor((Color)ParamPanel.data[ParamData.PRMSL_COLOR_IN_ROUTING][1]);
+            gr.setColor((Color)ParamPanel.data[ParamData.PRMSL_COLOR_IN_ROUTING][ParamData.VALUE_INDEX]);
             if (prevXprmsl > -1 && prevYprmsl > -1)
               gr.drawLine(prevXprmsl, prevYprmsl, x, y);
             prevXprmsl = x;
@@ -1063,7 +1063,7 @@ public class GRIBSlicePanel
           if (displayHGT500 && !Float.isInfinite(hgt500scale))
           {
             y = (int)(this.getHeight() - ((hgt500 - (gribMini.hgt500))* hgt500scale));
-            gr.setColor((Color)ParamPanel.data[ParamData.HGT500_COLOR_IN_ROUTING][1]);
+            gr.setColor((Color)ParamPanel.data[ParamData.HGT500_COLOR_IN_ROUTING][ParamData.VALUE_INDEX]);
             if (prevXhgt500 > -1 && prevYhgt500 > -1)
               gr.drawLine(prevXhgt500, prevYhgt500, x, y);
             prevXhgt500 = x;
@@ -1073,7 +1073,7 @@ public class GRIBSlicePanel
           if (displayWAVES && !Float.isInfinite(wavescale))
           {
             y = (int)(this.getHeight() - (waves * wavescale));
-            gr.setColor((Color)ParamPanel.data[ParamData.WAVES_COLOR_IN_ROUTING][1]);
+            gr.setColor((Color)ParamPanel.data[ParamData.WAVES_COLOR_IN_ROUTING][ParamData.VALUE_INDEX]);
             if (prevXwaves > -1 && prevYwaves > -1)
               gr.drawLine(prevXwaves, prevYwaves, x, y);
             prevXwaves = x;
@@ -1083,7 +1083,7 @@ public class GRIBSlicePanel
           if (displayTEMP && !Float.isInfinite(tempscale))
           {
             y = (int)(this.getHeight() - ((temp - (gribMini.temp - 273))* tempscale));
-            gr.setColor((Color)ParamPanel.data[ParamData.AIRTMP_COLOR_IN_ROUTING][1]);
+            gr.setColor((Color)ParamPanel.data[ParamData.AIRTMP_COLOR_IN_ROUTING][ParamData.VALUE_INDEX]);
             if (prevXtemp > -1 && prevYtemp > -1)
               gr.drawLine(prevXtemp, prevYtemp, x, y);
             prevXtemp = x;
@@ -1094,7 +1094,7 @@ public class GRIBSlicePanel
           {
 //          System.out.println("-> Rain (2) " + x + ":" + (rain));
             y = (int)(this.getHeight() - (((rain) /* - (gribMini.rain * 3600f) */)* rainscale));
-            gr.setColor((Color)ParamPanel.data[ParamData.RAIN_COLOR_IN_ROUTING][1]);
+            gr.setColor((Color)ParamPanel.data[ParamData.RAIN_COLOR_IN_ROUTING][ParamData.VALUE_INDEX]);
             if (prevXrain > -1 && prevYrain > -1)
               gr.drawLine(prevXrain, prevYrain, x, y);
             prevXrain = x;
@@ -1125,7 +1125,7 @@ public class GRIBSlicePanel
           {
       //    System.out.println("Idx:" + gribIdx + ", x:" + x + " for w:" + this.getWidth() + " and gSize:" + gribSize);
             y = (int)(this.getHeight() - (bsp * bspscale));
-            gr.setColor((Color)ParamPanel.data[ParamData.BSP_COLOR_IN_ROUTING][1]);
+            gr.setColor((Color)ParamPanel.data[ParamData.BSP_COLOR_IN_ROUTING][ParamData.VALUE_INDEX]);
             if (prevXbsp > -1 && prevYbsp > -1)
               gr.drawLine(prevXbsp, prevYbsp, x, y);
             prevXbsp = x;
@@ -1155,7 +1155,7 @@ public class GRIBSlicePanel
           {
       //    System.out.println("Idx:" + gribIdx + ", x:" + x + " for w:" + this.getWidth() + " and gSize:" + gribSize);
             y = (int)(this.getHeight() - (bsp * scale));
-            gr.setColor((Color)ParamPanel.data[ParamData.TWS_COLOR_IN_ROUTING][1]);
+            gr.setColor((Color)ParamPanel.data[ParamData.TWS_COLOR_IN_ROUTING][ParamData.VALUE_INDEX]);
             if (prevXbsp > -1 && prevYbsp > -1)
               gr.drawLine(prevXbsp, prevYbsp, x, y);
             prevXbsp = x;

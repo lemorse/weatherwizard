@@ -146,7 +146,7 @@ public final class FaxPatternEditTablePanel
                           Boolean.FALSE, 
                           Boolean.TRUE,
                           "http://...", 
-                          (ParamPanel.DataDirectory)ParamPanel.data[ParamData.FAX_FILES_LOC][1], 
+                          (ParamPanel.DataDirectory)ParamPanel.data[ParamData.FAX_FILES_LOC][ParamData.VALUE_INDEX], 
                           "Fax_", 
                           "yyyy_MM_dd_HH_mm_ss_z", 
                           "png", 

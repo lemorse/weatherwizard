@@ -207,8 +207,8 @@ public class BlindRouting implements RoutingClientInterface
       }
     }
     ParamPanel.setUserValues();
-    ParamPanel.data[ParamData.POLAR_FILE_LOC][1] = new ParamPanel.DataFile(new String[] {"xml"}, WWGnlUtilities.buildMessage("polars"), polarFile);
-    String fName = ((ParamPanel.DataFile) ParamPanel.data[ParamData.POLAR_FILE_LOC][1]).toString();
+    ParamPanel.data[ParamData.POLAR_FILE_LOC][ParamData.VALUE_INDEX] = new ParamPanel.DataFile(new String[] {"xml"}, WWGnlUtilities.buildMessage("polars"), polarFile);
+    String fName = ((ParamPanel.DataFile) ParamPanel.data[ParamData.POLAR_FILE_LOC][ParamData.VALUE_INDEX]).toString();
     if (verbose) 
     {  
       System.out.println("Using polar file " + fName);

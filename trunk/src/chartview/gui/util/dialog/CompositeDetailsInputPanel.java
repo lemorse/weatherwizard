@@ -911,7 +911,7 @@ public class CompositeDetailsInputPanel
     }
     else
     {
-      String firstDir = ((ParamPanel.DataPath) ParamPanel.data[ParamData.GRIB_FILES_LOC][1]).toString().split(File.pathSeparator)[0];
+      String firstDir = ((ParamPanel.DataPath) ParamPanel.data[ParamData.GRIB_FILES_LOC][ParamData.VALUE_INDEX]).toString().split(File.pathSeparator)[0];
       String grib = WWGnlUtilities.chooseFile(this, JFileChooser.FILES_ONLY, new String[]
                                              { "grb", "grib" }, 
                                              "GRIB Files", 

@@ -63,9 +63,9 @@ public class LoggingPanel
   {
     this.setLayout(borderLayout1);
 
-    this.setPreferredSize(new Dimension(ChartControlPane.WIDTH, 200));
-    this.setMinimumSize(new Dimension(ChartControlPane.WIDTH, 200));
-    this.setSize(new Dimension(ChartControlPane.WIDTH, 200));
+    this.setPreferredSize(new Dimension(ControlPane.WIDTH, 200));
+    this.setMinimumSize(new Dimension(ControlPane.WIDTH, 200));
+    this.setSize(new Dimension(ControlPane.WIDTH, 200));
 
     loggingTextZone.setFont(new Font("Dialog", 0, 9));
     loggingTextZone.setCaretColor(Color.lightGray);

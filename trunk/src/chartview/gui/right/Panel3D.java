@@ -42,7 +42,7 @@ public class Panel3D
   private ThreeDPanel threeDPanel = new ThreeDPanel(null, 
                                                     1.0f, 
                                                     new Color(240, 240, 245), 
-                                                    (Color)ParamPanel.data[ParamData.CHART_COLOR][1], 
+                                                    (Color)ParamPanel.data[ParamData.CHART_COLOR][ParamData.VALUE_INDEX], 
                                                     Color.blue, // Text (N, S, E, W)
                                                     Color.red); // Other points (not used for now)
   private ZoomPanel zoompanel = new ZoomPanel();
