@@ -444,16 +444,14 @@ public class ChartAdjust
             {
     //            System.out.println("URL Activated:" + he.getURL().toString());
               String activatedURL = he.getURL().toString();
-              String value = activatedURL.substring(activatedURL.lastIndexOf("/") + 1);
-              if (value.startsWith("showDate("))
+              String value = activatedURL;
+              if (!value.startsWith("http://"))
+                value = value.substring(value.indexOf("http://"));
+              if (value.startsWith("http://"))
               {
-                System.out.println("Value:" + value);
-                value = value.substring("showDate(".length(), value.length() - 1);
-                System.out.println("arg:" + value);
-                long date = Long.parseLong(value);
-                // Broadcast
-                System.out.println("Broadcasting Date " + date + ":" + new Date(date).toString());
-                // TODO ...la suite
+                if (value.endsWith(".html/"))
+                  value = value.substring(0, value.length() - 1);
+                Utilities.openInBrowser(value);
               }
             }
           }
