@@ -147,15 +147,18 @@ public class GRIBVisualPanel extends JPanel // TransparentPanel
       String displayString = "";
       Color startColor = null; // bottom (low)
       Color endColor   = null; // top    (high)
+      String label = "";
       switch (i)
       {
         case 0: // TWS
+          label = "TWS";
           currValue = truewindspeed;
           displayValue = (int) (currValue * ((float)h / 70f)); // [0, 70]
           startColor = new Color(193, 216, 217, COLOR_OPACITY);
           endColor   = new Color(  0,   0, 128, COLOR_OPACITY);
           break;
         case 1: // PRMSL
+          label = "PRMSL";
           currValue = prmslValue / 100f;
 //        System.out.println("PRMSL:" + prmslValue);
           displayValue = (int) ((currValue - 950f) * ((float)h / 100f)); // [950, 1050]
@@ -163,6 +166,7 @@ public class GRIBVisualPanel extends JPanel // TransparentPanel
           endColor   = new Color(255, 128, 192, COLOR_OPACITY);
           break;
         case 2: // HGT500
+          label = "HGT500";
           currValue = hgt500Value;
           displayValue = (int) ((currValue - 4500f) * ((float)h / 1500f)); // [4500, 6000]
 //        System.out.println("HGT500:" + hgt500Value);
@@ -170,6 +174,7 @@ public class GRIBVisualPanel extends JPanel // TransparentPanel
           startColor = new Color(  0,   0, 255, COLOR_OPACITY);
           break;
         case 3: // WAVES
+          label = "WAVES";
 //        System.out.println("Waves Height:" + waveHeightValue);
           currValue = waveHeightValue / 100f;
           displayValue = (int) (currValue * ((float)h / 10f)); // [0, 10]
@@ -177,6 +182,7 @@ public class GRIBVisualPanel extends JPanel // TransparentPanel
           endColor   = new Color(  0, 128,   0, COLOR_OPACITY);
           break;
         case 4: // TEMP
+          label = "TEMP";
           startColor = new Color(128, 255, 255, COLOR_OPACITY);
           endColor   = new Color(255,   0,   0, COLOR_OPACITY);
           currValue = tempValue - 273f;
@@ -185,6 +191,7 @@ public class GRIBVisualPanel extends JPanel // TransparentPanel
           break;
         case 5: // PRATE
 //        System.out.println("PRATE:" + prateValue);
+          label = "PRATE";
           currValue = prateValue * 3600f;
           displayValue = (int) (currValue * ((float)h / 20f)); // [0, 20]
           startColor = new Color(255, 255, 255, COLOR_OPACITY);
@@ -196,9 +203,20 @@ public class GRIBVisualPanel extends JPanel // TransparentPanel
       if (displayValue == 0F)
         continue;
       
+      // Label
+      g.setColor(Color.white);
+      int labelXCenterOffset = xOffset + (i * (w / 6)) + (w / 12);
+      int labelLength = g.getFontMetrics().stringWidth(label);
+      int labelY = g.getFont().getSize() + 1;
+      g.drawString(label, labelXCenterOffset - (labelLength / 2) + 2, labelY + 2);
+      g.setColor(Color.darkGray);
+      g.drawString(label, labelXCenterOffset - (labelLength / 2), labelY);
+      
       GradientPaint gradient = new GradientPaint(0, this.getHeight(), startColor, 0, 0, endColor); // vertical, upside down
       ((Graphics2D)g).setPaint(gradient);
       g.fillRect(xOffset + (i * (w / 6)), h - yOffset - displayValue, w / 6, displayValue);
+      g.setColor(startColor);      
+      g.drawRect(xOffset + (i * (w / 6)), h - yOffset - displayValue, w / 6, displayValue);
       g.setColor(GRIB_DATA_TEXT_COLOR);
       displayString = FMTS[i].format(currValue);
       int l = g.getFontMetrics(smallFont).stringWidth(displayString);
@@ -264,21 +282,40 @@ public class GRIBVisualPanel extends JPanel // TransparentPanel
     int x = displayCenterX - (l / 2);
     int y = displayCenterY - externalCircleRadius + (fontSize / 2);
     g.drawString(card, x, y);
+    g.setColor(Color.darkGray);
+    g.drawString(card, x + 2, y + 2);
+    g.setColor(Color.white);
     card = "S";
     l = g.getFontMetrics(cardFont).stringWidth(card);
     x = displayCenterX - (l / 2);
     y = displayCenterY + externalCircleRadius + (fontSize / 2);
     g.drawString(card, x, y);
+    g.setColor(Color.darkGray);
+    g.drawString(card, x + 2, y + 2);
+    g.setColor(Color.white);
     card = "W";
     l = g.getFontMetrics(cardFont).stringWidth(card);
     x = displayCenterX - externalCircleRadius - (l / 2);
     y = displayCenterY + (fontSize / 2);
     g.drawString(card, x, y);
+    g.setColor(Color.darkGray);
+    g.drawString(card, x + 2, y + 2);
+    g.setColor(Color.white);
     card = "E";
     l = g.getFontMetrics(cardFont).stringWidth(card);
     x = displayCenterX + externalCircleRadius - (l / 2);
     y = displayCenterY + (fontSize / 2);
     g.drawString(card, x, y);
+    g.setColor(Color.darkGray);
+    g.drawString(card, x + 2, y + 2);
+
+    g.setColor(Color.white);
+    String twd = "TWD";
+    int labelLength = g.getFontMetrics().stringWidth(twd);
+    int labelY = g.getFont().getSize() + 1;
+    g.drawString(twd, displayCenterX - (labelLength / 2) + 2, displayCenterY - (externalCircleRadius / 2) + 2);
+    g.setColor(Color.darkGray);
+    g.drawString(twd, displayCenterX - (labelLength / 2), displayCenterY - (externalCircleRadius / 2));
     
     // Wind dir - Hand
     int handEndX = displayCenterX + (int)((displayRadius - 8) * Math.sin(Math.toRadians(truewinddir)));
