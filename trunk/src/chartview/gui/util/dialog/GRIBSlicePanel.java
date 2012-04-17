@@ -106,11 +106,13 @@ public class GRIBSlicePanel
   private GridBagLayout gridBagLayout2 = new GridBagLayout();
   private JTextField smoothTextField = new JTextField();
 
+
+  private static int tempUnit = Integer.parseInt(((ParamPanel.TemperatureUnitList)(ParamPanel.data[ParamData.TEMPERATURE_UNIT][ParamData.VALUE_INDEX])).getStringIndex());
   private DecimalFormat speedFormat  = new DecimalFormat("##0.0 'kts'");
   private DecimalFormat prmslFormat  = new DecimalFormat("##0.0 'mb'");
   private DecimalFormat hgt500Format = new DecimalFormat("##0 'm'");
   private DecimalFormat wavesFormat  = new DecimalFormat("##0.0 'm'"); 
-  private DecimalFormat tempFormat   = new DecimalFormat("##0'°C'");
+  private DecimalFormat tempFormat   = new DecimalFormat("##0'" + ParamPanel.TemperatureUnitList.getLabel(tempUnit) + "'");
   private DecimalFormat prateFormat  = new DecimalFormat("##0.00 'mm/h'");
 
   public GRIBSlicePanel(List<DatedGribCondition> data, 
@@ -959,7 +961,7 @@ public class GRIBSlicePanel
         {
           int y = (int)(this.getHeight() - (((gribPoint.temp - 273) - (gribMini.temp - 273))* tempscale));
           postit(gr, 
-                 " " + tempFormat.format(gribPoint.temp - 273), 
+                 " " + tempFormat.format(WWGnlUtilities.convertTemperatureFromKelvin(gribPoint.temp, tempUnit)), 
                  infoX, y, 
                  (Color)ParamPanel.data[ParamData.AIRTMP_COLOR_IN_ROUTING][ParamData.VALUE_INDEX], 
                  reverseColor((Color)ParamPanel.data[ParamData.AIRTMP_COLOR_IN_ROUTING][ParamData.VALUE_INDEX]), 

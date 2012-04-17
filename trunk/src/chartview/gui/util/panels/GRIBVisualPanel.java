@@ -4,7 +4,11 @@ import chartview.ctx.ApplicationEventListener;
 import chartview.ctx.WWContext;
 
 import chartview.gui.toolbar.controlpanels.ControlPane;
+import chartview.gui.util.param.ParamData;
+import chartview.gui.util.param.ParamPanel;
 import chartview.gui.util.transparent.TransparentPanel;
+
+import chartview.util.WWGnlUtilities;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -112,17 +116,26 @@ public class GRIBVisualPanel extends JPanel // TransparentPanel
   private final static int BORDER_TICKNESS = 5;
   private final static int COLOR_OPACITY   = 200; // 0-255
   private final static int FONT_SIZE       = 8;
+  
+  private static int tempUnit = Integer.parseInt(((ParamPanel.TemperatureUnitList)(ParamPanel.data[ParamData.TEMPERATURE_UNIT][ParamData.VALUE_INDEX])).getStringIndex());
 
   private final static DecimalFormat[] FMTS = { 
                                                 new DecimalFormat("##0.0 'kts'"), 
                                                 new DecimalFormat("##0.0 'mb'"), 
                                                 new DecimalFormat("##0 'm'"), 
                                                 new DecimalFormat("##0.0 'm'"), 
-                                                new DecimalFormat("##0'°C'"), 
+                                                new DecimalFormat("##0'" + ParamPanel.TemperatureUnitList.getLabel(tempUnit) + "'"), 
                                                 new DecimalFormat("##0.00 'mm/h'"),
                                               };
   private final static DecimalFormat DIR_FMT = new DecimalFormat("##0'°'");
   private final static Color GRIB_DATA_TEXT_COLOR = Color.blue;
+  
+  private final static int TWS         = 0;
+  private final static int PRMSL       = 1;
+  private final static int HGT500      = 2;
+  private final static int WAVES       = 3;
+  private final static int TEMPERATURE = 4;
+  private final static int PRATE       = 5;
   
   public void paintComponent(Graphics g)
   {
@@ -150,14 +163,14 @@ public class GRIBVisualPanel extends JPanel // TransparentPanel
       String label = "";
       switch (i)
       {
-        case 0: // TWS
+        case TWS: // TWS
           label = "TWS";
           currValue = truewindspeed;
           displayValue = (int) (currValue * ((float)h / 70f)); // [0, 70]
           startColor = new Color(193, 216, 217, COLOR_OPACITY);
           endColor   = new Color(  0,   0, 128, COLOR_OPACITY);
           break;
-        case 1: // PRMSL
+        case PRMSL: // PRMSL
           label = "PRMSL";
           currValue = prmslValue / 100f;
 //        System.out.println("PRMSL:" + prmslValue);
@@ -165,7 +178,7 @@ public class GRIBVisualPanel extends JPanel // TransparentPanel
           startColor = new Color(255,   0,   0, COLOR_OPACITY);
           endColor   = new Color(255, 128, 192, COLOR_OPACITY);
           break;
-        case 2: // HGT500
+        case HGT500: // HGT500
           label = "HGT500";
           currValue = hgt500Value;
           displayValue = (int) ((currValue - 4500f) * ((float)h / 1500f)); // [4500, 6000]
@@ -173,7 +186,7 @@ public class GRIBVisualPanel extends JPanel // TransparentPanel
           endColor   = new Color(  0, 255, 255, COLOR_OPACITY);
           startColor = new Color(  0,   0, 255, COLOR_OPACITY);
           break;
-        case 3: // WAVES
+        case WAVES: // WAVES
           label = "WAVES";
 //        System.out.println("Waves Height:" + waveHeightValue);
           currValue = waveHeightValue / 100f;
@@ -181,15 +194,15 @@ public class GRIBVisualPanel extends JPanel // TransparentPanel
           startColor = new Color(128, 255, 128, COLOR_OPACITY);
           endColor   = new Color(  0, 128,   0, COLOR_OPACITY);
           break;
-        case 4: // TEMP
+        case TEMPERATURE: // TEMP
           label = "TEMP";
           startColor = new Color(128, 255, 255, COLOR_OPACITY);
           endColor   = new Color(255,   0,   0, COLOR_OPACITY);
-          currValue = tempValue - 273f;
+          currValue = (float)WWGnlUtilities.convertTemperatureFromKelvin(tempValue, ParamPanel.TemperatureUnitList.CELCIUS); // tempUnit);
 //        System.out.println("TEMP:" + tempValue);
           displayValue = (int) ((currValue + 50f) * ((float)h / 100f)); // [-50, 50]
           break;
-        case 5: // PRATE
+        case PRATE: // PRATE
 //        System.out.println("PRATE:" + prateValue);
           label = "PRATE";
           currValue = prateValue * 3600f;
@@ -218,7 +231,10 @@ public class GRIBVisualPanel extends JPanel // TransparentPanel
       g.setColor(startColor);      
       g.drawRect(xOffset + (i * (w / 6)), h - yOffset - displayValue, w / 6, displayValue);
       g.setColor(GRIB_DATA_TEXT_COLOR);
-      displayString = FMTS[i].format(currValue);
+      if (i == TEMPERATURE)
+        displayString = FMTS[i].format(WWGnlUtilities.convertTemperatureFromCelcius(currValue, tempUnit));
+      else
+        displayString = FMTS[i].format(currValue);
       int l = g.getFontMetrics(smallFont).stringWidth(displayString);
       int x = xOffset + (i * (w / 6)) + (w / (2 * 6)) - (l / 2);
       int y = h - yOffset - 5;
@@ -361,7 +377,7 @@ public class GRIBVisualPanel extends JPanel // TransparentPanel
     startY += (FONT_SIZE * 1.2);
     g.drawString("WAVES  " + FMTS[3].format(waveHeightValue / 100f), startX, startY);
     startY += (FONT_SIZE * 1.2);
-    g.drawString("TEMP   " + FMTS[4].format(tempValue - 273f), startX, startY);
+    g.drawString("TEMP   " + FMTS[4].format(WWGnlUtilities.convertTemperatureFromKelvin(tempValue, tempUnit)), startX, startY);
     startY += (FONT_SIZE * 1.2);
     g.drawString("PRATE  " + FMTS[5].format(prateValue * 3600f), startX, startY);
     startY += (FONT_SIZE * 1.2);

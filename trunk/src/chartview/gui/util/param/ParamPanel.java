@@ -348,6 +348,9 @@ public final class ParamPanel
       case ParamData.EXPAND_CONTROLS_BY_DEFAULT:
         it = Boolean.TRUE;
         break;
+      case ParamData.TEMPERATURE_UNIT:
+        it = new TemperatureUnitList(0);
+        break;
       default:
         break;
     }
@@ -466,6 +469,8 @@ public final class ParamPanel
                 data[i][ParamData.VALUE_INDEX] = new ListOfSerialPorts(s);
               else if (i == ParamData.ROUTING_OUTPUT_FLAVOR)
                 data[i][ParamData.VALUE_INDEX] = new RoutingOutputList(Integer.parseInt(s));
+              else if (i == ParamData.TEMPERATURE_UNIT)
+                data[i][ParamData.VALUE_INDEX] = new TemperatureUnitList(Integer.parseInt(s));
               else                                                 // Strings
                 data[i][ParamData.VALUE_INDEX] = s;
             }
@@ -530,7 +535,8 @@ public final class ParamPanel
         ParamData.DEFAULT_FAX_BLUR,
         ParamData.CLICK_SCROLL,
         ParamData.WAIT_ON_STARTUP,
-        ParamData.EXPAND_CONTROLS_BY_DEFAULT }, 
+        ParamData.EXPAND_CONTROLS_BY_DEFAULT,
+        ParamData.TEMPERATURE_UNIT }, 
       new int[] // Routing
       { ParamData.NMEA_SERVER_URL, 
         ParamData.SERIAL_PORT,
@@ -1125,6 +1131,7 @@ public final class ParamPanel
     JComboBox lnfList = new JComboBox(lnfValues); // Should not be used
     WindOptionComboBox wdoCombo   = new WindOptionComboBox();
     FaxBlurListComboBox blurCombo = new FaxBlurListComboBox();
+    TemperatureUnitListComboBox tempUnitCombo = new TemperatureUnitListComboBox();
     JComboBox serialPortList      = new JComboBox(SerialPortList.listSerialPorts());
     RoutingOptionComboBox roCombo = new RoutingOptionComboBox();
         
@@ -1196,6 +1203,11 @@ public final class ParamPanel
       {
         componentToApply = blurCombo;
         blurCombo.setSelectedItem(((FaxBlurList)value).getCurrentValue());
+      }
+      else if (column == 1 && value instanceof TemperatureUnitList)
+      {
+        componentToApply = tempUnitCombo;
+        tempUnitCombo.setSelectedItem(((TemperatureUnitList)value).getCurrentValue());
       }
       else if (column == 1 && value instanceof ListOfSerialPorts)
       {
@@ -1269,6 +1281,20 @@ public final class ParamPanel
       else if (componentToApply instanceof BooleanCellEditor)
       {
         return ((Boolean)((BooleanCellEditor)componentToApply).getCellEditorValue());
+      }
+      else if (componentToApply instanceof TemperatureUnitListComboBox)
+      {
+        String s = (String)((TemperatureUnitListComboBox)componentToApply).getSelectedItem();
+        Integer i = null;
+        for (Integer k : TemperatureUnitList.getMap().keySet())
+        {
+          if (TemperatureUnitList.getMap().get(k).equals(s))
+          {
+            i = k;
+            break;
+          }
+        }
+        return (new TemperatureUnitList(i.intValue()));
       }
       else if (componentToApply instanceof FaxBlurListComboBox)
       {
@@ -1424,6 +1450,11 @@ public final class ParamPanel
         {
           Color c = (Color)valueObject;
           val.setNodeValue(WWGnlUtilities.colorToString(c));
+        }
+        else if (valueObject instanceof TemperatureUnitList)
+        {
+          TemperatureUnitList tul = (TemperatureUnitList)valueObject;
+          val.setNodeValue(tul.getStringIndex());
         }
         else if (valueObject instanceof FaxBlurList)
         {
@@ -1684,6 +1715,49 @@ public final class ParamPanel
     }
   }
   
+  public static class TemperatureUnitList extends ListOfValues
+  {
+    public final static int CELCIUS    = 0;
+    public final static int FAHRENHEIT = 1;
+    public final static int KELVIN     = 2;
+    
+    private static HashMap<Integer, String> map = new HashMap<Integer, String>(3);
+    
+    public TemperatureUnitList(int key)
+    { 
+      map.put(CELCIUS,    "ºC");      
+      map.put(FAHRENHEIT, "ºF");      
+      map.put(KELVIN,     "ºK");      
+
+      super.setCurrentValue(map.get(key));
+    }
+    
+    public static HashMap<Integer, String> getMap()
+    {
+      return map;
+    }
+    
+    public String getStringIndex()
+    {
+      String str = "";
+      String s = super.getCurrentValue();
+      for (Integer k : map.keySet())
+      {
+        if (map.get(k).equals(s))
+        {
+          str = k.toString();
+          break;
+        }
+      }
+      return str;
+    }
+    
+    public static String getLabel(int idx)
+    {
+      return map.get(new Integer(idx));
+    }
+  }
+   
   public static class FaxBlurList extends ListOfValues
   {
     private static HashMap<Integer, String> map = new HashMap<Integer, String>(3);
@@ -1772,6 +1846,20 @@ public final class ParamPanel
     
     public String toString()
     { return getLabel(); }
+  }
+  
+  @SuppressWarnings("serial")
+  private static class TemperatureUnitListComboBox extends JComboBox
+  {
+    public TemperatureUnitListComboBox()
+    {
+      super();
+      this.removeAllItems();
+      for (Integer key : TemperatureUnitList.getMap().keySet())
+      {
+        this.addItem(TemperatureUnitList.getMap().get(key));
+      }
+    }
   }
   
   @SuppressWarnings("serial")

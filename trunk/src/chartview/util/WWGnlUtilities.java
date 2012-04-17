@@ -125,6 +125,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -286,6 +287,43 @@ public class WWGnlUtilities
     else
       trunc += (orig.substring(orig.lastIndexOf("/")));
     return trunc;
+  }
+
+  public static double convertTemperatureFromKelvin(double temperature, int toUnit)
+  {
+    double newTemp = temperature;
+    switch (toUnit)
+    {
+      case ParamPanel.TemperatureUnitList.CELCIUS:
+        newTemp -= 273.6;
+        break;
+      case ParamPanel.TemperatureUnitList.FAHRENHEIT:
+        newTemp -= 273.6;
+        newTemp *= (9d/5d);
+        newTemp += 32;
+        break;
+      default:
+        break;
+    }
+    return newTemp;
+  }
+
+  public static double convertTemperatureFromCelcius(double temperature, int toUnit)
+  {
+    double newTemp = temperature;
+    switch (toUnit)
+    {
+      case ParamPanel.TemperatureUnitList.KELVIN:
+        newTemp += 273.6;
+        break;
+      case ParamPanel.TemperatureUnitList.FAHRENHEIT:
+        newTemp *= (9d/5d);
+        newTemp += 32;
+        break;
+      default:
+        break;
+    }
+    return newTemp;
   }
 
   public static void installLookAndFeel() 
@@ -3800,6 +3838,17 @@ public class WWGnlUtilities
     return str;
   }
 
+  public static void main__(String[] args)
+  {
+    double kelvin = 273d;
+    System.out.println(kelvin + " K = " + convertTemperatureFromKelvin(kelvin, ParamPanel.TemperatureUnitList.CELCIUS) + " C");  
+    System.out.println(kelvin + " K = " + convertTemperatureFromKelvin(kelvin, ParamPanel.TemperatureUnitList.FAHRENHEIT) + " F");  
+    System.out.println();
+    kelvin = 293d;
+    System.out.println(kelvin + " K = " + convertTemperatureFromKelvin(kelvin, ParamPanel.TemperatureUnitList.CELCIUS) + " C");  
+    System.out.println(kelvin + " K = " + convertTemperatureFromKelvin(kelvin, ParamPanel.TemperatureUnitList.FAHRENHEIT) + " F");
+  }
+  
   public static void main_(String[] args)
   {
     Point center = new Point(200, 100);

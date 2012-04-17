@@ -243,8 +243,11 @@ public class CommandPanel
   private final static int RAIN          = 5;
   private final static int CURRENT_SPEED = 6;
   
+  private static int temperatureUnit = Integer.parseInt(((ParamPanel.TemperatureUnitList)(ParamPanel.data[ParamData.TEMPERATURE_UNIT][ParamData.VALUE_INDEX])).getStringIndex());
   private final static String[] dataLabels = { "WIND", "PRMSL", "500HGT", "AIRTMP", "WAVES", "RAIN",  "CURRENT" };
-  private final static String[] units      = { " kts", " mb",   " m",     "°C",     " m",    " mm/h", " kts" };
+  private final static String[] units      = { " kts", " mb",   " m",     
+                                                                          ParamPanel.TemperatureUnitList.getLabel(temperatureUnit), // was "°C"    
+                                                                                    " m",    " mm/h", " kts" };
   private double[][] boundaries = new double[dataLabels.length][2];
   
   private JLabel statusLabel = new JLabel("");
@@ -3358,7 +3361,7 @@ public class CommandPanel
                 boundaries[WIND_SPEED] = GRIBDataUtil.getWindSpeedBoundaries(gribData); // TODO Look into this
                 
                 String u = units[WIND_SPEED];
-                boundariesLabel.setText(WWGnlUtilities.buildMessage("from-to", new String[] { WWGnlUtilities.XX22.format(boundaries[0][0]) + u, WWGnlUtilities.XX22.format(boundaries[0][ParamData.VALUE_INDEX]) + u }));            
+                boundariesLabel.setText(WWGnlUtilities.buildMessage("from-to", new String[] { WWGnlUtilities.XX22.format(boundaries[0][0]) + u, WWGnlUtilities.XX22.format(boundaries[0][1]) + u }));            
                 boundariesLabel.setEnabled(true);
                 
                 if (WWGnlUtilities.isIn(dataLabels[WIND_SPEED], displayComboBox))
@@ -3673,7 +3676,11 @@ public class CommandPanel
             
             double[] bndr = boundaries[getDataIndexOf((String)displayComboBox.getSelectedItem())];
             String u = units[getDataIndexOf((String)displayComboBox.getSelectedItem())];
-            boundariesLabel.setText(WWGnlUtilities.buildMessage("from-to", new String[] { WWGnlUtilities.XX22.format(bndr[0]) + u, WWGnlUtilities.XX22.format(bndr[1]) + u }));            
+            if ("AIRTMP".equals((String)displayComboBox.getSelectedItem()))
+              boundariesLabel.setText(WWGnlUtilities.buildMessage("from-to", new String[] { WWGnlUtilities.XX22.format(WWGnlUtilities.convertTemperatureFromCelcius(bndr[0], temperatureUnit)) + u, 
+                                                                                            WWGnlUtilities.XX22.format(WWGnlUtilities.convertTemperatureFromCelcius(bndr[1], temperatureUnit)) + u }));            
+            else
+              boundariesLabel.setText(WWGnlUtilities.buildMessage("from-to", new String[] { WWGnlUtilities.XX22.format(bndr[0]) + u, WWGnlUtilities.XX22.format(bndr[1]) + u }));            
             chartPanel.repaint();
           }
         }
@@ -5890,8 +5897,8 @@ public class CommandPanel
                   }
                   else if ("AIRTMP".equals(dataOption))
                   {
-                    double temperature = /*(double)*/(gribData.getGribPointData()[h][w].getAirtmp() - 273D);
-                    gr.setColor(WWGnlUtilities.getTemperatureColor(temperature, boundaries[TEMPERATURE][ParamData.VALUE_INDEX], boundaries[TEMPERATURE][0]));
+                    double temperature = /*(double)*/(gribData.getGribPointData()[h][w].getAirtmp() - 273.6D);
+                    gr.setColor(WWGnlUtilities.getTemperatureColor(temperature, boundaries[TEMPERATURE][1], boundaries[TEMPERATURE][0]));
                     // 
                     double topLeftLat = lat + (gribStepY / 2D);
                     double topLeftLng = lng - (gribStepX / 2D);
@@ -5913,7 +5920,7 @@ public class CommandPanel
                   else if ("500HGT".equals(dataOption))
                   {
                     double altitude = /*(double)*/(gribData.getGribPointData()[h][w].getHgt());
-                    gr.setColor(WWGnlUtilities.get500mbColor(altitude, boundaries[HGT500][ParamData.VALUE_INDEX], boundaries[HGT500][0]));
+                    gr.setColor(WWGnlUtilities.get500mbColor(altitude, boundaries[HGT500][1], boundaries[HGT500][0]));
                     // 
                     double topLeftLat = lat + (gribStepY / 2D);
                     double topLeftLng = lng - (gribStepX / 2D);
@@ -5936,7 +5943,7 @@ public class CommandPanel
                   {
                     // TASK What if array size is noyte is not the same?
                     double height = /*(double)*/(gribData.getGribPointData()[h][w].getWHgt());
-                    gr.setColor(WWGnlUtilities.getWavesColor(height / 100D, boundaries[WAVES][ParamData.VALUE_INDEX], boundaries[WAVES][0]));
+                    gr.setColor(WWGnlUtilities.getWavesColor(height / 100D, boundaries[WAVES][1], boundaries[WAVES][0]));
                     // 
                     double topLeftLat = lat + (gribStepY / 2D);
                     double topLeftLng = lng - (gribStepX / 2D);
@@ -5958,7 +5965,7 @@ public class CommandPanel
                   else if ("RAIN".equals(dataOption)) 
                   {
                     double height = /*(double)*/(gribData.getGribPointData()[h][w].getRain() * 3600D);
-                    gr.setColor(WWGnlUtilities.getRainColor(height, boundaries[RAIN][ParamData.VALUE_INDEX], boundaries[RAIN][0]));
+                    gr.setColor(WWGnlUtilities.getRainColor(height, boundaries[RAIN][1], boundaries[RAIN][0]));
                     // 
                     double topLeftLat = lat + ((gribStepY) / 2D);
                     double topLeftLng = lng - ((gribStepX) / 2D);
@@ -5980,7 +5987,7 @@ public class CommandPanel
                   else if ("PRMSL".equals(dataOption))
                   {
                     double pressure = (double)gribData.getGribPointData()[h][w].getPrmsl() / 100D;
-                    gr.setColor(WWGnlUtilities.getPressureColor(pressure, boundaries[PRMSL][ParamData.VALUE_INDEX], boundaries[PRMSL][0]));
+                    gr.setColor(WWGnlUtilities.getPressureColor(pressure, boundaries[PRMSL][1], boundaries[PRMSL][0]));
                     // 
                     double topLeftLat = lat + ((gribStepY) / 2D);
                     double topLeftLng = lng - ((gribStepX) / 2D);
@@ -7556,7 +7563,7 @@ public class CommandPanel
             mess += ((isThereWind()?("wind:" + Math.round(gribPoint.windspeed) + "kts@" + gribPoint.winddir + " (" + (!displayAltTooltip?"<b>":"") + "F " + WWGnlUtilities.getBeaufort(gribPoint.windspeed) + (!displayAltTooltip?"</b>":"") + ")"):"") +
                     ((gribPoint.prmsl>0)?br  + "prmsl:" + WWGnlUtilities.DF2.format((gribPoint.prmsl / 100F)) + units[PRMSL]:"") +
                     ((gribPoint.waves>0)?br  + "waves:" + WWGnlUtilities.XXX12.format((gribPoint.waves / 100F)) + units[WAVES]:"") +
-                    ((gribPoint.temp>0)?br   + "temp:" + WWGnlUtilities.XX22.format(gribPoint.temp - 273) + units[TEMPERATURE]:"") + // Originally in Kelvin
+                    ((gribPoint.temp>0)?br   + "temp:" + WWGnlUtilities.XX22.format(WWGnlUtilities.convertTemperatureFromKelvin(gribPoint.temp, temperatureUnit)) + units[TEMPERATURE]:"") + // Originally in Kelvin
                     ((gribPoint.hgt500>0)?br + "500mb:" + WWGnlUtilities.DF2.format(gribPoint.hgt500) + units[HGT500]:"") + 
                     ((gribPoint.rain>0)?br   + "prate:" + WWGnlUtilities.XX22.format(gribPoint.rain * 3600F) + units[RAIN]:"") +
                      ((gribPoint.currentspeed>0)?br + "current:" + WWGnlUtilities.XXX12.format(gribPoint.currentspeed) + "kts@" + gribPoint.currentdir:""));
