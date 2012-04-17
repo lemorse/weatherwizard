@@ -85,8 +85,9 @@ public class ParamData
   public final static int GRAY_PANEL_OPACITY             = 70;
   public final static int WAIT_ON_STARTUP                = 71;
   public final static int EXPAND_CONTROLS_BY_DEFAULT     = 72;
+  public final static int TEMPERATURE_UNIT               = 73;
 
-  public final static int NB_PRFERENCES         = 73; 
+  public final static int NB_PRFERENCES         = 74; 
   
   private final static String[] labels = 
   { 
@@ -162,7 +163,8 @@ public class ParamData
     WWGnlUtilities.buildMessage("shift-down-gray-panel"),
     WWGnlUtilities.buildMessage("gray-panel-opacity"),
     WWGnlUtilities.buildMessage("startup-wait"),
-    WWGnlUtilities.buildMessage("expand-control-by-default")
+    WWGnlUtilities.buildMessage("expand-control-by-default"),
+    WWGnlUtilities.buildMessage("temperature-unit")
   };
 
   private final static String[] helptext = 
@@ -239,7 +241,8 @@ public class ParamData
     WWGnlUtilities.buildMessage("help-shift-down-gray-panel"),
     WWGnlUtilities.buildMessage("help-gray-panel-opacity"),
     WWGnlUtilities.buildMessage("help-startup-wait"),
-    WWGnlUtilities.buildMessage("help-expand-control-by-default")
+    WWGnlUtilities.buildMessage("help-expand-control-by-default"),
+    WWGnlUtilities.buildMessage("temperature-unit-help")
   };
     
   public static String[] getLabels()
