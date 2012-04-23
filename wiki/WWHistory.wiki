@@ -8,17 +8,18 @@ This page takes over and replaces the one [http://donpedro.lediouris.net/softwar
 
 = Details =
 
-      <table width="100%" border="1">
-        <tr>
-          <th>Date</th>
-          <th>Description</th>
-          <th>Impacted file(s)</th>
-        </tr>
-        <tr>
-          <td valign="top">18-Apr-2012</td>
-          <td valign="top">
-            Cosmetics.
-          </td>
-          <td valign="top">chartadjust.jar</td>
-        </tr>
-      </table>
+<table width="100%" border="1">
+  <tr>
+    <th>Date</th>
+    <th>Description</th>
+    <th>Impacted file(s)</th>
+  </tr>
+  <tr>
+    <td valign="top">18-Apr-2012</td>
+    <td valign="top">Cosmetics.</td>
+    <td valign="top">chartadjust.jar</td>
+  </tr>
+</table>
+
+|| Date || Description || Impacted file(s) ||
+|| 18-Apr-2012 || Cosmetic || chartadjust.jar ||
