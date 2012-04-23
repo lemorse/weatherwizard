@@ -8,7 +8,18 @@ This page takes over and replaces the one [http://donpedro.lediouris.net/softwar
 
 = Details =
 
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+      <table width="100%" border="0">
+        <tr>
+          <th bgcolor="#ffffff">Date</th>
+          <th bgcolor="#ffffff">Description</th>
+          <th bgcolor="#ffffff">Impacted file(s)</th>
+        </tr>
+        <tr>
+          <!--td valign="top" bgcolor="#cdcdcd">29-Mar-2012</td-->
+          <td valign="top" bgcolor="#e2e2e2">18-Apr-2012</td>
+          <td valign="top" bgcolor="#e2e2e2">
+            Cosmetics.
+          </td>
+          <td valign="top" bgcolor="#e2e2e2">chartadjust.jar</td>
+        </tr>
+      </table>
