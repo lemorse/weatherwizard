@@ -8,5 +8,5 @@ This page takes over and replaces the one [http://donpedro.lediouris.net/softwar
 
 = Details =
 
-|| Date || Description || Impacted file(s) ||
+|| *Date* || *Description* || *Impacted file(s)* ||
 || 18-Apr-2012 || Cosmetic || chartadjust.jar ||
