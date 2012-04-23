@@ -15,7 +15,6 @@ This page takes over and replaces the one [http://donpedro.lediouris.net/softwar
           <th bgcolor="#ffffff">Impacted file(s)</th>
         </tr>
         <tr>
-          <!--td valign="top" bgcolor="#cdcdcd">29-Mar-2012</td-->
           <td valign="top" bgcolor="#e2e2e2">18-Apr-2012</td>
           <td valign="top" bgcolor="#e2e2e2">
             Cosmetics.
