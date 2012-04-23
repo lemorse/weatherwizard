@@ -3,7 +3,7 @@ Weather Wizard History
 
 = Introduction =
 
-This page replaces the one at [Here http://donpedro.lediouris.net/software/structure/datafiles/news/index.html]
+This page takes over and replaces the one [http://donpedro.lediouris.net/software/structure/datafiles/news/index.html Here]
 
 
 = Details =
