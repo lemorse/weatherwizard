@@ -18,10 +18,12 @@ import java.awt.event.MouseEvent;
 
 import java.io.File;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JComponent;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
@@ -35,13 +37,15 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 
 @SuppressWarnings("serial")
-public final class OneColumnTablePanel
+public class OneColumnTablePanel
   extends JPanel
 {
   private BorderLayout borderLayout1 = new BorderLayout();
   private JPanel centerPane = new JPanel();
 
   private String colName = "File"; 
+  private boolean editable = true;
+  private boolean withDelete = false;
 
   private String[] names = { colName };
 
@@ -55,7 +59,15 @@ public final class OneColumnTablePanel
 
   public OneColumnTablePanel(String colName)
   {
+    this(colName, true, false);
+  }
+  
+  public OneColumnTablePanel(String colName, boolean editable, boolean withDelete)
+  {
     this.colName = colName;
+    this.editable = editable;
+    this.withDelete = withDelete;
+    
     this.names[0] = this.colName;
     try
     {
@@ -135,7 +147,7 @@ public final class OneColumnTablePanel
 
         public boolean isCellEditable(int row, int col)
         {
-          return true;
+          return editable;
         }
 
         public void setValueAt(Object aValue, int row, int column)
@@ -176,6 +188,15 @@ public final class OneColumnTablePanel
   {
     return table.getSelectedRows();
   }
+  
+  public List<Object> getSelectedData()
+  {
+    List<Object> al = new ArrayList<Object>();
+    int[] selectedRow = getSelectRows();
+    for (int i : selectedRow)
+      al.add(data[i][0]);
+    return al;
+  }
 
   private Object[][] addLineInTable(String name, Object[][] d)
   {
@@ -212,6 +233,11 @@ public final class OneColumnTablePanel
     data = newData;
     ((AbstractTableModel) dataModel).fireTableDataChanged();
   }
+  
+  public void refresh()
+  {
+    // To be overridden
+  }
 
   public class SelectionListener
     implements ListSelectionListener
@@ -241,8 +267,10 @@ public final class OneColumnTablePanel
     private String[] row2show;
 
     private JMenuItem gotoDirectory;
+    private JMenuItem deleteSelected;
 
     private final String GO_TO = WWGnlUtilities.buildMessage("go-to-directory");
+    private final String DELETE = WWGnlUtilities.buildMessage("delete-selected");
 
     public TablePopup(String[] rowId)
     {
@@ -250,6 +278,11 @@ public final class OneColumnTablePanel
       row2show = rowId;
       this.add(gotoDirectory = new JMenuItem(GO_TO));
       gotoDirectory.addActionListener(this);
+      if (withDelete)
+      {
+        this.add(deleteSelected = new JMenuItem(DELETE));
+        deleteSelected.addActionListener(this);
+      }
     }
 
     public void actionPerformed(ActionEvent event)
@@ -259,6 +292,24 @@ public final class OneColumnTablePanel
 //      System.out.println("Popup Action detected on row " + row2show[0]);
         String directory = row2show[0].substring(0, row2show[0].lastIndexOf(File.separator));
         try { Utilities.showFileSystem(directory); } catch (Exception ex) { ex.printStackTrace(); }
+      }
+      if (event.getActionCommand().equals(DELETE))
+      {
+        if (row2show.length > 0)
+        {
+          // Confirmation
+          int resp = JOptionPane.showConfirmDialog(this, "Delete " + row2show.length + " Document(s) ?", "Delete", JOptionPane.YES_NO_OPTION);
+          if (resp == JOptionPane.YES_OPTION)
+          {
+            for (String s : row2show)
+            {
+              System.out.println("Deleting " + s);
+              File f = new File(s);
+              f.delete();
+            }
+          }
+          refresh();
+        }
       }
     }
 

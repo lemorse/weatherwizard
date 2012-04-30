@@ -424,7 +424,6 @@ public class JTreeFilePanel
       final DefaultMutableTreeNode onLinePatterns = new DefaultMutableTreeNode(WWGnlUtilities.buildMessage("on-line-patterns"));
       localPatterns = new DefaultMutableTreeNode(WWGnlUtilities.buildMessage("local-patterns"));
       root.add(localPatterns);
-      root.add(onLinePatterns);
 //    jTree.setRootVisible(false);
       
       Thread olpThread = new Thread()
@@ -434,21 +433,25 @@ public class JTreeFilePanel
             try
             {
               URL url = new URL(OLP_URL);
-              DOMParser parser = WWContext.getInstance().getParser();
-              synchronized (parser)
+              // We create a new parser, for other thread not to wait for it to be released
+              DOMParser parser = new DOMParser(); // (DOMParser)WWContext.getInstance().getParser();
+              synchronized (parser) 
               {
                 parser.setValidationMode(XMLParser.NONVALIDATING);
                 parser.parse(url);
                 XMLDocument olpDoc = parser.getDocument();
                 drillDownWebPatterns((XMLElement)olpDoc.getDocumentElement(), onLinePatterns);
              // onLinePatterns.add(new PatternFileTreeNode("http://", "weather.lediouris.net/patterns/01.Favorites/06.01.bis.AllPac.Faxes.Satellite.ptrn", "Web Pattern"));
+                root.add(onLinePatterns);
+                ((DefaultTreeModel)jTree.getModel()).reload(root);                
               }
             }
-            catch (Exception ex)
+            catch (Throwable ex)
             {
-              root.remove(onLinePatterns);
-              System.out.println("No connection for OnLine patterns.");
+              System.err.println("No connection for OnLine patterns:" + ex.getLocalizedMessage());
+//            ex.printStackTrace();
             }
+            System.out.println("Online Pattern Thread completed.");
           }
         };
       olpThread.start();
@@ -458,25 +461,33 @@ public class JTreeFilePanel
 //    preDefFaxes = new DefaultMutableTreeNode(WWGnlUtilities.buildMessage("pre-def-faxes"));
 //    root.add(preDefFaxes);
       jTree.setRootVisible(true);
-      try
-      {
-        URL url = new File(PDF_URL).toURI().toURL();
-        DOMParser parser = WWContext.getInstance().getParser();
-        synchronized (parser)
+      Thread predefLoader = new Thread()
         {
-          parser.setValidationMode(XMLParser.NONVALIDATING);
-          parser.parse(url);
-          XMLDocument pdfDoc = parser.getDocument();
-//        drillDownPreDefFaxes((XMLElement)pdfDoc.getDocumentElement(), preDefFaxes);
-          drillDownPreDefFaxes((XMLElement)pdfDoc.getDocumentElement(), root);
-        }
-      }
-      catch (Exception ex)
-      {
-        root.add(new DefaultMutableTreeNode("No pre-defined fax definition found.")); // LOCALIZE
-        System.out.println("No PreDefined faxes...");
-        ex.printStackTrace();
-      }
+          public void run()
+          {
+            try
+            {
+              URL url = new File(PDF_URL).toURI().toURL();
+              DOMParser parser = WWContext.getInstance().getParser();
+              synchronized (parser)
+              {
+                parser.setValidationMode(XMLParser.NONVALIDATING);
+                parser.parse(url);
+                XMLDocument pdfDoc = parser.getDocument();
+      //        drillDownPreDefFaxes((XMLElement)pdfDoc.getDocumentElement(), preDefFaxes);
+                drillDownPreDefFaxes((XMLElement)pdfDoc.getDocumentElement(), root);
+                System.out.println("Pre-defined faxes thread completed.");
+              }
+            }
+            catch (Exception ex)
+            {
+              root.add(new DefaultMutableTreeNode("No pre-defined fax definition found.")); // LOCALIZE
+              System.out.println("No PreDefined faxes...:" + ex.getLocalizedMessage());
+              ex.printStackTrace();
+            }
+          }
+        };
+      predefLoader.start();
     }
 
     nbFile = 0;

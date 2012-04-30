@@ -2,6 +2,8 @@ package chartview.gui.util.tree;
 
 import astro.calc.GeoPoint;
 
+import chart.components.ui.ChartPanelInterface;
+
 import chartview.gui.util.dialog.FaxType;
 import chartview.gui.util.dialog.PatternEditorPanel;
 import chartview.gui.util.param.ParamData;
@@ -10,6 +12,8 @@ import chartview.gui.util.param.ParamPanel;
 import chartview.util.WWGnlUtilities;
 import chartview.ctx.WWContext;
 
+import chartview.gui.right.CommandPanel;
+import chartview.gui.util.dialog.FaxPatternEditTablePanel;
 import chartview.gui.util.dialog.FileFilterPanel;
 import chartview.gui.util.dialog.GRIBDetailPanel;
 
@@ -260,7 +264,7 @@ public class DataFilePopup
             XMLDocument doc = parser.getDocument();
             NodeList faxList = doc.selectNodes("//fax-collection/fax");
   //        System.out.println("Found " + faxList.getLength() + " fax(es)");
-            Object[][] faxData = new Object[faxList.getLength()][9];
+            Object[][] faxData = new Object[faxList.getLength()][13];
             for (int i=0; i<faxList.getLength(); i++)
             {
               XMLElement faxrow = (XMLElement)faxList.item(i);
@@ -274,7 +278,7 @@ public class DataFilePopup
               Boolean transparent = Boolean.valueOf(faxrow.getAttribute("transparent"));
               Boolean colorChange = Boolean.valueOf(faxrow.getAttribute("color-change"));
               String faxName = faxrow.getAttribute("hint");
-              faxData[i][0] = new FaxType(faxName, 
+              faxData[i][FaxPatternEditTablePanel.HINT_COL] = new FaxType(faxName, 
                                           WWGnlUtilities.buildColor(faxrow.getAttribute("color")), 
                                           true, 
                                           transparent, 
@@ -282,28 +286,42 @@ public class DataFilePopup
                                           faxOrigin,
                                           faxName,
                                           colorChange);
-              faxData[i][1] = transparent;
+              faxData[i][FaxPatternEditTablePanel.TRANSPARENT_COL] = transparent;
               if (dynamics.getLength() > 0)
               {
                 XMLElement dyn = (XMLElement)dynamics.item(0);
-                faxData[i][2] = Boolean.TRUE;
-                faxData[i][3] = colorChange;
-                faxData[i][4] = dyn.getAttribute("url");
-                faxData[i][5] = new ParamPanel.DataDirectory("Faxes", dyn.getAttribute("dir"));
-                faxData[i][6] = dyn.getAttribute("prefix");
-                faxData[i][7] = dyn.getAttribute("pattern");
-                faxData[i][8] = dyn.getAttribute("extension");
+                faxData[i][FaxPatternEditTablePanel.DYNAMIC_COL] = Boolean.TRUE;
+                faxData[i][FaxPatternEditTablePanel.CHANGE_COLOR_COL] = colorChange;
+                faxData[i][FaxPatternEditTablePanel.FAX_URL_COL] = dyn.getAttribute("url");
+                faxData[i][FaxPatternEditTablePanel.FAX_DIR_COL] = new ParamPanel.DataDirectory("Faxes", dyn.getAttribute("dir"));
+                faxData[i][FaxPatternEditTablePanel.FAX_PREFIX_COL] = dyn.getAttribute("prefix");
+                faxData[i][FaxPatternEditTablePanel.FAX_PATTERN_COL] = dyn.getAttribute("pattern");
+                faxData[i][FaxPatternEditTablePanel.FAX_EXT_COL] = dyn.getAttribute("extension");
               }
               else
               {
-                faxData[i][2] = Boolean.FALSE;
-                faxData[i][3] = Boolean.TRUE;
-                faxData[i][4] = "";
-                faxData[i][5] = new ParamPanel.DataDirectory("Faxes", ".");
-                faxData[i][6] = "";
-                faxData[i][7] = "";
-                faxData[i][8] = "";              
+                faxData[i][FaxPatternEditTablePanel.DYNAMIC_COL] = Boolean.FALSE;
+                faxData[i][FaxPatternEditTablePanel.CHANGE_COLOR_COL] = Boolean.TRUE;
+                faxData[i][FaxPatternEditTablePanel.FAX_URL_COL] = "";
+                faxData[i][FaxPatternEditTablePanel.FAX_DIR_COL] = new ParamPanel.DataDirectory("Faxes", ".");
+                faxData[i][FaxPatternEditTablePanel.FAX_PREFIX_COL] = "";
+                faxData[i][FaxPatternEditTablePanel.FAX_PATTERN_COL] = "";
+                faxData[i][FaxPatternEditTablePanel.FAX_EXT_COL] = "";              
               }
+              double scale = 0d;
+              double rotation = 0f;
+              int x_offset = 0;
+              int y_offset = 0;
+              
+              try { scale = Double.parseDouble(faxrow.selectNodes("./faxScale").item(0).getTextContent()); } catch (Exception ignore) {}
+              try { rotation = Float.parseFloat(faxrow.selectNodes("./faxRotation").item(0).getTextContent()); } catch (Exception ignore) {}
+              try { x_offset = Integer.parseInt(faxrow.selectNodes("./faxXoffset").item(0).getTextContent()); } catch (Exception ignore) {}
+              try { y_offset = Integer.parseInt(faxrow.selectNodes("./faxYoffset").item(0).getTextContent()); } catch (Exception ignore) {}
+              
+              faxData[i][FaxPatternEditTablePanel.SCALE_COL] = scale;     // Scale
+              faxData[i][FaxPatternEditTablePanel.ROTATION_COL] = rotation; // Rotation
+              faxData[i][FaxPatternEditTablePanel.X_OFFSET_COL] = x_offset; // X_Offset
+              faxData[i][FaxPatternEditTablePanel.Y_OFFSET_COL] = y_offset; // Y_Offset
             }
             Object[][] gribData = new Object[1][23];
             NodeList gribList = doc.selectNodes("//grib/dynamic-grib");
@@ -433,29 +451,126 @@ public class DataFilePopup
                 catch (Exception ignore) { /* for backward compatibility */ }
               }
             }
-            PatternEditorPanel pep = new PatternEditorPanel(faxData, gribData);
+            // Chart data
+            int projection = -1;
+            double northBoundary = 0d;
+            double southBoundary = 0d;
+            double eastBoundary  = 0d;
+            double westBoundary  = 0d;
+            int chartWidth = 0;
+            int chartHeight = 0;
+            int xOffset = 0;
+            int yOffset = 0;
+            try { northBoundary = Double.parseDouble(doc.selectNodes("/pattern/north").item(0).getTextContent()); } catch (Exception ignore) {}
+            try { southBoundary = Double.parseDouble(doc.selectNodes("/pattern/south").item(0).getTextContent()); } catch (Exception ignore) {}
+            try { eastBoundary = Double.parseDouble(doc.selectNodes("/pattern/east").item(0).getTextContent()); } catch (Exception ignore) {}
+            try { westBoundary = Double.parseDouble(doc.selectNodes("/pattern/west").item(0).getTextContent()); } catch (Exception ignore) {}
+
+            try { chartWidth = Integer.parseInt(doc.selectNodes("/pattern/chartwidth").item(0).getTextContent()); } catch (Exception ignore) {}
+            try { chartHeight = Integer.parseInt(doc.selectNodes("/pattern/chartheight").item(0).getTextContent()); } catch (Exception ignore) {}
+            
+            try { xOffset = Integer.parseInt(((XMLElement)(doc.selectNodes("/pattern/scroll").item(0))).getAttribute("x")); } catch (Exception ignore) {}
+            try { yOffset = Integer.parseInt(((XMLElement)(doc.selectNodes("/pattern/scroll").item(0))).getAttribute("y")); } catch (Exception ignore) {}
+
+            try 
+            { 
+              String prjStr = ((XMLElement)(doc.selectNodes("/pattern/projection").item(0))).getAttribute("type");
+              if (prjStr.equals(CommandPanel.MERCATOR))
+                projection = ChartPanelInterface.MERCATOR;
+              else if (prjStr.equals(CommandPanel.ANAXIMANDRE))
+                projection = ChartPanelInterface.ANAXIMANDRE;
+              else if (prjStr.equals(CommandPanel.LAMBERT))
+                projection = ChartPanelInterface.LAMBERT;
+              else if (prjStr.equals(CommandPanel.GLOBE))
+                projection = ChartPanelInterface.GLOBE_VIEW;
+              else if (prjStr.equals(CommandPanel.SATELLITE))
+                projection = ChartPanelInterface.SATELLITE_VIEW;
+              else if (prjStr.equals(CommandPanel.CONIC_EQU))
+                projection = ChartPanelInterface.CONIC_EQUIDISTANT;
+              else if (prjStr.equals(CommandPanel.STEREO))
+                projection = ChartPanelInterface.STEREOGRAPHIC;
+              else if (prjStr.equals(CommandPanel.POLAR_STEREO))
+                projection = ChartPanelInterface.POLAR_STEREOGRAPHIC;
+            } 
+            catch (Exception ignore) {}
+            // TODO In FaxData, add Scale, Offset (X & Y), Rotation
+            PatternEditorPanel pep = new PatternEditorPanel(projection, 
+                                                            northBoundary, 
+                                                            southBoundary, 
+                                                            eastBoundary, 
+                                                            westBoundary, 
+                                                            chartWidth, 
+                                                            chartHeight,
+                                                            xOffset, 
+                                                            yOffset, 
+                                                            faxData, 
+                                                            gribData);
             pep.setGrib(withGrib);
             // UI
-            int resp = JOptionPane.showConfirmDialog(this, pep, WWGnlUtilities.buildMessage("edit-pattern"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-            
+            int resp = JOptionPane.showConfirmDialog(this, pep, WWGnlUtilities.buildMessage("edit-pattern"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);            
             if (resp == JOptionPane.OK_OPTION)
             {
+              // Get Chart Parameters
+              doc.selectNodes("/pattern/north").item(0).setTextContent(Double.toString(pep.getTopLat()));
+              doc.selectNodes("/pattern/south").item(0).setTextContent(Double.toString(pep.getBottomLat()));
+              doc.selectNodes("/pattern/east").item(0).setTextContent(Double.toString(pep.getLeftLong()));
+              doc.selectNodes("/pattern/west").item(0).setTextContent(Double.toString(pep.getRightLong()));
+              
+              doc.selectNodes("/pattern/chartwidth").item(0).setTextContent(Integer.toString(pep.getChartWidth()));
+              doc.selectNodes("/pattern/chartheight").item(0).setTextContent(Integer.toString(pep.getChartHeight()));
+              
+              ((XMLElement)(doc.selectNodes("/pattern/scroll").item(0))).setAttribute("x", Integer.toString(pep.getXOffset()));
+              ((XMLElement)(doc.selectNodes("/pattern/scroll").item(0))).setAttribute("y", Integer.toString(pep.getYOffset()));
+              
+              projection = pep.getProjection();
+              String prjStr = "";
+              switch (projection)
+              {
+                case ChartPanelInterface.ANAXIMANDRE:
+                  prjStr = CommandPanel.ANAXIMANDRE;
+                  break;
+                case ChartPanelInterface.MERCATOR:
+                  prjStr = CommandPanel.MERCATOR;                
+                  break;
+                case ChartPanelInterface.LAMBERT:
+                  prjStr = CommandPanel.LAMBERT;                
+                  break;
+                case ChartPanelInterface.CONIC_EQUIDISTANT:
+                  prjStr = CommandPanel.CONIC_EQU;                
+                  break;
+                case ChartPanelInterface.GLOBE_VIEW:
+                  prjStr = CommandPanel.GLOBE;                
+                  break;
+                case ChartPanelInterface.SATELLITE_VIEW:
+                  prjStr = CommandPanel.SATELLITE;                
+                  break;
+                case ChartPanelInterface.STEREOGRAPHIC:
+                  prjStr = CommandPanel.STEREO;                
+                  break;
+                case ChartPanelInterface.POLAR_STEREOGRAPHIC:
+                  prjStr = CommandPanel.POLAR_STEREO;                
+                  break;
+                default:
+                  break;
+              }
+              ((XMLElement)(doc.selectNodes("/pattern/projection").item(0))).setAttribute("type", prjStr);
+              
               faxData = pep.getFaxData();
               // Replace attributes
               for (int i=0; i<faxData.length; i++)
               {
                 XMLElement faxrow = (XMLElement)faxList.item(i);
-                FaxType ft = (FaxType)faxData[i][0];
+                FaxType ft = (FaxType)faxData[i][FaxPatternEditTablePanel.HINT_COL];
                 faxrow.setAttribute("hint", ft.toString());
                 faxrow.setAttribute("color", WWGnlUtilities.colorToString(ft.getColor()));
-                faxrow.setAttribute("transparent", ((Boolean)faxData[i][1]).toString());
+                faxrow.setAttribute("transparent", ((Boolean)faxData[i][FaxPatternEditTablePanel.TRANSPARENT_COL]).toString());
              // faxrow.setAttribute("color-change", Boolean.toString(ft.isChangeColor()));
-                faxrow.setAttribute("color-change", ((Boolean)faxData[i][3]).toString());
+                faxrow.setAttribute("color-change", ((Boolean)faxData[i][FaxPatternEditTablePanel.CHANGE_COLOR_COL]).toString());
                 XMLElement dyn = null;
                 if (faxrow.selectNodes("./dynamic-resource").getLength() != 0)
                 {
                   dyn = (XMLElement)faxrow.selectNodes("./dynamic-resource").item(0);
-                  if (!((Boolean)faxData[i][2]).booleanValue()) // remove dyn
+                  if (!((Boolean)faxData[i][FaxPatternEditTablePanel.DYNAMIC_COL]).booleanValue()) // remove dyn
                   {
                     faxrow.removeChild(dyn);
                     dyn = null;
@@ -463,20 +578,26 @@ public class DataFilePopup
                 }
                 else
                 {
-                  if (((Boolean)faxData[i][2]).booleanValue()) // create
+                  if (((Boolean)faxData[i][FaxPatternEditTablePanel.DYNAMIC_COL]).booleanValue()) // create
                   {
                     dyn = (XMLElement)doc.createElement("dynamic-resource");
                     faxrow.appendChild(dyn);
-                  }                
+                  }   
                 }
+                // TODO Scale, Rotation, X&Y Offsets
+                
+                try { faxrow.selectNodes("./faxScale").item(0).setTextContent(Double.toString((Double)faxData[i][FaxPatternEditTablePanel.SCALE_COL])); } catch (Exception ignore) {}
+                try { faxrow.selectNodes("./faxRotation").item(0).setTextContent(Float.toString((Float)faxData[i][FaxPatternEditTablePanel.ROTATION_COL])); } catch (Exception ignore) {}
+                try { faxrow.selectNodes("./faxXoffset").item(0).setTextContent(Integer.toString((Integer)faxData[i][FaxPatternEditTablePanel.X_OFFSET_COL])); } catch (Exception ignore) {}
+                try { faxrow.selectNodes("./faxYoffset").item(0).setTextContent(Integer.toString((Integer)faxData[i][FaxPatternEditTablePanel.Y_OFFSET_COL])); } catch (Exception ignore) {}
                 if (((Boolean)faxData[i][2]).booleanValue())
                 {
                   // assume dyn is not null
-                  dyn.setAttribute("url", (String)faxData[i][4]);
-                  dyn.setAttribute("dir", ((ParamPanel.DataDirectory)faxData[i][5]).toString());
-                  dyn.setAttribute("prefix", (String)faxData[i][6]);
-                  dyn.setAttribute("pattern", (String)faxData[i][7]);
-                  dyn.setAttribute("extension", (String)faxData[i][8]);
+                  dyn.setAttribute("url", (String)faxData[i][FaxPatternEditTablePanel.FAX_URL_COL]);
+                  dyn.setAttribute("dir", ((ParamPanel.DataDirectory)faxData[i][FaxPatternEditTablePanel.FAX_DIR_COL]).toString());
+                  dyn.setAttribute("prefix", (String)faxData[i][FaxPatternEditTablePanel.FAX_PREFIX_COL]);
+                  dyn.setAttribute("pattern", (String)faxData[i][FaxPatternEditTablePanel.FAX_PATTERN_COL]);
+                  dyn.setAttribute("extension", (String)faxData[i][FaxPatternEditTablePanel.FAX_EXT_COL]);
                 }
               }
               XMLElement gribNode = (XMLElement)doc.selectNodes("//grib").item(0);

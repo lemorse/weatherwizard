@@ -4539,14 +4539,14 @@ public class CommandPanel
     }
   }
   
-  private final static String MERCATOR     = "MERCATOR";
-  private final static String ANAXIMANDRE  = "ANAXIMANDRE";
-  private final static String POLAR_STEREO = "POLAR_STEREO";
-  private final static String STEREO       = "STEREO";
-  private final static String LAMBERT      = "LAMBERT";
-  private final static String CONIC_EQU    = "CONIC_EQU";
-  private final static String GLOBE        = "GLOBE";
-  private final static String SATELLITE    = "SATELLITE";
+  public final static String MERCATOR     = "MERCATOR";
+  public final static String ANAXIMANDRE  = "ANAXIMANDRE";
+  public final static String POLAR_STEREO = "POLAR_STEREO";
+  public final static String STEREO       = "STEREO";
+  public final static String LAMBERT      = "LAMBERT";
+  public final static String CONIC_EQU    = "CONIC_EQU";
+  public final static String GLOBE        = "GLOBE";
+  public final static String SATELLITE    = "SATELLITE";
   
   public void restoreComposite(String fileName)
   {
