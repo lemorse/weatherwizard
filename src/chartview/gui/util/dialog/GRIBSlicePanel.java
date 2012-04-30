@@ -17,6 +17,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
@@ -822,10 +823,12 @@ public class GRIBSlicePanel
                                         RenderingHints.VALUE_TEXT_ANTIALIAS_ON);      
       ((Graphics2D)gr).setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                                         RenderingHints.VALUE_ANTIALIAS_ON);      
-      gr.setColor(Color.white);
+      GradientPaint gradient = new GradientPaint(0, this.getHeight(), Color.lightGray, 0, 0, Color.white); // vertical, upside down
+      ((Graphics2D)gr).setPaint(gradient);
+//    gr.setColor(Color.white);
       gr.fillRect(0, 0, this.getWidth(), this.getHeight());
       // Horizontal lines
-      gr.setColor(Color.lightGray);
+      gr.setColor(Color.gray);
       for (int i=0; i<this.getHeight(); i+=(this.getHeight()/10))
         gr.drawLine(0, i, this.getWidth(), i);
 

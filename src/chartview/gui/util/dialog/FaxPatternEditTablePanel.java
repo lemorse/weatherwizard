@@ -58,19 +58,52 @@ public final class FaxPatternEditTablePanel
   private JButton addButton = new JButton();
   private JButton removeButton = new JButton();
 
-  private static final String HINT = WWGnlUtilities.buildMessage("hint");
-  private static final String TRANSPARENT = WWGnlUtilities.buildMessage("transparent");
+  private static final String HINT         = WWGnlUtilities.buildMessage("hint");
+  private static final String TRANSPARENT  = WWGnlUtilities.buildMessage("transparent");
   private static final String CHANGE_COLOR = WWGnlUtilities.buildMessage("change-color");
-  private static final String DYNAMIC = WWGnlUtilities.buildMessage("dynamic");
-  private static final String FAX_URL = WWGnlUtilities.buildMessage("url");
-  private static final String FAX_DIR = WWGnlUtilities.buildMessage("directory");
-  private static final String FAX_PREFIX = WWGnlUtilities.buildMessage("prefix");
-  private static final String FAX_PATTERN = WWGnlUtilities.buildMessage("pattern");
-  private static final String FAX_EXT = WWGnlUtilities.buildMessage("extension");
+  private static final String DYNAMIC      = WWGnlUtilities.buildMessage("dynamic");
+  private static final String FAX_URL      = WWGnlUtilities.buildMessage("url");
+  private static final String FAX_DIR      = WWGnlUtilities.buildMessage("directory");
+  private static final String FAX_PREFIX   = WWGnlUtilities.buildMessage("prefix");
+  private static final String FAX_PATTERN  = WWGnlUtilities.buildMessage("pattern");
+  private static final String FAX_EXT      = WWGnlUtilities.buildMessage("extension");
+  
+  private static final String SCALE    = WWGnlUtilities.buildMessage("scale");
+  private static final String ROTATION = WWGnlUtilities.buildMessage("rotation");
+  private static final String X_OFFSET = WWGnlUtilities.buildMessage("x_offset");
+  private static final String Y_OFFSET = WWGnlUtilities.buildMessage("y_offset");
 
   private static final String[] names =
-  { HINT, TRANSPARENT, DYNAMIC, CHANGE_COLOR, FAX_URL, FAX_DIR, FAX_PREFIX, FAX_PATTERN, FAX_EXT };
+  { 
+    HINT, 
+    TRANSPARENT, 
+    DYNAMIC, 
+    CHANGE_COLOR, 
+    FAX_URL, 
+    FAX_DIR, 
+    FAX_PREFIX, 
+    FAX_PATTERN, 
+    FAX_EXT, 
+    SCALE, 
+    ROTATION, 
+    X_OFFSET, 
+    Y_OFFSET 
+  };
 
+  public final static int HINT_COL         =  0;
+  public final static int TRANSPARENT_COL  =  1;
+  public final static int DYNAMIC_COL      =  2;
+  public final static int CHANGE_COLOR_COL =  3;
+  public final static int FAX_URL_COL      =  4;
+  public final static int FAX_DIR_COL      =  5;
+  public final static int FAX_PREFIX_COL   =  6;
+  public final static int FAX_PATTERN_COL  =  7;
+  public final static int FAX_EXT_COL      =  8;
+  public final static int SCALE_COL        =  9;
+  public final static int ROTATION_COL     = 10;
+  public final static int X_OFFSET_COL     = 11;
+  public final static int Y_OFFSET_COL     = 12;  
+  
   private transient TableModel dataModel;
 
   private transient Object[][] data = new Object[0][0];
@@ -144,12 +177,16 @@ public final class FaxPatternEditTablePanel
     data = addLineInTable(new FaxType("", Color.black, true, true, 0D, null, null), 
                           Boolean.TRUE,
                           Boolean.FALSE, 
-                          Boolean.TRUE,
+                          Boolean.TRUE, // Dynamic
                           "http://...", 
                           (ParamPanel.DataDirectory)ParamPanel.data[ParamData.FAX_FILES_LOC][ParamData.VALUE_INDEX], 
                           "Fax_", 
                           "yyyy_MM_dd_HH_mm_ss_z", 
                           "png", 
+                          1.0,
+                          0.0f,
+                          0,
+                          0,
                           data);
   }
 
@@ -167,6 +204,10 @@ public final class FaxPatternEditTablePanel
                                     String prefix, 
                                     String pattern, 
                                     String ext, 
+                                    double scale,
+                                    float rotation,
+                                    int x_offset,
+                                    int y_offset,
                                     Object[][] d)
   {
     int len = 0;
@@ -178,15 +219,19 @@ public final class FaxPatternEditTablePanel
       for (int j = 0; j < names.length; j++)
         newData[i][j] = d[i][j];
     }
-    newData[len][0] = hint;
-    newData[len][1] = tr;
-    newData[len][2] = dyn;
-    newData[len][3] = changeColor;
-    newData[len][4] = url;
-    newData[len][5] = dir;
-    newData[len][6] = prefix;
-    newData[len][7] = pattern;
-    newData[len][8] = ext;
+    newData[len][HINT_COL]         = hint;
+    newData[len][TRANSPARENT_COL]  = tr;
+    newData[len][DYNAMIC_COL]      = dyn;
+    newData[len][CHANGE_COLOR_COL] = changeColor;
+    newData[len][FAX_URL_COL]      = url;
+    newData[len][FAX_DIR_COL]      = dir;
+    newData[len][FAX_PREFIX_COL]   = prefix;
+    newData[len][FAX_PATTERN_COL]  = pattern;
+    newData[len][FAX_EXT_COL]      = ext;
+    newData[len][SCALE_COL]        = scale;
+    newData[len][ROTATION_COL]     = rotation;
+    newData[len][X_OFFSET_COL]     = x_offset;
+    newData[len][Y_OFFSET_COL]     = y_offset;
     data = newData;
     ((AbstractTableModel) dataModel).fireTableDataChanged();
     return newData;
@@ -250,8 +295,8 @@ public final class FaxPatternEditTablePanel
           public boolean isCellEditable(int row, int col)
           {
             boolean edit = true;
-            if (col > 2)
-              edit = ((Boolean)getValueAt(row, 2)).booleanValue(); // Col > 2, dyn faxes only
+            if (col > DYNAMIC_COL && col < SCALE_COL)
+              edit = ((Boolean)getValueAt(row, DYNAMIC_COL)).booleanValue(); // between Col 2 and 9, dyn faxes only
             return edit;
           }
 
@@ -259,21 +304,21 @@ public final class FaxPatternEditTablePanel
           {
             data[row][column] = aValue;
 //          System.out.println("Value set at row " + row + ", col " + column);
-            if (column == 0 || column == 3) // Fax Color or color-change, propagate the "apply"
+            if (column == HINT_COL || column == CHANGE_COLOR_COL) // Fax Color or color-change, propagate the "apply"
             {
-              Boolean cc = (Boolean)getValueAt(row, 3);
-              FaxType ft = (FaxType)getValueAt(row, 0);
-              if (column == 0)
+              Boolean cc = (Boolean)getValueAt(row, CHANGE_COLOR_COL);
+              FaxType ft = (FaxType)getValueAt(row, HINT_COL);
+              if (column == HINT_COL)
               {
                 // Then set value of ColorChange in the table (col 3)
                 if (cc.booleanValue() != ft.isChangeColor())
                 {
-                  setValueAt(Boolean.valueOf(ft.isChangeColor()), row, 3);
+                  setValueAt(Boolean.valueOf(ft.isChangeColor()), row, CHANGE_COLOR_COL);
                   // Repaint the other cell
-                  this.fireTableCellUpdated(row, 3);
+                  this.fireTableCellUpdated(row, CHANGE_COLOR_COL);
                 }
               }
-              else if (column == 3)
+              else if (column == CHANGE_COLOR_COL)
               {
                 // Then set value in the fax type (col 0)
                 if (cc.booleanValue() != ft.isChangeColor())
@@ -338,7 +383,12 @@ public final class FaxPatternEditTablePanel
       table.getColumn(FAX_DIR).setPreferredWidth(200);     
       table.getColumn(FAX_PREFIX).setPreferredWidth(100);     
       table.getColumn(FAX_PATTERN).setPreferredWidth(200);     
-      table.getColumn(FAX_EXT).setPreferredWidth(70);     
+      table.getColumn(FAX_EXT).setPreferredWidth(70);
+      
+      table.getColumn(SCALE).setPreferredWidth(50);     
+      table.getColumn(ROTATION).setPreferredWidth(50);     
+      table.getColumn(X_OFFSET).setPreferredWidth(50);     
+      table.getColumn(Y_OFFSET).setPreferredWidth(50);     
     }
     data = newData;
     ((AbstractTableModel) dataModel).fireTableDataChanged();

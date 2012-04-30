@@ -56,6 +56,10 @@ import java.awt.Polygon;
 
 import java.awt.Stroke;
 
+import java.awt.event.KeyAdapter;
+
+import java.awt.event.KeyEvent;
+
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
@@ -2392,9 +2396,114 @@ public class WWGnlUtilities
   {
     Component component = WWContext.getInstance().getMasterTopFrame();
      
+    final List<String> gribList = buildGribList();    
+    final List<String> faxList = buildFaxList();    
+    final List<String> compositeList = buildCompositeList();    
+
+    int origFaxNumber = faxList.size();
+    int origGribNumber = gribList.size();
+    
+    // Now drilling into the composites...
+    removeUsedOnesFromLists(compositeList, faxList, gribList);
+    Collections.sort(gribList);
+    Collections.sort(faxList);
+    
+    final JTabbedPane tabs = new JTabbedPane();
+
+    @SuppressWarnings("serial")
+    OneColumnTablePanel gribPanel = new OneColumnTablePanel(WWGnlUtilities.buildMessage("splash-grib"), false, true)
+      {
+        public void refresh()
+        {
+          System.out.println("Refreshing GRIBs after delete");
+          List<String> newGribList = buildGribList();
+          int origGribNumber = newGribList.size();
+          removeUsedOnesFromLists(compositeList, faxList, newGribList);
+          Collections.sort(newGribList);
+          setData(newGribList);
+          tabs.setTitleAt(1, WWGnlUtilities.buildMessage("unused-gribs", new String[] { Integer.toString(newGribList.size()), Integer.toString(origGribNumber) }));
+        }
+      };
+    gribPanel.setData(gribList);
+
+    @SuppressWarnings("serial")
+    OneColumnTablePanel faxPanel  = new OneColumnTablePanel(WWGnlUtilities.buildMessage("splash-faxes"), false, true)
+      {
+        public void refresh()
+        {
+          System.out.println("Refreshing faxes after delete");
+          List<String> newFaxList = buildFaxList();    
+          int origFaxNumber = newFaxList.size();
+          removeUsedOnesFromLists(compositeList, newFaxList, gribList);
+          Collections.sort(newFaxList);
+          setData(newFaxList);
+          tabs.setTitleAt(0, WWGnlUtilities.buildMessage("unused-faxes", new String[] { Integer.toString(newFaxList.size()), Integer.toString(origFaxNumber) }));
+        }
+      };
+    faxPanel.setData(faxList);
+    
+    JPanel tabPanel = new JPanel();
+    tabPanel.setLayout(new BorderLayout());
+
+    tabPanel.add(tabs, BorderLayout.CENTER);
+    tabs.add(WWGnlUtilities.buildMessage("unused-faxes", new String[] { Integer.toString(faxList.size()),  Integer.toString(origFaxNumber) }),  faxPanel);
+    tabs.add(WWGnlUtilities.buildMessage("unused-gribs", new String[] { Integer.toString(gribList.size()), Integer.toString(origGribNumber) }), gribPanel);
+    if (false)
+    {
+      String mess = "Found " + gribList.size() + "/" + origGribNumber + " unused GRIB file(s)\n" + 
+                    "Found " + faxList.size() + "/" + origFaxNumber + " unused fax(es)\n" + 
+                    "From " + compositeList.size() + " xml composite(s)\n" +
+                    "Work in progress...";
+      System.out.println(mess);
+    }
+    JOptionPane.showMessageDialog(component, tabPanel, WWGnlUtilities.buildMessage("detect-unused"), JOptionPane.INFORMATION_MESSAGE);    
+  }
+  
+  private static void removeUsedOnesFromLists(List<String> compositeList,
+                                              List<String> faxList,
+                                              List<String> gribList)
+  {
+    for (String comp : compositeList)
+    {
+      Composite composite = new Composite(comp);
+    //    System.out.println("Composite " + comp + " contains:");
+      for (String c : composite.getFaxList())
+      {
+    //      System.out.println(" Fax:" + c);
+        File fax = new File(c);
+        if (!fax.exists())
+        {
+          System.out.println("Composite [" + comp + "] mentions a non-existing fax [" + c + "]");
+        }
+        else
+        {
+          // Is it in the fax list?
+          if (faxList.contains(fax.getAbsolutePath()))
+          {
+    //          System.out.println("*** Removing from list [" + fax.getAbsolutePath() + "]");
+            faxList.remove(fax.getAbsolutePath());
+          }
+          else
+            System.out.println("Composite [" + comp + "] fax [" + fax.getAbsolutePath() + "] not in list...");
+        }
+      }
+      String gfName = composite.getGribFileName();
+      if (gfName != null && gfName.trim().length() > 0)
+      {
+        File grib = new File(gfName);
+        if (gribList.contains(grib.getAbsolutePath()))
+        {
+          gribList.remove(grib.getAbsolutePath());
+        }
+        else
+          System.out.println("Composite [" + comp + "] grib [" + grib.getAbsolutePath() + "] not in list...");
+      }
+    }    
+  }
+  
+  private static List<String> buildGribList()
+  {
     List<String> gribList = null;    
-    List<String> faxList = null;    
-    List<String> compositeList = null;    
     // Scan GRIBs
     FilenameFilter gribFilter = new FilenameFilter()
       {
@@ -2415,7 +2524,12 @@ public class WWGnlUtilities
       File gribDir = new File(pe[i]);
       gribList = recurseDirectory(gribDir, gribList, gribFilter);
     }
-//  System.out.println("Found " + gribList.size() + " GRIB file(s)");
+    return gribList;    
+  }
+      
+  private static List<String> buildFaxList()
+  {
+    List<String> faxList = null;    
     // Scan faxes, full path
     FilenameFilter faxFilter = new FilenameFilter()
       {
@@ -2434,13 +2548,18 @@ public class WWGnlUtilities
       };
     faxList = new ArrayList<String>();
     String faxPath = ((ParamPanel.DataPath)ParamPanel.data[ParamData.FAX_FILES_LOC][ParamData.VALUE_INDEX]).toString();
-    pe = faxPath.split(File.pathSeparator);
+    String[] pe = faxPath.split(File.pathSeparator);
     for (int i=0; i<pe.length; i++)
     {
       File faxDir = new File(pe[i]);
       faxList = recurseDirectory(faxDir, faxList, faxFilter);
     }
-//  System.out.println("Found " + faxList.size() + " Fax(es)");
+    return faxList;
+  }
+  
+  private static List<String> buildCompositeList()
+  {
+    List<String> compositeList = null;    
     // Scan Composites (xml, not waz)
     String compositeDir = ((ParamPanel.DataDirectory)ParamPanel.data[ParamData.COMPOSITE_ROOT_DIR][ParamData.VALUE_INDEX]).toString();    
     FilenameFilter compositeFilter = new FilenameFilter()
@@ -2454,70 +2573,7 @@ public class WWGnlUtilities
       };
     compositeList = new ArrayList<String>();
     compositeList = recurseDirectory(new File(compositeDir), compositeList, compositeFilter);
-
-    int origFaxNumber = faxList.size();
-    int origGribNumber = gribList.size();
-    
-    // Now drilling into the composites...
-    for (String comp : compositeList)
-    {
-      Composite composite = new Composite(comp);
-//    System.out.println("Composite " + comp + " contains:");
-      for (String c : composite.getFaxList())
-      {
-//      System.out.println(" Fax:" + c);
-        File fax = new File(c);
-        if (!fax.exists())
-        {
-          System.out.println("Composite [" + comp + "] mentions a non-existing fax [" + c + "]");
-        }
-        else
-        {
-          // Is it in the fax list?
-          if (faxList.contains(fax.getAbsolutePath()))
-          {
-//          System.out.println("*** Removing from list [" + fax.getAbsolutePath() + "]");
-            faxList.remove(fax.getAbsolutePath());
-          }
-          else
-            System.out.println("Composite [" + comp + "] fax [" + fax.getAbsolutePath() + "] not in list...");
-        }
-      }
-      String gfName = composite.getGribFileName();
-      if (gfName != null && gfName.trim().length() > 0)
-      {
-        File grib = new File(gfName);
-        if (gribList.contains(grib.getAbsolutePath()))
-        {
-          gribList.remove(grib.getAbsolutePath());
-        }
-        else
-          System.out.println("Composite [" + comp + "] grib [" + grib.getAbsolutePath() + "] not in list...");
-      }
-    }
-    Collections.sort(gribList);
-    Collections.sort(faxList);
-    
-    OneColumnTablePanel gribPanel = new OneColumnTablePanel(WWGnlUtilities.buildMessage("splash-grib"));
-    gribPanel.setData(gribList);
-    OneColumnTablePanel faxPanel = new OneColumnTablePanel(WWGnlUtilities.buildMessage("splash-faxes"));
-    faxPanel.setData(faxList);
-    
-    JPanel tabPanel = new JPanel();
-    tabPanel.setLayout(new BorderLayout());
-    JTabbedPane tabs = new JTabbedPane();
-    tabPanel.add(tabs, BorderLayout.CENTER);
-    tabs.add(WWGnlUtilities.buildMessage("unused-faxes", new String[] { Integer.toString(faxList.size()), Integer.toString(origFaxNumber) }), faxPanel);
-    tabs.add(WWGnlUtilities.buildMessage("unused-gribs", new String[] { Integer.toString(gribList.size()), Integer.toString(origGribNumber) }), gribPanel);
-    if (false)
-    {
-      String mess = "Found " + gribList.size() + "/" + origGribNumber + " unused GRIB file(s)\n" + 
-                    "Found " + faxList.size() + "/" + origFaxNumber + " unused fax(es)\n" + 
-                    "From " + compositeList.size() + " xml composite(s)\n" +
-                    "Work in progress...";
-      System.out.println(mess);
-    }
-    JOptionPane.showMessageDialog(component, tabPanel, WWGnlUtilities.buildMessage("detect-unused"), JOptionPane.INFORMATION_MESSAGE);    
+    return compositeList;
   }
   
   public static void placesMgmt(Component comp)

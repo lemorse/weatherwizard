@@ -121,14 +121,14 @@ public class GRIBVisualPanel extends JPanel // TransparentPanel
 
   private final static DecimalFormat[] FMTS = { 
                                                 new DecimalFormat("##0.0 'kts'"), 
-                                                new DecimalFormat("##0.0 'mb'"), 
+                                                new DecimalFormat("###0 'mb'"), // Rounded 
                                                 new DecimalFormat("##0 'm'"), 
                                                 new DecimalFormat("##0.0 'm'"), 
                                                 new DecimalFormat("##0'" + ParamPanel.TemperatureUnitList.getLabel(tempUnit) + "'"), 
-                                                new DecimalFormat("##0.00 'mm/h'"),
+                                                new DecimalFormat("##0.0 'mm/h'"),
                                               };
   private final static DecimalFormat DIR_FMT = new DecimalFormat("##0'°'");
-  private final static Color GRIB_DATA_TEXT_COLOR = Color.blue;
+  private final static Color GRIB_DATA_TEXT_COLOR = Color.green; // Color.blue;
   
   private final static int TWS         = 0;
   private final static int PRMSL       = 1;
@@ -147,10 +147,15 @@ public class GRIBVisualPanel extends JPanel // TransparentPanel
         yOffset = BORDER_TICKNESS;
     int w = this.getWidth() - (2 * BORDER_TICKNESS);
     int h = (this.getHeight() - (2 * BORDER_TICKNESS)) / 2;
-    super.paintComponent(g);
+//  super.paintComponent(g);
+    
+    GradientPaint gradient = new GradientPaint(0, this.getHeight(), Color.darkGray, 0, 0, Color.black); // vertical, upside down
+    ((Graphics2D)g).setPaint(gradient);
+//  g.setColor(Color.darkGray);
+    g.fillRect(0, 0, this.getWidth(), this.getHeight());
     
     Font origFont = g.getFont();
-    Font smallFont = new Font(origFont.getName(), origFont.getStyle(), FONT_SIZE);
+    Font smallFont = new Font(origFont.getName(), Font.BOLD /*origFont.getStyle()*/, FONT_SIZE);
     g.setFont(smallFont);
 
     for (int i=0; i<6; i++)
@@ -217,15 +222,15 @@ public class GRIBVisualPanel extends JPanel // TransparentPanel
         continue;
       
       // Label
-      g.setColor(Color.white);
+      g.setColor(Color.lightGray);
       int labelXCenterOffset = xOffset + (i * (w / 6)) + (w / 12);
       int labelLength = g.getFontMetrics().stringWidth(label);
       int labelY = g.getFont().getSize() + 1;
-      g.drawString(label, labelXCenterOffset - (labelLength / 2) + 2, labelY + 2);
-      g.setColor(Color.darkGray);
+      g.drawString(label, labelXCenterOffset - (labelLength / 2) + 1, labelY + 1);
+      g.setColor(Color.white);
       g.drawString(label, labelXCenterOffset - (labelLength / 2), labelY);
       
-      GradientPaint gradient = new GradientPaint(0, this.getHeight(), startColor, 0, 0, endColor); // vertical, upside down
+   /* GradientPaint */ gradient = new GradientPaint(0, this.getHeight(), startColor, 0, 0, endColor); // vertical, upside down
       ((Graphics2D)g).setPaint(gradient);
       g.fillRect(xOffset + (i * (w / 6)), h - yOffset - displayValue, w / 6, displayValue);
       g.setColor(startColor);      
@@ -239,6 +244,14 @@ public class GRIBVisualPanel extends JPanel // TransparentPanel
       int x = xOffset + (i * (w / 6)) + (w / (2 * 6)) - (l / 2);
       int y = h - yOffset - 5;
       g.drawString(displayString, x, y);
+      if (i == TWS)
+      {
+        displayString = "F " + Integer.toString(WWGnlUtilities.getBeaufort(truewindspeed));
+        l = g.getFontMetrics(smallFont).stringWidth(displayString);
+        x = xOffset + (i * (w / 6)) + (w / (2 * 6)) - (l / 2);
+        y = h - yOffset - 15;
+        g.drawString(displayString, x, y);
+      }
     }
 
     // Wind dir - Display
@@ -361,7 +374,7 @@ public class GRIBVisualPanel extends JPanel // TransparentPanel
                2 * 4);
 
     // Text data
-    Font dataFont = new Font("Courier", origFont.getStyle(), 10);
+    Font dataFont = new Font("Courier", Font.BOLD /* origFont.getStyle() */, 10);
     g.setFont(dataFont);
     g.setColor(GRIB_DATA_TEXT_COLOR);
 

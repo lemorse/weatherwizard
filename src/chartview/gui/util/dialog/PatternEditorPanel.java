@@ -6,6 +6,9 @@ import chartview.gui.util.param.ParamPanel;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -17,17 +20,38 @@ import javax.swing.JPanel;
 public class PatternEditorPanel
   extends JPanel
 {
-  private BorderLayout borderLayout1 = new BorderLayout();
-  private FaxPatternEditTablePanel faxPatternEditTablePanel = new FaxPatternEditTablePanel();
-  private GRIBPatternEditorPanel gribPatternEditorPanel = new GRIBPatternEditorPanel();
+  private FaxPatternEditTablePanel faxPatternEditTablePanel  = new FaxPatternEditTablePanel();
+  private GRIBPatternEditorPanel gribPatternEditorPanel      = new GRIBPatternEditorPanel();
+  private ChartDimensionInputPanel chartDimensionEditorPanel = new ChartDimensionInputPanel();
 
   private transient Object[][] faxData = null;
   private transient Object[][] gribData = null;
   private boolean grib = false;
   private JCheckBox fitColumnsCheckBox = new JCheckBox();
+  private GridBagLayout gridBagLayout1 = new GridBagLayout();
 
-  public PatternEditorPanel(Object[][] f, Object[][] g)
+  public PatternEditorPanel(int projection,
+                            double northBoundary, 
+                            double southBoundary, 
+                            double eastBoundary, 
+                            double westBoundary, 
+                            int chartWidth, 
+                            int chartHeight, 
+                            int xOffset, 
+                            int yOffset, 
+                            Object[][] f, 
+                            Object[][] g)
   {
+    chartDimensionEditorPanel.setProjection(projection);
+    chartDimensionEditorPanel.setTopLat(northBoundary);
+    chartDimensionEditorPanel.setBottomLat(southBoundary);
+    chartDimensionEditorPanel.setLeftLong(westBoundary);
+    chartDimensionEditorPanel.setRightLong(eastBoundary);
+    chartDimensionEditorPanel.setChartWidth(chartWidth);
+    chartDimensionEditorPanel.setChartHeight(chartHeight);
+    chartDimensionEditorPanel.setXOffset(xOffset);
+    chartDimensionEditorPanel.setYOffset(yOffset);
+    
     faxData = f;
     gribData = g;
     faxPatternEditTablePanel.setData(faxData);
@@ -67,8 +91,8 @@ public class PatternEditorPanel
   private void jbInit()
     throws Exception
   {
-    this.setLayout(borderLayout1);
-    this.setSize(new Dimension(460, 385));
+    this.setLayout(gridBagLayout1);
+    this.setSize(new Dimension(597, 604));
     fitColumnsCheckBox.setText("Auto-resize Columns"); // TODO Localize
     fitColumnsCheckBox.addActionListener(new ActionListener()
       {
@@ -77,9 +101,14 @@ public class PatternEditorPanel
           fitColumnsCheckBox_actionPerformed(e);
         }
       });
-    this.add(faxPatternEditTablePanel, BorderLayout.NORTH);
-    this.add(gribPatternEditorPanel, BorderLayout.SOUTH);
-    this.add(fitColumnsCheckBox, BorderLayout.WEST);
+    this.add(chartDimensionEditorPanel, new GridBagConstraints(0, 0, 2, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+          new Insets(0, 0, 0, 0), 0, 0));
+    this.add(faxPatternEditTablePanel, new GridBagConstraints(0, 1, 2, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+          new Insets(0, 0, 0, 0), 0, 0));
+    this.add(fitColumnsCheckBox, new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
+          new Insets(0, 0, 0, 0), 0, 0));
+    this.add(gribPatternEditorPanel, new GridBagConstraints(0, 3, 2, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+          new Insets(0, 0, 0, 0), -80, 0));
     fitColumnsCheckBox.setSelected(faxPatternEditTablePanel.getTableResize() == TableResizeValue.ON);
   }
 
@@ -165,6 +194,51 @@ public class PatternEditorPanel
     return grib;
   }
 
+  public double getTopLat()
+  {
+    return chartDimensionEditorPanel.getTopLat();
+  }
+  
+  public double getBottomLat()
+  {
+    return chartDimensionEditorPanel.getBottomLat();
+  }
+  
+  public double getLeftLong()
+  {
+    return chartDimensionEditorPanel.getLeftLong();
+  }
+  
+  public double getRightLong()
+  {
+    return chartDimensionEditorPanel.getRightLong();
+  }
+  
+  public int getProjection()
+  {
+    return chartDimensionEditorPanel.getProjection();
+  }
+  
+  public int getChartWidth()
+  {
+    return chartDimensionEditorPanel.getChartWidth();
+  }
+      
+  public int getChartHeight()
+  {
+    return chartDimensionEditorPanel.getChartHeight();
+  }
+  
+  public int getXOffset()
+  {
+    return chartDimensionEditorPanel.getXOffset();
+  }
+      
+  public int getYOffset()
+  {
+    return chartDimensionEditorPanel.getYOffset();
+  }
+      
   private void fitColumnsCheckBox_actionPerformed(ActionEvent e)
   {
     faxPatternEditTablePanel.setTableResize(fitColumnsCheckBox.isSelected()? TableResizeValue.ON : TableResizeValue.OFF);
