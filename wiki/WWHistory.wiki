@@ -9,5 +9,6 @@ This page takes over and replaces the one [http://donpedro.lediouris.net/softwar
 = Details =
 
 || *Date* || *Description* || *Impacted file(s)* ||
+|| 07-May-2012 || Cosmetic || chartadjust.jar ||
 || 30-Apr-2012 || Dynamic Patterns graphical Editor || chartadjust.jar, chartcomponents.jar ||
 || 18-Apr-2012 || Cosmetic || chartadjust.jar ||
