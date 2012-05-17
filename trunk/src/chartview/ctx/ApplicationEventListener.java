@@ -201,4 +201,6 @@ public abstract class ApplicationEventListener implements EventListener
   
   public void setOpenTabNum(int i) {}
   public void scrollThroughTabs() {}
+
+  public void gribAtTheMouseisShwoing(boolean b) {}
 }

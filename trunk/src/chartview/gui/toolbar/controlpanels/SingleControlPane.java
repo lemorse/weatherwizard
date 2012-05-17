@@ -23,9 +23,9 @@ public class SingleControlPane
   private CustomPanelButton topPanel = null;
   
   private JPanel controlPanel = null;
-  private boolean visible = true;
+  protected boolean visible = true;
   
-  private boolean enabled = true;
+  protected boolean enabled = true;
   
   public SingleControlPane(String title, JPanel control, boolean visible)
   {
@@ -58,6 +58,7 @@ public class SingleControlPane
             visible = !visible;
             controlPanel.setVisible(visible);
           }
+          onClickOnControl(enabled && visible);
         }
       });
   }
@@ -68,5 +69,9 @@ public class SingleControlPane
     if (!enabled && visible)
       controlPanel.setVisible(false);
     topPanel.setEnabled(enabled);
+    onClickOnControl(enabled && visible);
   }
+  
+  protected void onClickOnControl(boolean displayingData)
+  { }
 }

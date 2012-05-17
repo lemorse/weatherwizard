@@ -92,7 +92,8 @@ public class PatternEditorPanel
     throws Exception
   {
     this.setLayout(gridBagLayout1);
-    this.setSize(new Dimension(597, 604));
+    this.setSize(new Dimension(595, 605));
+    this.setPreferredSize(new Dimension(595, 605));
     fitColumnsCheckBox.setText("Auto-resize Columns"); // TODO Localize
     fitColumnsCheckBox.addActionListener(new ActionListener()
       {

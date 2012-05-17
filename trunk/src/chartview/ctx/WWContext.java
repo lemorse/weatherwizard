@@ -45,7 +45,8 @@ import oracle.xml.parser.v2.XMLParser;
  */
 public class WWContext
 {
-  public final static String VERSION_NUMBER = "0.9.0.6";
+//public final static String VERSION_NUMBER = "0.9.0.6";
+  public final static String VERSION_NUMBER = "3.0.0.1";
   public final static String PRODUCT_ID     = "weather_assistant." + VERSION_NUMBER;
   
   public final static String PRODUCT_KEY    = "WW";
@@ -1069,6 +1070,16 @@ public class WWContext
     }    
   }
   
+  public void fireGribAtTheMouseisShowing(boolean b)
+  {    
+    for (int i = 0; i < WWContext.getInstance().getListeners().size(); i++)
+    {
+      ApplicationEventListener l = WWContext.getInstance().getListeners().get(i);
+      l.gribAtTheMouseisShwoing(b);
+    }    
+  }
+
+  
   public void setUseGRIBWindSpeedTransparency(Boolean useGRIBWindSpeedTransparency)
   {
     this.useGRIBWindSpeedTransparency = useGRIBWindSpeedTransparency;
@@ -1291,7 +1302,7 @@ public class WWContext
           if (filters != null)
           {
             fullDescription += " (";
-            Enumeration<String> extensions = filters.keys();
+            Enumeration extensions = filters.keys();
             if (extensions != null)
               for (fullDescription += "." + (String)extensions.nextElement(); extensions.hasMoreElements(); fullDescription += ", " + (String)extensions.nextElement());
             fullDescription += ")";
