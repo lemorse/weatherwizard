@@ -346,6 +346,15 @@ public class GRIBVisualPanel extends JPanel // TransparentPanel
     g.setColor(Color.darkGray);
     g.drawString(twd, displayCenterX - (labelLength / 2), displayCenterY - (externalCircleRadius / 2));
     
+    // Actual direction (value)
+    g.setColor(Color.white);
+    twd = Integer.toString(truewinddir) + "\272";
+    labelLength = g.getFontMetrics().stringWidth(twd);
+    labelY = g.getFont().getSize() + 1;
+    g.drawString(twd, displayCenterX - (labelLength / 2) + 2, displayCenterY + (externalCircleRadius / 2) + 2);
+    g.setColor(Color.darkGray);
+    g.drawString(twd, displayCenterX - (labelLength / 2), displayCenterY + (externalCircleRadius / 2));
+    
     // Wind dir - Hand
     int handEndX = displayCenterX + (int)((displayRadius - 8) * Math.sin(Math.toRadians(truewinddir)));
     int handEndY = displayCenterY - (int)((displayRadius - 8) * Math.cos(Math.toRadians(truewinddir)));;
@@ -395,6 +404,11 @@ public class GRIBVisualPanel extends JPanel // TransparentPanel
     g.drawString("PRATE  " + FMTS[5].format(prateValue * 3600f), startX, startY);
     startY += (FONT_SIZE * 1.2);
 
+    g.setFont(g.getFont().deriveFont(24f));
+    startY += (g.getFont().getSize() * 1.2);
+    g.setColor(Color.cyan);
+    g.drawString("Twd " + DIR_FMT.format(truewinddir), startX, startY);
+    
     g.setFont(origFont);
   }
   

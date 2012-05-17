@@ -43,11 +43,6 @@ import chartview.gui.util.dialog.RoutingOutputFlavorPanel;
 import chartview.gui.util.dialog.TwoFilePanel;
 import chartview.gui.util.dialog.places.PlacesTablePanel;
 
-import chartview.gui.util.panels.GRIBVisualPanel;
-import chartview.gui.util.transparent.TransparentFrame;
-
-import chartview.gui.util.transparent.TransparentPanel;
-
 import chartview.routing.DatedGribCondition;
 
 import chartview.util.DynFaxUtil;
@@ -138,7 +133,6 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -307,7 +301,7 @@ public class CommandPanel
   protected boolean routingOnItsWay     = false;
   private boolean postitOnRoute         = ((Boolean)ParamPanel.data[ParamData.SHOW_ROUTING_LABELS][ParamData.VALUE_INDEX]).booleanValue();;
 
-//private double timeInterval         = ((Double) ParamPanel.data[ParamData.ROUTING_TIME_INTERVAL][ParamData.VALUE_INDEX]).doubleValue(); // 6.0;
+//private double timeInterval         = ((Double)  ParamPanel.data[ParamData.ROUTING_TIME_INTERVAL][ParamData.VALUE_INDEX]).doubleValue(); // 6.0;
 //private static int routingForkWidth = ((Integer) ParamPanel.data[ParamData.ROUTING_FORK_WIDTH][ParamData.VALUE_INDEX]).intValue(); // 50;
 //private static int routingStep      = ((Integer) ParamPanel.data[ParamData.ROUTING_STEP][ParamData.VALUE_INDEX]).intValue(); // 10;
     
@@ -348,12 +342,12 @@ public class CommandPanel
   private boolean display3DTemperature = false;
   private boolean display3DRain  = false;  
   
-  private boolean thereIsWind = true;
+  private boolean thereIsWind  = true;
   private boolean thereIsPrmsl = true;
   private boolean thereIs500mb = true;
   private boolean thereIsWaves = true;
   private boolean thereIsTemperature = true;
-  private boolean thereIsRain = true;
+  private boolean thereIsRain  = true;
   private boolean thereIsCurrent = true;
 
   private static boolean coloredWind = true;
@@ -414,6 +408,7 @@ public class CommandPanel
   private boolean altToooltipWindowBeingDragged = false;
   private int dragStartX = 0, dragStartY = 0;
   private boolean displayAltTooltip = false;
+  private boolean gribAtTheMouse = false;
   
   private final static int CLOSE_IMAGE       = 1;
   private final static int ZOOMEXPAND_IMAGE  = 2;
@@ -924,16 +919,21 @@ public class CommandPanel
   public int[] genImage()
   {
     int[] ret = null;
-    String fName = WWGnlUtilities.chooseFile(this, JFileChooser.FILES_ONLY, 
-                                           new String[] { "jpg", "jpeg", "png" }, WWGnlUtilities.buildMessage("image-files"),
-                                           ".", WWGnlUtilities.buildMessage("save"), WWGnlUtilities.buildMessage("generate-image"));
+    String fName = WWGnlUtilities.chooseFile(this, 
+                                             JFileChooser.FILES_ONLY, 
+                                             new String[] { "jpg", "jpeg", "png" }, 
+                                             WWGnlUtilities.buildMessage("image-files"),
+                                             ".", WWGnlUtilities.buildMessage("save"), 
+                                             WWGnlUtilities.buildMessage("generate-image"));
     if (fName.trim().length() > 0)
     {
       String prefix = "";
       String suffix = "";
       if (fName.trim().indexOf(".") == -1)
       {
-        JOptionPane.showMessageDialog(this, WWGnlUtilities.buildMessage("please-provide-extension"), WWGnlUtilities.buildMessage("generate-image"), 
+        JOptionPane.showMessageDialog(this, 
+                                      WWGnlUtilities.buildMessage("please-provide-extension"), 
+                                      WWGnlUtilities.buildMessage("generate-image"), 
                                       JOptionPane.ERROR_MESSAGE); 
       }
       else
@@ -944,13 +944,19 @@ public class CommandPanel
             !suffix.toLowerCase().equals("jpeg") &&
             !suffix.toLowerCase().equals("png"))
         {
-          JOptionPane.showMessageDialog(this, WWGnlUtilities.buildMessage("bad-extension", new String[] { suffix.toLowerCase() }), WWGnlUtilities.buildMessage("generate-image"), 
+          JOptionPane.showMessageDialog(this, 
+                                        WWGnlUtilities.buildMessage("bad-extension", 
+                                                                    new String[] { suffix.toLowerCase() }), 
+                                        WWGnlUtilities.buildMessage("generate-image"), 
                                         JOptionPane.ERROR_MESSAGE); 
         }
         else
         {
           ret = chartPanel.genImage(prefix, suffix.toLowerCase());
-          JOptionPane.showMessageDialog(this, WWGnlUtilities.buildMessage("file-generated", new String[] { fName }), WWGnlUtilities.buildMessage("generate-image"), 
+          JOptionPane.showMessageDialog(this, 
+                                        WWGnlUtilities.buildMessage("file-generated", 
+                                                                    new String[] { fName }), 
+                                        WWGnlUtilities.buildMessage("generate-image"), 
                                         JOptionPane.INFORMATION_MESSAGE);
         }
       }
@@ -3620,6 +3626,11 @@ public class CommandPanel
             gribSliceInfo = -1D;
             chartPanel.repaint();
           }
+        }
+        
+        public void gribAtTheMouseisShwoing(boolean b) 
+        {
+          gribAtTheMouse = b;
         }
       };
     
@@ -7057,7 +7068,7 @@ public class CommandPanel
           boolean stopIfTooOld = stopGRIB;
           long before = System.currentTimeMillis();
           closest = null;
-          isoFrom = from;
+          isoFrom = from; // Init
           isoTo   = to;
           System.out.println("Routing from " + isoFrom.toString() + "\nto " + isoTo.toString());
           int i = 0;
@@ -7093,7 +7104,7 @@ public class CommandPanel
                                                                   limitTWA,
                                                                   stopIfTooOld,
                                                                   pf);
-          
+          // Routing completed, seeing output option
           int clipboardOption = Integer.parseInt(((ParamPanel.RoutingOutputList)(ParamPanel.data[ParamData.ROUTING_OUTPUT_FLAVOR][ParamData.VALUE_INDEX])).getStringIndex());
           String fileOutput = null;
           
@@ -7124,7 +7135,37 @@ public class CommandPanel
               }
             }
           }
-
+          // Refine?
+          if (false) // TODO Suggest second computation, based on a fork around the best route
+          {
+            int resp = JOptionPane.showConfirmDialog(instance, 
+                                                     "Refine routing?", 
+                                                     "Routing", 
+                                                     JOptionPane.YES_NO_OPTION, 
+                                                     JOptionPane.QUESTION_MESSAGE);
+            if (resp == JOptionPane.YES_OPTION)
+            {
+              System.out.println("==> Routing next phase...");
+              // Calculate best route, and follow it.
+              allCalculatedIsochrons = RoutingUtil.refineRouting(instance, 
+                                                                 chartPanel,
+                                                                 center, 
+                                                                 destination,
+                                                                 allCalculatedIsochrons,
+                                                                 closestPoint,
+                                                                 interWP,
+                                                                 now, 
+                                                                 wgd,
+                                                                 timeInterval, // Reduce this
+                                                                 routingForkWidth,  // Reduce this ?
+                                                                 routingStep,
+                                                                 limitTWS, 
+                                                                 limitTWA,
+                                                                 stopIfTooOld,
+                                                                 pf);              
+            }
+          }
+          
           if (clipboardOption == ParamPanel.RoutingOutputList.ASK)
           {
             try { Thread.sleep(500L); } catch (InterruptedException ie) {} // Pas joli...
@@ -7168,21 +7209,7 @@ public class CommandPanel
           if (closestPoint != null && allCalculatedIsochrons != null)
           {
             Calendar cal = new GregorianCalendar();
-            List<RoutingPoint> bestRoute = new ArrayList<RoutingPoint>(allCalculatedIsochrons.size());
-            boolean go = true;
-            RoutingPoint start = closestPoint;
-            bestRoute.add(start);
-            while (go)
-            {
-              RoutingPoint next = start.getAncestor();
-              if (next == null)
-                go = false;
-              else
-              {
-                bestRoute.add(next);
-                start = next;
-              }
-            }
+            List<RoutingPoint> bestRoute = RoutingUtil.getBestRoute(closestPoint, allCalculatedIsochrons);
             int routesize = bestRoute.size();
             String date = "", time = "";
             RoutingPoint rp = null;
@@ -7336,6 +7363,7 @@ public class CommandPanel
 //          System.out.println("RoutingMode:" + routingMode + ", from:" + (from==null?"":"not ") + "null" +
 //                                                            ", to:" + (to==null?"":"not ") + "null" +
 //                                                            ", allIsochrons:" + (allIsochrons==null?"":"not ") + "null");
+            
           }
           repaint();
         }
@@ -7405,10 +7433,26 @@ public class CommandPanel
             if (boatPosition != null && ((Boolean) ParamPanel.data[ParamData.ROUTING_FROM_CURR_LOC][ParamData.VALUE_INDEX]).booleanValue())
             {
               if (allCalculatedIsochrons != null && !insertRoutingWP) // reset
-                shutOffRouting(); // Caution: this one resets from & to.         
-              from = boatPosition;
-              if (!insertRoutingWP)
-                to = null;
+              {             
+                int resp = JOptionPane.showConfirmDialog(this, 
+                                                         WWGnlUtilities.buildMessage("confirm-drop-routing"), 
+                                                         WWGnlUtilities.buildMessage("routing"), 
+                                                         JOptionPane.OK_CANCEL_OPTION, 
+                                                         JOptionPane.QUESTION_MESSAGE);
+                if (resp == JOptionPane.OK_OPTION)
+                {
+                  shutOffRouting(); // Caution: this one resets from & to.
+                  from = boatPosition;
+                  if (!insertRoutingWP)
+                    to = null;
+                }
+              }
+              else
+              {
+                from = boatPosition;
+                if (!insertRoutingWP)
+                  to = null;
+              }
             }
             if (from == null && to == null)
               from = here;
@@ -7418,9 +7462,22 @@ public class CommandPanel
             {
               if (!insertRoutingWP)
               {
+                // Warning: This will reset the routing
                 if (allCalculatedIsochrons != null) // reset
-                  shutOffRouting(); // Caution: this one resets from & to.         
-                from = here;
+                {             
+                  int resp = JOptionPane.showConfirmDialog(this, 
+                                                           WWGnlUtilities.buildMessage("confirm-drop-routing"), 
+                                                           WWGnlUtilities.buildMessage("routing"), 
+                                                           JOptionPane.OK_CANCEL_OPTION, 
+                                                           JOptionPane.QUESTION_MESSAGE);
+                  if (resp == JOptionPane.OK_OPTION)
+                  {
+                    shutOffRouting(); // Caution: this one resets from & to.
+                    from = here;
+                  }
+                }
+                else
+                  from = here;
               }
               else
               {
@@ -7523,8 +7580,7 @@ public class CommandPanel
         }
         GribHelper.GribCondition gribPoint = null;
         try { gribPoint = GribHelper.gribLookup(gp, wgd, gribData.getDate()); }
-        catch (Exception ignore) 
-        
+        catch (Exception ignore)         
         {
           WWContext.getInstance().fireLogging(WWGnlUtilities.buildMessage("wind-lookup", new String[] { gribData.getDate().toString(), ignore.getMessage() }) + "\n"); }
 
@@ -7560,13 +7616,16 @@ public class CommandPanel
                                                     gribPoint.waves, 
                                                     gribPoint.temp, 
                                                     gribPoint.rain);
-            mess += ((isThereWind()?("wind:" + Math.round(gribPoint.windspeed) + "kts@" + gribPoint.winddir + " (" + (!displayAltTooltip?"<b>":"") + "F " + WWGnlUtilities.getBeaufort(gribPoint.windspeed) + (!displayAltTooltip?"</b>":"") + ")"):"") +
-                    ((gribPoint.prmsl>0)?br  + "prmsl:" + WWGnlUtilities.DF2.format((gribPoint.prmsl / 100F)) + units[PRMSL]:"") +
-                    ((gribPoint.waves>0)?br  + "waves:" + WWGnlUtilities.XXX12.format((gribPoint.waves / 100F)) + units[WAVES]:"") +
-                    ((gribPoint.temp>0)?br   + "temp:" + WWGnlUtilities.XX22.format(WWGnlUtilities.convertTemperatureFromKelvin(gribPoint.temp, temperatureUnit)) + units[TEMPERATURE]:"") + // Originally in Kelvin
-                    ((gribPoint.hgt500>0)?br + "500mb:" + WWGnlUtilities.DF2.format(gribPoint.hgt500) + units[HGT500]:"") + 
-                    ((gribPoint.rain>0)?br   + "prate:" + WWGnlUtilities.XX22.format(gribPoint.rain * 3600F) + units[RAIN]:"") +
-                     ((gribPoint.currentspeed>0)?br + "current:" + WWGnlUtilities.XXX12.format(gribPoint.currentspeed) + "kts@" + gribPoint.currentdir:""));
+            if  (displayAltTooltip || !gribAtTheMouse) // Dont display GRIB Data if GRIB at the mouse is visible.
+            {
+              mess += ((isThereWind()?("wind:" + Math.round(gribPoint.windspeed) + "kts@" + gribPoint.winddir + " (" + (!displayAltTooltip?"<b>":"") + "F " + WWGnlUtilities.getBeaufort(gribPoint.windspeed) + (!displayAltTooltip?"</b>":"") + ")"):"") +
+                      ((gribPoint.prmsl>0)?br  + "prmsl:" + WWGnlUtilities.DF2.format((gribPoint.prmsl / 100F)) + units[PRMSL]:"") +
+                      ((gribPoint.waves>0)?br  + "waves:" + WWGnlUtilities.XXX12.format((gribPoint.waves / 100F)) + units[WAVES]:"") +
+                      ((gribPoint.temp>0)?br   + "temp:" + WWGnlUtilities.XX22.format(WWGnlUtilities.convertTemperatureFromKelvin(gribPoint.temp, temperatureUnit)) + units[TEMPERATURE]:"") + // Originally in Kelvin
+                      ((gribPoint.hgt500>0)?br + "500mb:" + WWGnlUtilities.DF2.format(gribPoint.hgt500) + units[HGT500]:"") + 
+                      ((gribPoint.rain>0)?br   + "prate:" + WWGnlUtilities.XX22.format(gribPoint.rain * 3600F) + units[RAIN]:"") +
+                       ((gribPoint.currentspeed>0)?br + "current:" + WWGnlUtilities.XXX12.format(gribPoint.currentspeed) + "kts@" + gribPoint.currentdir:""));
+            }
             if (!displayAltTooltip)
             {
               mess += "<hr>" +

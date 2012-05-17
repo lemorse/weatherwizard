@@ -64,6 +64,7 @@ import java.util.TimeZone;
 import javax.swing.AbstractAction;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
@@ -423,6 +424,7 @@ public class AdjustFrame
   {
     WWContext.getInstance().setMasterTopFrame(this);
     
+    masterTabPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
     layers.add(masterTabPane, new Integer(1));
 //  layers.add(grayTransparentPanel, grayLayerIndex);
     

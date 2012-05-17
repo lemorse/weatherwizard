@@ -243,7 +243,15 @@ public class ControlPane
 
     // GRIB Visual Controls
     gribVisualControlPanelHolder.add(gribVisualPanel, BorderLayout.CENTER);
-    gribVisualControl = new SingleControlPane(WWGnlUtilities.buildMessage("grib-visual-control"), gribVisualControlPanelHolder, false);
+    gribVisualControl = new SingleControlPane(WWGnlUtilities.buildMessage("grib-visual-control"), gribVisualControlPanelHolder, false)
+      {
+        @Override
+        protected void onClickOnControl(boolean displayingData)
+        {
+//        System.out.println("GRIB Details at the mouse are " + (displayingData?"visible":"not displayed"));
+          WWContext.getInstance().fireGribAtTheMouseisShowing(displayingData);
+        }
+      };
     componentHolder.add(gribVisualControl, new GridBagConstraints(0, panelIdx++, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));        
     gribVisualControl.setEnabled(false);
     

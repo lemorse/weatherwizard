@@ -66,7 +66,7 @@ public class UpdatePanel
     jTextArea.setEditable(false);
     jTextArea.setBackground(SystemColor.control);
     bottomLeft.setText(WWGnlUtilities.buildMessage("check-update-nature"));
-    bottomRight.setText("<html><u>The Don Pedro Project</u></html>");
+    bottomRight.setText("<html><u>The Weather Wizard History Page</u></html>");
     bottomRight.setForeground(Color.blue);
     bottomRight.addMouseListener(new MouseAdapter()
       {
@@ -106,7 +106,8 @@ public class UpdatePanel
   
   private void url_mouseClicked(MouseEvent e)
   {
-    try { Utilities.openInBrowser("http://donpedro.lediouris.net/software/structure/datafiles/news/index.html"); } 
+//  try { Utilities.openInBrowser("http://donpedro.lediouris.net/software/structure/datafiles/news/index.html"); } 
+    try { Utilities.openInBrowser("http://code.google.com/p/weatherwizard/wiki/WWHistory?ts=1337007410&updated=WWHistory"); } 
     catch (Exception ignore) {}
   }
   

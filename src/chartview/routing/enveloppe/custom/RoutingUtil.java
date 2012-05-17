@@ -67,20 +67,71 @@ public class RoutingUtil
     return brg;
   }
 
-  public static List<List<RoutingPoint>> calculateIsochrons(RoutingClientInterface caller, 
-                                                            ChartPanel chartPanel,
-                                                            RoutingPoint startFrom,
-                                                            RoutingPoint destination,
-                                                            List<RoutingPoint> intermediateWP,
-                                                            Date fromDate,
+  private static int getBearingTo(RoutingPoint center, RoutingPoint dest)
+  {
+    int brg = 0;
+    gc.setStart(new GeoPoint(Math.toRadians(center.getPosition().getL()),
+                             Math.toRadians(center.getPosition().getG())));
+    gc.setArrival(new GeoPoint(Math.toRadians(dest.getPosition().getL()),
+                               Math.toRadians(dest.getPosition().getG())));
+  //  gc.calculateGreatCircle(10);
+  //  double gcDistance = Math.toDegrees(gc.getDistance() * 60D);
+    gc.calculateRhumLine();
+    double rlZ = gc.getRhumbLineRoute();
+    brg = (int)Math.round(Math.toDegrees(rlZ));
+    return brg;
+  }
+  
+  // 
+
+  public static List<List<RoutingPoint>> calculateIsochrons(RoutingClientInterface         caller, 
+                                                            ChartPanel                     chartPanel,
+                                                            RoutingPoint                   startFrom,
+                                                            RoutingPoint                   destination,
+                                                            List<RoutingPoint>             intermediateWP,
+                                                            Date                           fromDate,
                                                             GribHelper.GribConditionData[] gribData,
-                                                            double timeInterval,
-                                                            int routingForkWidth,
-                                                            int routingStep,
-                                                            int maxTWS,
-                                                            int minTWA,
-                                                            boolean stopIfGRIB2old,
-                                                            double speedCoeff)
+                                                            double                         timeInterval,
+                                                            int                            routingForkWidth,
+                                                            int                            routingStep,
+                                                            int                            maxTWS,
+                                                            int                            minTWA,
+                                                            boolean                        stopIfGRIB2old,
+                                                            double                         speedCoeff)
+  {
+    smallestDist = Double.MAX_VALUE; // Reset, for the next leg
+    return calculateIsochrons(caller, 
+                              chartPanel, 
+                              startFrom, 
+                              destination, 
+                              intermediateWP, 
+                              null, 
+                              fromDate, 
+                              gribData, 
+                              timeInterval, 
+                              routingForkWidth, 
+                              routingStep, 
+                              maxTWS, 
+                              minTWA, 
+                              stopIfGRIB2old, 
+                              speedCoeff);
+  }
+
+  private static List<List<RoutingPoint>> calculateIsochrons(RoutingClientInterface         caller, 
+                                                            ChartPanel                     chartPanel,
+                                                            RoutingPoint                   startFrom,
+                                                            RoutingPoint                   destination,
+                                                            List<RoutingPoint>             intermediateWP,
+                                                            List<RoutingPoint>             bestRoute,
+                                                            Date                           fromDate,
+                                                            GribHelper.GribConditionData[] gribData,
+                                                            double                         timeInterval,
+                                                            int                            routingForkWidth,
+                                                            int                            routingStep,
+                                                            int                            maxTWS,
+                                                            int                            minTWA,
+                                                            boolean                        stopIfGRIB2old,
+                                                            double                         speedCoeff)
   {
     wgd              = gribData;
     finalDestination = destination; // By default
@@ -95,11 +146,21 @@ public class RoutingUtil
       finalDestination = intermediateWP.get(nbIntermediateIndex++);
     
     double gcDistance = 0D;
+    RoutingPoint aimFor = null;
+    int bestRouteIndex = 0;
+    if (bestRoute != null && bestRoute.size() > 0)
+    {
+      aimFor = bestRoute.get(++bestRouteIndex);
+      System.out.println("Aiming for [" + aimFor.getPosition() + "]");
+    }
     
 //  System.out.println("Starting routing from " + center.getPosition().toString() + " to " + destination.getPosition().toString());
 
     // Calcutate bearing to detination (from start)
-    brg = getBearing(center);
+    if (aimFor == null)
+      brg = getBearing(center);
+    else
+      brg = getBearingTo(center, aimFor);
     
     List<List<RoutingPoint>> allIsochrons = new ArrayList<List<RoutingPoint>>();
     
@@ -145,7 +206,7 @@ public class RoutingUtil
         while (!interruptRouting && dimOne.hasNext() && keepLooping)
         {
 //        timer = logDiffTime(timer, "Milestone 2");
-          List<RoutingPoint> curve = dimOne.next();
+          List<RoutingPoint> curve = dimOne.next(); 
           Iterator<RoutingPoint> dimTwo = curve.iterator();
           nbNonZeroSpeed = 0;
           while (!interruptRouting && keepLooping && dimTwo.hasNext())
@@ -168,10 +229,17 @@ public class RoutingUtil
             }
 //          timer = logDiffTime(timer, "Milestone 4");
             
-            brg = getBearing(newCurveCenter); // 7-apr-2010
+//          brg = getBearing(newCurveCenter); // 7-apr-2010.            
+            if (aimFor == null)
+              brg = getBearing(newCurveCenter);
+            else // Finer Routing
+              brg = getBearingTo(newCurveCenter, aimFor);
+            
             nbNonZeroSpeed = 0;
             // Calculate isochron from center
-            for (int bearing=brg - routingForkWidth / 2; keepLooping && !interruptRouting && bearing<=brg + routingForkWidth / 2; bearing += routingStep)
+            for (int bearing=brg - routingForkWidth / 2; 
+                 keepLooping && !interruptRouting && bearing<=brg + routingForkWidth / 2; 
+                 bearing += routingStep)
             {
 //            timer = logDiffTime(timer, "Milestone 5");
               int windDir = 0;
@@ -259,7 +327,7 @@ public class RoutingUtil
           }
         }      
         long after = System.currentTimeMillis();
-        System.out.println("Isochron calculated in " + Long.toString(after - before) + " ms.");
+//      System.out.println("Isochron calculated in " + Long.toString(after - before) + " ms.");
         // Start from the finalCurve, the previous enveloppe, for the next calculation
         // Flip data
 //      timer = logDiffTime(timer, "Milestone 8");
@@ -271,7 +339,19 @@ public class RoutingUtil
 //        WWContext.getInstance().fireLogging("Reducing...");
 //        System.out.print("Reducing...");
 //        before = System.currentTimeMillis();
-          finalCurve = calculateEnveloppe(data, center);          
+          finalCurve = calculateEnveloppe(data, center);
+          if (aimFor != null)
+          {
+            if (isPointIn(aimFor, finalCurve, center))
+            {
+              try { aimFor = bestRoute.get(++bestRouteIndex); }
+              catch (IndexOutOfBoundsException ioobe)
+              { aimFor = finalDestination; }
+              System.out.println("Aiming for [" + aimFor.getPosition() + "]");
+            //localSmallOne = Double.MAX_VALUE;
+              smallestDist = Double.MAX_VALUE; // Reset, for the next leg            
+            }
+          }
 //        WWContext.getInstance().fireLogging("Reducing completed in " + Long.toString(System.currentTimeMillis() - before) + " ms\n");
 //        System.out.println(" completed in " + Long.toString(System.currentTimeMillis() - before) + " ms\n");
         }
@@ -289,14 +369,19 @@ public class RoutingUtil
             }
           }
         }
+//      System.out.println("finalIterator.hasNext() : [" + finalIterator.hasNext() + "]");
         while (!interruptRouting && finalIterator != null && finalIterator.hasNext())
         {
 //        timer = logDiffTime(timer, "Milestone 10");
           RoutingPoint forecast = finalIterator.next();
           gc.setStart(new GeoPoint(Math.toRadians(forecast.getPosition().getL()),
                                    Math.toRadians(forecast.getPosition().getG())));
-          gc.setArrival(new GeoPoint(Math.toRadians(finalDestination.getPosition().getL()),
-                                     Math.toRadians(finalDestination.getPosition().getG())));
+          if (aimFor == null)
+            gc.setArrival(new GeoPoint(Math.toRadians(finalDestination.getPosition().getL()),
+                                       Math.toRadians(finalDestination.getPosition().getG())));
+          else
+            gc.setArrival(new GeoPoint(Math.toRadians(aimFor.getPosition().getL()),
+                                       Math.toRadians(aimFor.getPosition().getG())));
           gc.calculateGreatCircle(10);                                       
           gcDistance = Math.toDegrees(gc.getDistance() * 60D);
           if (gcDistance < localSmallOne)
@@ -335,6 +420,9 @@ public class RoutingUtil
         else
         {
           keepLooping = false;
+          System.out.println("Destination reached ? aiming [" + (aimFor!=null?aimFor.getPosition().toString():"none") + "] finalDestination [" + finalDestination.getPosition().toString() + "]");
+          System.out.println("LocalSmallOne:" + localSmallOne);
+          System.out.println("SmallestDistance:" + smallestDist);
           if (allowOtherRoute && nbNonZeroSpeed == 0)
           {
             smallestDist = localSmallOne;
@@ -358,10 +446,13 @@ public class RoutingUtil
                 if (!finalDestination.getPosition().equals(destination.getPosition()))
                   finalDestination = destination;
                 else
+                {
                   keepLooping = false;
+                  System.out.println("Destination reached aiming [" + (aimFor==null?aimFor.getPosition().toString():"none") + "] finalDestination [" + finalDestination.getPosition().toString() + "]");
+                }
               }
             }
-            if (!keepLooping)
+            if (!keepLooping) // End of Routing
               WWContext.getInstance().fireLogging("Finished (" + WWGnlUtilities.XXXX12.format(smallestDist) + " vs " + WWGnlUtilities.XXXX12.format(localSmallOne) + ").\n(Non Zero Speed:" + nbNonZeroSpeed+ ")\n", LoggingPanel.YELLOW_STYLE);                  
             if (nbNonZeroSpeed == 0)
             {
@@ -429,6 +520,79 @@ public class RoutingUtil
     return allIsochrons;
   }
   
+  public static List<List<RoutingPoint>> refineRouting(RoutingClientInterface         caller,
+                                                       ChartPanel                     chartPanel,
+                                                       RoutingPoint                   startFrom,
+                                                       RoutingPoint                   destination,
+                                                       List<List<RoutingPoint>>       previousIsochrons, 
+                                                       RoutingPoint                   closestPoint,
+                                                       List<RoutingPoint>             intermediateWP,
+                                                       Date                           fromDate,
+                                                       GribHelper.GribConditionData[] gribData,
+                                                       double                         timeInterval,
+                                                       int                            routingForkWidth,
+                                                       int                            routingStep,
+                                                       int                            maxTWS,
+                                                       int                            minTWA,
+                                                       boolean                        stopIfGRIB2old,
+                                                       double                         speedCoeff)
+  {
+    smallestDist = Double.MAX_VALUE; // Reset, for the next leg
+    List<RoutingPoint> bestRoute = RoutingUtil.getBestRoute(closestPoint, previousIsochrons);
+    // The route goes from destination to origin. Revert it.
+    bestRoute = revertList(bestRoute);
+    
+//    for (RoutingPoint rp : bestRoute)
+//      System.out.println("Best : " + rp.getPosition().toString());
+    
+    return calculateIsochrons(caller, 
+                              chartPanel, 
+                              startFrom, 
+                              destination, 
+                              intermediateWP, 
+                              bestRoute, 
+                              fromDate, 
+                              gribData, 
+                              timeInterval, 
+                              routingForkWidth, 
+                              routingStep, 
+                              maxTWS, 
+                              minTWA, 
+                              stopIfGRIB2old, 
+                              speedCoeff);
+  }
+  
+  public static <T> List<T> revertList(List<T> list)
+  {
+    List<T> inverted = new ArrayList<T>(list.size());
+    int listSize = list.size();
+    for (int i=listSize - 1; i>=0; i--)
+    {
+      inverted.add(list.get(i));
+    }    
+    return inverted; 
+  }
+
+  public static List<RoutingPoint> getBestRoute(RoutingPoint closestPoint, List<List<RoutingPoint>> allIsochrons)
+  {
+    List<RoutingPoint> bestRoute = new ArrayList<RoutingPoint>(allIsochrons.size());
+    boolean go = true;
+    RoutingPoint start = closestPoint;
+    bestRoute.add(start);
+    while (go)
+    {
+      RoutingPoint next = start.getAncestor();
+      if (next == null)
+        go = false;
+      else
+      {
+        bestRoute.add(next);
+        start = next;
+      }
+    }
+    return bestRoute;
+  }
+  
   private static long timer = 0L;
   private static long logDiffTime(long before, String mess)
   {
@@ -437,7 +601,7 @@ public class RoutingUtil
     return after;
   }
      
-  // TASK Needs optimization   
+  // TASK Possible optimization ?   
   private static List<RoutingPoint> calculateEnveloppe(List<List<RoutingPoint>> bulkPoints, RoutingPoint center)
   {
     List<RoutingPoint> returnCurve = new ArrayList<RoutingPoint>();
@@ -496,6 +660,16 @@ public class RoutingUtil
     System.out.println(mess + "to " + returnCurve.size() + " point(s), curve reducing calculated in " + Long.toString(after - before) + " ms");
     
     return returnCurve;
+  }
+  
+  private static boolean isPointIn(RoutingPoint rp, List<RoutingPoint> lrp, RoutingPoint center)
+  {
+    Polygon currentPolygon = new Polygon();
+    currentPolygon.addPoint(center.getPoint().x, center.getPoint().y); // center
+    for (RoutingPoint p : lrp)
+      currentPolygon.addPoint(p.getPoint().x, p.getPoint().y);    
+    currentPolygon.addPoint(center.getPoint().x, center.getPoint().y); // close
+    return currentPolygon.contains(rp.getPoint());
   }
   
   public static void interruptRoutingCalculation()
