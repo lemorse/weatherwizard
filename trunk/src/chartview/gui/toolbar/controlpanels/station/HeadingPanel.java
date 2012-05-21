@@ -1,5 +1,6 @@
 package chartview.gui.toolbar.controlpanels.station;
 
+import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Dimension;
 
@@ -9,6 +10,7 @@ import java.awt.Graphics;
 
 import java.awt.Graphics2D;
 
+import java.awt.Point;
 import java.awt.RenderingHints;
 
 import javax.swing.JPanel;
@@ -48,11 +50,24 @@ public class HeadingPanel
     int h = this.getHeight();
     final int FONT_SIZE = 12;
 //  g2d.setColor(Color.black); 
-    Color startColor = Color.black; // new Color(255, 255, 255);
-    Color endColor   = Color.gray; // new Color(102, 102, 102);
-    GradientPaint gradient = new GradientPaint(0, this.getHeight(), startColor, 0, 0, endColor); // vertical, upside down
-    ((Graphics2D)gr).setPaint(gradient);
-    gr.fillRect(0, 0, w, h);
+    if (false)
+    {
+      Color startColor = Color.black; // new Color(255, 255, 255);
+      Color endColor   = Color.gray; // new Color(102, 102, 102);
+      GradientPaint gradient = new GradientPaint(0, this.getHeight(), startColor, 0, 0, endColor); // vertical, upside down
+      ((Graphics2D)gr).setPaint(gradient);
+      gr.fillRect(0, 0, w, h);
+    }
+    if (true)
+    {
+      drawGlossyRectangularDisplay((Graphics2D)gr, 
+                                   new Point(0, 0), 
+                                   new Point(this.getWidth(), this.getHeight()), 
+                                   Color.gray, 
+                                   Color.black, 
+                                   1f);
+      
+    }
     // Width: 30 on each side = 60
     gr.setColor(Color.white);
     float oneDegree = (float)w / 60f;
@@ -112,5 +127,30 @@ public class HeadingPanel
   public int getHdg()
   {
     return hdg;
+  }
+  private static void drawGlossyRectangularDisplay(Graphics2D g2d, Point topLeft, Point bottomRight, Color lightColor, Color darkColor, float transparency)
+  {
+    g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, transparency));
+    g2d.setPaint(null);
+
+    g2d.setColor(darkColor);
+
+    int width  = bottomRight.x - topLeft.x;
+    int height = bottomRight.y - topLeft.y;
+
+    g2d.fillRoundRect(topLeft.x , topLeft.y, width, height, 10, 10);
+
+    Point gradientOrigin = new Point(0, //topLeft.x + (width) / 2,
+                                     0);
+    GradientPaint gradient = new GradientPaint(gradientOrigin.x, 
+                                               gradientOrigin.y, 
+                                               lightColor, 
+                                               gradientOrigin.x, 
+                                               gradientOrigin.y + (height / 3), 
+                                               darkColor); // vertical, light on top
+    g2d.setPaint(gradient);
+    int offset = 1; //(int)(width * 0.025);
+    int arcRadius = 5;
+    g2d.fillRoundRect(topLeft.x + offset, topLeft.y + offset, (width - (2 * offset)), (height - (2 * offset)), 2 * arcRadius, 2 * arcRadius); 
   }
 }

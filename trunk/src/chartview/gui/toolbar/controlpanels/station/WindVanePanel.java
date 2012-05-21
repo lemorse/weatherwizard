@@ -59,12 +59,20 @@ public class WindVanePanel
     Graphics2D g2d = (Graphics2D)g;
     // Background
 //  g2d.setColor(Color.black); 
-    Color startColor = Color.black; // new Color(255, 255, 255);
-    Color endColor   = Color.gray; // new Color(102, 102, 102);
-    GradientPaint gradient = new GradientPaint(0, this.getHeight(), startColor, 0, 0, endColor); // vertical, upside down
-    (g2d).setPaint(gradient);
-//  g2d.fillRect(0, 0, this.getWidth(), this.getHeight());
-    g2d.fillOval(0, 0, this.getWidth(), this.getHeight());
+    if (false)
+    {
+      Color startColor = Color.black; // new Color(255, 255, 255);
+      Color endColor   = Color.gray; // new Color(102, 102, 102);
+      GradientPaint gradient = new GradientPaint(0, this.getHeight(), startColor, 0, 0, endColor); // vertical, upside down
+      (g2d).setPaint(gradient);
+  //  g2d.fillRect(0, 0, this.getWidth(), this.getHeight());
+      g2d.fillOval(0, 0, this.getWidth(), this.getHeight());
+    }
+    if (true)
+    {
+      int rad = Math.min(this.getWidth(), this.getHeight()) / 2;
+      drawGlossyCircularDisplay((Graphics2D)g, center, rad, Color.lightGray, Color.black, 1f);
+    }    
     // Starboard, Port
     float alpha = 0.3f;
     ((Graphics2D)g).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
@@ -120,5 +128,27 @@ public class WindVanePanel
   public int getWindDir()
   {
     return windDir;
+  }
+  private static void drawGlossyCircularDisplay(Graphics2D g2d, Point center, int radius, Color lightColor, Color darkColor, float transparency)
+  {
+    g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, transparency));
+    g2d.setPaint(null);
+
+    g2d.setColor(darkColor);
+    g2d.fillOval(center.x - radius, center.y - radius, 2 * radius, 2 * radius);
+
+    Point gradientOrigin = new Point(center.x - radius,
+                                     center.y - radius);
+    GradientPaint gradient = new GradientPaint(gradientOrigin.x, 
+                                               gradientOrigin.y, 
+                                               lightColor, 
+                                               gradientOrigin.x, 
+                                               gradientOrigin.y + (2 * radius / 3), 
+                                               darkColor); // vertical, light on top
+    g2d.setPaint(gradient);
+    g2d.fillOval((int)(center.x - (radius * 0.90)), 
+                 (int)(center.y - (radius * 0.95)), 
+                 (int)(2 * radius * 0.9), 
+                 (int)(2 * radius * 0.95));
   }
 }

@@ -48,6 +48,7 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontFormatException;
 
+import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -3892,6 +3893,34 @@ public class WWGnlUtilities
       }
     }
     return str;
+  }
+
+  public static void drawGlossyCircularDisplay(Graphics2D g2d, 
+                                               Point center, 
+                                               int radius, 
+                                               Color lightColor, 
+                                               Color darkColor, 
+                                               float transparency)
+  {
+    g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, transparency));
+    g2d.setPaint(null);
+
+    g2d.setColor(darkColor);
+    g2d.fillOval(center.x - radius, center.y - radius, 2 * radius, 2 * radius);
+
+    Point gradientOrigin = new Point(center.x - radius,
+                                     center.y - radius);
+    GradientPaint gradient = new GradientPaint(gradientOrigin.x, 
+                                               gradientOrigin.y, 
+                                               lightColor, 
+                                               gradientOrigin.x, 
+                                               gradientOrigin.y + (2 * radius / 3), 
+                                               darkColor); // vertical, light on top
+    g2d.setPaint(gradient);
+    g2d.fillOval((int)(center.x - (radius * 0.90)), 
+                 (int)(center.y - (radius * 0.95)), 
+                 (int)(2 * radius * 0.9), 
+                 (int)(2 * radius * 0.95));
   }
 
   public static void main__(String[] args)

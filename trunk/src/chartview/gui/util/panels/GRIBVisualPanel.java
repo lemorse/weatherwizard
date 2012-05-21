@@ -259,23 +259,41 @@ public class GRIBVisualPanel extends JPanel // TransparentPanel
     int displayCenterY = 3 * this.getHeight() / 4;
     int displayRadius = Math.min(this.getWidth() / 4, this.getHeight() / 4) - BORDER_TICKNESS;
     int displayBackGroundOpacity = 125;
-    // Display shadow
-    g.setColor(new Color(Color.gray.getRed(), Color.gray.getGreen(), Color.gray.getBlue(), displayBackGroundOpacity));
-    g.fillOval(displayCenterX - displayRadius + 3,
-               displayCenterY - displayRadius + 3,
-               2 * displayRadius,
-               2 * displayRadius);
-    // Display
-    g.setColor(new Color(0, 0, 0, displayBackGroundOpacity));
-    g.fillOval(displayCenterX - displayRadius,
-               displayCenterY - displayRadius,
-               2 * displayRadius,
-               2 * displayRadius);
-    g.setColor(new Color(255, 255, 255, displayBackGroundOpacity));
-    g.fillOval(displayCenterX - (displayRadius - 4),
-               displayCenterY - (displayRadius - 4),
-               2 * (displayRadius - 4),
-               2 * (displayRadius - 4));
+    if (true)
+    {
+      g.setColor(Color.lightGray);
+      g.fillOval(displayCenterX - displayRadius,
+                 displayCenterY - displayRadius,
+                 2 * displayRadius,
+                 2 * displayRadius);
+      
+      WWGnlUtilities.drawGlossyCircularDisplay((Graphics2D)g, 
+                                               new Point(displayCenterX, displayCenterY), 
+                                               (displayRadius - 4), 
+                                               Color.lightGray, 
+                                               Color.darkGray, 
+                                               1f);
+    }
+    else
+    {
+      // Display shadow
+      g.setColor(new Color(Color.gray.getRed(), Color.gray.getGreen(), Color.gray.getBlue(), displayBackGroundOpacity));
+      g.fillOval(displayCenterX - displayRadius + 3,
+                 displayCenterY - displayRadius + 3,
+                 2 * displayRadius,
+                 2 * displayRadius);
+      // Display
+      g.setColor(new Color(0, 0, 0, displayBackGroundOpacity));
+      g.fillOval(displayCenterX - displayRadius,
+                 displayCenterY - displayRadius,
+                 2 * displayRadius,
+                 2 * displayRadius);
+      g.setColor(new Color(255, 255, 255, displayBackGroundOpacity));
+      g.fillOval(displayCenterX - (displayRadius - 4),
+                 displayCenterY - (displayRadius - 4),
+                 2 * (displayRadius - 4),
+                 2 * (displayRadius - 4));
+    }
     // Rose
     int externalCircleRadius = (int)((double)displayRadius * 0.95);
     int internalCircleRadius = (int)((double)displayRadius * 0.25);
