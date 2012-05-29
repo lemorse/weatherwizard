@@ -448,7 +448,7 @@ public class RoutingUtil
                 else
                 {
                   keepLooping = false;
-                  System.out.println("Destination reached aiming [" + (aimFor==null?aimFor.getPosition().toString():"none") + "] finalDestination [" + finalDestination.getPosition().toString() + "]");
+                  System.out.println("Destination reached aiming [" + (aimFor!=null?aimFor.getPosition().toString():"none") + "] finalDestination [" + finalDestination.getPosition().toString() + "]");
                 }
               }
             }

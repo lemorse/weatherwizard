@@ -105,12 +105,12 @@ public class WW_NMEAReader
       if (tcp != null && tcp.trim().length() > 0)
       {
         int tcpport = Integer.parseInt(tcp);
-        read(tcpport, CustomNMEAClient.TCP_OPTION); // TCP
+        read(tcpport, "localhost", CustomNMEAClient.TCP_OPTION); // TCP
       } 
       else if (udp != null && udp.trim().length() > 0)
       {
         int udpport = Integer.parseInt(udp);
-        read(udpport, CustomNMEAClient.UDP_OPTION); // UDP
+        read(udpport, "localhost", CustomNMEAClient.UDP_OPTION); // UDP
       } 
       else if (data != null && data.trim().length() > 0)
       {
@@ -160,12 +160,12 @@ public class WW_NMEAReader
       };
   }
 
-  private void read(int port, int option)
+  private void read(int port, String host, int option)
   {
     if (option == CustomNMEAClient.TCP_OPTION)
     {
       System.out.println("Reading TCP...");
-      nmeaClient = new CustomNMEAClient(this, CustomNMEAClient.TCP_OPTION, port)
+      nmeaClient = new CustomNMEAClient(this, CustomNMEAClient.TCP_OPTION, host, port)
       {
         public void manageNMEAError(Throwable t)
         {
@@ -178,7 +178,7 @@ public class WW_NMEAReader
     {
       System.out.println("Reading UDP...");
       long timeout = 5000L; // TODO Config Parameter
-      nmeaClient = new CustomNMEAClient(this, CustomNMEAClient.UDP_OPTION, port, timeout)
+      nmeaClient = new CustomNMEAClient(this, CustomNMEAClient.UDP_OPTION, host, port, timeout)
       {
         public void manageNMEAError(Throwable t)
         {

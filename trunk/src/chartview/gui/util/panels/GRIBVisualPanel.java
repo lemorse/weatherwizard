@@ -6,7 +6,6 @@ import chartview.ctx.WWContext;
 import chartview.gui.toolbar.controlpanels.ControlPane;
 import chartview.gui.util.param.ParamData;
 import chartview.gui.util.param.ParamPanel;
-import chartview.gui.util.transparent.TransparentPanel;
 
 import chartview.util.WWGnlUtilities;
 
