@@ -841,7 +841,7 @@ public class CommandPanelPopup
         aliwp.add(gp);
       aliwp.add(parent.to);
       WayPointTablePanel wptp = new WayPointTablePanel(aliwp);
-      wptp.setTopLabel("From " + parent.to.toString()); // LOCALIZE
+      wptp.setTopLabel("From " + parent.from.toString()); // LOCALIZE
       int resp = JOptionPane.showConfirmDialog(this, wptp, "Way Point(s)", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
       if (resp == JOptionPane.OK_OPTION)
       {
