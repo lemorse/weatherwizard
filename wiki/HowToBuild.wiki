@@ -4,9 +4,12 @@
 = Build Instructions =
 
 How to build the weather wizard.
+<br>
 The build system is using Ant (no Maven).
+<br>
 We assume you have a subversion client on your system.
-
+<br>
+<br>
 This is a work in progress, check it out again later... (soon).
 
 = Details =
