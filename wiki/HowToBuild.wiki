@@ -1,5 +1,5 @@
-#summary One-sentence summary of this page.
 #labels Featured
+#Details all the steps for you to build the Weather Wizard on your system.
 
 = Build Instructions =
 
