@@ -1,0 +1,17 @@
+#summary One-sentence summary of this page.
+#labels Featured
+
+= Build Instructions =
+
+How to build the weather wizard.
+The build system is using Ant (no Maven).
+We assume you have a subversion client on your system.
+
+This is a work in progress, check it out again later... (soon).
+
+= Details =
+
+Add your content here.  Format your content with:
+  * Text in *bold* or _italic_
+  * Headings, paragraphs, and lists
+  * Automatic links to other wiki pages
