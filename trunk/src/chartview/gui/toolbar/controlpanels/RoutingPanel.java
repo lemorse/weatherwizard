@@ -491,7 +491,7 @@ public class RoutingPanel extends JPanel
 
   public void setBestRoute(List<RoutingPoint> bestRoute, int routingType)
   {
-    GreatCircle gc = WWContext.getInstance().getGreatCircle();
+ // GreatCircle gc = WWContext.getInstance().getGreatCircle();
 
     this.bestRoute = bestRoute;
 //  routeSlider.setMinimum(1);
@@ -533,7 +533,7 @@ public class RoutingPanel extends JPanel
           if (twa < minTWA) minTWA = twa;
         }
         if (prevPos != null)
-          actualDistance += gc.getDistanceInNM(prevPos, rp.getPosition());
+          actualDistance += GreatCircle.getDistanceInNM(prevPos, rp.getPosition());
         prevPos = rp.getPosition();
       }
       fromDate    = bestRoute.get(bestRoute.size() - 1).getDate();
@@ -555,7 +555,7 @@ public class RoutingPanel extends JPanel
       twaRangeLabel.setText(WWGnlUtilities.buildMessage("twa-range", new String[] { Integer.toString(minTWA), Integer.toString(maxTWA) }));
       
       // from-to
-      double gcDist = gc.getDistanceInNM(fromPos, toPos);
+      double gcDist = GreatCircle.getDistanceInNM(fromPos, toPos);
       gcLabel.setText(WWGnlUtilities.buildMessage("gc", new String[] { WWGnlUtilities.XXX12.format(gcDist) }));
       actualDistLabel.setText(WWGnlUtilities.buildMessage("actual", new String[] { WWGnlUtilities.XXX12.format(actualDistance) }));
       
