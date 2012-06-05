@@ -329,6 +329,31 @@ public class AdjustFrame
     }
   }
   
+  public void closeOthers(int tabIdx)
+  {
+    System.out.println("Closing all but tab #" + tabIdx);
+    // Shift selected tab left (at 0) and close everytning on the right
+    int nbT = masterTabPane.getTabCount() - 2;
+    WWContext.getInstance().fireSetOpenTabNum(nbT);            
+    if (masterTabPane.getTabCount() > 2)
+    {
+      for (int i=tabIdx; i>0; i--)
+        shiftTabLeft(i);
+      
+      for (int i=masterTabPane.getTabCount()-2; i>0; i--) // -2, the last one is available (+ sign).
+      {
+        Object o = masterTabPane.getComponentAt(i);
+        if (o instanceof CompositeTabbedPane)
+          ((CompositeTabbedPane)o).removeListener();
+        else
+          System.out.println("Component at tab " + i + " is a " + o.getClass().getName());
+        masterTabPane.setComponentAt(i, null);
+        masterTabPane.remove(i);          
+      }
+      masterTabPane.setSelectedIndex(0);
+    }
+  }
+  
   private void askAndWaitForLoadAtStartup(final String compositeName, int timeout)
   {
     final LoadAtStartupPanel specialPanel = new LoadAtStartupPanel(compositeName);
@@ -480,11 +505,13 @@ public class AdjustFrame
            mouseEvent.consume(); // Trap
            // Show menu to shift the tab right or left when appropriate
            int selectedIndex = ((JTabbedPane)mouseEvent.getSource()).getSelectedIndex();
+           
            if (((JTabbedPane)mouseEvent.getSource()).getTabCount() > 2 && 
                selectedIndex < ((JTabbedPane)mouseEvent.getSource()).getTabCount() - 1) // More than one tab, clicked
            {
 //             JTabbedPane tp = (JTabbedPane)mouseEvent.getSource();             
              ShiftTabPopup stp = new ShiftTabPopup(instance, selectedIndex);
+             stp.enableCloseOthers(true);
              if (selectedIndex == 0)
                stp.enableShiftLeft(false);
              if (selectedIndex == ((JTabbedPane)mouseEvent.getSource()).getTabCount() - 2)
