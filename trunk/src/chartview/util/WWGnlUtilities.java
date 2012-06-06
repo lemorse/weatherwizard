@@ -1832,7 +1832,8 @@ public class WWGnlUtilities
     }
     catch (Exception e)
     {
-      e.printStackTrace();
+      System.err.println(e.getLocalizedMessage());
+//    e.printStackTrace();
     }
   }
   
