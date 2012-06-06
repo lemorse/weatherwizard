@@ -2,19 +2,4 @@
 #labels Featured
 
 = Build Instructions =
-
-How to build the weather wizard.
-<br>
-The build system is using Ant (no Maven).
-<br>
-We assume you have a subversion client on your system.
-<br>
-<br>
-This is a work in progress, check it out again later... (soon).
-
-= Details =
-
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+This project depends on several other projects. Build it from [http://code.google.com/p/oliv-soft-project-builder/ there].
