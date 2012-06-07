@@ -3255,12 +3255,19 @@ public class WWGnlUtilities
             }
             nb++;
           }
-          double dist = 0D;
-//        if (firstPt != null && (dist = firstPt.orthoDistanceBetween(current)) < 300D) // Close the loop
-          if (firstPt != null && (dist = firstPt.loxoDistanceBetween(current)) < 300D) // Close the loop
+          double dist = 0d;
+          if (firstPt != null)
+            dist = firstPt.loxoDistanceBetween(current); // firstPt.orthoDistanceBetween(current)
+          if (firstPt != null && dist < 300D) // Close the loop
           {
-    //                System.out.println("Distance between First & last:" + dist + "nm");
+    //      System.out.println("Distance between First & last:" + dist + "nm");
             gr.drawLine(firstPanelPoint.x, firstPanelPoint.y, previous.x, previous.y);
+          }
+          else if (firstPt != null)
+          {
+//h          System.out.println("Distance too big to close the loop:" + dist);
+            gr.fillOval(firstPanelPoint.x - 3, firstPanelPoint.y - 3, 6, 6);
+            gr.fillOval(previous.x - 3, previous.y - 3, 6, 6);
           }
         }
       }
