@@ -288,7 +288,9 @@ public class GRIBDataUtil
         boolean closestFound = true;
         while (closestFound)
         {
-          GeoPoint close = getClosest(p, iso, 2d * gribData.getStepY() * 60d); // in miles.
+          // Look into iso for the point the closest to p, if its distance is lower that maxDist
+          double maxDist = 2d * Math.max(gribData.getStepX(), gribData.getStepY()) * 60d; // in miles.
+          GeoPoint close = getClosest(p, iso, maxDist); 
           if (close != null)
           {
             is.add(close);
@@ -422,10 +424,10 @@ public class GRIBDataUtil
     return coordinates;
   }
   
-  private static GeoPoint getClosest(GeoPoint pt, List<GeoPoint> al, double minDist)
+  private static GeoPoint getClosest(GeoPoint pt, List<GeoPoint> al, double maxDist)
   {
     GeoPoint p = null;
-    double min = minDist;
+    double min = maxDist;
     for (GeoPoint point : al)
     {
       double dist = getDistance(pt, point);
