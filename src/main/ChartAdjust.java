@@ -242,8 +242,17 @@ public class ChartAdjust
       }
       catch (ParseException pe2)
       {
-        // Give up...
-        System.err.println(pe2.getLocalizedMessage());
+        try
+        {
+          SimpleDateFormat sdf = new SimpleDateFormat("E MM/dd/yyyy HH:mm:ss", Locale.ENGLISH); // Compiled on Linux
+          sdf.setTimeZone(TimeZone.getTimeZone("Pacific/Los_Angeles"));
+          compiledDate = sdf.parse(lastModified);        
+        }
+        catch (ParseException pe3)
+        {
+          // Give up...
+          System.err.println(pe3.getLocalizedMessage());
+        }
       }
     }
     catch (Exception ex)
@@ -353,7 +362,8 @@ public class ChartAdjust
                 }
                 catch (ParseException pe)
                 {
-                  System.err.println(pe.getLocalizedMessage());                  
+                  if (notificationDate.trim().length() > 0)
+                    System.err.println(pe.getLocalizedMessage());                  
                 }
 //              System.out.println("Properties Date:" + propertiesDate.toString() + ", Provided Date:" + providedDate.toString());
                 if (notificationDate == null || notificationDate.trim().length() == 0 || propertiesDate.before(providedDate))
