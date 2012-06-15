@@ -228,7 +228,7 @@ public class ChartAdjust
     try
     {
       SimpleDateFormat sdf = new SimpleDateFormat("E MM/dd/yyyy HH:mm:ss.SS", Locale.ENGLISH);
-      sdf.setTimeZone(TimeZone.getTimeZone("Pacific/Los_Angeles"));
+      sdf.setTimeZone(TimeZone.getTimeZone("America/Los_Angeles"));
       compiledDate = sdf.parse(lastModified);
     }
     catch (ParseException pe)
@@ -237,7 +237,7 @@ public class ChartAdjust
       try
       {
         SimpleDateFormat sdf = new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
-        sdf.setTimeZone(TimeZone.getTimeZone("Pacific/Los_Angeles"));
+        sdf.setTimeZone(TimeZone.getTimeZone("America/Los_Angeles"));
         compiledDate = sdf.parse(lastModified);        
       }
       catch (ParseException pe2)
@@ -245,7 +245,7 @@ public class ChartAdjust
         try
         {
           SimpleDateFormat sdf = new SimpleDateFormat("E MM/dd/yyyy HH:mm:ss", Locale.ENGLISH); // Compiled on Linux
-          sdf.setTimeZone(TimeZone.getTimeZone("Pacific/Los_Angeles"));
+          sdf.setTimeZone(TimeZone.getTimeZone("America/Los_Angeles"));
           compiledDate = sdf.parse(lastModified);        
         }
         catch (ParseException pe3)
