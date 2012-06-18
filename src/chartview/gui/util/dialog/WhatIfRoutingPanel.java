@@ -12,6 +12,10 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 
+import java.awt.event.MouseWheelEvent;
+
+import java.awt.event.MouseWheelListener;
+
 import java.text.DecimalFormat;
 
 import javax.swing.ButtonGroup;
@@ -196,6 +200,17 @@ public class WhatIfRoutingPanel
           new Insets(0, 0, 0, 0), 0, 0));
     jPanelTwo.add(stepLabel, new GridBagConstraints(0, 8, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE,
           new Insets(0, 0, 0, 0), 0, 0));
+    
+    stepJSpinner.addMouseWheelListener(new MouseWheelListener()
+      {
+        public void mouseWheelMoved(MouseWheelEvent e)
+        {
+          int notches = e.getWheelRotation();
+          Integer ds = (Integer)stepJSpinner.getValue();
+          stepJSpinner.setValue(new Integer(ds.intValue() + (notches * -1)));
+        }
+      });
+
     jPanelTwo.add(stepJSpinner, new GridBagConstraints(1, 8, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
           new Insets(0, 0, 0, 0), 0, 0));
     dp.setEnabled(false);    
