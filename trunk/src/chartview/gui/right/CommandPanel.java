@@ -118,6 +118,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
@@ -7195,6 +7196,12 @@ public class CommandPanel
               Date d = new Date();
               clipboardContent += ("  <rte>\n" +
                                    "    <name>Weather Wizard route (" + WWGnlUtilities.SDF_DMY.format(d) + ")</name>\n" + 
+                                   "    <extensions>\n" + 
+                                   "      <opencpn:start>" + from.toString() + "</opencpn:start>\n" + 
+                                   "      <opencpn:end>" + to.toString() + "</opencpn:end>\n" + 
+                                   "      <opencpn:viz>1</opencpn:viz>\n" + 
+                                   "      <opencpn:guid>" + UUID.randomUUID().toString() + "</opencpn:guid>\n" + 
+                                   "    </extensions>\n" +
                                    "    <type>Routing</type>\n" +
                                    "    <desc>Routing from Weather Wizard (generated " + d.toString() + ")</desc>\n" +
                                    "    <number>" + (d.getTime()) + "</number>\n");
