@@ -3146,11 +3146,17 @@ public class CommandPanel
                               }
                               catch (Exception udpEx)
                               {
-                                String mess = "Cannot read UDP port either.\nStopping UDP Port reading, switch to manual entry";
-                                System.err.println(mess);
-//                              mess = "HTTP, Serial, TCP, UDP ports are not responding.\nSwitching to manual entry.";
-//                              JOptionPane.showMessageDialog(null, mess, "Position Acquisition", JOptionPane.WARNING_MESSAGE);
-                                WWGnlUtilities.getManualBoatPosition();
+                                System.err.println("Cannot read UDP port either.\nStopping UDP Port reading, trying GPSd");
+                                try
+                                {
+                                  bp = WWGnlUtilities.getGPSdBoatPosition(); // Try GPSd
+                                }
+                                catch (Exception gpsdEx)
+                                {
+                                  String mess = "Cannot read GPSd port either.\nStopping GPSd Port reading, switch to manual entry";
+                                  System.err.println(mess);
+                                  WWGnlUtilities.getManualBoatPosition();
+                                }
                               }
                             }
                           }                        
@@ -3176,11 +3182,12 @@ public class CommandPanel
                                                               boatHeading, 
                                                               new File("." + File.separator + "config" + File.separator + WWContext.MANUAL_POSITION_FILE));                        
                       }
-                      else
-                      {
-                        // TODO If everything has failed, switch to Manual input
-                        System.out.println("Manual Position Input");
-                      }
+//                      else
+//                      {
+//                        // TODO If everything has failed, switch to Manual input
+//                        System.out.println("Manual Position Input");
+//                        JOptionPane.showMessageDialog(instance, "No NMEA Data found.\nPlease try manual input.", "Position Input", JOptionPane.WARNING_MESSAGE);
+//                      }
                       
                       if (KEEP_LOOPING) // Wait and re-read
                       {

@@ -19,14 +19,12 @@ public class WW_NMEAReader
   implements NMEAEventManager
 {
   private boolean verbose = false;
-  private String pfile = "";
   private String serial = null;
   private int br = 0;
   private String tcp = "";
   private String udp = "";
   private int option = -1;
-  
-  private String data = null;
+  private String hostName = "localhost"; 
   
   private WWGnlUtilities.BoatPosition bp = null;
   private BoatPositionClient parent = null;
@@ -36,33 +34,12 @@ public class WW_NMEAReader
   public WW_NMEAReader(boolean v,
                        BoatPositionClient parent,
                        String serial,
-                       int br,
-                       String propertiesFile)
+                       int br)
   {
     this.verbose = v;
     this.parent = parent;
     this.serial = serial;
     this.br = br;
-    this.pfile = propertiesFile;
-    try
-    {
-      jbInit();
-    }
-    catch (Exception e)
-    {
-      e.printStackTrace();
-    }
-  }
-
-  public WW_NMEAReader(boolean v,
-                       BoatPositionClient parent,
-                       String fName, // simulation file
-                       String propertiesFile)
-  {
-    this.verbose = v;
-    this.parent = parent;
-    this.data = fName;
-    this.pfile = propertiesFile;
     try
     {
       jbInit();
@@ -77,16 +54,17 @@ public class WW_NMEAReader
                        BoatPositionClient parent,
                        int option,
                        String port,
-                       String propertiesFile)
+                       String hostName)
   {
     this.verbose = v;
     this.parent = parent;
     this.option = option;
+    this.hostName = hostName;
     if (option == CustomNMEAClient.UDP_OPTION)      
       this.udp = port;
     if (option == CustomNMEAClient.TCP_OPTION)
       this.tcp = port;
-    this.pfile = propertiesFile;
+
     try
     {
       jbInit();
@@ -105,17 +83,13 @@ public class WW_NMEAReader
       if (tcp != null && tcp.trim().length() > 0)
       {
         int tcpport = Integer.parseInt(tcp);
-        read(tcpport, "localhost", CustomNMEAClient.TCP_OPTION); // TCP
+        read(tcpport, hostName, CustomNMEAClient.TCP_OPTION); // TCP
       } 
       else if (udp != null && udp.trim().length() > 0)
       {
         int udpport = Integer.parseInt(udp);
-        read(udpport, "localhost", CustomNMEAClient.UDP_OPTION); // UDP
+        read(udpport, hostName, CustomNMEAClient.UDP_OPTION); // UDP
       } 
-      else if (data != null && data.trim().length() > 0)
-      {
-        read(new File(data));                       // File Replay/Simulation
-      }
       else if (serial != null & serial.trim().length() > 0)
       {
         read(serial, br);                           // Serial port
@@ -131,16 +105,6 @@ public class WW_NMEAReader
     {
       e.printStackTrace();
     }
-  }
-
-  private void read()
-  {
-    read((String)null);
-  }
-
-  private void read(String port)
-  {
-    read(port, 4800);
   }
 
   private void read(String port, int br)
