@@ -28,6 +28,7 @@ import chartview.util.local.WeatherAssistantResourceBundle;
 
 //import chartview.util.progress.ProgressMonitor;
 
+import chartview.util.nmeaclient.BoatPositionGPSdClient;
 import chartview.util.progress.ProgressUtil;
 
 import chartview.util.nmeaclient.BoatPositionSerialClient;
@@ -3629,12 +3630,18 @@ public class WWGnlUtilities
   public static BoatPosition getSerialBoatPosition() throws Exception
   {
     BoatPositionSerialClient bpsc = new BoatPositionSerialClient();
-    while (bpsc.getBoatPosition() == null && bpsc.allIsOk())
+    int nbTry = 0;
+    while (bpsc.getBoatPosition() == null && bpsc.allIsOk() && nbTry++ < 5)
     {
       try { Thread.sleep(1000L); } catch (Exception ex) {} 
     }
     if (bpsc.allIsOk())
-      return bpsc.getBoatPosition();
+    {
+      if (bpsc.getBoatPosition() != null)
+        return bpsc.getBoatPosition();
+      else
+        throw new RuntimeException("No position found from the serial port");
+    }
     else
       throw new RuntimeException(bpsc.getProblemCause());
   }
@@ -3642,12 +3649,18 @@ public class WWGnlUtilities
   public static BoatPosition getTCPBoatPosition() throws Exception
   {
     BoatPositionTCPClient bptc = new BoatPositionTCPClient();
-    while (bptc.getBoatPosition() == null && bptc.allIsOk())
+    int nbTry = 0;
+    while (bptc.getBoatPosition() == null && bptc.allIsOk() && nbTry++ < 5)
     {
       try { Thread.sleep(1000L); } catch (Exception ex) {}
     }
     if (bptc.allIsOk())
-      return bptc.getBoatPosition();
+    {
+      if (bptc.getBoatPosition() != null)
+        return bptc.getBoatPosition();
+      else
+        throw new RuntimeException("No position found from the TCP port");
+    }
     else
       throw new RuntimeException(bptc.getProblemCause());
   }
@@ -3655,14 +3668,39 @@ public class WWGnlUtilities
   public static BoatPosition getUDPBoatPosition() throws Exception
   {
     BoatPositionUDPClient bpuc = new BoatPositionUDPClient();
-    while (bpuc.getBoatPosition() == null && bpuc.allIsOk())
+    int nbTry = 0;
+    while (bpuc.getBoatPosition() == null && bpuc.allIsOk() && nbTry++ < 5)
     {
       try { Thread.sleep(1000L); } catch (Exception ex) {}
     }
     if (bpuc.allIsOk())
-      return bpuc.getBoatPosition();
+    {
+      if (bpuc.getBoatPosition() != null)
+        return bpuc.getBoatPosition();
+      else
+        throw new RuntimeException("No position found from the UDP port");
+    }
     else
       throw new RuntimeException(bpuc.getProblemCause());
+  }
+  
+  public static BoatPosition getGPSdBoatPosition() throws Exception
+  {
+    BoatPositionGPSdClient bpgc = new BoatPositionGPSdClient();
+    int nbTry = 0;
+    while (bpgc.getBoatPosition() == null && bpgc.allIsOk() && nbTry++ < 5)
+    {
+      try { Thread.sleep(1000L); } catch (Exception ex) {}
+    }
+    if (bpgc.allIsOk())
+    {
+      if (bpgc.getBoatPosition() != null)
+        return bpgc.getBoatPosition();
+      else
+      throw new RuntimeException("No position found from the GPSd port");
+    }
+    else
+      throw new RuntimeException(bpgc.getProblemCause());
   }
   
   public static BoatPosition getHTTPBoatPosition() throws Exception

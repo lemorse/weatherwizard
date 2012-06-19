@@ -16,7 +16,7 @@ public class BoatPositionTCPClient implements BoatPositionClient
   public BoatPositionTCPClient()
   {
     final String tcpPortNumber = (ParamPanel.data[ParamData.TCP_PORT][ParamData.VALUE_INDEX]).toString();
-    final WW_NMEAReader reader = new WW_NMEAReader(false, this, CustomNMEAClient.TCP_OPTION, tcpPortNumber,  "");     
+    final WW_NMEAReader reader = new WW_NMEAReader(false, this, CustomNMEAClient.TCP_OPTION, tcpPortNumber, (ParamPanel.data[ParamData.NMEA_HOST][ParamData.VALUE_INDEX]).toString());     
 //  reader.setParent(this);
     
     Thread t = new Thread("tcp-port-reader")

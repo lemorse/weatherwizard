@@ -300,6 +300,12 @@ public final class ParamPanel
       case ParamData.UDP_PORT:
         it = "8001";
         break;
+      case ParamData.GPSD_PORT:
+        it = "2947";
+        break;
+      case ParamData.NMEA_HOST:
+        it = "localhost";
+        break;
       case ParamData.ROUTING_OUTPUT_FLAVOR:
         it = new RoutingOutputList(0);
         break;
@@ -405,7 +411,10 @@ public final class ParamPanel
                   i == ParamData.BSP_COLOR_IN_ROUTING)
                 data[i][ParamData.VALUE_INDEX] = WWGnlUtilities.buildColor(s);
               else if (i == ParamData.ROUTING_STEP ||              // Integers
-                       i == ParamData.ROUTING_FORK_WIDTH ||  
+                       i == ParamData.ROUTING_FORK_WIDTH ||
+                       i == ParamData.TCP_PORT ||  
+                       i == ParamData.UDP_PORT ||  
+                       i == ParamData.GPSD_PORT ||  
                        i == ParamData.NMEA_POLLING_FREQ ||
                        i == ParamData.CHART_LINE_THICK ||
                        i == ParamData.AVOID_TWS_GT ||
@@ -537,11 +546,13 @@ public final class ParamPanel
         ParamData.WAIT_ON_STARTUP,
         ParamData.EXPAND_CONTROLS_BY_DEFAULT,
         ParamData.TEMPERATURE_UNIT }, 
-      new int[] // Routing
+      new int[] // Routing, NMEA
       { ParamData.NMEA_SERVER_URL, 
         ParamData.SERIAL_PORT,
         ParamData.TCP_PORT,
         ParamData.UDP_PORT,
+        ParamData.GPSD_PORT,
+        ParamData.NMEA_HOST,
         ParamData.NMEA_POLLING_FREQ, 
         ParamData.POLAR_FILE_LOC, 
         ParamData.ROUTING_STEP, 

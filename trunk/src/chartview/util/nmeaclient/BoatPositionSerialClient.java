@@ -14,7 +14,7 @@ public class BoatPositionSerialClient implements BoatPositionClient
   public BoatPositionSerialClient()
   {
     final String serialPortName = (ParamPanel.data[ParamData.SERIAL_PORT][ParamData.VALUE_INDEX]).toString();
-    final WW_NMEAReader reader = new WW_NMEAReader(false, this, serialPortName, 4800, ""); 
+    final WW_NMEAReader reader = new WW_NMEAReader(false, this, serialPortName, 4800); 
 //  reader.setParent(this);
     
     Thread t = new Thread("serial-port-reader")
