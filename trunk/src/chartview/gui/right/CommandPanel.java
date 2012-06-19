@@ -3105,7 +3105,7 @@ public class CommandPanel
             if (b) // Start
             {
               nmeaPollingInterval = ((Integer) ParamPanel.data[ParamData.NMEA_POLLING_FREQ][ParamData.VALUE_INDEX]).intValue();
-              final boolean KEEP_LOOPING = false;
+              final boolean KEEP_LOOPING = false; // Will get the positions only once if set to false. Polling becomes useless.
               nmeaThread = new Thread("nmea-data-thread")
               {
                 public void run()
@@ -3122,13 +3122,15 @@ public class CommandPanel
                         try
                         {
                           bp = WWGnlUtilities.getHTTPBoatPosition(); // Try HTTP port
+                          WWContext.getInstance().fireSetStatus("Got Position from HTTP");
                         }
                         catch (HTTPClient.NMEAServerException nse)
                         {
-                          System.out.println("NMEA HTTP Server must be down...");   
+                          System.err.println("NMEA HTTP Server must be down. Trying Serial port");   
                           try
                           {
                             bp = WWGnlUtilities.getSerialBoatPosition(); // Try Serial port
+                            WWContext.getInstance().fireSetStatus("Got Position from Serial Port");
                           }
                           catch (Exception serialEx)
                           {
@@ -3136,6 +3138,7 @@ public class CommandPanel
                             try
                             {
                               bp = WWGnlUtilities.getTCPBoatPosition(); // Try TCP
+                              WWContext.getInstance().fireSetStatus("Got Position from TCP");
                             }
                             catch (Exception tcpEx)
                             {
@@ -3143,6 +3146,7 @@ public class CommandPanel
                               try
                               {
                                 bp = WWGnlUtilities.getUDPBoatPosition(); // Try UDP
+                                WWContext.getInstance().fireSetStatus("Got Position from UDP");
                               }
                               catch (Exception udpEx)
                               {
@@ -3150,6 +3154,7 @@ public class CommandPanel
                                 try
                                 {
                                   bp = WWGnlUtilities.getGPSdBoatPosition(); // Try GPSd
+                                  WWContext.getInstance().fireSetStatus("Got Position from GPSd");
                                 }
                                 catch (Exception gpsdEx)
                                 {
