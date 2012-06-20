@@ -88,8 +88,9 @@ public class ParamData
   public final static int TEMPERATURE_UNIT               = 73;
   public final static int NMEA_HOST                      = 74;
   public final static int GPSD_PORT                      = 75;
+  public final static int ANEMOMETER_HAND_OPTION         = 76;
 
-  public final static int NB_PRFERENCES         = 76; 
+  public final static int NB_PRFERENCES         = 77; 
   
   private final static String[] labels = 
   { 
@@ -168,7 +169,8 @@ public class ParamData
     WWGnlUtilities.buildMessage("expand-control-by-default"),
     WWGnlUtilities.buildMessage("temperature-unit"),
     WWGnlUtilities.buildMessage("nmea-hostname"),
-    WWGnlUtilities.buildMessage("gpsd-port")
+    WWGnlUtilities.buildMessage("gpsd-port"),
+    WWGnlUtilities.buildMessage("anemometer-hand-option")
   };
 
   private final static String[] helptext = 
@@ -248,7 +250,8 @@ public class ParamData
     WWGnlUtilities.buildMessage("help-expand-control-by-default"),
     WWGnlUtilities.buildMessage("temperature-unit-help"),
     WWGnlUtilities.buildMessage("help-nmea-hostname"),
-    WWGnlUtilities.buildMessage("help-gpsd-port")
+    WWGnlUtilities.buildMessage("help-gpsd-port"),
+    WWGnlUtilities.buildMessage("help-anemometer-hand-option")
   };
     
   public static String[] getLabels()
