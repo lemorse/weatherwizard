@@ -781,14 +781,9 @@ public class WWGnlUtilities
 
   private final static int KNOB_DIAMETER = 10; // Make it even
   
-  private final static int SIMPLE_HAND_OPTION = 1;
-  private final static int ARROW_HAND_OPTION  = 2;
-  private final static int BIG_HAND_OPTION    = 3;
-  // TODO A preference for the hand flavor
-  private final static int HAND_OPTION = BIG_HAND_OPTION;
-  
   public static void drawTWAOverBoat(Graphics2D g2d, int hLength, Point center, int twa)
   {
+    int handOption = Integer.parseInt(((ParamPanel.AnemometerHandOptionList)(ParamPanel.data[ParamData.ANEMOMETER_HAND_OPTION][ParamData.VALUE_INDEX])).getStringIndex());    
     // Hand shadow
     g2d.setColor(Color.gray);
     float alpha = 0.3f;
@@ -800,20 +795,20 @@ public class WWGnlUtilities
     g2d.setStroke(stroke);  
     int handLength = hLength;
     int shadowOffset = 5;
-    if (HAND_OPTION == SIMPLE_HAND_OPTION)
+    if (handOption == ParamPanel.AnemometerHandOptionList.SIMPLE_HAND_OPTION)
     {
       g2d.drawLine(center.x + shadowOffset, 
                    center.y + shadowOffset, 
                    center.x + shadowOffset + (int)(handLength * Math.sin(Math.toRadians((double)twa))),
                    center.y + shadowOffset - (int)(handLength * Math.cos(Math.toRadians((double)twa))));
     }
-    else if (HAND_OPTION == ARROW_HAND_OPTION)
+    else if (handOption == ParamPanel.AnemometerHandOptionList.ARROW_HAND_OPTION)
     {
       Point from = new Point(center.x + shadowOffset + (int)((handLength) * Math.sin(Math.toRadians((double)twa))),
                              center.y + shadowOffset - (int)((handLength) * Math.cos(Math.toRadians((double)twa))));
       drawAnemometerArrow(g2d, from, center, 20, BACKWARD, null);      
     }
-    else if (HAND_OPTION == BIG_HAND_OPTION)
+    else if (handOption == ParamPanel.AnemometerHandOptionList.BIG_HAND_OPTION)
     {
       Point to   = new Point(center.x + shadowOffset + (int)(handLength * Math.sin(Math.toRadians((double)twa))),
                              center.y + shadowOffset - (int)(handLength * Math.cos(Math.toRadians((double)twa))));
@@ -828,20 +823,24 @@ public class WWGnlUtilities
     alpha = 1.0f;
     g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));      
     // Hand
-    if (HAND_OPTION == SIMPLE_HAND_OPTION)
+    if (handOption == ParamPanel.AnemometerHandOptionList.SIMPLE_HAND_OPTION)
     {
+      Color c = g2d.getColor();
+      g2d.setColor(new Color(19, 234, 186));
       g2d.drawLine(center.x, 
                    center.y, 
                    center.x + (int)(handLength * Math.sin(Math.toRadians((double)twa))),
                    center.y - (int)(handLength * Math.cos(Math.toRadians((double)twa))));
+      g2d.setColor(c);
     }
-    else if (HAND_OPTION == ARROW_HAND_OPTION)
+    else if (handOption == ParamPanel.AnemometerHandOptionList.ARROW_HAND_OPTION)
     {
       Point from = new Point(center.x + (int)((handLength) * Math.sin(Math.toRadians((double)twa))),
                              center.y - (int)((handLength) * Math.cos(Math.toRadians((double)twa))));
-      drawAnemometerArrow(g2d, from, center, 20, BACKWARD, null);      
+      Color c = new Color(19, 234, 186);
+      drawAnemometerArrow(g2d, from, center, 20, BACKWARD, c, c);      
     }
-    else if (HAND_OPTION == BIG_HAND_OPTION)
+    else if (handOption == ParamPanel.AnemometerHandOptionList.BIG_HAND_OPTION)
     {
       Point to   = new Point(center.x + (int)(handLength * Math.sin(Math.toRadians((double)twa))),
                              center.y - (int)(handLength * Math.cos(Math.toRadians((double)twa))));

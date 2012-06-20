@@ -32,6 +32,7 @@ import java.util.EventObject;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
@@ -357,6 +358,9 @@ public final class ParamPanel
       case ParamData.TEMPERATURE_UNIT:
         it = new TemperatureUnitList(0);
         break;
+      case ParamData.ANEMOMETER_HAND_OPTION:
+        it = new AnemometerHandOptionList(AnemometerHandOptionList.ARROW_HAND_OPTION);
+        break;
       default:
         break;
     }
@@ -451,10 +455,8 @@ public final class ParamPanel
               else if (i == ParamData.COMPOSITE_ROOT_DIR)               // DataDirectories
                 data[i][ParamData.VALUE_INDEX] = new DataDirectory(WWGnlUtilities.buildMessage("composite-button"), s);
               else if (i == ParamData.FAX_FILES_LOC)
-  //            data[i][ParamData.VALUE_INDEX] = new DataDirectory(GnlUtilities.buildMessage("faxes-button"), s);
                 data[i][ParamData.VALUE_INDEX] = new DataPath(s);
               else if (i == ParamData.GRIB_FILES_LOC)
-  //            data[i][ParamData.VALUE_INDEX] = new DataDirectory(GnlUtilities.buildMessage("grib-files-button"), s);
                 data[i][ParamData.VALUE_INDEX] = new DataPath(s);
               else if (i == ParamData.PATTERN_DIR)
                 data[i][ParamData.VALUE_INDEX] = new DataDirectory(WWGnlUtilities.buildMessage("pattern-button"), s);
@@ -480,6 +482,8 @@ public final class ParamPanel
                 data[i][ParamData.VALUE_INDEX] = new RoutingOutputList(Integer.parseInt(s));
               else if (i == ParamData.TEMPERATURE_UNIT)
                 data[i][ParamData.VALUE_INDEX] = new TemperatureUnitList(Integer.parseInt(s));
+              else if (i == ParamData.ANEMOMETER_HAND_OPTION)
+                data[i][ParamData.VALUE_INDEX] = new AnemometerHandOptionList(Integer.parseInt(s));  
               else                                                 // Strings
                 data[i][ParamData.VALUE_INDEX] = s;
             }
@@ -565,7 +569,8 @@ public final class ParamPanel
         ParamData.POLAR_SPEED_FACTOR,
         ParamData.SHOW_ROUTING_LABELS,
         ParamData.SHOW_ISOCHRONS,
-        ParamData.ROUTING_OUTPUT_FLAVOR}, 
+        ParamData.ROUTING_OUTPUT_FLAVOR,
+        ParamData.ANEMOMETER_HAND_OPTION}, 
       new int[] // Misc
       { ParamData.GRIB_FILES_LOC, 
         ParamData.FAX_FILES_LOC, 
@@ -625,6 +630,10 @@ public final class ParamPanel
                                      ((DataDirectory)data[index][ParamData.VALUE_INDEX]).value);
         else if (data[index][ParamData.VALUE_INDEX] instanceof ListOfLookAndFeel)
           cloned = new ListOfLookAndFeel(((ListOfLookAndFeel)data[index][ParamData.VALUE_INDEX]).currentValue);
+        else if (data[index][ParamData.VALUE_INDEX] instanceof AnemometerHandOptionList)
+          cloned = new AnemometerHandOptionList(((AnemometerHandOptionList)data[index][ParamData.VALUE_INDEX]).getCurrentIndex());
+        else if (data[index][ParamData.VALUE_INDEX] instanceof TemperatureUnitList)
+          cloned = new TemperatureUnitList(((TemperatureUnitList)data[index][ParamData.VALUE_INDEX]).getCurrentIndex());
         else if (data[index][ParamData.VALUE_INDEX] instanceof ContourLinesList)
           cloned = new ContourLinesList(((ContourLinesList)data[index][ParamData.VALUE_INDEX]).toString());
         else
@@ -916,7 +925,12 @@ public final class ParamPanel
       @Override
       public void setValueAt(Object aValue, int row, int column)
       { 
-        localData[row][column] = aValue; 
+        try { localData[row][column] = aValue; }
+        catch (Exception ex)
+        {
+          System.err.println("Setting value row " + row + ", column " + column + " : [" + aValue + "]");
+          System.err.println(ex.getLocalizedMessage());          
+        }
       }
     };
     table = new JTable(dataModel)
@@ -1143,6 +1157,7 @@ public final class ParamPanel
     WindOptionComboBox wdoCombo   = new WindOptionComboBox();
     FaxBlurListComboBox blurCombo = new FaxBlurListComboBox();
     TemperatureUnitListComboBox tempUnitCombo = new TemperatureUnitListComboBox();
+    AnemometerHandOptionListComboBox anemoCombo = new AnemometerHandOptionListComboBox();
     JComboBox serialPortList      = new JComboBox(SerialPortList.listSerialPorts());
     RoutingOptionComboBox roCombo = new RoutingOptionComboBox();
         
@@ -1219,6 +1234,11 @@ public final class ParamPanel
       {
         componentToApply = tempUnitCombo;
         tempUnitCombo.setSelectedItem(((TemperatureUnitList)value).getCurrentValue());
+      }
+      else if (column == 1 && value instanceof AnemometerHandOptionList)
+      {
+        componentToApply = anemoCombo;
+        anemoCombo.setSelectedItem(((AnemometerHandOptionList)value).getCurrentValue());        
       }
       else if (column == 1 && value instanceof ListOfSerialPorts)
       {
@@ -1307,6 +1327,20 @@ public final class ParamPanel
         }
         return (new TemperatureUnitList(i.intValue()));
       }
+      else if (componentToApply instanceof AnemometerHandOptionListComboBox)
+      {
+        String s = (String)((AnemometerHandOptionListComboBox)componentToApply).getSelectedItem();
+        Integer i = null;
+        for (Integer k : AnemometerHandOptionList.getMap().keySet())
+        {
+          if (AnemometerHandOptionList.getMap().get(k).equals(s))
+          {
+            i = k;
+            break;
+          }
+        }
+        return (new AnemometerHandOptionList(i.intValue()));
+      }
       else if (componentToApply instanceof FaxBlurListComboBox)
       {
         String s = (String)((FaxBlurListComboBox)componentToApply).getSelectedItem();
@@ -1360,7 +1394,10 @@ public final class ParamPanel
         if (originalValue instanceof ListOfSerialPorts) 
           return new ListOfSerialPorts((String)((JComboBox)componentToApply).getSelectedItem());
         else // Assume Look and Feel... Not granted
+        {
+          System.out.println("Warning!!! Unproperly managed ComboBox for :" + originalValue.getClass().getName());
           return (new ListOfLookAndFeel((String)((JComboBox)componentToApply).getSelectedItem()));
+        }
       }
       else
       {
@@ -1743,6 +1780,77 @@ public final class ParamPanel
       super.setCurrentValue(map.get(key));
     }
     
+    public int getCurrentIndex()
+    {
+      int idx = -1;
+      for (Integer k : map.keySet())
+      {
+        if (map.get(k).equals(getCurrentValue()))
+        {
+          idx = k.intValue();
+          break;
+        }
+      }
+      return idx;
+    }
+    
+    public static HashMap<Integer, String> getMap()
+    {
+      return map;
+    }
+    
+    public String getStringIndex()
+    {
+      String str = "";
+      String s = super.getCurrentValue();
+      for (Integer k : map.keySet())
+      {
+        if (map.get(k).equals(s))
+        {
+          str = k.toString();
+          break;
+        }
+      }
+      return str;
+    }
+    
+    public static String getLabel(int idx)
+    {
+      return map.get(new Integer(idx));
+    }
+  }
+   
+  public static class AnemometerHandOptionList extends ListOfValues
+  {
+    public final static int SIMPLE_HAND_OPTION = 1;
+    public final static int ARROW_HAND_OPTION  = 2;
+    public final static int BIG_HAND_OPTION    = 3;
+    
+    private static HashMap<Integer, String> map = new HashMap<Integer, String>(3);
+    
+    public AnemometerHandOptionList(int key)
+    { 
+      map.put(SIMPLE_HAND_OPTION, WWGnlUtilities.buildMessage("simple-hand"));      
+      map.put(ARROW_HAND_OPTION,  WWGnlUtilities.buildMessage("short-arrow"));      
+      map.put(BIG_HAND_OPTION,    WWGnlUtilities.buildMessage("long-arrow"));      
+
+      super.setCurrentValue(map.get(key));
+    }
+    
+    public int getCurrentIndex()
+    {
+      int idx = -1;
+      for (Integer k : map.keySet())
+      {
+        if (map.get(k).equals(getCurrentValue()))
+        {
+          idx = k.intValue();
+          break;
+        }
+      }
+      return idx;
+    }
+    
     public static HashMap<Integer, String> getMap()
     {
       return map;
@@ -1869,6 +1977,20 @@ public final class ParamPanel
       for (Integer key : TemperatureUnitList.getMap().keySet())
       {
         this.addItem(TemperatureUnitList.getMap().get(key));
+      }
+    }
+  }
+  
+  @SuppressWarnings("serial")
+  private static class AnemometerHandOptionListComboBox extends JComboBox
+  {
+    public AnemometerHandOptionListComboBox()
+    {
+      super();
+      this.removeAllItems();
+      for (Integer key : AnemometerHandOptionList.getMap().keySet())
+      {
+        this.addItem(AnemometerHandOptionList.getMap().get(key));
       }
     }
   }
