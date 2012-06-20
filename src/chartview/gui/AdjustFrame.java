@@ -140,10 +140,11 @@ public class AdjustFrame
         
 //      g.setColor(Color.LIGHT_GRAY);
 //      g.setColor(Color.GRAY);
-        Color startColor = Color.GRAY; // new Color(255, 255, 255);
+        Color startColor = Color.BLACK; // DARK_GRAY; // new Color(255, 255, 255);
 //      Color endColor   = Color.BLACK;  // new Color(102, 102, 102);
         Color endColor   = Color.WHITE;
-        GradientPaint gradient = new GradientPaint(0, this.getHeight(), startColor, 0, 0, endColor); // vertical, upside down
+//      GradientPaint gradient = new GradientPaint(0, this.getHeight(), startColor, 0, 0, endColor); // vertical, upside down
+        GradientPaint gradient = new GradientPaint(this.getWidth(), this.getHeight(), startColor, 0, 0, endColor); // top right to bottom left
         ((Graphics2D)g).setPaint(gradient);
         g.fillRect(0, 0, this.getWidth(), this.getHeight());
         

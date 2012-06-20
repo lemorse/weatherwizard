@@ -46,7 +46,7 @@ import oracle.xml.parser.v2.XMLParser;
 public class WWContext
 {
 //public final static String VERSION_NUMBER = "0.9.0.6";
-  public final static String VERSION_NUMBER = "3.0.0.1";
+  public final static String VERSION_NUMBER = "3.0.0.2";
   public final static String PRODUCT_ID     = "weather_assistant." + VERSION_NUMBER;
   
   public final static String PRODUCT_KEY    = "WW";
