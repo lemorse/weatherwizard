@@ -137,6 +137,8 @@ public class AdjustFrame
         this.setSize(masterTabPane.getSize());
         ((Graphics2D)g).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 
                                                                 ((Float) ParamPanel.data[ParamData.GRAY_PANEL_OPACITY][ParamData.VALUE_INDEX]).floatValue()));
+        g.setColor(Color.gray);
+        g.fillRect(0, 0, this.getWidth(), 10); // The top side of the altuglass
         
 //      g.setColor(Color.LIGHT_GRAY);
 //      g.setColor(Color.GRAY);

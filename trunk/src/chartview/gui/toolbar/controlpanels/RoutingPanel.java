@@ -69,8 +69,8 @@ public class RoutingPanel extends JPanel
   private GridBagLayout gridBagLayoutOne    = new GridBagLayout();
   private GridBagLayout gridBagLayoutTwo    = new GridBagLayout();
 
-  private JRadioButton trueWindRadioButton  = new JRadioButton("True");  // LOCALIZE
-  private JRadioButton appWindRadioButton   = new JRadioButton("App.");  // LOCALIZE
+  private JRadioButton trueWindRadioButton  = new JRadioButton(WWGnlUtilities.buildMessage("true-wind"));
+  private JRadioButton appWindRadioButton   = new JRadioButton(WWGnlUtilities.buildMessage("app-wind")); 
   private JPanel trueAppPanel               = new JPanel();
   private ButtonGroup group                 = new ButtonGroup();
   

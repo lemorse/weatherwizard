@@ -194,7 +194,7 @@ public class ImageUtil
 
     if (w == -1 && h == -1)
     {
-      // TODO Localize (but deprecated)
+      // LOCALIZE (but deprecated)
       JOptionPane.showMessageDialog(WWContext.getInstance().getMasterTopFrame(), 
                                     "Missing Fax!", 
                                     "Image processing", 

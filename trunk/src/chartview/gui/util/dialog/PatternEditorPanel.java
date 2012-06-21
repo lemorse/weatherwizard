@@ -94,7 +94,7 @@ public class PatternEditorPanel
     this.setLayout(gridBagLayout1);
     this.setSize(new Dimension(595, 605));
     this.setPreferredSize(new Dimension(595, 605));
-    fitColumnsCheckBox.setText("Auto-resize Columns"); // TODO Localize
+    fitColumnsCheckBox.setText("Auto-resize Columns"); // LOCALIZE
     fitColumnsCheckBox.addActionListener(new ActionListener()
       {
         public void actionPerformed(ActionEvent e)

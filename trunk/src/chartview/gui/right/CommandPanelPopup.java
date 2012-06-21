@@ -841,7 +841,7 @@ public class CommandPanelPopup
         aliwp.add(gp);
       aliwp.add(parent.to);
       WayPointTablePanel wptp = new WayPointTablePanel(aliwp);
-      wptp.setTopLabel("From " + parent.from.toString()); // LOCALIZE
+      wptp.setTopLabel(WWGnlUtilities.buildMessage("from-2", new String[] { parent.from.toString() }));
       int resp = JOptionPane.showConfirmDialog(this, wptp, "Way Point(s)", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
       if (resp == JOptionPane.OK_OPTION)
       {
@@ -1055,7 +1055,7 @@ public class CommandPanelPopup
     }
     if (task == null)
     {
-      ok = false; // TASK More details...
+      ok = false; // TASK More details?...
     }
     else
     {
