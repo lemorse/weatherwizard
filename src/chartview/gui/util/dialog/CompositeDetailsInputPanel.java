@@ -352,7 +352,7 @@ public class CompositeDetailsInputPanel
     prate3DCheckBox.setSelected(true);
     prate3DCheckBox.setToolTipText("Precipitation Rate");
     
-    // TODO Localize, at least the tooltips    
+    // LOCALIZE at least the tooltips    
     contourTWSCheckBox.setText("TWS Cont.");
     contourPRMSLCheckBox.setText("PRMSL Cont.");
     contourPRMSLCheckBox.setActionCommand("contourPRMSLCheckBox");

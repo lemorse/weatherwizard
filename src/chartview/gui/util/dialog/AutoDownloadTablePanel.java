@@ -130,7 +130,7 @@ public final class AutoDownloadTablePanel
     bottomPanel.add(removeButton, new GridBagConstraints(2, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 2, 0, 0), 0, 0));
     bottomPanel.add(tableAutoResizeCheckBox, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 5), 0, 0));
     removeButton.setEnabled(false);
-    tableAutoResizeCheckBox.setText("Auto-resize Columns"); // TODO Localize
+    tableAutoResizeCheckBox.setText("Auto-resize Columns"); // LOCALIZE
     tableAutoResizeCheckBox.addActionListener(new ActionListener()
       {
         public void actionPerformed(ActionEvent e)

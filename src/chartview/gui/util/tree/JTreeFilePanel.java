@@ -608,7 +608,6 @@ public class JTreeFilePanel
   
   private int nbFile = 0;
   
-  // TODO Implement lazy loading here
   private void drillDown(File dir, DefaultMutableTreeNode parent)
   {
     drillDown(dir, parent, null, false);

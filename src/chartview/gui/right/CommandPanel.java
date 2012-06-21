@@ -2002,7 +2002,6 @@ public class CommandPanel
                 // 3 - Update composite.xml (taken care of later)
                 in.close();
                 out.close();
-                // TODO Swap pointers to archive
 //              System.out.println("Saved as " + newCompositeName);
                 compositeName = newCompositeName;
                 WWContext.getInstance().setCurrentComposite(compositeName);

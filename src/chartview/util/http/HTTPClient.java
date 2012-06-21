@@ -84,7 +84,7 @@ public class HTTPClient
           long delta = now - started;
           double rate = (double)content.length / ((double)delta / 1000D);
           System.out.println("Size: " + content.length + " byte(s), downloading at " + Math.round(rate) + " bytes per second..."); 
-          WWContext.getInstance().fireSetStatus("Downloading at " + rate + " bytes per second..."); // TODO Localize
+          WWContext.getInstance().fireSetStatus("Downloading at " + rate + " bytes per second..."); // LOCALIZE
           nbLoop++;
         }
       }

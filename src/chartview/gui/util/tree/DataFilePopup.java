@@ -694,7 +694,7 @@ public class DataFilePopup
       }
       else
       {
-        // TODO Localize
+        // LOCALIZE
         JOptionPane.showMessageDialog(this, "Only available for patterns..., sorry (you bet!).", "Rename", JOptionPane.ERROR_MESSAGE);
       }      
     }

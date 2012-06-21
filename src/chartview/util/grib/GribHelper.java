@@ -128,7 +128,7 @@ public class GribHelper
             
             double prmsl  = gribData.getGribPointData()[yIdx][xIdx].getPrmsl();
             double hgt500 = gribData.getGribPointData()[yIdx][xIdx].getHgt();
-            double temp   = gribData.getGribPointData()[yIdx][xIdx].getAirtmp(); // TODO seatmp
+            double temp   = gribData.getGribPointData()[yIdx][xIdx].getAirtmp();
             double whgt   = gribData.getGribPointData()[yIdx][xIdx].getWHgt();
             double rain   = gribData.getGribPointData()[yIdx][xIdx].getRain();
             
@@ -371,7 +371,7 @@ public class GribHelper
                 gpd[h][w].setHgt((float)getIntermediateValue(gpd1[h][w].getHgt(), gpd2[h][w].getHgt(), nbsteps, j));
                 gpd[h][w].setPrmsl((float)getIntermediateValue(gpd1[h][w].getPrmsl(), gpd2[h][w].getPrmsl(), nbsteps, j));
                 gpd[h][w].setRain((float)getIntermediateValue(gpd1[h][w].getRain(), gpd2[h][w].getRain(), nbsteps, j));
-                gpd[h][w].setAirtmp((float)getIntermediateValue(gpd1[h][w].getAirtmp(), gpd2[h][w].getAirtmp(), nbsteps, j)); // TODO seatmp
+                gpd[h][w].setAirtmp((float)getIntermediateValue(gpd1[h][w].getAirtmp(), gpd2[h][w].getAirtmp(), nbsteps, j));
                 gpd[h][w].setTwd(getIntermediateValue(gpd1[h][w].getTwd(), gpd2[h][w].getTwd(), nbsteps, j));
                 gpd[h][w].setTws(getIntermediateValue(gpd1[h][w].getTws(), gpd2[h][w].getTws(), nbsteps, j));
                 gpd[h][w].setU((float)getIntermediateValue(gpd1[h][w].getU(), gpd2[h][w].getU(), nbsteps, j));
@@ -432,7 +432,7 @@ public class GribHelper
       e.printStackTrace();
     }
   }
-  // TODO Localize
+  // LOCALIZE
   public static void displayGRIBDetails(GribFile gf, String mess)
   {    
     try
@@ -1447,7 +1447,7 @@ public class GribHelper
           gribCond.vertIdx = l;
           gribCond.prmsl = wpd[l][g].getPrmsl();
           gribCond.waves = wpd[l][g].getWHgt();
-          gribCond.temp = wpd[l][g].getAirtmp(); // TODO seatmp
+          gribCond.temp = wpd[l][g].getAirtmp();
           gribCond.rain = wpd[l][g].getRain();
 
           float xC = wpd[l][g].getUOgrd();

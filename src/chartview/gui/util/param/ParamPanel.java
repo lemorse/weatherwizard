@@ -1020,7 +1020,7 @@ public final class ParamPanel
       {
 //      System.out.println("ROW Idx:" + (row % 2));
         bgColor = rowColors.get(row % 2);
-//      this.setBackground(rowColors.get(row % 2)); // TODO Fix that
+//      this.setBackground(rowColors.get(row % 2)); 
 //      ((AbstractTableModel)table.getModel()).fireTableRowsUpdated(row, row);
       }
       return this;
@@ -1070,78 +1070,6 @@ public final class ParamPanel
       }
     }
   }
-
-//  public class ValueTableCellRenderer
-//       extends JTextField
-//    implements TableCellRenderer
-//  {
-//    private final transient List<Color> rowColors = Arrays.asList(Color.WHITE, Color.LIGHT_GRAY);
-//
-//    private transient Object curValue = null;
-//    private transient Color bgColor = null;
-//
-//    private JLabel colorComponent = new JLabel();
-//
-//    public Component getTableCellRendererComponent(JTable table,
-//                                                   Object value,
-//                                                   boolean isSelected,
-//                                                   boolean hasFocus,
-//                                                   int row,
-//                                                   int column)
-//    {      
-//      this.setEditable(false);
-//      if (value == null)
-//      {
-//        curValue = table.getValueAt(row, column);
-//        System.out.println("Defaulting to curValue [" + (curValue==null?"null":curValue.getClass().getName()) + "]");
-//      }
-//      else
-//        curValue = value;
-//      
-//      if (!isSelected)
-//      {
-////      System.out.println("ROW Idx:" + (row % 2));
-//        bgColor = rowColors.get(row % 2);
-////      this.setBackground(rowColors.get(row % 2)); // TODO Fix that
-////      ((AbstractTableModel)table.getModel()).fireTableRowsUpdated(row, row);
-//      }
-//      if (curValue instanceof Color)
-//        return colorComponent;        
-//      else
-//        return this;
-//    }
-//     
-//    public void paintComponent(Graphics g)
-//    {
-//      if (curValue instanceof Color)
-//      {
-//        if (curValue != null)
-//          g.setColor((Color)curValue);
-////      g.fillRect(0, 0, getWidth() - 1, getHeight() - 1);        
-//        g.fillRect(2, 2, Math.min(getWidth() - 5, 20), getHeight() - 5);
-//        g.setColor(Color.black);
-//        g.drawRect(2, 2, Math.min(getWidth() - 5, 20), getHeight() - 5);
-//      }
-//      else
-//      {
-//        if (curValue != null)
-//        {
-////        System.out.println("curValue is a " + curValue.getClass().getName());
-////        g.drawString((String)curValue, 1, getHeight() - 1);
-//          if (bgColor != null)
-//          {
-//            this.setBackground(bgColor);
-//          }
-////        g.setFont(g.getFont().deriveFont(Font.BOLD, g.getFont().getSize()));
-////        g.drawString(curValue.toString(), 1, getHeight() - 1);
-//        }
-//        else
-//        {
-//          System.out.println("Not a color, but null");
-//        }
-//      }
-//    }
-//  }
 
   protected static String[] lnfValues = null; // Populated in the constructor
   

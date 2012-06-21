@@ -77,7 +77,7 @@ public class CurveUtil
             value_7 = gribData.getGribPointData()[h+1][w].getWHgt();
             value_8 = gribData.getGribPointData()[h+1][w+1].getWHgt();            
           }
-          else if (type == AIRTEMP) // TODO SEATEMP
+          else if (type == AIRTEMP)
           {
             value = gribData.getGribPointData()[h][w].getAirtmp();
             value_1 = gribData.getGribPointData()[h-1][w-1].getAirtmp();

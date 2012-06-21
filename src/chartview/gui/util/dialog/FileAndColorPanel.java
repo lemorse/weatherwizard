@@ -78,7 +78,7 @@ public class FileAndColorPanel
             colorButton_actionPerformed(e);
           }
         });
-    applyColorCheckBox.setText("Apply Color"); // TODO Localize
+    applyColorCheckBox.setText("Apply Color"); // LOCALIZE
     applyColorCheckBox.setSelected(true);
     applyColorCheckBox.addActionListener(new ActionListener()
       {

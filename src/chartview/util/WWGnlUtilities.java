@@ -595,7 +595,7 @@ public class WWGnlUtilities
       previewer = new FilePreviewer(chooser);
       chooser.setAccessory(previewer);
     }
-    // TODO Sort the file by date, most recent on top. If possible... :(
+    // QUESTION Sort the file by date, most recent on top. If possible... :(
     WWContext.ToolFileFilter filter = new WWContext.ToolFileFilter(flt, desc);
     chooser.addChoosableFileFilter(filter);
     chooser.setFileFilter(filter);
@@ -2022,7 +2022,7 @@ public class WWGnlUtilities
     if (deleteOnceDone.booleanValue())
     {
       filesToDelete = new ArrayList<String>(1);
-      filesToDelete.add(compositeName); // TODO Make sure... It will be deleted anyway.
+      filesToDelete.add(compositeName); // Make sure... It will be deleted anyway.
     }
     String archiveName = "";
     String wazFileName = "";
@@ -3552,7 +3552,7 @@ public class WWGnlUtilities
   {
     List<String> faxList = null;
     String gribFileName = null;
-    // TODO Other parameters
+
     public Composite(String fileName)
     {
       DOMParser parser = WWContext.getInstance().getParser();
@@ -3616,7 +3616,6 @@ public class WWGnlUtilities
     return new Color(c.getRed(), c.getGreen(), c.getBlue(), transpency);
   }
   
-  // TODO Implement...
   public static void drawBigBubble(Graphics gr,
                                    Color bgColor,
                                    Color fgColor,
@@ -3624,6 +3623,7 @@ public class WWGnlUtilities
                                    String text)
   {
     String[] line = text.split("\n");
+    // TODO Implement...
   }
   
   public static BoatPosition getSerialBoatPosition() throws Exception
