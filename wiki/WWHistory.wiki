@@ -9,6 +9,7 @@ This page takes over and replaces the one [http://donpedro.lediouris.net/softwar
 = Details =
 
 || *Date* || *Description* || *Impacted file(s)* ||
+|| 22-Jun-2012 || Fixed a bug in the pattern editor || chartadjust.jar ||
 || 20-Jun-2012 || Preferences for the shape of the anemometer hand || chartadjust.jar ||
 || 20-Jun-2012 || GPDs implemmentation (beta) || nmeaparser.jar, nmeareader.jar, chartadjust.jar ||
 || 20-May-2012 || More Cosmetic for the GRIB @ mouse panel, and for the routing details || chartadjust.jar ||
