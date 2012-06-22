@@ -513,12 +513,18 @@ public class DataFilePopup
               // Get Chart Parameters
               doc.selectNodes("/pattern/north").item(0).setTextContent(Double.toString(pep.getTopLat()));
               doc.selectNodes("/pattern/south").item(0).setTextContent(Double.toString(pep.getBottomLat()));
-              doc.selectNodes("/pattern/east").item(0).setTextContent(Double.toString(pep.getLeftLong()));
-              doc.selectNodes("/pattern/west").item(0).setTextContent(Double.toString(pep.getRightLong()));
+              doc.selectNodes("/pattern/east").item(0).setTextContent(Double.toString(pep.getRightLong()));
+              doc.selectNodes("/pattern/west").item(0).setTextContent(Double.toString(pep.getLeftLong()));
               
               doc.selectNodes("/pattern/chartwidth").item(0).setTextContent(Integer.toString(pep.getChartWidth()));
               doc.selectNodes("/pattern/chartheight").item(0).setTextContent(Integer.toString(pep.getChartHeight()));
               
+              NodeList nl = doc.selectNodes("/pattern/scroll");
+              if (nl.getLength() == 0)
+              {
+                XMLElement scroll = (XMLElement)doc.createElement("scroll");
+                doc.selectNodes("/pattern").item(0).appendChild(scroll);
+              }
               ((XMLElement)(doc.selectNodes("/pattern/scroll").item(0))).setAttribute("x", Integer.toString(pep.getXOffset()));
               ((XMLElement)(doc.selectNodes("/pattern/scroll").item(0))).setAttribute("y", Integer.toString(pep.getYOffset()));
               
