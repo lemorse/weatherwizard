@@ -382,24 +382,24 @@ public class DataFilePopup
               boolean newVersion = false;
               try
               {
-                // TASK display-TWS-Data ?
-                gribData[0][6] = new Boolean(((XMLElement)doc.selectNodes("//grib").item(0)).getAttribute("display-PRMSL-Data").equals("true"));
-                gribData[0][7] = new Boolean(((XMLElement)doc.selectNodes("//grib").item(0)).getAttribute("display-500HGT-Data").equals("true"));
-                gribData[0][8] = new Boolean(((XMLElement)doc.selectNodes("//grib").item(0)).getAttribute("display-WAVES-Data").equals("true"));
-                gribData[0][9] = new Boolean(((XMLElement)doc.selectNodes("//grib").item(0)).getAttribute("display-TEMP-Data").equals("true"));
-                gribData[0][10] = new Boolean(((XMLElement)doc.selectNodes("//grib").item(0)).getAttribute("display-PRATE-Data").equals("true"));
-                gribData[0][11] = new Boolean(((XMLElement)doc.selectNodes("//grib").item(0)).getAttribute("display-TWS-3D").equals("true"));
-                gribData[0][12] = new Boolean(((XMLElement)doc.selectNodes("//grib").item(0)).getAttribute("display-PRMSL-3D").equals("true"));
-                gribData[0][13] = new Boolean(((XMLElement)doc.selectNodes("//grib").item(0)).getAttribute("display-500HGT-3D").equals("true"));
-                gribData[0][14] = new Boolean(((XMLElement)doc.selectNodes("//grib").item(0)).getAttribute("display-WAVES-3D").equals("true"));
-                gribData[0][15] = new Boolean(((XMLElement)doc.selectNodes("//grib").item(0)).getAttribute("display-TEMP-3D").equals("true"));
-                gribData[0][16] = new Boolean(((XMLElement)doc.selectNodes("//grib").item(0)).getAttribute("display-PRATE-3D").equals("true"));
-                gribData[0][17] = new Boolean(((XMLElement)doc.selectNodes("//grib").item(0)).getAttribute("display-TWS-contour").equals("true"));                
-                gribData[0][18] = new Boolean(((XMLElement)doc.selectNodes("//grib").item(0)).getAttribute("display-PRMSL-contour").equals("true"));
-                gribData[0][19] = new Boolean(((XMLElement)doc.selectNodes("//grib").item(0)).getAttribute("display-500HGT-contour").equals("true"));
-                gribData[0][20] = new Boolean(((XMLElement)doc.selectNodes("//grib").item(0)).getAttribute("display-WAVES-contour").equals("true"));
-                gribData[0][21] = new Boolean(((XMLElement)doc.selectNodes("//grib").item(0)).getAttribute("display-TEMP-contour").equals("true"));
-                gribData[0][22] = new Boolean(((XMLElement)doc.selectNodes("//grib").item(0)).getAttribute("display-PRATE-contour").equals("true"));   
+                // TASK display-TWS-Data ?                
+                gribData[0][6]  = Boolean.valueOf(((XMLElement)doc.selectNodes("//grib").item(0)).getAttribute("display-PRMSL-Data").equals("true"));
+                gribData[0][7]  = Boolean.valueOf(((XMLElement)doc.selectNodes("//grib").item(0)).getAttribute("display-500HGT-Data").equals("true"));
+                gribData[0][8]  = Boolean.valueOf(((XMLElement)doc.selectNodes("//grib").item(0)).getAttribute("display-WAVES-Data").equals("true"));
+                gribData[0][9]  = Boolean.valueOf(((XMLElement)doc.selectNodes("//grib").item(0)).getAttribute("display-TEMP-Data").equals("true"));
+                gribData[0][10] = Boolean.valueOf(((XMLElement)doc.selectNodes("//grib").item(0)).getAttribute("display-PRATE-Data").equals("true"));
+                gribData[0][11] = Boolean.valueOf(((XMLElement)doc.selectNodes("//grib").item(0)).getAttribute("display-TWS-3D").equals("true"));
+                gribData[0][12] = Boolean.valueOf(((XMLElement)doc.selectNodes("//grib").item(0)).getAttribute("display-PRMSL-3D").equals("true"));
+                gribData[0][13] = Boolean.valueOf(((XMLElement)doc.selectNodes("//grib").item(0)).getAttribute("display-500HGT-3D").equals("true"));
+                gribData[0][14] = Boolean.valueOf(((XMLElement)doc.selectNodes("//grib").item(0)).getAttribute("display-WAVES-3D").equals("true"));
+                gribData[0][15] = Boolean.valueOf(((XMLElement)doc.selectNodes("//grib").item(0)).getAttribute("display-TEMP-3D").equals("true"));
+                gribData[0][16] = Boolean.valueOf(((XMLElement)doc.selectNodes("//grib").item(0)).getAttribute("display-PRATE-3D").equals("true"));
+                gribData[0][17] = Boolean.valueOf(((XMLElement)doc.selectNodes("//grib").item(0)).getAttribute("display-TWS-contour").equals("true"));                
+                gribData[0][18] = Boolean.valueOf(((XMLElement)doc.selectNodes("//grib").item(0)).getAttribute("display-PRMSL-contour").equals("true"));
+                gribData[0][19] = Boolean.valueOf(((XMLElement)doc.selectNodes("//grib").item(0)).getAttribute("display-500HGT-contour").equals("true"));
+                gribData[0][20] = Boolean.valueOf(((XMLElement)doc.selectNodes("//grib").item(0)).getAttribute("display-WAVES-contour").equals("true"));
+                gribData[0][21] = Boolean.valueOf(((XMLElement)doc.selectNodes("//grib").item(0)).getAttribute("display-TEMP-contour").equals("true"));
+                gribData[0][22] = Boolean.valueOf(((XMLElement)doc.selectNodes("//grib").item(0)).getAttribute("display-PRATE-contour").equals("true"));   
                 newVersion = true;
               }
               catch (Exception ex)
@@ -426,7 +426,7 @@ public class DataFilePopup
               {
                 try 
                 { 
-                  boolean wo = new Boolean(((XMLElement)doc.selectNodes("//grib").item(0)).getAttribute("wind-only").equals("true")); 
+                  boolean wo = Boolean.valueOf(((XMLElement)doc.selectNodes("//grib").item(0)).getAttribute("wind-only").equals("true")); 
                   if (!wo)
                   {
                     gribData[0][6] = Boolean.TRUE; // PRMSL
