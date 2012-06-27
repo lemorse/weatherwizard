@@ -21,6 +21,10 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.GraphicsConfiguration;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
+import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
@@ -194,10 +198,37 @@ public class ChartAdjust
         int x  = Integer.parseInt(props.getProperty("frame.x.pos"));
         int y  = Integer.parseInt(props.getProperty("frame.y.pos"));
         int dl = Integer.parseInt(props.getProperty("divider.location", "175"));
-        frame.setSize(w, h);
-        frame.setLocation(x, y);
-        frame.setDividerLocation(dl);
-        positioned = true;
+        
+        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        GraphicsDevice[] screenDevices = ge.getScreenDevices();
+        boolean foundMatch = false;
+        for (GraphicsDevice curGs: screenDevices)
+        {
+          GraphicsConfiguration[] gc = curGs.getConfigurations();
+          for (GraphicsConfiguration curGc: gc)
+          {
+            Rectangle bounds = curGc.getBounds();
+//          System.out.println(bounds.getX() + "," + bounds.getY() + " " + bounds.getWidth() + " x " + bounds.getHeight());
+            if (x > bounds.getX() && x < (bounds.getX() + bounds.getWidth()) && y > bounds.getY() && y < (bounds.getY() + bounds.getHeight()))
+            {
+              foundMatch = true;
+              break;
+            }
+          }
+        }
+
+        if (!foundMatch)
+        {
+          System.out.println("Frame position has been saved on another screen configuration. Reseting.");
+          positioned = false;
+        }
+        else
+        {
+          frame.setSize(w, h);
+          frame.setLocation(x, y);
+          frame.setDividerLocation(dl);
+          positioned = true;
+        }
       }
       catch (Exception forgetit) 
       { System.err.println(forgetit.toString()); }
