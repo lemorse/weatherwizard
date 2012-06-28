@@ -10,6 +10,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.event.MouseAdapter;
 
 import javax.swing.JPanel;
@@ -68,6 +69,7 @@ public class AboutBox
   JPanel panelTwo = new JPanel();
   private JLabel compiledLabel = new JLabel();
   private JLabel proxyLabel = new JLabel();
+  private JLabel jLabel2 = new JLabel();
 
   public AboutBox()
   {
@@ -98,6 +100,8 @@ public class AboutBox
     compiledLabel.setText("Compiled " + WWContext.getInstance().getCompiled());
     proxyLabel.setText("Proxy");
     // -Dhttp.proxyHost=www-proxy.us.oracle.com  -Dhttp.proxyPort=80
+    jLabel2.setText("The Weather Wizard");
+    jLabel2.setFont(new Font("Tahoma", 1, 12));
     Properties props = System.getProperties();
     String proxyHost = props.getProperty("http.proxyHost", "");
     String proxyPort = props.getProperty("http.proxyPort", "");
@@ -110,11 +114,12 @@ public class AboutBox
       proxyLabel.setText("Proxy: " + proxyHost + ":" + proxyPort);
     }
     labelTitle.setText("GRIB, Weather Faxes, Charts");
-    jLabel1.setIcon(new ImageIcon(this.getClass().getResource("onecameltranspsmall.png")));
+//  jLabel1.setIcon(new ImageIcon(this.getClass().getResource("onecameltranspsmall.png")));
+    jLabel1.setIcon(new ImageIcon(this.getClass().getResource("wizard150.png")));
     contactLabel.setText("Contact: olivier@lediouris.net");
     labelAuthor.setText("version " + WWContext.VERSION_NUMBER);
     labelCopyright.setText("Copyright 2007 and beyond");
-    labelCompany.setText("<html><u>The Don Pedro Project</u></html>");
+    labelCompany.setText("<html><u>The Weather Wizard Project</u></html>");
     labelCompany.setForeground(Color.blue);
     labelCompany.addMouseListener(new MouseAdapter()
       {
@@ -133,18 +138,23 @@ public class AboutBox
           labelCompany.repaint();
         }
       });
-    panelOne.add(labelTitle, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(5, 15, 0, 15), 0, 0));
-    panelOne.add(labelAuthor, new GridBagConstraints(1, 1, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 15, 0, 15), 0, 0));
-    panelOne.add(labelCopyright, new GridBagConstraints(1, 4, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
+    panelOne.add(labelTitle, new GridBagConstraints(1, 1, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
+          new Insets(5, 15, 0, 15), 0, 0));
+    panelOne.add(labelAuthor, new GridBagConstraints(1, 2, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
+          new Insets(0, 15, 0, 15), 0, 0));
+    panelOne.add(labelCopyright, new GridBagConstraints(1, 5, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
           new Insets(10, 15, 0, 15), 0, 0));
-    panelOne.add(labelCompany, new GridBagConstraints(1, 5, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
+    panelOne.add(labelCompany, new GridBagConstraints(1, 6, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
           new Insets(0, 15, 10, 15), 0, 0));
-    panelOne.add(jLabel1, new GridBagConstraints(0, 0, 1, 4, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-    panelOne.add(contactLabel, new GridBagConstraints(1, 8, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
+    panelOne.add(jLabel1, new GridBagConstraints(0, 0, 1, 9, 0.0, 0.0, GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
+          new Insets(0, 0, 0, 0), 0, 0));
+    panelOne.add(contactLabel, new GridBagConstraints(1, 9, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
           new Insets(10, 15, 0, 0), 0, 0));
-    panelOne.add(compiledLabel, new GridBagConstraints(1, 6, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
+    panelOne.add(compiledLabel, new GridBagConstraints(1, 7, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
           new Insets(0, 15, 0, 0), 0, 0));
-    panelOne.add(proxyLabel, new GridBagConstraints(1, 7, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
+    panelOne.add(proxyLabel, new GridBagConstraints(1, 8, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
+          new Insets(0, 15, 0, 0), 0, 0));
+    panelOne.add(jLabel2, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
           new Insets(0, 15, 0, 0), 0, 0));
     initTable();
   }
