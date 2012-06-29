@@ -456,7 +456,8 @@ public class AdjustFrame
     layers.add(masterTabPane, new Integer(1));
 //  layers.add(grayTransparentPanel, grayLayerIndex);
     
-    this.setIconImage(new ImageIcon(this.getClass().getResource("img/paperboat.png")).getImage());
+//  this.setIconImage(new ImageIcon(this.getClass().getResource("img/paperboat.png")).getImage());
+    this.setIconImage(new ImageIcon(this.getClass().getResource("img/wizardicone.png")).getImage());
     this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
     final CompositeTabbedPane firstTab = new CompositeTabbedPane();
