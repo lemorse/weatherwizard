@@ -65,8 +65,7 @@ public class HeadingPanel
                                    new Point(this.getWidth(), this.getHeight()), 
                                    Color.gray, 
                                    Color.black, 
-                                   1f);
-      
+                                   1f);      
     }
     // Width: 30 on each side = 60
     gr.setColor(Color.white);
