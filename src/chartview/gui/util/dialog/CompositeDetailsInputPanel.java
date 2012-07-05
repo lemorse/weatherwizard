@@ -136,7 +136,6 @@ public class CompositeDetailsInputPanel
   private JCheckBox upToCheckBox = new JCheckBox();
   private DateTimePanel dtPanel = new DateTimePanel();
   private JLabel fromGPXLabel = new JLabel();
-  private JCheckBox jCheckBox1 = new JCheckBox();
 
   public CompositeDetailsInputPanel()
   {
@@ -200,7 +199,6 @@ public class CompositeDetailsInputPanel
 
     fromGPXLabel.setText("From...");
     fromGPXLabel.setEnabled(false);
-    jCheckBox1.setText("jCheckBox1");
     topLatTextField.setPreferredSize(new Dimension(60, 20));
     topLatTextField.setHorizontalAlignment(JTextField.RIGHT);
     jLabel1.setText("N Lat");

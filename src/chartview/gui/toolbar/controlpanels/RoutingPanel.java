@@ -5,7 +5,8 @@ import astro.calc.GeoPoint;
 import astro.calc.GreatCircle;
 
 import chartview.gui.toolbar.controlpanels.station.BSPDisplay;
-import chartview.gui.toolbar.controlpanels.station.HeadingPanel;
+// import chartview.gui.toolbar.controlpanels.station.HeadingPanel;
+import coreutilities.gui.HeadingPanel;
 import chartview.gui.toolbar.controlpanels.station.StationDataPanel;
 import chartview.gui.toolbar.controlpanels.station.WindGaugePanel;
 import chartview.gui.toolbar.controlpanels.station.WindVanePanel;
@@ -78,7 +79,7 @@ public class RoutingPanel extends JPanel
   private WindGaugePanel windGaugePanel     = new WindGaugePanel();
   private StationDataPanel stationDataPanel = new StationDataPanel();
   private BSPDisplay bspDisplay             = new BSPDisplay();
-  private HeadingPanel headingPanel         = new HeadingPanel();
+  private HeadingPanel headingPanel         = new HeadingPanel(true); // with glossy effect
   
   private JTabbedPane tabbedPane    = new JTabbedPane();
   private JPanel stepPanel          = new JPanel();
