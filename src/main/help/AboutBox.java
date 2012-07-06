@@ -30,6 +30,7 @@ import java.util.Properties;
 
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
+import javax.swing.JEditorPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
@@ -67,6 +68,7 @@ public class AboutBox
   BorderLayout borderLayout = new BorderLayout();
   JPanel panelOne = new JPanel();
   JPanel panelTwo = new JPanel();
+  JPanel panelThree = new JPanel();
   private JLabel compiledLabel = new JLabel();
   private JLabel proxyLabel = new JLabel();
   private JLabel jLabel2 = new JLabel();
@@ -92,6 +94,29 @@ public class AboutBox
 
     tabbedPane.add("Info", panelOne);
     tabbedPane.add("Properties", panelTwo);
+    tabbedPane.add("Disclaimer", panelThree);
+
+    JEditorPane jEditorPane = new JEditorPane();
+    JScrollPane jScrollPane = new JScrollPane();
+    panelThree.setLayout(new BorderLayout());
+    jEditorPane.setEditable(false);
+    jEditorPane.setFocusable(false);
+    jEditorPane.setFont(new Font("Verdana", 0, 10));
+    jEditorPane.setBackground(Color.lightGray);
+    jScrollPane.getViewport().add(jEditorPane, null);
+
+    try
+    {
+      jEditorPane.setPage(this.getClass().getResource("disclaimer.html"));
+      jEditorPane.repaint();
+    }
+    catch (Exception ex)
+    {
+      ex.printStackTrace();
+    }
+    panelThree.add(jScrollPane, BorderLayout.CENTER);
+    
+    
 
     this.add(tabbedPane, BorderLayout.CENTER);
 
