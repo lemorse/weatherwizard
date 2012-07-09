@@ -123,6 +123,7 @@ public class AdjustFrame
 
   private JTabbedPane masterTabPane = new JTabbedPane();
   private String message2Display = "";
+  
   @SuppressWarnings("serial")
   private JPanel grayTransparentPanel = new JPanel()
     {
@@ -150,14 +151,17 @@ public class AdjustFrame
         ((Graphics2D)g).setPaint(gradient);
         g.fillRect(0, 0, this.getWidth(), this.getHeight());
         
-//      g.setFont(new Font("Arial", Font.ITALIC | Font.BOLD, 50));
-        g.setFont(g.getFont().deriveFont(Font.ITALIC | Font.BOLD, 50f));
-        String str = message2Display; // WWGnlUtilities.buildMessage("loading");
-        int strWidth = g.getFontMetrics(g.getFont()).stringWidth(str);
-        g.setColor(Color.GRAY);
-        g.drawString(str, (this.getWidth() / 2) - (strWidth / 2) + 3, 20 + g.getFont().getSize() + 3); // Shadow
-        g.setColor(Color.RED);
-        g.drawString(str, (this.getWidth() / 2) - (strWidth / 2), 20 + g.getFont().getSize());         // Text
+        if (message2Display != null && message2Display.trim().length() > 0)
+        {
+  //      g.setFont(new Font("Arial", Font.ITALIC | Font.BOLD, 50));
+          g.setFont(g.getFont().deriveFont(Font.ITALIC | Font.BOLD, 50f));
+          String str = message2Display; // WWGnlUtilities.buildMessage("loading");
+          int strWidth = g.getFontMetrics(g.getFont()).stringWidth(str);
+          g.setColor(Color.GRAY);
+          g.drawString(str, (this.getWidth() / 2) - (strWidth / 2) + 3, 20 + g.getFont().getSize() + 3); // Shadow
+          g.setColor(Color.RED);
+          g.drawString(str, (this.getWidth() / 2) - (strWidth / 2), 20 + g.getFont().getSize());         // Text
+        }
       }
     };
 
