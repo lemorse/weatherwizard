@@ -1,4 +1,6 @@
+#summary Weather Wizard updates history
 #labels Featured
+
 Weather Wizard History
 
 = Introduction =
