@@ -1,0 +1,4 @@
+#summary You also might want to check this out
+#labels Featured
+
+The Navigation Desktop, also available on [http://code.google.com/p/navigation-desktop/ Google Code].
