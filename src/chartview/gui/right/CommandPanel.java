@@ -74,6 +74,11 @@ import java.awt.Stroke;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetDragEvent;
+import java.awt.dnd.DropTargetDropEvent;
+import java.awt.dnd.DropTargetEvent;
+import java.awt.dnd.DropTargetListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -8734,6 +8739,27 @@ public class CommandPanel
   public int getCheckBoxPanelOption()
   {
     return checkBoxPanelOption;
+  }
+
+  public void dragEnter(DropTargetDragEvent dtde)
+  {
+  }
+
+  public void dragOver(DropTargetDragEvent dtde)
+  {
+  }
+
+  public void dropActionChanged(DropTargetDragEvent dtde)
+  {
+  }
+
+  public void dragExit(DropTargetEvent dte)
+  {
+  }
+
+  public void drop(DropTargetDropEvent dtde)
+  {
+    System.out.println("Dropped " + dtde.getTransferable().getClass().getName());
   }
 
   public static class FaxImage implements Cloneable

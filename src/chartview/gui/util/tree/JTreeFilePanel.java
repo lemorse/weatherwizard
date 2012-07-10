@@ -65,6 +65,7 @@ import org.w3c.dom.NodeList;
 
 import user.util.GeomUtil;
 
+
 @SuppressWarnings("serial")
 public class JTreeFilePanel
      extends JPanel
@@ -78,6 +79,8 @@ public class JTreeFilePanel
 //private JButton showHideButton = new JButton();
   private CustomPanelButton showHideButton = null;
   private final transient TreeSelectionListener treeMonitor = new TreeMonitor(this);
+
+  private DefaultMutableTreeNode currentlySelectedNode = null;
 
   private boolean expanded = true;
   private String path = null;
@@ -1101,9 +1104,12 @@ public class JTreeFilePanel
     {
       TreePath tp = tse.getNewLeadSelectionPath();
       if (tp == null)
+      {
+        currentlySelectedNode = null;
         return;
+      }
       DefaultMutableTreeNode dtn = (DefaultMutableTreeNode)tp.getLastPathComponent();    
-//    currentlySelectedNode = dtn;
+      currentlySelectedNode = dtn;
       if (dtn instanceof DataFileTreeNode && parent.type == JTreeFilePanel.FAX_TYPE) // Fax Preview
       {
         WWContext.getInstance().fireFaxSelectedForPreview(((DataFileTreeNode)dtn).getFullFileName());
