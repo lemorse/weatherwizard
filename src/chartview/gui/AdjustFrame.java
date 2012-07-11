@@ -46,6 +46,13 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+
+import java.beans.PropertyChangeEvent;
+
+import java.beans.PropertyChangeListener;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -65,6 +72,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
@@ -983,9 +991,17 @@ public class AdjustFrame
         {
           public void actionPerformed(ActionEvent ae)
           {
-            JOptionPane.showMessageDialog(instance, new AboutBox(), 
-                                          "GRIB, Weather Faxes, Charts", 
-                                          JOptionPane.PLAIN_MESSAGE);
+
+            final JDialog dialog = new JDialog(instance, "GRIB, Weather Faxes, Charts", true);
+            dialog.setContentPane(new AboutBox());
+            dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+            dialog.pack();
+            dialog.setLocationRelativeTo(instance);
+            dialog.setVisible(true);
+
+//            JOptionPane.showMessageDialog(instance, new AboutBox(), 
+//                                          "GRIB, Weather Faxes, Charts", 
+//                                          JOptionPane.PLAIN_MESSAGE);
           }
         });
 //    menuHelp.add(menuHelpContent);
