@@ -92,7 +92,10 @@ public class AboutBox
     this.setLayout(new BorderLayout());
     this.setBorder(border);
 
-    tabbedPane.add("Info", panelOne);
+    this.setSize(new Dimension(400, 300));
+    this.setPreferredSize(new Dimension(400, 300));
+    this.setMaximumSize(new Dimension(400, 300));
+    tabbedPane.add("Info",       panelOne);
     tabbedPane.add("Properties", panelTwo);
     tabbedPane.add("Disclaimer", panelThree);
 
@@ -114,10 +117,6 @@ public class AboutBox
     {
       ex.printStackTrace();
     }
-    panelThree.add(jScrollPane, BorderLayout.CENTER);
-    
-    
-
     this.add(tabbedPane, BorderLayout.CENTER);
 
     panelOne.setLayout(layoutMain);
@@ -182,6 +181,8 @@ public class AboutBox
     panelOne.add(jLabel2, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
           new Insets(0, 15, 0, 0), 0, 0));
     initTable();
+
+    panelThree.add(jScrollPane, BorderLayout.CENTER);        
   }
 
   private void labelCompany_mouseClicked(MouseEvent e)
@@ -274,7 +275,7 @@ public class AboutBox
             }
             catch (Exception ex)
             {
-              System.err.println("ParamPanel:" + ex.getMessage());
+              System.err.println("Property Table:" + ex.getMessage());
               WWContext.getInstance().fireExceptionLogging(ex);
               ex.printStackTrace();
             }
@@ -284,7 +285,7 @@ public class AboutBox
       };
 
     scrollPane = new JScrollPane(table);
-    scrollPane.setPreferredSize(new Dimension(300, 200));
+    panelTwo.setLayout(new BorderLayout());
     panelTwo.add(scrollPane, BorderLayout.CENTER);
 
     Properties props = System.getProperties();
