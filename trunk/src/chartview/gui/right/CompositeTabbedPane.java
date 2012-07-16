@@ -323,6 +323,8 @@ public class CompositeTabbedPane
       File gf = new File(gribFile);
       inputPanel.setGRIBRequestSelected(!gf.exists()); // If file not found, assume GRIB Request
     }
+    else
+      inputPanel.setGribFileName("");
     inputPanel.setPRMSL(commandPanel.isDisplayPrmsl() && commandPanel.isTherePrmsl());
     inputPanel.set500mb(commandPanel.isDisplay500mb() && commandPanel.isThere500mb());
     inputPanel.setWaves(commandPanel.isDisplayWaves() && commandPanel.isThereWaves());

@@ -1451,6 +1451,8 @@ public class AdjustFrame
       File gf = new File(gribFile);
       inputPanel.setGRIBRequestSelected(!gf.exists()); // If file not found, assume GRIB Request
     }
+    else
+      inputPanel.setGribFileName("");
     inputPanel.setPRMSL(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().isDisplayPrmsl() && ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().isTherePrmsl());
     inputPanel.set500mb(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().isDisplay500mb() && ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().isThere500mb());
     inputPanel.setWaves(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().isDisplayWaves() && ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().isThereWaves());

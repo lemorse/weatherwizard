@@ -400,6 +400,7 @@ public class ChartAdjust
                 if (notificationDate == null || notificationDate.trim().length() == 0 || propertiesDate.before(providedDate))
                   notificationDate = NotificationCheck.getDateFormat().format(providedDate);          
               }
+              // Set notificationDate to null for ALL notifications.
               NotificationCheck nc = new NotificationCheck(WWContext.PRODUCT_KEY, notificationDate);
               Map<Date, String> map = nc.check();
               String productName = nc.getProductName();
@@ -483,7 +484,7 @@ public class ChartAdjust
           {
             if (he.getEventType() == HyperlinkEvent.EventType.ACTIVATED)
             {
-    //            System.out.println("URL Activated:" + he.getURL().toString());
+              System.out.println("URL Activated: [" + he.getURL().toString() + "]");
               String activatedURL = he.getURL().toString();
               String value = activatedURL;
               if (!value.startsWith("http://"))
