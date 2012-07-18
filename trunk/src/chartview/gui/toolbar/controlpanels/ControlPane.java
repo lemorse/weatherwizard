@@ -106,6 +106,7 @@ public class ControlPane
   private FaxPreviewPanel faxPreviewPanel = new FaxPreviewPanel();
   private RoutingPanel routingPanel       = new RoutingPanel();
   private GRIBVisualPanel gribVisualPanel = new GRIBVisualPanel();
+  private ThumbnailPanel thumbnailPanel   = new ThumbnailPanel();
 
   private final JPanel chartControlPanelHolder = new JPanel(new BorderLayout());
   private final JPanel faxControlPanelHolder = new JPanel(new BorderLayout());
@@ -115,6 +116,7 @@ public class ControlPane
   private final JPanel faxPreviewControlPanelHolder = new JPanel(new BorderLayout());
   private final JPanel logControlPanelHolder = new JPanel(new BorderLayout());
   private final JPanel gribVisualControlPanelHolder = new JPanel(new BorderLayout());
+  private final JPanel thumbnailControlPanelHolder = new JPanel(new BorderLayout());
   
   private SingleControlPane faxControl = null;
   private SingleControlPane chartControl = null;
@@ -124,6 +126,7 @@ public class ControlPane
   private SingleControlPane routingPreviewControl = null;
   private SingleControlPane longControl = null;
   private SingleControlPane gribVisualControl = null;
+  private SingleControlPane thumbnailControl = null;
 
   private transient ApplicationEventListener ael = new ApplicationEventListener()
         {
@@ -266,6 +269,11 @@ public class ControlPane
     longControl = new SingleControlPane(WWGnlUtilities.buildMessage("log-control"), logControlPanelHolder, false);
     componentHolder.add(longControl, new GridBagConstraints(0, panelIdx++, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));        
 
+    // Thumbnail
+    thumbnailControlPanelHolder.add(thumbnailPanel, BorderLayout.CENTER);
+    thumbnailControl = new SingleControlPane(WWGnlUtilities.buildMessage("thumbnail"), thumbnailControlPanelHolder, false);
+    componentHolder.add(thumbnailControl, new GridBagConstraints(0, panelIdx++, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));        
+    
     // Done with the toolbar
     this.add(componentHolder, BorderLayout.NORTH);
     

@@ -247,6 +247,15 @@ public class WWContext
     }    
   }
   
+  public void fireChartIsRepainted() 
+  {
+    for (int i=0; i < this.getListeners().size(); i++)
+    {
+      ApplicationEventListener l = this.getListeners().get(i);
+      l.chartRepaint();
+    }    
+  }
+  
   public void fireNMEAAcquisition(boolean b)
   {
     for (int i=0; i < this.getListeners().size(); i++)
