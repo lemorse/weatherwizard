@@ -11,7 +11,7 @@ This page takes over and replaces the one [http://donpedro.lediouris.net/softwar
 = Details =
 
 || *Date* || *Description* || *Impacted file(s)* ||
-|| 18-Jul-2012 || Notifications (bug fix). Use -Dnotifications=all to see all notifications || chartadjust.jar, coreutilities.jar ||
+|| 18-Jul-2012 || Notifications (bug fix). Use -Dnotifications=all to see all notifications.<br>Added a thumbnail in the control pane. || chartadjust.jar, coreutilities.jar ||
 || 28-Jun-2012 || New logo in the About box! || chartadjust.jar, coreutilities.jar ||
 || 22-Jun-2012 || Fixed a bug in the pattern editor || chartadjust.jar ||
 || 20-Jun-2012 || Preferences for the shape of the anemometer hand || chartadjust.jar ||
