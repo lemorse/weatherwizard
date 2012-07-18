@@ -6875,12 +6875,13 @@ public class CommandPanel
   {
     if (doItAfter)
       chartPanelPaintComponentFeature(gr);
-    // Draw Alternate Windows
+    // Draw Alternate Windows, on top
     if (displayAltTooltip)
     {
 //    displayAltWindow(gr, WWGnlUtilities.buildMessage("alt-win-title"), tooltipMess);
       setDisplayAltTooltip(gr, WWGnlUtilities.buildMessage("alt-win-title"), tooltipMess);
-    }    
+    }  
+    WWContext.getInstance().fireChartIsRepainted();
   }
 
   public void whatIfRouting() 

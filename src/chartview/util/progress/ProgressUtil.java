@@ -1,5 +1,9 @@
 package chartview.util.progress;
 
+import chartview.ctx.WWContext;
+
+import chartview.gui.AdjustFrame;
+
 import java.awt.Component;
 import java.awt.Dialog;
 import java.awt.Frame;
@@ -84,7 +88,7 @@ public class ProgressUtil
                                 new ProgressDialog((Frame) owner, monitor, showInterruptButton, buttonLabel) : 
                                 new ProgressDialog((Dialog) owner, monitor, showInterruptButton, buttonLabel);
         dlg.pack();
-        dlg.setLocationRelativeTo(null);
+        dlg.setLocationRelativeTo(((AdjustFrame)WWContext.getInstance().getMasterTopFrame()));
         dlg.setVisible(true);
       }
     }

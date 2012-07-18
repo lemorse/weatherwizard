@@ -118,7 +118,7 @@ public abstract class ApplicationEventListener implements EventListener
   public void patternFileOpen(String str) {}
   public void predfinedFaxOpen(String str) {}
   public void addFaxImage(CommandPanel.FaxImage fi) {}
-  
+  public void chartRepaint() {}
   public void chartRepaintRequested() {}
   public void setNMEAAcquisition(boolean b) {}
   

@@ -401,6 +401,8 @@ public class ChartAdjust
                   notificationDate = NotificationCheck.getDateFormat().format(providedDate);          
               }
               // Set notificationDate to null for ALL notifications.
+              if ("all".equals(System.getProperty("notifications", "last")))
+                notificationDate = null;
               NotificationCheck nc = new NotificationCheck(WWContext.PRODUCT_KEY, notificationDate);
               Map<Date, String> map = nc.check();
               String productName = nc.getProductName();
@@ -492,6 +494,8 @@ public class ChartAdjust
               if (value.startsWith("http://"))
               {
                 if (value.endsWith(".html/"))
+                  value = value.substring(0, value.length() - 1);
+                if (value.endsWith("\\"));
                   value = value.substring(0, value.length() - 1);
                 Utilities.openInBrowser(value);
               }
