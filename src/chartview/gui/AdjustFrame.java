@@ -36,6 +36,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.GradientPaint;
 import java.awt.Graphics;
@@ -86,6 +87,7 @@ import javax.swing.JSeparator;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
+import javax.swing.RepaintManager;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
@@ -115,6 +117,11 @@ public class AdjustFrame
 
   private FileTypeHolder allJTrees = new FileTypeHolder();
   
+  private final static int FADE_OPTION = 1;
+  private final static int SHIFT_DOWN_OPTION = 2;
+  
+  private static int grayPanelOption = FADE_OPTION;
+  
   int grayPanelY = 0;
   @SuppressWarnings("serial")
   private JLayeredPane layers = new JLayeredPane()
@@ -132,6 +139,7 @@ public class AdjustFrame
   private JTabbedPane masterTabPane = new JTabbedPane();
   private String message2Display = "";
   
+  private float grayPanelTransparency = ((Float) ParamPanel.data[ParamData.GRAY_PANEL_OPACITY][ParamData.VALUE_INDEX]).floatValue();
   @SuppressWarnings("serial")
   private JPanel grayTransparentPanel = new JPanel()
     {
@@ -144,11 +152,12 @@ public class AdjustFrame
                                          RenderingHints.VALUE_ANTIALIAS_ON);      
         this.setOpaque(false);      
         this.setSize(masterTabPane.getSize());
-        ((Graphics2D)g).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 
-                                                                ((Float) ParamPanel.data[ParamData.GRAY_PANEL_OPACITY][ParamData.VALUE_INDEX]).floatValue()));
-        g.setColor(Color.gray);
-        g.fillRect(0, 0, this.getWidth(), 10); // The top side of the altuglass
-        
+        ((Graphics2D)g).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, grayPanelTransparency));
+        if (grayPanelOption == SHIFT_DOWN_OPTION)
+        {
+          g.setColor(Color.gray);
+          g.fillRect(0, 0, this.getWidth(), 10); // The top side of the altuglass
+        }
 //      g.setColor(Color.LIGHT_GRAY);
 //      g.setColor(Color.GRAY);
         Color startColor = Color.BLACK; // DARK_GRAY; // new Color(255, 255, 255);
@@ -1189,7 +1198,11 @@ public class AdjustFrame
           message2Display = mess;
           setLoadingProgresssBar(b, mess);
           if (b)
+          {
+            grayPanelY = 0;
+            grayPanelTransparency = ((Float) ParamPanel.data[ParamData.GRAY_PANEL_OPACITY][ParamData.VALUE_INDEX]).floatValue();
             layers.add(grayTransparentPanel, grayLayerIndex); // Add gray layer
+          }
           else
           {
 //          WWContext.getInstance().fireInterruptProcess();
@@ -1197,22 +1210,74 @@ public class AdjustFrame
             {
               synchronized (layers)
               {
+                Runnable shiftGrayLayerDown = new Runnable()
+                  {
+                    public void run()
+                    {
+                      float origTransparency = grayPanelTransparency;
+                      for (int i=0; i<layers.getSize().getHeight(); i++) // Shifts/Scrolls down
+                      {
+                        final int y = i;
+                        final float gpt = (origTransparency * (1f - ((float)i / (float)layers.getSize().getHeight())));
+                        try
+                        {                          
+                          EventQueue.invokeLater(new Runnable()
+                           {
+                             public void run()
+                             {
+                               if (grayPanelOption == SHIFT_DOWN_OPTION)
+                                 grayPanelY = y;
+                               else if (grayPanelOption == FADE_OPTION)
+                                 grayPanelTransparency = gpt;
+//                             System.out.println("-> " + grayPanelY);
+//                             System.out.println("-> " + grayPanelTransparency);
+                               grayTransparentPanel.repaint();
+                             }
+                           });
+                          Thread.sleep(5L);
+                        }
+                        catch (Exception ie)
+                        {
+                          System.out.println("Oops! Interrupted!");
+                          return;
+                        }
+                      }
+//                    RepaintManager.currentManager(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel()).markCompletelyDirty(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel());
+//                    ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().setCanRepaint(true);
+                      layers.remove(grayTransparentPanel);              // remove gray layer
+                      grayPanelY = 0;
+                    }
+                  };
+//              RepaintManager.currentManager(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel()).markCompletelyClean(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel());
+//              ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().setCanRepaint(false);
+                new Thread(shiftGrayLayerDown).start();
+                
                 message2Display = "";
-                for (int i=0; i<layers.getSize().getHeight(); i++) // Shifts/Scrolls down
+                if (false)
                 {
-                  try { Thread.sleep(5L); } catch (InterruptedException ex) {}
-  //              System.out.print("," + i);
-                  grayPanelY = i;
-//                layers.repaint();
-                  grayTransparentPanel.repaint();
+                  for (int i=0; i<layers.getSize().getHeight(); i++) // Shifts/Scrolls down
+                  {
+                    try { Thread.sleep(50L); } catch (InterruptedException ex) {}
+    //              System.out.print("," + i);
+                    grayPanelY = i;
+  //                layers.repaint();
+                    grayTransparentPanel.repaint();
+                  }
                 }
               }
             }
-            layers.remove(grayTransparentPanel);              // remove gray layer
-            grayPanelY = 0;
+            else
+            {
+              layers.remove(grayTransparentPanel);              // remove gray layer
+              grayPanelY = 0;
+            }
+//            layers.remove(grayTransparentPanel);              // remove gray layer
+//            grayPanelY = 0;
           }
           layers.repaint();
         }
+        
+        
         
         @Override
         public void progressing(String mess)

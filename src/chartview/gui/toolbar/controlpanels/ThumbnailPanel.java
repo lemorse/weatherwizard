@@ -80,7 +80,7 @@ public class ThumbnailPanel
           {
             try
             {
-              displayImage();
+              refreshThumbnail();
             }
             catch (Exception ex)
             {
@@ -139,8 +139,14 @@ public class ThumbnailPanel
     g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
   }
   
-  private final void displayImage() throws Exception
+  private long lastRefresh = 0L;
+  
+  private final void refreshThumbnail() throws Exception
   {
-    repaint();
+    if (System.currentTimeMillis() - lastRefresh > 1000L) // No more than once every second
+    {
+      lastRefresh = System.currentTimeMillis();
+      repaint();
+    }
   }
 }

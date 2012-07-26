@@ -1088,6 +1088,21 @@ public class WWContext
     }    
   }
 
+  public void fireSetDisplayBestRoute(boolean b) 
+  {
+    for (ApplicationEventListener l : WWContext.getInstance().getListeners())
+      l.setDisplayBestRoute(b);
+  }
+  public void fireSetDisplayRoutingLabels(boolean b)
+  {
+    for (ApplicationEventListener l : WWContext.getInstance().getListeners())
+      l.setDisplayRoutingLabels(b);
+  }
+  public void fireSetDisplayIsochrons(boolean b)
+  {
+    for (ApplicationEventListener l : WWContext.getInstance().getListeners())
+      l.setDisplayIsochrons(b);
+  }
   
   public void setUseGRIBWindSpeedTransparency(Boolean useGRIBWindSpeedTransparency)
   {
