@@ -91,13 +91,28 @@ public class ImageUtil
 
   public static BufferedImage blur(BufferedImage bimg)
   {
-    float data[] =
+    float blurMatrix[] =
     { 0.0625f, 0.125f, 0.0625f, 
       0.125f,  0.25f,  0.125f, 
       0.0625f, 0.125f, 0.0625f };
-    Kernel kernel = new Kernel(3, 3, data);
-    BufferedImageOp op = new ConvolveOp(kernel, ConvolveOp.EDGE_NO_OP, null);
-    bimg = op.filter(bimg, null);
+    Kernel kernel = new Kernel(3, 3, blurMatrix);
+    BufferedImageOp blurFilter = new ConvolveOp(kernel, ConvolveOp.EDGE_NO_OP, null);
+    bimg = blurFilter.filter(bimg, null);
+    return bimg;
+  }
+
+  public static BufferedImage blur(BufferedImage bimg, int matrixDim)
+  {
+  //  System.out.println("Blur dim:" + matrixDim);
+    float blurMatrix[] = new float[matrixDim * matrixDim];
+    for (int i=0; i< blurMatrix.length; i++)
+      blurMatrix[i] = 1f / (float)(matrixDim * matrixDim);
+
+    Kernel kernel = new Kernel(matrixDim, matrixDim, blurMatrix);
+    BufferedImageOp blurFilter = new ConvolveOp(kernel, 
+                                                ConvolveOp.EDGE_NO_OP, // ConvolveOp.EDGE_ZERO_FILL 
+                                                null);
+    bimg = blurFilter.filter(bimg, null);
     return bimg;
   }
 

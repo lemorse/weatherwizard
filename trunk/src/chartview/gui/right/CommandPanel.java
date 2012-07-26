@@ -86,6 +86,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
 import java.awt.print.PageFormat;
 import java.awt.print.PrinterJob;
 
@@ -163,6 +164,9 @@ import org.w3c.dom.Text;
 
 import user.util.GeomUtil;
 
+/**
+ * Warning: This is a big file...
+ */
 @SuppressWarnings("serial")
 public class CommandPanel 
      extends JPanel
@@ -421,6 +425,8 @@ public class CommandPanel
   private final static int ZOOMSHRINK_IMAGE  = 3;
   
   private List<GeoPoint> gpxData = null;
+  
+  private boolean canRepaint = true;
   
   public boolean isBusy() // Is there a Composite in the panel?
   {
@@ -5637,7 +5643,7 @@ public class CommandPanel
   // GRIB Data
   private transient GribHelper.GribConditionData gribData = null;
   
-  public void chartPanelPaintComponentFeature(final Graphics gr)
+  public void chartPanelPaintComponentFeature(/*final*/ Graphics gr)
   {
     ((Graphics2D)gr).setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
                                       RenderingHints.VALUE_TEXT_ANTIALIAS_ON);      
@@ -5808,6 +5814,18 @@ public class CommandPanel
           if (displayGribPrateContour && islandsPrate != null && displayContourPrate)
             WWGnlUtilities.drawIsoPoints(gr, chartPanel, islandsPrate, (Color)ParamPanel.data[ParamData.PRATE_CONTOUR][ParamData.VALUE_INDEX], ((ParamPanel.ContourLinesList)ParamPanel.data[ParamData.ISOPRATE_LIST][ParamData.VALUE_INDEX]).getBoldIndexes());
         }
+        boolean smoothColors = false; // TODO Parameter
+        Graphics stbyGraphics = gr;
+        BufferedImage bufferedImage = null;
+        if (smoothColors)
+        {
+          bufferedImage = new BufferedImage(this.getWidth(), this.getHeight(), BufferedImage.TYPE_INT_ARGB);       
+          // Create a graphics contents on the buffered image
+          Graphics2D imageG2d = bufferedImage.createGraphics();
+       // imageG2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
+          gr = imageG2d;
+        }
+        
         // Real points - from the GRIB
         String dataOption = (String)displayComboBox.getSelectedItem();
         if (dataOption == null) dataOption = "WIND";
@@ -6113,6 +6131,15 @@ public class CommandPanel
         catch (Exception ex)
         {
           ex.printStackTrace();
+        }
+        
+        if (smoothColors)
+        {
+          gr.dispose();
+          int matrixDim = 14; //(int)Math.round(Math.max(gribData.getStepX(), gribData.getStepY()));
+          bufferedImage = ImageUtil.blur(bufferedImage, matrixDim);
+          gr = stbyGraphics;
+          gr.drawImage(bufferedImage, 0, 0, null);                    
         }
       } // gribData != null
 //    else
@@ -6451,7 +6478,7 @@ public class CommandPanel
     
         // Draw Routing
         boolean isochronLine = true;   // TODO Preference
-        boolean drawRadii    = true;  // TODO Preference
+        boolean drawRadii    = true;   // TODO Preference
         boolean plotPoints   = false;  // TODO Preference
         if (allCalculatedIsochrons != null && drawIsochrons)
         {
@@ -6867,13 +6894,13 @@ public class CommandPanel
         jSplitPane.setDividerLocation(0D);
       resizeSplitPane = false;
     }
-    if (!doItAfter)
+    if (!doItAfter && canRepaint)
       chartPanelPaintComponentFeature(gr);
   }
 
   public void chartPanelPaintComponentAfter(final Graphics gr)
   {
-    if (doItAfter)
+    if (doItAfter && canRepaint)
       chartPanelPaintComponentFeature(gr);
     // Draw Alternate Windows, on top
     if (displayAltTooltip)
@@ -8174,6 +8201,7 @@ public class CommandPanel
 
   public void setDrawIsochrons(boolean b)
   {
+    WWContext.getInstance().fireSetDisplayIsochrons(b);
     this.drawIsochrons = b;
   }
 
@@ -8184,6 +8212,7 @@ public class CommandPanel
 
   public void setDrawBestRoute(boolean b)
   {
+    WWContext.getInstance().fireSetDisplayBestRoute(b);
     this.drawBestRoute = b;
   }
 
@@ -8194,6 +8223,7 @@ public class CommandPanel
 
   public void setPostitOnRoute(boolean postitOnRoute)
   {
+    WWContext.getInstance().fireSetDisplayRoutingLabels(postitOnRoute);
     this.postitOnRoute = postitOnRoute;
     repaint();
   }
@@ -8761,6 +8791,11 @@ public class CommandPanel
   public void drop(DropTargetDropEvent dtde)
   {
     System.out.println("Dropped " + dtde.getTransferable().getClass().getName());
+  }
+
+  public void setCanRepaint(boolean canRepaint)
+  {
+    this.canRepaint = canRepaint;
   }
 
   public static class FaxImage implements Cloneable

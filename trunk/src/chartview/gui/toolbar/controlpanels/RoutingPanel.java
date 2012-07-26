@@ -4,6 +4,10 @@ import astro.calc.GeoPoint;
 
 import astro.calc.GreatCircle;
 
+import chart.components.ui.ChartPanel;
+
+import chartview.ctx.ApplicationEventListener;
+
 import chartview.gui.toolbar.controlpanels.station.BSPDisplay;
 // import chartview.gui.toolbar.controlpanels.station.HeadingPanel;
 import coreutilities.gui.HeadingPanel;
@@ -16,6 +20,9 @@ import chartview.routing.enveloppe.custom.RoutingPoint;
 import chartview.util.WWGnlUtilities;
 import chartview.ctx.WWContext;
 
+import chartview.gui.AdjustFrame;
+import chartview.gui.right.CommandPanel;
+
 import chartview.routing.enveloppe.custom.RoutingUtil;
 
 import coreutilities.Utilities;
@@ -24,6 +31,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 
 import java.awt.Font;
+import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 
@@ -112,6 +120,11 @@ public class RoutingPanel extends JPanel
   private JSeparator jSeparator2 = new JSeparator();
   private JSeparator jSeparator3 = new JSeparator();
   private JLabel elapsedLabel = new JLabel();
+  private JSeparator jSeparator4 = new JSeparator();
+  
+  private JCheckBox showIsochrons = new JCheckBox(WWGnlUtilities.buildMessage("show-isochrones"));
+  private JCheckBox showRoute     = new JCheckBox(WWGnlUtilities.buildMessage("show-best-route"));
+  private JCheckBox showLabels    = new JCheckBox(WWGnlUtilities.buildMessage("routing-labels"));
 
   public RoutingPanel()
   {
@@ -342,9 +355,73 @@ public class RoutingPanel extends JPanel
     summaryPanel.add(jSeparator3,
                      new GridBagConstraints(0, 10, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                                             new Insets(0, 0, 0, 0), 0, 0));
+    summaryPanel.add(jSeparator4,
+                     new GridBagConstraints(0, 13, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                                            new Insets(0, 0, 0, 0), 0, 0));
+    summaryPanel.add(showIsochrons,
+                     new GridBagConstraints(0, 14, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                                            new Insets(0, 0, 0, 0), 0, 0));
+    summaryPanel.add(showRoute,
+                     new GridBagConstraints(0, 15, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                                            new Insets(0, 0, 0, 0), 0, 0));
+    summaryPanel.add(showLabels,
+                     new GridBagConstraints(0, 16, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                                            new Insets(0, 0, 0, 0), 0, 0));
+    
+    showIsochrons.addActionListener(new ActionListener()
+      {
+        public void actionPerformed(ActionEvent e)
+        {
+          CommandPanel cp = ((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getCommandPanel();
+          cp.setDrawIsochrons(showIsochrons.isSelected());
+          cp.getChartPanel().repaint();
+        }
+      });
+    showRoute.addActionListener(new ActionListener()
+      {
+        public void actionPerformed(ActionEvent e)
+        {
+          CommandPanel cp = ((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getCommandPanel();
+          cp.setDrawBestRoute(showRoute.isSelected());
+          cp.getChartPanel().repaint();
+        }
+      });
+    showLabels.addActionListener(new ActionListener()
+      {
+        public void actionPerformed(ActionEvent e)
+        {
+          CommandPanel cp = ((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getCommandPanel();
+          cp.setPostitOnRoute(showLabels.isSelected());
+          cp.getChartPanel().repaint();
+        }
+      });
     this.validate();
+    
+    WWContext.getInstance().addApplicationListener(new ApplicationEventListener()
+     {
+       public void setDisplayBestRoute(boolean b) 
+       {
+         showRoute.setSelected(b);
+       }
+       public void setDisplayRoutingLabels(boolean b) 
+       {
+         showLabels.setSelected(b);
+       }
+       public void setDisplayIsochrons(boolean b) 
+       {
+         showIsochrons.setSelected(b);
+       }
+     });
   }
 
+  public void paintComponent(Graphics gr)
+  {
+    CommandPanel cp = ((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getCommandPanel();
+    showIsochrons.setSelected(cp.isDrawIsochrons());
+    showRoute.setSelected(cp.isDrawBestRoute());
+    showLabels.setSelected(cp.isPostitOnRoute());
+  }
+  
   private void updateData()
   {
     if (routeSliderValue == 1)

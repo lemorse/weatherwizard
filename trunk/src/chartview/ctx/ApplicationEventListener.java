@@ -203,4 +203,8 @@ public abstract class ApplicationEventListener implements EventListener
   public void scrollThroughTabs() {}
 
   public void gribAtTheMouseisShwoing(boolean b) {}
+  
+  public void setDisplayBestRoute(boolean b) {}
+  public void setDisplayRoutingLabels(boolean b) {}
+  public void setDisplayIsochrons(boolean b) {}
 }
