@@ -118,11 +118,12 @@ public class AdjustFrame
 
   private FileTypeHolder allJTrees = new FileTypeHolder();
   
-  private final static int FADE_OPTION       = 1;
-  private final static int SHIFT_DOWN_OPTION = 2;
-  private final static int SECTOR_OPTION     = 3;
+  public final static int GRAY_PANEL_NONE_OPTION       = 0;
+  public final static int GRAY_PANEL_FADE_OPTION       = 1;
+  public final static int GRAY_PANEL_SHIFT_DOWN_OPTION = 2;
+  public final static int GRAY_PANEL_SECTOR_OPTION     = 3;
   
-  private static int grayPanelOption = FADE_OPTION;
+  private static int grayPanelOption = GRAY_PANEL_NONE_OPTION;
   
   int grayPanelY = 0;
   int grayPanelSectorAngle = 0;  
@@ -159,7 +160,7 @@ public class AdjustFrame
         this.setSize(masterTabPane.getSize());
 //      System.out.println("Transparency:" + grayPanelTransparency);
         ((Graphics2D)g).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, grayPanelTransparency));
-        if (grayPanelOption == SHIFT_DOWN_OPTION)
+        if (grayPanelOption == GRAY_PANEL_SHIFT_DOWN_OPTION)
         {
           g.setColor(Color.gray);
           g.fillRect(0, 0, this.getWidth(), 10); // The top side of the altuglass
@@ -173,10 +174,10 @@ public class AdjustFrame
         GradientPaint gradient = new GradientPaint(this.getWidth(), this.getHeight(), startColor, 0, 0, endColor); // top right to bottom left
         ((Graphics2D)g).setPaint(gradient);
         
-        if (grayPanelOption == SHIFT_DOWN_OPTION ||
-            grayPanelOption == FADE_OPTION)
+        if (grayPanelOption == GRAY_PANEL_SHIFT_DOWN_OPTION ||
+            grayPanelOption == GRAY_PANEL_FADE_OPTION)
           g.fillRect(0, 0, this.getWidth(), this.getHeight());
-        if (grayPanelOption == SECTOR_OPTION)
+        if (grayPanelOption == GRAY_PANEL_SECTOR_OPTION)
           g.fillArc(- this.getWidth() / 2, - this.getHeight() / 2, 2 * this.getWidth(), 2 * this.getHeight(), 90, 360-grayPanelSectorAngle);
 
         if (message2Display != null && message2Display.trim().length() > 0)
@@ -1216,7 +1217,7 @@ public class AdjustFrame
         {
           message2Display = mess;
           setLoadingProgresssBar(b, mess);
-          if (b)
+          grayPanelOption = Integer.parseInt(((ParamPanel.GrayPanelOptionList)(ParamPanel.data[ParamData.GRAY_PANEL_OPTION][ParamData.VALUE_INDEX])).getStringIndex());          if (b)
           {
             grayPanelY = 0;
             grayPanelTransparency = ((Float) ParamPanel.data[ParamData.GRAY_PANEL_OPACITY][ParamData.VALUE_INDEX]).floatValue();
@@ -1252,7 +1253,8 @@ public class AdjustFrame
               playThread.start();
             }
             // Fade gray panel
-            if (((Boolean)ParamPanel.data[ParamData.USE_GRAY_PANEL_SHIFT][ParamData.VALUE_INDEX]).booleanValue())
+        //  grayPanelOption = Integer.parseInt(((ParamPanel.GrayPanelOptionList)(ParamPanel.data[ParamData.GRAY_PANEL_OPTION][ParamData.VALUE_INDEX])).getStringIndex());
+            if (grayPanelOption != GRAY_PANEL_NONE_OPTION)
             {
               synchronized (layers)
               {
@@ -1265,7 +1267,7 @@ public class AdjustFrame
                       int maxI = (int) layers.getSize().getHeight();
                       int step = (int) (layers.getSize().getHeight() / 10d);
 
-                      if (grayPanelOption == SECTOR_OPTION)
+                      if (grayPanelOption == GRAY_PANEL_SECTOR_OPTION)
                       {
                         maxI = 361;
                         step = 15;
@@ -1283,11 +1285,11 @@ public class AdjustFrame
 //                          {
 //                             public void run()
 //                             {
-                                 if (grayPanelOption == SHIFT_DOWN_OPTION)
+                                 if (grayPanelOption == GRAY_PANEL_SHIFT_DOWN_OPTION)
                                    grayPanelY = y;
-                                 else if (grayPanelOption == FADE_OPTION)
+                                 else if (grayPanelOption == GRAY_PANEL_FADE_OPTION)
                                    grayPanelTransparency = gpt;
-                                 else if (grayPanelOption == SECTOR_OPTION)
+                                 else if (grayPanelOption == GRAY_PANEL_SECTOR_OPTION)
                                    grayPanelSectorAngle = y;
   //                             System.out.println("-> " + grayPanelY);
   //                             System.out.println("-> " + grayPanelTransparency);
