@@ -59,6 +59,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 
@@ -117,12 +118,14 @@ public class AdjustFrame
 
   private FileTypeHolder allJTrees = new FileTypeHolder();
   
-  private final static int FADE_OPTION = 1;
+  private final static int FADE_OPTION       = 1;
   private final static int SHIFT_DOWN_OPTION = 2;
+  private final static int SECTOR_OPTION     = 3;
   
   private static int grayPanelOption = FADE_OPTION;
   
   int grayPanelY = 0;
+  int grayPanelSectorAngle = 0;  
   @SuppressWarnings("serial")
   private JLayeredPane layers = new JLayeredPane()
     {
@@ -136,6 +139,8 @@ public class AdjustFrame
       }
     };
 
+  private transient Thread fader = null;
+  
   private JTabbedPane masterTabPane = new JTabbedPane();
   private String message2Display = "";
   
@@ -166,8 +171,13 @@ public class AdjustFrame
 //      GradientPaint gradient = new GradientPaint(0, this.getHeight(), startColor, 0, 0, endColor); // vertical, upside down
         GradientPaint gradient = new GradientPaint(this.getWidth(), this.getHeight(), startColor, 0, 0, endColor); // top right to bottom left
         ((Graphics2D)g).setPaint(gradient);
-        g.fillRect(0, 0, this.getWidth(), this.getHeight());
         
+        if (grayPanelOption == SHIFT_DOWN_OPTION ||
+            grayPanelOption == FADE_OPTION)
+          g.fillRect(0, 0, this.getWidth(), this.getHeight());
+        if (grayPanelOption == SECTOR_OPTION)
+          g.fillArc(- this.getWidth() / 2, - this.getHeight() / 2, 2 * this.getWidth(), 2 * this.getHeight(), 90, 360-grayPanelSectorAngle);
+
         if (message2Display != null && message2Display.trim().length() > 0)
         {
   //      g.setFont(new Font("Arial", Font.ITALIC | Font.BOLD, 50));
@@ -178,6 +188,14 @@ public class AdjustFrame
           g.drawString(str, (this.getWidth() / 2) - (strWidth / 2) + 3, 20 + g.getFont().getSize() + 3); // Shadow
           g.setColor(Color.RED);
           g.drawString(str, (this.getWidth() / 2) - (strWidth / 2), 20 + g.getFont().getSize());         // Text
+        }
+        if (fader != null)
+        {
+          synchronized (fader)
+          {
+//          System.out.println("Notifying fader");
+            fader.notify();
+          }
         }
       }
     };
@@ -1204,53 +1222,106 @@ public class AdjustFrame
             layers.add(grayTransparentPanel, grayLayerIndex); // Add gray layer
           }
           else
-          {
+          {            
 //          WWContext.getInstance().fireInterruptProcess();
+            final String soundName = ((ParamPanel.DataFile) ParamPanel.data[ParamData.PLAY_SOUND_ON_JOB_COMPLETION][ParamData.VALUE_INDEX]).toString();
+            if (soundName.trim().length() > 0) // Play Sound on Completion
+            {
+              Thread playThread = new Thread()
+                {
+                  public void run()
+                  {
+                    try
+                    {
+                      WWGnlUtilities.playSound(new File(soundName).toURI().toURL());
+                    }
+                    catch (MalformedURLException murle)
+                    {
+                      // TODO: Add catch code
+                      murle.printStackTrace();
+                    }
+                    catch (Exception e)
+                    {
+                      System.err.println("Playing [" + soundName + "]");
+                      // TODO: Add catch code
+                      e.printStackTrace();
+                    }
+                  }
+                };
+              playThread.start();
+            }
+            // Fade gray panel
             if (((Boolean)ParamPanel.data[ParamData.USE_GRAY_PANEL_SHIFT][ParamData.VALUE_INDEX]).booleanValue())
             {
               synchronized (layers)
               {
-                Runnable shiftGrayLayerDown = new Runnable()
+//              Runnable shiftGrayLayerDown = new Runnable()
+                fader = new Thread()
                   {
                     public void run()
                     {
                       float origTransparency = grayPanelTransparency;
-                      for (int i=0; i<layers.getSize().getHeight(); i++) // Shifts/Scrolls down
+                      int maxI = (int) layers.getSize().getHeight();
+                      int step = 1;
+                      if (grayPanelOption == SHIFT_DOWN_OPTION)
+                        step = (int) (layers.getSize().getHeight() / 10d);
+                      if (grayPanelOption == SECTOR_OPTION)
                       {
-                        final int y = i;
-                        final float gpt = (origTransparency * (1f - ((float)i / (float)layers.getSize().getHeight())));
-                        try
-                        {                          
-                          EventQueue.invokeLater(new Runnable()
-                           {
-                             public void run()
-                             {
-                               if (grayPanelOption == SHIFT_DOWN_OPTION)
-                                 grayPanelY = y;
-                               else if (grayPanelOption == FADE_OPTION)
-                                 grayPanelTransparency = gpt;
-//                             System.out.println("-> " + grayPanelY);
-//                             System.out.println("-> " + grayPanelTransparency);
-                               grayTransparentPanel.repaint();
-                             }
-                           });
-                          Thread.sleep(5L);
-                        }
-                        catch (Exception ie)
+                        maxI = 361;
+                        step = 15;
+                      }
+                      
+                      for (int i=0; i<maxI; i+=step) // Shifts/Scrolls down, or circular whipe out.
+                      {
+                        synchronized (this)
                         {
-                          System.out.println("Oops! Interrupted!");
-                          return;
+                          final int y = i;
+                          final float gpt = (origTransparency * (1f - ((float)i / (float)layers.getSize().getHeight())));
+                          try
+                          {                          
+//                          EventQueue.invokeLater(new Runnable()
+//                          {
+//                             public void run()
+//                             {
+                                 if (grayPanelOption == SHIFT_DOWN_OPTION)
+                                   grayPanelY = y;
+                                 else if (grayPanelOption == FADE_OPTION)
+                                   grayPanelTransparency = gpt;
+                                 else if (grayPanelOption == SECTOR_OPTION)
+                                   grayPanelSectorAngle = y;
+  //                             System.out.println("-> " + grayPanelY);
+  //                             System.out.println("-> " + grayPanelTransparency);
+  //                             System.out.println("-> angle:" + grayPanelSectorAngle);
+                                 grayTransparentPanel.repaint();
+//                             }
+//                          });
+  //                        Thread.sleep(5L);  // Replace with a wait, grayTransparentPanel repaint should notify this thread.
+                            this.wait();
+                          }
+                          catch (InterruptedException ie)
+                          {
+                            System.out.println("Wait intrerruped.");
+                          }
+                          catch (Exception e)
+                          {                          
+                            System.out.println("Fading error:" + e.getMessage());
+                            e.printStackTrace();                          
+  //                        return;
+                          }
                         }
                       }
 //                    RepaintManager.currentManager(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel()).markCompletelyDirty(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel());
 //                    ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().setCanRepaint(true);
                       layers.remove(grayTransparentPanel);              // remove gray layer
                       grayPanelY = 0;
+                      grayPanelSectorAngle = 0;
                     }
                   };
 //              RepaintManager.currentManager(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel()).markCompletelyClean(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel());
 //              ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().setCanRepaint(false);
-                new Thread(shiftGrayLayerDown).start();
+                
+//              fader = new Thread(shiftGrayLayerDown);
+                fader.start();
                 
                 message2Display = "";
                 if (false)
