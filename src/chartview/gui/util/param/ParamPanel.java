@@ -3,6 +3,7 @@ package chartview.gui.util.param;
 import chartview.ctx.JTableFocusChangeListener;
 import chartview.ctx.WWContext;
 
+import chartview.gui.AdjustFrame;
 import chartview.gui.util.param.widget.BooleanCellEditor;
 import chartview.gui.util.param.widget.ColorPickerCellEditor;
 import chartview.gui.util.param.widget.DirectoryPickerCellEditor;
@@ -343,8 +344,8 @@ public final class ParamPanel
       case ParamData.RELOAD_DEFAULT_COMPOSITE_INTERVAL:
         it = new Integer(0);
         break;
-      case ParamData.USE_GRAY_PANEL_SHIFT:
-        it = Boolean.TRUE;
+      case ParamData.GRAY_PANEL_OPTION:
+        it = new GrayPanelOptionList(AdjustFrame.GRAY_PANEL_NONE_OPTION);
         break;
       case ParamData.GRAY_PANEL_OPACITY:
         it = new Float(0.75);
@@ -448,7 +449,6 @@ public final class ParamPanel
                        i == ParamData.CLICK_SCROLL ||
                        i == ParamData.SHOW_ROUTING_LABELS ||
                        i == ParamData.SHOW_ISOCHRONS ||
-                       i == ParamData.USE_GRAY_PANEL_SHIFT ||
                        i == ParamData.EXPAND_CONTROLS_BY_DEFAULT)
                 data[i][ParamData.VALUE_INDEX] = new Boolean(s);    
               else if (i == ParamData.POLAR_FILE_LOC)              // DataFiles, Polars
@@ -479,6 +479,8 @@ public final class ParamPanel
                 data[i][ParamData.VALUE_INDEX] = new ContourLinesList(s);      
               else if (i == ParamData.DEFAULT_FAX_BLUR)
                 data[i][ParamData.VALUE_INDEX] = new FaxBlurList(Integer.parseInt(s));
+              else if (i == ParamData.GRAY_PANEL_OPTION)
+                data[i][ParamData.VALUE_INDEX] = new GrayPanelOptionList(Integer.parseInt(s));
               else if (i == ParamData.SERIAL_PORT)
                 data[i][ParamData.VALUE_INDEX] = new ListOfSerialPorts(s);
               else if (i == ParamData.ROUTING_OUTPUT_FLAVOR)
@@ -598,7 +600,7 @@ public final class ParamPanel
         ParamData.DEFAULT_ZOOM_VALUE,
         ParamData.DEFAULT_CHART_INC_VALUE,
         ParamData.DEFAULT_FAX_INC_VALUE,
-        ParamData.USE_GRAY_PANEL_SHIFT,
+        ParamData.GRAY_PANEL_OPTION,
         ParamData.GRAY_PANEL_OPACITY,
         ParamData.PLAY_SOUND_ON_JOB_COMPLETION }
     };
@@ -644,7 +646,8 @@ public final class ParamPanel
           cloned = new ContourLinesList(((ContourLinesList)data[index][ParamData.VALUE_INDEX]).toString());
         else
         {
-          WWContext.getInstance().fireLogging("Cloning a [" + (data[index][ParamData.VALUE_INDEX]).getClass().getName() + "] is not supported.");
+//        WWContext.getInstance().fireLogging("Cloning a [" + (data[index][ParamData.VALUE_INDEX]).getClass().getName() + "] is not supported.");
+//        System.out.println("Cloning a [" + (data[index][ParamData.VALUE_INDEX]).getClass().getName() + "] is not supported.");
           cloned = data[index][ParamData.VALUE_INDEX];
         }
         oa[i] = new Object[] {data[index][ParamData.NAME_INDEX], cloned};
@@ -800,7 +803,6 @@ public final class ParamPanel
                    currentIndex == ParamData.COLOR_RANGE ||
                    currentIndex == ParamData.DISPLAY_WIND_WITH_COLOR_WIND_RANGE ||
                    currentIndex == ParamData.CLICK_SCROLL ||
-                   currentIndex == ParamData.USE_GRAY_PANEL_SHIFT ||
                    currentIndex == ParamData.EXPAND_CONTROLS_BY_DEFAULT)
           {
             try { /* boolean b = */ new Boolean(after); }
@@ -1090,6 +1092,7 @@ public final class ParamPanel
     JComboBox lnfList = new JComboBox(lnfValues); // Should not be used
     WindOptionComboBox wdoCombo   = new WindOptionComboBox();
     FaxBlurListComboBox blurCombo = new FaxBlurListComboBox();
+    GrayPanelOptionListComboBox gpOptionCombo = new GrayPanelOptionListComboBox();
     TemperatureUnitListComboBox tempUnitCombo = new TemperatureUnitListComboBox();
     AnemometerHandOptionListComboBox anemoCombo = new AnemometerHandOptionListComboBox();
     JComboBox serialPortList      = new JComboBox(SerialPortList.listSerialPorts());
@@ -1163,6 +1166,11 @@ public final class ParamPanel
       {
         componentToApply = blurCombo;
         blurCombo.setSelectedItem(((FaxBlurList)value).getCurrentValue());
+      }
+      else if (column == 1 && value instanceof GrayPanelOptionList)
+      {
+        componentToApply = gpOptionCombo;
+        gpOptionCombo.setSelectedItem(((GrayPanelOptionList)value).getCurrentValue());
       }
       else if (column == 1 && value instanceof TemperatureUnitList)
       {
@@ -1288,7 +1296,22 @@ public final class ParamPanel
           }
         }
         return (new FaxBlurList(i.intValue()));
+      }      
+      else if (componentToApply instanceof GrayPanelOptionListComboBox)
+      {
+        String s = (String)((GrayPanelOptionListComboBox)componentToApply).getSelectedItem();
+        Integer i = null;
+        for (Integer k : GrayPanelOptionList.getMap().keySet())
+        {
+          if (GrayPanelOptionList.getMap().get(k).equals(s))
+          {
+            i = k;
+            break;
+          }
+        }
+        return (new GrayPanelOptionList(i.intValue()));
       }
+      
       else if (componentToApply instanceof WindOptionComboBox)
       {
         String s = (String)((WindOptionComboBox)componentToApply).getSelectedItem();
@@ -1442,6 +1465,16 @@ public final class ParamPanel
         {
           FaxBlurList fbl = (FaxBlurList)valueObject;
           val.setNodeValue(fbl.getStringIndex());
+        }
+        else if (valueObject instanceof GrayPanelOptionList)
+        {
+          GrayPanelOptionList gpol = (GrayPanelOptionList)valueObject;
+          val.setNodeValue(gpol.getStringIndex());
+        }
+        else if (valueObject instanceof AnemometerHandOptionList)
+        {
+          AnemometerHandOptionList ahol = (AnemometerHandOptionList)valueObject;
+          val.setNodeValue(ahol.getStringIndex());
         }
         else if (valueObject instanceof RoutingOutputList)
         {
@@ -1845,6 +1878,41 @@ public final class ParamPanel
     }
   }
    
+  public static class GrayPanelOptionList extends ListOfValues
+  {
+    private static HashMap<Integer, String> map = new HashMap<Integer, String>(3);
+    
+    public GrayPanelOptionList(int key)
+    { 
+      map.put(AdjustFrame.GRAY_PANEL_NONE_OPTION,       WWGnlUtilities.buildMessage("no-fade"));      
+      map.put(AdjustFrame.GRAY_PANEL_SHIFT_DOWN_OPTION, WWGnlUtilities.buildMessage("shift-down"));      
+      map.put(AdjustFrame.GRAY_PANEL_FADE_OPTION,       WWGnlUtilities.buildMessage("fade-option"));      
+      map.put(AdjustFrame.GRAY_PANEL_SECTOR_OPTION,     WWGnlUtilities.buildMessage("circle-whipe"));      
+
+      super.setCurrentValue(map.get(key));
+    }
+    
+    public static HashMap<Integer, String> getMap()
+    {
+      return map;
+    }
+    
+    public String getStringIndex()
+    {
+      String str = "";
+      String s = super.getCurrentValue();
+      for (Integer k : map.keySet())
+      {
+        if (map.get(k).equals(s))
+        {
+          str = k.toString();
+          break;
+        }
+      }
+      return str;
+    }
+  }
+   
   public class SelectionListener
     implements ListSelectionListener
   {
@@ -1925,6 +1993,20 @@ public final class ParamPanel
       for (Integer key : AnemometerHandOptionList.getMap().keySet())
       {
         this.addItem(AnemometerHandOptionList.getMap().get(key));
+      }
+    }
+  }
+  
+  @SuppressWarnings("serial")
+  private static class GrayPanelOptionListComboBox extends JComboBox
+  {
+    public GrayPanelOptionListComboBox()
+    {
+      super();
+      this.removeAllItems();
+      for (Integer key : GrayPanelOptionList.getMap().keySet())
+      {
+        this.addItem(GrayPanelOptionList.getMap().get(key));
       }
     }
   }

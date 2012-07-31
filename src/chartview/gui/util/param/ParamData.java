@@ -81,7 +81,7 @@ public class ParamData
   public final static int GRIB_CURRENT_COLOR             = 66;
   public final static int AUTO_SAVE_DEFAULT_COMPOSITE    = 67;
   public final static int RELOAD_DEFAULT_COMPOSITE_INTERVAL = 68;
-  public final static int USE_GRAY_PANEL_SHIFT           = 69;
+  public final static int GRAY_PANEL_OPTION              = 69;
   public final static int GRAY_PANEL_OPACITY             = 70;
   public final static int WAIT_ON_STARTUP                = 71;
   public final static int EXPAND_CONTROLS_BY_DEFAULT     = 72;
