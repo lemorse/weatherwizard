@@ -157,6 +157,7 @@ public class AdjustFrame
                                          RenderingHints.VALUE_ANTIALIAS_ON);      
         this.setOpaque(false);      
         this.setSize(masterTabPane.getSize());
+//      System.out.println("Transparency:" + grayPanelTransparency);
         ((Graphics2D)g).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, grayPanelTransparency));
         if (grayPanelOption == SHIFT_DOWN_OPTION)
         {
@@ -1262,9 +1263,8 @@ public class AdjustFrame
                     {
                       float origTransparency = grayPanelTransparency;
                       int maxI = (int) layers.getSize().getHeight();
-                      int step = 1;
-                      if (grayPanelOption == SHIFT_DOWN_OPTION)
-                        step = (int) (layers.getSize().getHeight() / 10d);
+                      int step = (int) (layers.getSize().getHeight() / 10d);
+
                       if (grayPanelOption == SECTOR_OPTION)
                       {
                         maxI = 361;
