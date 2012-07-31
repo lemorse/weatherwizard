@@ -361,6 +361,9 @@ public final class ParamPanel
       case ParamData.ANEMOMETER_HAND_OPTION:
         it = new AnemometerHandOptionList(AnemometerHandOptionList.ARROW_HAND_OPTION);
         break;
+      case ParamData.PLAY_SOUND_ON_JOB_COMPLETION:
+        it = new DataFile(new String[] {"wav", "ogg"}, WWGnlUtilities.buildMessage("sounds"), "." + File.separator + "sounds" + File.separator + "gong.wav");
+        break;
       default:
         break;
     }
@@ -484,6 +487,8 @@ public final class ParamPanel
                 data[i][ParamData.VALUE_INDEX] = new TemperatureUnitList(Integer.parseInt(s));
               else if (i == ParamData.ANEMOMETER_HAND_OPTION)
                 data[i][ParamData.VALUE_INDEX] = new AnemometerHandOptionList(Integer.parseInt(s));  
+              else if (i == ParamData.PLAY_SOUND_ON_JOB_COMPLETION)              // DataFiles, Sound
+                data[i][ParamData.VALUE_INDEX] = new DataFile(new String[] {"wav", "ogg"}, "Sounds", s);
               else                                                 // Strings
                 data[i][ParamData.VALUE_INDEX] = s;
             }
@@ -570,7 +575,7 @@ public final class ParamPanel
         ParamData.SHOW_ROUTING_LABELS,
         ParamData.SHOW_ISOCHRONS,
         ParamData.ROUTING_OUTPUT_FLAVOR,
-        ParamData.ANEMOMETER_HAND_OPTION}, 
+        ParamData.ANEMOMETER_HAND_OPTION }, 
       new int[] // Misc
       { ParamData.GRIB_FILES_LOC, 
         ParamData.FAX_FILES_LOC, 
@@ -594,7 +599,8 @@ public final class ParamPanel
         ParamData.DEFAULT_CHART_INC_VALUE,
         ParamData.DEFAULT_FAX_INC_VALUE,
         ParamData.USE_GRAY_PANEL_SHIFT,
-        ParamData.GRAY_PANEL_OPACITY}
+        ParamData.GRAY_PANEL_OPACITY,
+        ParamData.PLAY_SOUND_ON_JOB_COMPLETION }
     };
   
   private Object[][] mkDataArray(int idx)
