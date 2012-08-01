@@ -15,7 +15,11 @@ import chartview.util.WWGnlUtilities;
 import chartview.ctx.WWContext;
 
 import chartview.gui.right.CommandPanel;
+import chartview.gui.util.dialog.RoutingOutputFlavorPanel;
 import chartview.gui.util.dialog.WhatIfRoutingPanel;
+
+import chartview.gui.util.param.ParamData;
+import chartview.gui.util.param.ParamPanel;
 
 import chartview.util.grib.GribHelper.GribCondition;
 import chartview.util.grib.GribHelper.GribConditionData;
@@ -25,13 +29,29 @@ import chartview.util.progress.ProgressMonitor;
 import java.awt.Point;
 import java.awt.Polygon;
 
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
+
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+
+import java.text.NumberFormat;
+
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Iterator;
 
 import java.util.List;
 
+import java.util.Locale;
+import java.util.UUID;
+
 import javax.swing.JOptionPane;
+
+import user.util.GeomUtil;
 
 public class RoutingUtil
 {
@@ -810,5 +830,339 @@ public class RoutingUtil
       route = route2;
     }
     return route;
-  }  
+  }
+  
+  public static void outputRouting(CommandPanel instance, GeoPoint from, GeoPoint to, RoutingPoint closestPoint, List<List<RoutingPoint>> allCalculatedIsochrons)
+  {
+    int clipboardOption = Integer.parseInt(((ParamPanel.RoutingOutputList)(ParamPanel.data[ParamData.ROUTING_OUTPUT_FLAVOR][ParamData.VALUE_INDEX])).getStringIndex());
+    String fileOutput = null;
+    if (clipboardOption == ParamPanel.RoutingOutputList.ASK)
+    {
+      try { Thread.sleep(500L); } catch (InterruptedException ie) {} // Pas joli...
+      RoutingOutputFlavorPanel rofp = new RoutingOutputFlavorPanel();              
+      JOptionPane.showMessageDialog(instance, rofp, "Routing output", JOptionPane.QUESTION_MESSAGE);
+      clipboardOption = rofp.getSelectedOption();
+      fileOutput = rofp.getFileOutput();
+    }
+
+    String kmlPlaces = "";
+    String kmlRoute  = "";
+    int firstKMLHeading = -1;
+    
+    // Reverse, for the clipboard
+    boolean generateGPXRoute = true;
+    String clipboardContent = "";
+    // Opening tags
+    if (clipboardOption == ParamPanel.RoutingOutputList.CSV)
+      clipboardContent = "L;(dec L);G;(dec G);Date;UTC;TWS;TWD;BSP;HDG\n";
+    else if (clipboardOption == ParamPanel.RoutingOutputList.GPX)
+    {
+      clipboardContent = 
+      "<?xml version=\"1.0\" encoding=\"utf-8\" ?>\n" + 
+      "<gpx version=\"1.1\" \n" + 
+      "     creator=\"OpenCPN\" \n" + 
+      "  xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" \n" + 
+      "  xmlns=\"http://www.topografix.com/GPX/1/1\" \n" + 
+      "  xsi:schemaLocation=\"http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd\" \n" + 
+      "  xmlns:opencpn=\"http://www.opencpn.org\">\n";
+      if (generateGPXRoute)
+      {
+        Date d = new Date();
+        clipboardContent += ("  <rte>\n" +
+                             "    <name>Weather Wizard route (" + WWGnlUtilities.SDF_DMY.format(d) + ")</name>\n" + 
+                             "    <extensions>\n" + 
+                             "      <opencpn:start>" + from.toString() + "</opencpn:start>\n" + 
+                             "      <opencpn:end>" + to.toString() + "</opencpn:end>\n" + 
+                             "      <opencpn:viz>1</opencpn:viz>\n" + 
+                             "      <opencpn:guid>" + UUID.randomUUID().toString() + "</opencpn:guid>\n" + 
+                             "    </extensions>\n" +
+                             "    <type>Routing</type>\n" +
+                             "    <desc>Routing from Weather Wizard (generated " + d.toString() + ")</desc>\n" +
+                             "    <number>" + (d.getTime()) + "</number>\n");
+      }
+    }
+    else if (clipboardOption == ParamPanel.RoutingOutputList.TXT)
+    {
+      Date d = new Date();
+      clipboardContent += ("Weather Wizard route (" + WWGnlUtilities.SDF_DMY.format(d) + ") generated " + d.toString() + ")\n");
+    }
+    else if (clipboardOption == ParamPanel.RoutingOutputList.KML)
+    {
+      Date d = new Date();
+      clipboardContent += 
+        "<?xml version = '1.0' encoding = 'UTF-8'?>\n" + 
+        "<kml xmlns=\"http://earth.google.com/kml/2.0\" \n" + 
+        "     xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" + 
+        "     xsi:schemaLocation=\"http://earth.google.com/kml/2.0 ../xsd/kml21.xsd\">\n" + 
+        "   <Document>\n" + 
+        "      <name>Weather Wizard route (" + WWGnlUtilities.SDF_DMY.format(d) + ")</name>\n"; // TASK Add from/to
+    }
+    else if (clipboardOption == ParamPanel.RoutingOutputList.JSON)
+    {
+      clipboardContent += 
+       ("var wayPoint = new Array\n" +
+        "  {\n");
+    }
+
+    if (closestPoint != null && allCalculatedIsochrons != null)
+    {
+      Calendar cal = new GregorianCalendar();
+      List<RoutingPoint> bestRoute = RoutingUtil.getBestRoute(closestPoint, allCalculatedIsochrons);
+      int routesize = bestRoute.size();
+      String date = "", time = "";
+      RoutingPoint rp = null;
+      RoutingPoint ic = null; // Isochron Center
+//    for (int r=0; r<routesize; r++) // 0 is the closest point, the last calculated
+      for (int r=routesize - 1; r>=0; r--) // 0 is the closest point, the last calculated
+      {
+        rp = bestRoute.get(r);
+        if (r == 0) // Last one
+          ic = rp;
+        else
+          ic = bestRoute.get(r-1);
+          
+        if (rp.getDate() == null)
+          date = time = "";
+        else
+        {
+          cal.setTime(rp.getDate());
+              
+          int year    = cal.get(Calendar.YEAR);
+          int month   = cal.get(Calendar.MONTH);
+          int day     = cal.get(Calendar.DAY_OF_MONTH);
+          int hours   = cal.get(Calendar.HOUR_OF_DAY);
+          int minutes = cal.get(Calendar.MINUTE);
+          int seconds = cal.get(Calendar.SECOND);
+          if (clipboardOption == ParamPanel.RoutingOutputList.CSV)
+          {
+            date = WWGnlUtilities.DF2.format(month + 1) + "/" + WWGnlUtilities.DF2.format(day) + "/" + Integer.toString(year);
+            time = WWGnlUtilities.DF2.format(hours) + ":" + WWGnlUtilities.DF2.format(minutes);
+          }
+          else if (clipboardOption == ParamPanel.RoutingOutputList.GPX)
+          {
+            date = Integer.toString(year) + "-" + 
+                   WWGnlUtilities.DF2.format(month + 1) + "-" + 
+                   WWGnlUtilities.DF2.format(day) + "T" +
+                   WWGnlUtilities.DF2.format(hours) + ":" + 
+                   WWGnlUtilities.DF2.format(minutes) + ":" +
+                   WWGnlUtilities.DF2.format(seconds) + "Z";
+          }
+          else if (clipboardOption == ParamPanel.RoutingOutputList.TXT || clipboardOption == ParamPanel.RoutingOutputList.KML)
+          {
+            date = rp.getDate().toString();
+          }
+          else if (clipboardOption == ParamPanel.RoutingOutputList.JSON)
+          {
+            date = Integer.toString(year) + "-" + 
+                   WWGnlUtilities.DF2.format(month + 1) + "-" + 
+                   WWGnlUtilities.DF2.format(day) + "T" +
+                   WWGnlUtilities.DF2.format(hours) + ":" + 
+                   WWGnlUtilities.DF2.format(minutes) + ":" +
+                   WWGnlUtilities.DF2.format(seconds) + "Z";
+          }
+        }    
+        // Route points
+        if (clipboardOption == ParamPanel.RoutingOutputList.CSV)
+        {
+          String lat = GeomUtil.decToSex(rp.getPosition().getL(), GeomUtil.SWING, GeomUtil.NS);
+          String lng = GeomUtil.decToSex(rp.getPosition().getG(), GeomUtil.SWING, GeomUtil.EW);
+          String tws = WWGnlUtilities.XX22.format(ic.getTws());
+          String twd = Integer.toString(ic.getTwd());
+          String bsp = WWGnlUtilities.XX22.format(ic.getBsp());
+          String hdg = Integer.toString(ic.getHdg());
+              
+          clipboardContent += (lat + ";" + 
+                               Double.toString(rp.getPosition().getL()) + ";" +
+                               lng + ";" + 
+                               Double.toString(rp.getPosition().getG()) + ";" +
+                               date + ";" + 
+                               time + ";" + 
+                               tws + ";" +
+                               twd + ";" + 
+                               bsp + ";" + 
+                               hdg + "\n");
+        }
+        else if (clipboardOption == ParamPanel.RoutingOutputList.GPX)
+        {
+          if (generateGPXRoute)
+          {
+            NumberFormat nf = NumberFormat.getInstance(Locale.ENGLISH);      
+            nf.setMaximumFractionDigits(2);
+            clipboardContent +=
+              ("       <rtept lat=\"" + rp.getPosition().getL() + "\" lon=\"" + rp.getPosition().getG() + "\">\n" + 
+              "            <name>" + WWGnlUtilities.DF3.format(routesize - r) + "_WW</name>\n" + 
+              "            <desc>Waypoint " + Integer.toString(routesize - r) + ";VMG=" + nf.format(ic.getBsp()) + ";</desc>\n" +
+          //  "            <sym>triangle</sym>\n" + 
+              "            <sym>empty</sym>\n" + 
+              "            <type>WPT</type>\n" + 
+              "            <extensions>\n" + 
+              "                <opencpn:prop>A,0,1,1,1</opencpn:prop>\n" + 
+              "                <opencpn:viz>1</opencpn:viz>\n" + 
+              "                <opencpn:viz_name>0</opencpn:viz_name>\n" +
+              "            </extensions>\n" + 
+              "        </rtept>\n");
+          }
+          else
+          {
+            clipboardContent +=
+              ("  <wpt lat=\"" + rp.getPosition().getL() + "\" lon=\"" + rp.getPosition().getG() + "\">\n" + 
+               "    <time>" + date + "</time>\n" + 
+               "    <name>" + WWGnlUtilities.DF3.format(r) + "_WW</name>\n" + 
+               "    <sym>triangle</sym>\n" + 
+               "    <type>WPT</type>\n" + 
+               "    <extensions>\n" + 
+               "            <opencpn:guid>142646-1706866-1264115693</opencpn:guid>\n" + 
+               "            <opencpn:viz>1</opencpn:viz>\n" + 
+               "            <opencpn:viz_name>1</opencpn:viz_name>\n" + 
+               "            <opencpn:shared>1</opencpn:shared>\n" + 
+               "    </extensions>\n" +
+               "  </wpt>\n");
+          }
+        }
+        else if (clipboardOption == ParamPanel.RoutingOutputList.TXT)
+        {
+          String tws = WWGnlUtilities.XX22.format(ic.getTws());
+          String twd = Integer.toString(ic.getTwd());
+          String bsp = WWGnlUtilities.XX22.format(ic.getBsp());
+          String hdg = Integer.toString(ic.getHdg());
+          clipboardContent +=
+            (rp.getPosition().toString() + " : " + date + ", tws:" + tws + ", twd:" + twd + ", bsp:" + bsp + ", hdg:" + hdg + "\n");
+        }
+        else if (clipboardOption == ParamPanel.RoutingOutputList.KML)
+        {
+          if (firstKMLHeading == -1)
+            firstKMLHeading = ic.getHdg();
+          kmlRoute  += (rp.getPosition().getG() + "," + rp.getPosition().getL() + ",0\n");
+          String tws = WWGnlUtilities.XX22.format(ic.getTws());
+          String twd = Integer.toString(ic.getTwd());
+          String bsp = WWGnlUtilities.XX22.format(ic.getBsp());
+          String hdg = Integer.toString(ic.getHdg());
+          kmlPlaces += 
+           ("         <Placemark>\n" + 
+            "           <name>WayPoint " + Integer.toString(routesize - r) + "</name>\n" + 
+            "           <description>\n" + 
+            "            <![CDATA[\n" + 
+            "              <b>" + date + "</b>\n" + 
+            "              <table>\n" + 
+            "                <tr><td>TWS</td><td>" + tws + " knots</td></tr>\n" +
+            "                <tr><td>TWD</td><td>" + twd + "&deg;</td></tr>\n" +
+            "                <tr><td>BSP</td><td>" + bsp + " knots</td></tr>\n" +
+            "                <tr><td>HDG</td><td>" + hdg + "&deg;</td></tr>\n" +
+            "              </table>\n" +
+            "            ]]>\n" + 
+            "           </description>\n" + 
+            "           <LookAt>\n" + 
+            "             <longitude>" + rp.getPosition().getG() + "</longitude>\n" + 
+            "             <latitude>" + rp.getPosition().getL() + "</latitude>\n" + 
+            "             <range>50000</range>\n" + 
+            "             <tilt>45</tilt>\n" + 
+            "             <heading>" + Integer.toString(ic.getHdg()) + "</heading>\n" + 
+            "           </LookAt>\n" + 
+            "           <Point>\n" + 
+            "             <coordinates>" + rp.getPosition().getG() + "," + rp.getPosition().getL() + ",0 </coordinates>\n" + 
+            "           </Point>\n" + 
+            "         </Placemark>\n");
+        }
+        else if (clipboardOption == ParamPanel.RoutingOutputList.JSON)
+        {
+          String tws = WWGnlUtilities.XXX12.format(ic.getTws());
+          String twd = Integer.toString(ic.getTwd());
+          String bsp = WWGnlUtilities.XXX12.format(ic.getBsp());
+          String hdg = Integer.toString(ic.getHdg());
+          clipboardContent += 
+           ("    {\n" +
+            "      \"datetime\":\"" + date + "\",\n" +
+            "      \"position\": {\n" +
+            "                  \"latitude\":" + rp.getPosition().getL() + ",\n" +
+            "                  \"longitude\":" + rp.getPosition().getG() + "\n" +
+            "                },\n" +
+            "      \"tws\":" + tws + ",\n" +
+            "      \"twd\":" + twd + ",\n" + 
+            "      \"bsp\":" + bsp + ",\n" + 
+            "      \"hdg\":" + hdg +  "\n" +
+            "    }" + (r == 0?"":",") + "\n"); 
+        }
+      }
+      // Closing tags
+      if (clipboardOption == ParamPanel.RoutingOutputList.GPX)
+      {
+        if (generateGPXRoute)
+          clipboardContent += "  </rte>\n";
+        clipboardContent +=
+         ("</gpx>");
+      }
+      else if (clipboardOption == ParamPanel.RoutingOutputList.KML)
+      {
+        clipboardContent += 
+         ("      <Folder>\n" + 
+          "         <name>Waypoints</name>\n" +
+          kmlPlaces +
+          "      </Folder>\n");
+        clipboardContent += 
+         ("      <Placemark>\n" + 
+          "          <name>Suggested route</name>\n" + 
+          "          <LookAt>\n" + 
+          "             <longitude>" + from.getG() + "</longitude>\n" + 
+          "             <latitude>" + from.getL() + "</latitude>\n" + 
+          "             <range>100000</range>\n" + 
+          "             <tilt>45</tilt>\n" + 
+          "             <heading>" + Integer.toString(firstKMLHeading) + "</heading>\n" + 
+          "          </LookAt>\n" + 
+          "          <visibility>1</visibility>\n" + 
+          "          <open>0</open>\n" + 
+          "          <Style>\n" + 
+          "             <LineStyle>\n" + 
+          "                <width>3</width>\n" + 
+          "                <color>ff00ffff</color>\n" + 
+          "             </LineStyle>\n" + 
+          "             <PolyStyle>\n" + 
+          "                <color>7f00ff00</color>\n" + 
+          "             </PolyStyle>\n" + 
+          "          </Style>\n" + 
+          "          <LineString>\n" + 
+          "             <extrude>1</extrude>\n" + 
+          "             <tessellate>1</tessellate>\n" + 
+          "             <altitudeMode>clampToGround</altitudeMode>\n" + 
+          "             <coordinates>\n" +
+          kmlRoute + 
+          "             </coordinates>\n" + 
+          "          </LineString>\n" + 
+          "       </Placemark>\n");
+        clipboardContent += 
+         ("       <Snippet><![CDATA[created by <a href=\"http://code.google.com/p/weatherwizard/\">The Weather Wizard</a>]]></Snippet>\n" + 
+           "   </Document>\n" + 
+           "</kml>");
+      }
+      else if (clipboardOption == ParamPanel.RoutingOutputList.JSON)
+      {
+        clipboardContent += 
+         ("  };\n");
+      }
+
+      if (fileOutput != null && fileOutput.trim().length() > 0)            
+      {
+        try
+        {
+          BufferedWriter bw = new BufferedWriter(new FileWriter(fileOutput));              
+          bw.write(clipboardContent + "\n");
+          bw.close();
+        }
+        catch (Exception ex)
+        {
+          ex.printStackTrace();
+        }
+        WWContext.getInstance().fireSetStatus(WWGnlUtilities.buildMessage("routing-in-file", new String[] { fileOutput }));
+      }
+      else
+      {
+        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+        StringSelection stringSelection = new StringSelection(clipboardContent);
+        clipboard.setContents(stringSelection, null);    
+    //          JOptionPane.showMessageDialog(null, "Routing is in the clipboard\n(Ctrl+V in any editor...)", "Routing completed", JOptionPane.INFORMATION_MESSAGE);
+        WWContext.getInstance().fireSetStatus(WWGnlUtilities.buildMessage("routing-in-clip"));
+      }
+      WWContext.getInstance().fireRoutingAvailable(true, bestRoute);                              
+      // End of the Routing.
+    }    
+  }
 }

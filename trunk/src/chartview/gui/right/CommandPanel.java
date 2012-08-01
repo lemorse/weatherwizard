@@ -7149,10 +7149,7 @@ public class CommandPanel
                                                                   limitTWA,
                                                                   stopIfTooOld,
                                                                   pf);
-          // Routing completed, seeing output option
-          int clipboardOption = Integer.parseInt(((ParamPanel.RoutingOutputList)(ParamPanel.data[ParamData.ROUTING_OUTPUT_FLAVOR][ParamData.VALUE_INDEX])).getStringIndex());
-          String fileOutput = null;
-          
+          // Routing completed
           i = allCalculatedIsochrons.size();
           long after = System.currentTimeMillis();
           routingOnItsWay = false;
@@ -7181,7 +7178,7 @@ public class CommandPanel
             }
           }
           // Refine?
-          if (false) // TODO Suggest second computation, based on a fork around the best route
+          if (false) // TODO? Suggest second computation, based on a fork around the best route
           {
             int resp = JOptionPane.showConfirmDialog(instance, 
                                                      "Refine routing?", 
@@ -7209,213 +7206,13 @@ public class CommandPanel
                                                                  stopIfTooOld,
                                                                  pf);              
             }
-          }
-          
-          if (clipboardOption == ParamPanel.RoutingOutputList.ASK)
-          {
-            try { Thread.sleep(500L); } catch (InterruptedException ie) {} // Pas joli...
-            RoutingOutputFlavorPanel rofp = new RoutingOutputFlavorPanel();              
-            JOptionPane.showMessageDialog(instance, rofp, "Routing output", JOptionPane.QUESTION_MESSAGE);
-            clipboardOption = rofp.getSelectedOption();
-            fileOutput = rofp.getFileOutput();
-          }
-
-          // Reverse, for the clipboard
-          boolean generateGPXRoute = true;
-          String clipboardContent = "";
-          if (clipboardOption == ParamPanel.RoutingOutputList.CSV)
-            clipboardContent = "L;(dec L);G;(dec G);Date;UTC;TWS;TWD;BSP;HDG\n";
-          else if (clipboardOption == ParamPanel.RoutingOutputList.GPX)
-          {
-            clipboardContent = 
-            "<?xml version=\"1.0\" encoding=\"utf-8\" ?>\n" + 
-            "<gpx version=\"1.1\" \n" + 
-            "     creator=\"OpenCPN\" \n" + 
-            "	 xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" \n" + 
-            "	 xmlns=\"http://www.topografix.com/GPX/1/1\" \n" + 
-            "	 xsi:schemaLocation=\"http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd\" \n" + 
-            "	 xmlns:opencpn=\"http://www.opencpn.org\">\n";
-            if (generateGPXRoute)
-            {
-              Date d = new Date();
-              clipboardContent += ("  <rte>\n" +
-                                   "    <name>Weather Wizard route (" + WWGnlUtilities.SDF_DMY.format(d) + ")</name>\n" + 
-                                   "    <extensions>\n" + 
-                                   "      <opencpn:start>" + from.toString() + "</opencpn:start>\n" + 
-                                   "      <opencpn:end>" + to.toString() + "</opencpn:end>\n" + 
-                                   "      <opencpn:viz>1</opencpn:viz>\n" + 
-                                   "      <opencpn:guid>" + UUID.randomUUID().toString() + "</opencpn:guid>\n" + 
-                                   "    </extensions>\n" +
-                                   "    <type>Routing</type>\n" +
-                                   "    <desc>Routing from Weather Wizard (generated " + d.toString() + ")</desc>\n" +
-                                   "    <number>" + (d.getTime()) + "</number>\n");
-            }
-          }
-          else if (clipboardOption == ParamPanel.RoutingOutputList.TXT)
-          {
-            Date d = new Date();
-            clipboardContent += ("Weather Wizard route (" + WWGnlUtilities.SDF_DMY.format(d) + ") generated " + d.toString() + ")\n");
-          }
-
+          }          
+          // Routing output
+          RoutingUtil.outputRouting(instance, from, to, closestPoint, allCalculatedIsochrons);        
           if (closestPoint != null && allCalculatedIsochrons != null)
           {
-            Calendar cal = new GregorianCalendar();
-            List<RoutingPoint> bestRoute = RoutingUtil.getBestRoute(closestPoint, allCalculatedIsochrons);
-            int routesize = bestRoute.size();
-            String date = "", time = "";
-            RoutingPoint rp = null;
-            RoutingPoint ic = null; // Isochron Center
-//          for (int r=0; r<routesize; r++) // 0 is the closest point, the last calculated
-            for (int r=routesize - 1; r>=0; r--) // 0 is the closest point, the last calculated
-            {
-              rp = bestRoute.get(r);
-              if (r == 0) // Last one
-                ic = rp;
-              else
-                ic = bestRoute.get(r-1);
-                
-              if (rp.getDate() == null)
-                date = time = "";
-              else
-              {
-                cal.setTime(rp.getDate());
-                    
-                int year    = cal.get(Calendar.YEAR);
-                int month   = cal.get(Calendar.MONTH);
-                int day     = cal.get(Calendar.DAY_OF_MONTH);
-                int hours   = cal.get(Calendar.HOUR_OF_DAY);
-                int minutes = cal.get(Calendar.MINUTE);
-                int seconds = cal.get(Calendar.SECOND);
-                if (clipboardOption == ParamPanel.RoutingOutputList.CSV)
-                {
-                  date = WWGnlUtilities.DF2.format(month + 1) + "/" + WWGnlUtilities.DF2.format(day) + "/" + Integer.toString(year);
-                  time = WWGnlUtilities.DF2.format(hours) + ":" + WWGnlUtilities.DF2.format(minutes);
-                }
-                else if (clipboardOption == ParamPanel.RoutingOutputList.GPX)
-                {
-                  date = Integer.toString(year) + "-" + 
-                         WWGnlUtilities.DF2.format(month + 1) + "-" + 
-                         WWGnlUtilities.DF2.format(day) + "T" +
-                         WWGnlUtilities.DF2.format(hours) + ":" + 
-                         WWGnlUtilities.DF2.format(minutes) + ":" +
-                         WWGnlUtilities.DF2.format(seconds) + "Z";
-                }
-                else if (clipboardOption == ParamPanel.RoutingOutputList.TXT)
-                {
-                  date = rp.getDate().toString();
-                }
-              }    
-              if (clipboardOption == ParamPanel.RoutingOutputList.CSV)
-              {
-                String lat = GeomUtil.decToSex(rp.getPosition().getL(), GeomUtil.SWING, GeomUtil.NS);
-                String lng = GeomUtil.decToSex(rp.getPosition().getG(), GeomUtil.SWING, GeomUtil.EW);
-                String tws = WWGnlUtilities.XX22.format(ic.getTws());
-                String twd = Integer.toString(ic.getTwd());
-                String bsp = WWGnlUtilities.XX22.format(ic.getBsp());
-                String hdg = Integer.toString(ic.getHdg());
-                    
-                clipboardContent += (lat + ";" + 
-                                     Double.toString(rp.getPosition().getL()) + ";" +
-                                     lng + ";" + 
-                                     Double.toString(rp.getPosition().getG()) + ";" +
-                                     date + ";" + 
-                                     time + ";" + 
-                                     tws + ";" +
-                                     twd + ";" + 
-                                     bsp + ";" + 
-                                     hdg + "\n");
-              }
-              else if (clipboardOption == ParamPanel.RoutingOutputList.GPX)
-              {
-                if (generateGPXRoute)
-                {
-                  NumberFormat nf = NumberFormat.getInstance(Locale.ENGLISH);      
-                  nf.setMaximumFractionDigits(2);
-                  clipboardContent +=
-                    ("       <rtept lat=\"" + rp.getPosition().getL() + "\" lon=\"" + rp.getPosition().getG() + "\">\n" + 
-                    "            <name>" + WWGnlUtilities.DF3.format(routesize - r) + "_WW</name>\n" + 
-                    "            <desc>Waypoint " + Integer.toString(routesize - r) + ";VMG=" + nf.format(ic.getBsp()) + ";</desc>\n" +
-                //  "            <sym>triangle</sym>\n" + 
-                    "            <sym>empty</sym>\n" + 
-                    "            <type>WPT</type>\n" + 
-                    "            <extensions>\n" + 
-                    "                <opencpn:prop>A,0,1,1,1</opencpn:prop>\n" + 
-                    "                <opencpn:viz>1</opencpn:viz>\n" + 
-                    "                <opencpn:viz_name>0</opencpn:viz_name>\n" +
-                    "            </extensions>\n" + 
-                    "        </rtept>\n");
-                }
-                else
-                {
-                  clipboardContent +=
-                    ("  <wpt lat=\"" + rp.getPosition().getL() + "\" lon=\"" + rp.getPosition().getG() + "\">\n" + 
-                     "    <time>" + date + "</time>\n" + 
-                     "    <name>" + WWGnlUtilities.DF3.format(r) + "_WW</name>\n" + 
-                     "    <sym>triangle</sym>\n" + 
-                     "    <type>WPT</type>\n" + 
-                     "    <extensions>\n" + 
-                     "            <opencpn:guid>142646-1706866-1264115693</opencpn:guid>\n" + 
-                     "            <opencpn:viz>1</opencpn:viz>\n" + 
-                     "            <opencpn:viz_name>1</opencpn:viz_name>\n" + 
-                     "            <opencpn:shared>1</opencpn:shared>\n" + 
-                     "    </extensions>\n" +
-                     "  </wpt>\n");
-                }
-              }
-              else if (clipboardOption == ParamPanel.RoutingOutputList.TXT)
-              {
-                String tws = WWGnlUtilities.XX22.format(ic.getTws());
-                String twd = Integer.toString(ic.getTwd());
-                String bsp = WWGnlUtilities.XX22.format(ic.getBsp());
-                String hdg = Integer.toString(ic.getHdg());
-                clipboardContent +=
-                  (rp.getPosition().toString() + " : " + date + ", tws:" + tws + ", twd:" + twd + ", bsp:" + bsp + ", hdg:" + hdg + "\n");
-              }
-            }
-            if (clipboardOption == ParamPanel.RoutingOutputList.GPX)
-            {
-              if (generateGPXRoute)
-                clipboardContent += "  </rte>\n";
-              clipboardContent +=
-               ("</gpx>");
-            }
-
-//          commandPanelInstance.repaint();
-            if (fileOutput != null && fileOutput.trim().length() > 0)            
-            {
-              try
-              {
-                BufferedWriter bw = new BufferedWriter(new FileWriter(fileOutput));              
-                bw.write(clipboardContent + "\n");
-                bw.close();
-              }
-              catch (Exception ex)
-              {
-                ex.printStackTrace();
-              }
-              WWContext.getInstance().fireSetStatus(WWGnlUtilities.buildMessage("routing-in-file", new String[] { fileOutput }));
-            }
-            else
-            {
-              Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-              StringSelection stringSelection = new StringSelection(clipboardContent);
-              clipboard.setContents(stringSelection, null);    
-  //          JOptionPane.showMessageDialog(null, "Routing is in the clipboard\n(Ctrl+V in any editor...)", "Routing completed", JOptionPane.INFORMATION_MESSAGE);
-              WWContext.getInstance().fireSetStatus(WWGnlUtilities.buildMessage("routing-in-clip"));
-            }
-
-            WWContext.getInstance().fireRoutingAvailable(true, bestRoute);                        
             displayGRIBSlice(bestRoute);
-            
-            // End of the Routing.
-            
-  //        routingMode = false;
-  //        JOptionPane.showMessageDialog(null, "Isochron Calculation completed", "Routing", 1);
-//          System.out.println("RoutingMode:" + routingMode + ", from:" + (from==null?"":"not ") + "null" +
-//                                                            ", to:" + (to==null?"":"not ") + "null" +
-//                                                            ", allIsochrons:" + (allIsochrons==null?"":"not ") + "null");
-            
-          }
+          }          
           repaint();
         }
       };

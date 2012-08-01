@@ -32,7 +32,9 @@ import java.util.Arrays;
 import java.util.EventObject;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.Vector;
@@ -345,7 +347,7 @@ public final class ParamPanel
         it = new Integer(0);
         break;
       case ParamData.GRAY_PANEL_OPTION:
-        it = new GrayPanelOptionList(AdjustFrame.GRAY_PANEL_NONE_OPTION);
+        it = new GrayPanelOptionList(AdjustFrame.GRAY_PANEL_NO_FADE_OPTION);
         break;
       case ParamData.GRAY_PANEL_OPACITY:
         it = new Float(0.75);
@@ -1697,12 +1699,16 @@ public final class ParamPanel
     private static String[] map = { "CSV", 
                                     "GPX",
                                     "Text",
-                                    WWGnlUtilities.buildMessage("ask-user-every-time")};
+                                    WWGnlUtilities.buildMessage("ask-user-every-time"),
+                                    "KML",
+                                    "json"};
 
-    public final static int CSV = 0;
-    public final static int GPX = 1;
-    public final static int TXT = 2;
-    public final static int ASK = 3;
+    public final static int CSV  = 0;
+    public final static int GPX  = 1;
+    public final static int TXT  = 2;
+    public final static int ASK  = 3;
+    public final static int KML  = 4;
+    public final static int JSON = 5;
     
     public RoutingOutputList(int key)
     { 
@@ -1880,11 +1886,12 @@ public final class ParamPanel
    
   public static class GrayPanelOptionList extends ListOfValues
   {
-    private static HashMap<Integer, String> map = new HashMap<Integer, String>(3);
+    private static Map<Integer, String> map = new LinkedHashMap<Integer, String>(3);
     
     public GrayPanelOptionList(int key)
     { 
-      map.put(AdjustFrame.GRAY_PANEL_NONE_OPTION,       WWGnlUtilities.buildMessage("no-fade"));      
+      map.put(AdjustFrame.GRAY_PANEL_NOPANEL_OPTION,    WWGnlUtilities.buildMessage("no-gray-panel"));      
+      map.put(AdjustFrame.GRAY_PANEL_NO_FADE_OPTION,    WWGnlUtilities.buildMessage("no-fade"));      
       map.put(AdjustFrame.GRAY_PANEL_SHIFT_DOWN_OPTION, WWGnlUtilities.buildMessage("shift-down"));      
       map.put(AdjustFrame.GRAY_PANEL_FADE_OPTION,       WWGnlUtilities.buildMessage("fade-option"));      
       map.put(AdjustFrame.GRAY_PANEL_SECTOR_OPTION,     WWGnlUtilities.buildMessage("circle-whipe"));      
@@ -1892,7 +1899,7 @@ public final class ParamPanel
       super.setCurrentValue(map.get(key));
     }
     
-    public static HashMap<Integer, String> getMap()
+    public static Map<Integer, String> getMap()
     {
       return map;
     }

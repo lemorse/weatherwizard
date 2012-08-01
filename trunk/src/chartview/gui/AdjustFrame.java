@@ -118,12 +118,13 @@ public class AdjustFrame
 
   private FileTypeHolder allJTrees = new FileTypeHolder();
   
-  public final static int GRAY_PANEL_NONE_OPTION       = 0;
-  public final static int GRAY_PANEL_FADE_OPTION       = 1;
-  public final static int GRAY_PANEL_SHIFT_DOWN_OPTION = 2;
-  public final static int GRAY_PANEL_SECTOR_OPTION     = 3;
+  public final static int GRAY_PANEL_NOPANEL_OPTION    = -1;
+  public final static int GRAY_PANEL_NO_FADE_OPTION    =  0;
+  public final static int GRAY_PANEL_FADE_OPTION       =  1;
+  public final static int GRAY_PANEL_SHIFT_DOWN_OPTION =  2;
+  public final static int GRAY_PANEL_SECTOR_OPTION     =  3;
   
-  private static int grayPanelOption = GRAY_PANEL_NONE_OPTION;
+  private static int grayPanelOption = GRAY_PANEL_NO_FADE_OPTION;
   
   int grayPanelY = 0;
   int grayPanelSectorAngle = 0;  
@@ -174,7 +175,8 @@ public class AdjustFrame
         GradientPaint gradient = new GradientPaint(this.getWidth(), this.getHeight(), startColor, 0, 0, endColor); // top right to bottom left
         ((Graphics2D)g).setPaint(gradient);
         
-        if (grayPanelOption == GRAY_PANEL_SHIFT_DOWN_OPTION ||
+        if (grayPanelOption == GRAY_PANEL_NO_FADE_OPTION ||
+            grayPanelOption == GRAY_PANEL_SHIFT_DOWN_OPTION ||
             grayPanelOption == GRAY_PANEL_FADE_OPTION)
           g.fillRect(0, 0, this.getWidth(), this.getHeight());
         if (grayPanelOption == GRAY_PANEL_SECTOR_OPTION)
@@ -1254,7 +1256,7 @@ public class AdjustFrame
             }
             // Fade gray panel
         //  grayPanelOption = Integer.parseInt(((ParamPanel.GrayPanelOptionList)(ParamPanel.data[ParamData.GRAY_PANEL_OPTION][ParamData.VALUE_INDEX])).getStringIndex());
-            if (grayPanelOption != GRAY_PANEL_NONE_OPTION)
+            if (grayPanelOption != GRAY_PANEL_NO_FADE_OPTION)
             {
               synchronized (layers)
               {
