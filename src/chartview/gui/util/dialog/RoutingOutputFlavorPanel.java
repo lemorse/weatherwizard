@@ -43,6 +43,8 @@ public class RoutingOutputFlavorPanel
   private JPanel filePanel = new JPanel();
   private JButton saveAsButton = new JButton();
   private JTextField fileNameTextField = new JTextField();
+  private JRadioButton kmlRadioButton = new JRadioButton();
+  private JRadioButton jsonRadioButton = new JRadioButton();
 
   public RoutingOutputFlavorPanel()
   {
@@ -87,18 +89,32 @@ public class RoutingOutputFlavorPanel
           new Insets(0, 0, 0, 0), 0, 0));
     this.add(rightPanel, new GridBagConstraints(3, 1, 1, 3, 0.0, 0.0, GridBagConstraints.NORTH, GridBagConstraints.NONE,
           new Insets(0, 10, 0, 0), 0, 0));
-    this.add(separator, new GridBagConstraints(2, 1, 1, 3, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.VERTICAL,
+    this.add(separator, new GridBagConstraints(2, 1, 1, 5, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.VERTICAL,
           new Insets(0, 5, 0, 5), 0, 0));
-    rightPanel.add(clipboardRadioButton, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
+    this.add(kmlRadioButton, new GridBagConstraints(1, 4, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
           new Insets(0, 0, 0, 0), 0, 0));
-    rightPanel.add(saveFileRadioButton, new GridBagConstraints(2, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
-          new Insets(0, 5, 0, 0), 0, 0));
-    rightPanel.add(filePanel, new GridBagConstraints(1, 1, 2, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
-          new Insets(5, 0, 0, 0), 0, 0));
-    
+    this.add(jsonRadioButton, new GridBagConstraints(1, 5, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
+          new Insets(0, 0, 0, 0), 0, 0));
+    rightPanel.add(clipboardRadioButton,
+                   new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
+                                          new Insets(0, 0, 0, 0), 0, 0));
+    rightPanel.add(saveFileRadioButton,
+                   new GridBagConstraints(2, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
+                                          new Insets(0, 5, 0, 0), 0, 0));
+    rightPanel.add(filePanel,
+                   new GridBagConstraints(1, 1, 2, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(5,
+                                                                                                                               0,
+                                                                                                                               0,
+                                                                                                                               0),
+                                          0, 0));
+
     filePanel.add(fileNameTextField, null);
     filePanel.add(saveAsButton, null);
     fileNameTextField.setEnabled(false);
+    kmlRadioButton.setText("KML");
+    kmlRadioButton.setToolTipText("<html>For Google Earth</html>");
+    jsonRadioButton.setText("json");
+    jsonRadioButton.setToolTipText("<html>JavaScript Object Notation,<br>suitable for GoogleMaps</html>");
     saveAsButton.setEnabled(false);
 
     saveAsButton.addActionListener(new ActionListener()
@@ -111,7 +127,9 @@ public class RoutingOutputFlavorPanel
     groupOne.add(csvRadioButton);
     groupOne.add(gpxRadioButton);
     groupOne.add(txtRadioButton);
-    
+    groupOne.add(kmlRadioButton);
+    groupOne.add(jsonRadioButton);
+
     groupTwo.add(clipboardRadioButton);
     groupTwo.add(saveFileRadioButton);
   }
@@ -125,6 +143,10 @@ public class RoutingOutputFlavorPanel
       option = ParamPanel.RoutingOutputList.TXT;
     else if (gpxRadioButton.isSelected())
       option = ParamPanel.RoutingOutputList.GPX;
+    else if (kmlRadioButton.isSelected())
+      option = ParamPanel.RoutingOutputList.KML;
+    else if (jsonRadioButton.isSelected())
+      option = ParamPanel.RoutingOutputList.JSON;
     return option;
   }
   
