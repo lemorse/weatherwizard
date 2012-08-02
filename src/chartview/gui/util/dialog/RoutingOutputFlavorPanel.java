@@ -171,6 +171,10 @@ public class RoutingOutputFlavorPanel
       extension = "txt";
     else if (gpxRadioButton.isSelected())
       extension = "gpx";
+    else if (kmlRadioButton.isSelected())
+      extension = "kml";
+    else if (jsonRadioButton.isSelected())
+      extension = "json";
     String fileName = WWGnlUtilities.chooseFile(this, JFileChooser.FILES_ONLY, 
                                                 new String[] { extension }, 
                                                 "Routing output", 
