@@ -11,6 +11,7 @@ This page takes over and replaces the one [http://donpedro.lediouris.net/softwar
 = Details =
 
 || *Date* || *Description* || *Impacted file(s)* ||
+|| 2-Aug-2012 || Fixed the file type option when saving a routing. || chartadjust.jar ||
 || 27-Jul-2012 || Added chexboxes in the routing summary. || chartadjust.jar ||
 || 18-Jul-2012 || Notifications (bug fix). Use -Dnotifications=all to see all notifications.<br>Added a thumbnail in the control pane. || chartadjust.jar, coreutilities.jar ||
 || 28-Jun-2012 || New logo in the About box! || chartadjust.jar, coreutilities.jar ||
