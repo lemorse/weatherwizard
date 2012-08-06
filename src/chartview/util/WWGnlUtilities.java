@@ -48,7 +48,10 @@ import java.awt.FontFormatException;
 import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.Image;
+import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Polygon;
 
@@ -3567,7 +3570,7 @@ public class WWGnlUtilities
               extends JPanel
            implements PropertyChangeListener
   {
-    JButton playButton = new JButton("Play");
+    JButton playButton = new JButton("Play"); // LOCALIZE
     String soundFileName = null;
     
     private final static int DEFAULT_WIDTH  = 100;
@@ -3577,8 +3580,9 @@ public class WWGnlUtilities
     {
       setPreferredSize(new Dimension(DEFAULT_WIDTH, DEFAULT_HEIGHT));
       fc.addPropertyChangeListener(this);
-      this.setLayout(new BorderLayout());
-      this.add(playButton, BorderLayout.NORTH);
+      this.setLayout(new GridBagLayout());
+      this.add(playButton, 
+               new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.NORTH, GridBagConstraints.NONE, new Insets(5, 5, 0, 5), 0, 0));
       playButton.setEnabled(false);
       playButton.addActionListener(new ActionListener()
        {
