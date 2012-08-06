@@ -27,6 +27,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 
+import java.net.MalformedURLException;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EventObject;
@@ -365,7 +367,7 @@ public final class ParamPanel
         it = new AnemometerHandOptionList(AnemometerHandOptionList.ARROW_HAND_OPTION);
         break;
       case ParamData.PLAY_SOUND_ON_JOB_COMPLETION:
-        it = new DataFile(new String[] {"wav", "ogg"}, WWGnlUtilities.buildMessage("sounds"), "." + File.separator + "sounds" + File.separator + "gong.wav");
+        it = new SoundFile(new String[] {"wav", "ogg"}, WWGnlUtilities.buildMessage("sounds"), "." + File.separator + "sounds" + File.separator + "gong.wav");
         break;
       default:
         break;
@@ -492,8 +494,8 @@ public final class ParamPanel
               else if (i == ParamData.ANEMOMETER_HAND_OPTION)
                 data[i][ParamData.VALUE_INDEX] = new AnemometerHandOptionList(Integer.parseInt(s));  
               else if (i == ParamData.PLAY_SOUND_ON_JOB_COMPLETION)              // DataFiles, Sound
-                data[i][ParamData.VALUE_INDEX] = new DataFile(new String[] {"wav", "ogg"}, "Sounds", s);
-              else                                                 // Strings
+                data[i][ParamData.VALUE_INDEX] = new SoundFile(new String[] {"wav", "ogg"}, "Sounds", s);
+              else                                               // Strings
                 data[i][ParamData.VALUE_INDEX] = s;
             }
             catch (Exception ex)
@@ -631,10 +633,14 @@ public final class ParamPanel
           cloned = new String(data[index][ParamData.VALUE_INDEX].toString());
         else if (data[index][ParamData.VALUE_INDEX] instanceof Boolean)
           cloned = ((Boolean)data[index][ParamData.VALUE_INDEX]).booleanValue();
+        else if (data[index][ParamData.VALUE_INDEX] instanceof SoundFile)
+          cloned = new SoundFile(((SoundFile)data[index][ParamData.VALUE_INDEX]).getFileExt(),
+                                ((SoundFile)data[index][ParamData.VALUE_INDEX]).getDesc(),
+                                ((SoundFile)data[index][ParamData.VALUE_INDEX]).getValue());
         else if (data[index][ParamData.VALUE_INDEX] instanceof DataFile)
-          cloned = new DataFile(((DataFile)data[index][ParamData.VALUE_INDEX]).fileExt,
-                                ((DataFile)data[index][ParamData.VALUE_INDEX]).desc,
-                                ((DataFile)data[index][ParamData.VALUE_INDEX]).value);
+          cloned = new DataFile(((DataFile)data[index][ParamData.VALUE_INDEX]).getFileExt(),
+                                ((DataFile)data[index][ParamData.VALUE_INDEX]).getDesc(),
+                                ((DataFile)data[index][ParamData.VALUE_INDEX]).getValue());
         else if (data[index][ParamData.VALUE_INDEX] instanceof DataDirectory)
           cloned = new DataDirectory(((DataDirectory)data[index][ParamData.VALUE_INDEX]).desc,
                                      ((DataDirectory)data[index][ParamData.VALUE_INDEX]).value);
@@ -811,11 +817,17 @@ public final class ParamPanel
             catch (Exception e) 
             { 
               JOptionPane.showMessageDialog(this, 
-                                            e.getMessage(), WWGnlUtilities.buildMessage("modifying-parameters"), 
+                                            e.getMessage(), 
+                                            WWGnlUtilities.buildMessage("modifying-parameters"), 
                                             JOptionPane.ERROR_MESSAGE);
               ok2go = false; 
             }    
           }
+//        if (currentIndex == ParamData.PLAY_SOUND_ON_JOB_COMPLETION)
+//        {
+          // Play it?
+//          final String soundName = ((ParamPanel.SoundFile) ParamPanel.data[ParamData.PLAY_SOUND_ON_JOB_COMPLETION][ParamData.VALUE_INDEX]).toString();
+//        }
           // Ok to go
           if (ok2go)
           {
@@ -1125,6 +1137,11 @@ public final class ParamPanel
       {
         componentToApply = new ColorPickerCellEditor((Color)value);        
       }
+      else if (column == 1 && value instanceof SoundFile)
+      {
+        SoundFile sf = (SoundFile)value;
+        componentToApply = new FilePickerCellEditor(sf, sf.getFileExt(), sf.getDesc());
+      }
       else if (column == 1 && value instanceof DataFile)
       {
         DataFile df = (DataFile)value;
@@ -1242,7 +1259,7 @@ public final class ParamPanel
       }
       else if (componentToApply instanceof FilePickerCellEditor)
       {
-        return ((DataFile)((FilePickerCellEditor)componentToApply).getCellEditorValue()); // .toString();
+        return (/*(DataFile)*/((FilePickerCellEditor)componentToApply).getCellEditorValue()); // .toString();
       }
       else if (componentToApply instanceof DirectoryPickerCellEditor)
       {
@@ -1530,8 +1547,17 @@ public final class ParamPanel
     
     public String[] getFileExt() { return fileExt; }
     public String getDesc() { return desc; }
+    public String getValue() { return value; }
     public String toString() { return value; }
     public void setValue(String s) { value = s; }
+  }
+  
+  public static class SoundFile extends DataFile
+  {
+    public SoundFile(String[] sa, String s, String str)
+    {
+      super(sa, s, str);
+    }
   }
   
   public static class DataDirectory
