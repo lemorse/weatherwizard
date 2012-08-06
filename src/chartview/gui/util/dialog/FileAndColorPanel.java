@@ -98,10 +98,13 @@ public class FileAndColorPanel
   {
     String firstDir = ((ParamPanel.DataPath) ParamPanel.data[ParamData.FAX_FILES_LOC][ParamData.VALUE_INDEX]).toString().split(File.pathSeparator)[0];
     String fax = WWGnlUtilities.chooseFile(this, 
-                                         JFileChooser.FILES_ONLY, 
-                                         new String[] { "gif", "jpg", "jpeg", "tif", "tiff", "png" }, WWGnlUtilities.buildMessage("splash-faxes"), 
-                                         firstDir, WWGnlUtilities.buildMessage("open"), WWGnlUtilities.buildMessage("open-fax"), 
-                                         true);
+                                           JFileChooser.FILES_ONLY, 
+                                           new String[] { "gif", "jpg", "jpeg", "tif", "tiff", "png" }, 
+                                           WWGnlUtilities.buildMessage("splash-faxes"), 
+                                           firstDir, 
+                                           WWGnlUtilities.buildMessage("open"), 
+                                           WWGnlUtilities.buildMessage("open-fax"), 
+                                           true); // true: with previewer
     if (fax != null && fax.trim().length() > 0)
       fileNameTextField.setText(fax);
   }

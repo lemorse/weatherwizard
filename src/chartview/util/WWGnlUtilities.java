@@ -7,8 +7,6 @@ import chart.components.ui.ChartPanel;
 import chartview.ctx.ApplicationEventListener;
 import chartview.ctx.WWContext;
 
-//import chartview.ctx.WWContext.ToolFileFilter;
-
 import chartview.gui.AdjustFrame;
 import chartview.gui.left.FileTypeHolder;
 import chartview.gui.right.CommandPanel;
@@ -22,17 +20,15 @@ import chartview.gui.util.dialog.places.PlacesTablePanel;
 import chartview.gui.util.param.ParamData;
 import chartview.gui.util.param.ParamPanel;
 
-//import chartview.util.WWGnlUtilities.BoatPosition;
+import chartview.gui.util.param.widget.FieldPlusFinder;
+
 import chartview.util.http.HTTPClient;
 import chartview.util.local.WeatherAssistantResourceBundle;
-
-//import chartview.util.progress.ProgressMonitor;
 
 import chartview.util.nmeaclient.BoatPositionGPSdClient;
 import chartview.util.progress.ProgressUtil;
 
 import chartview.util.nmeaclient.BoatPositionSerialClient;
-//import chartview.util.serial.WWNMEAReader;
 
 import chartview.util.nmeaclient.BoatPositionTCPClient;
 
@@ -58,17 +54,14 @@ import java.awt.Polygon;
 
 import java.awt.Stroke;
 
-import java.awt.event.KeyAdapter;
-
-import java.awt.event.KeyEvent;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-//import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-//import java.io.ByteArrayInputStream;
 import java.io.File;
 
 import java.io.FileFilter;
@@ -118,7 +111,6 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-//import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import javax.management.MBeanServerConnection;
@@ -135,6 +127,7 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
@@ -158,8 +151,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
-
-// import com.sun.tools.attach.VirtualMachine;
 
 public class WWGnlUtilities
 {
@@ -573,7 +564,7 @@ public class WWGnlUtilities
     return WWGnlUtilities.chooseFile(null, mode, flt, desc, where, buttonLabel, dialogLabel);
   }
 
-  private static FilePreviewer previewer;
+  private static JComponent /*FilePreviewer*/ previewer;
   
   public static String chooseFile(Component parent, 
                                   int mode, 
@@ -585,7 +576,10 @@ public class WWGnlUtilities
   {
     return WWGnlUtilities.chooseFile(parent, mode, flt, desc, where, buttonLabel, dialogLabel, false);
   }
-
+  
+  public final static int IMAGE_PREVIEWER_OPTION = 1;
+  public final static int SOUND_PREVIEWER_OPTION = 2;
+  
   public static String chooseFile(Component parent, 
                                   int mode, 
                                   String[] flt, 
@@ -595,11 +589,36 @@ public class WWGnlUtilities
                                   String dialogLabel,
                                   boolean withPreviewer)
   {
+    return chooseFile(parent, mode, flt, desc, where, buttonLabel, dialogLabel, withPreviewer, IMAGE_PREVIEWER_OPTION);
+  }
+  
+  public static String chooseFile(Component parent, 
+                                  int mode, 
+                                  String[] flt, 
+                                  String desc, 
+                                  String where, 
+                                  String buttonLabel, 
+                                  String dialogLabel,
+                                  boolean withPreviewer,
+                                  int option)
+  {
     String fileName = "";
     JFileChooser chooser = new JFileChooser();
+    if (parent instanceof FieldPlusFinder)
+    {
+//    System.out.println("Parent:" + parent.getParent().getClass().getName()); // look for the "value"
+      if (((FieldPlusFinder)parent).getValue() instanceof ParamPanel.SoundFile)
+      {
+        withPreviewer = true;
+        option = SOUND_PREVIEWER_OPTION;
+      }
+    }
     if (withPreviewer)
     {
-      previewer = new FilePreviewer(chooser);
+      if (option == IMAGE_PREVIEWER_OPTION)
+        previewer = new FilePreviewer(chooser);
+      else if (option == SOUND_PREVIEWER_OPTION)
+        previewer = new SoundPreviewer(chooser);
       chooser.setAccessory(previewer);
     }
     // QUESTION Sort the file by date, most recent on top. If possible... :(
@@ -3544,6 +3563,80 @@ public class WWGnlUtilities
     }
   }
   
+  public static class SoundPreviewer
+              extends JPanel
+           implements PropertyChangeListener
+  {
+    JButton playButton = new JButton("Play");
+    String soundFileName = null;
+    
+    private final static int DEFAULT_WIDTH  = 100;
+    private final static int DEFAULT_HEIGHT = 200;
+
+    public SoundPreviewer(final JFileChooser fc)
+    {
+      setPreferredSize(new Dimension(DEFAULT_WIDTH, DEFAULT_HEIGHT));
+      fc.addPropertyChangeListener(this);
+      this.setLayout(new BorderLayout());
+      this.add(playButton, BorderLayout.NORTH);
+      playButton.setEnabled(false);
+      playButton.addActionListener(new ActionListener()
+       {
+          public void actionPerformed(ActionEvent e)
+          {
+            if (soundFileName != null && soundFileName.trim().length() > 0)
+            {
+                Thread playThread = new Thread()
+                  {
+                    public void run()
+                    {
+                      try
+                      {
+                        playSound(new File(soundFileName).toURI().toURL());
+                      }
+                      catch (Exception ex)
+                      {
+                        JOptionPane.showMessageDialog(fc, ex.getLocalizedMessage(), "Playing sound", JOptionPane.ERROR_MESSAGE);
+                      }
+                    }
+                  };
+                playThread.start();
+            }
+          }
+      });
+    }
+
+    public void propertyChange(PropertyChangeEvent e)
+    {
+      String prop = e.getPropertyName();
+      soundFileName = "";
+      playButton.setEnabled(false);
+      if (prop == JFileChooser.SELECTED_FILE_CHANGED_PROPERTY)
+      {
+        if (isShowing())
+        {
+          try 
+          { 
+            soundFileName = ((File) e.getNewValue()).getAbsolutePath();
+//          System.out.println("Sound file name [" + soundFileName + "]");
+            playButton.setEnabled(true);
+          }
+          catch (Exception ex)
+          {
+            // System.out.println("New Value:" + e.getNewValue());
+          }
+          repaint();
+        }
+      }
+    }
+
+//    public void paint(Graphics g)
+//    {
+//      g.setColor(Color.blue);
+//      g.fillRect(0, 0, getWidth(), getHeight());
+//    }
+  }
+  
   public static class SpecialBool
   {
     private boolean b = true;
@@ -3885,46 +3978,46 @@ public class WWGnlUtilities
     return ret;
   }
 
-  public static long memoryProbe()
-  {
-    long memoryUsed = 0L;
-    
-    RuntimeMXBean runtimeMXBean = ManagementFactory.getRuntimeMXBean();
-    String beanName = runtimeMXBean.getName();
-    String pidStr = beanName.substring(0, beanName.indexOf("@"));
-    String pid2look4 = pidStr;
-
-    try
-    {
-      com.sun.tools.attach.VirtualMachine vm = com.sun.tools.attach.VirtualMachine.attach(pid2look4);
-      String connectorAddr = vm.getAgentProperties().getProperty("com.sun.management.jmxremote.localConnectorAddress");
-      if (connectorAddr == null)
-      {
-        String agent = vm.getSystemProperties().getProperty("java.home") + File.separator + "lib" + File.separator + "management-agent.jar";
-        vm.loadAgent(agent);
-        connectorAddr = vm.getAgentProperties().getProperty("com.sun.management.jmxremote.localConnectorAddress");
-      }
-      JMXServiceURL serviceURL = new JMXServiceURL(connectorAddr);
-      JMXConnector connector = JMXConnectorFactory.connect(serviceURL);
-      MBeanServerConnection mbsc = connector.getMBeanServerConnection();
-      
-      ObjectName objName = new ObjectName(ManagementFactory.MEMORY_MXBEAN_NAME);
-      Set<ObjectName> mbeans = mbsc.queryNames(objName, null);
-      for (ObjectName name: mbeans)
-      {
-        MemoryMXBean mxBean;
-        mxBean = ManagementFactory.newPlatformMXBeanProxy(mbsc, name.toString(), MemoryMXBean.class);
-        memoryUsed = mxBean.getHeapMemoryUsage().getUsed();
-  //    System.out.println("MemoryUsed:" + memoryUsed + " bytes (" + formatMem(memoryUsed).trim() + ")");
-      }      
-    }
-    catch (Exception ex)
-    {
-      System.err.println("Oops 3 - " + ex.getLocalizedMessage());
-      throw new RuntimeException(ex);
-    }
-    return memoryUsed;
-  }
+//  public static long memoryProbe()
+//  {
+//    long memoryUsed = 0L;
+//    
+//    RuntimeMXBean runtimeMXBean = ManagementFactory.getRuntimeMXBean();
+//    String beanName = runtimeMXBean.getName();
+//    String pidStr = beanName.substring(0, beanName.indexOf("@"));
+//    String pid2look4 = pidStr;
+//
+//    try
+//    {
+//      com.sun.tools.attach.VirtualMachine vm = com.sun.tools.attach.VirtualMachine.attach(pid2look4);
+//      String connectorAddr = vm.getAgentProperties().getProperty("com.sun.management.jmxremote.localConnectorAddress");
+//      if (connectorAddr == null)
+//      {
+//        String agent = vm.getSystemProperties().getProperty("java.home") + File.separator + "lib" + File.separator + "management-agent.jar";
+//        vm.loadAgent(agent);
+//        connectorAddr = vm.getAgentProperties().getProperty("com.sun.management.jmxremote.localConnectorAddress");
+//      }
+//      JMXServiceURL serviceURL = new JMXServiceURL(connectorAddr);
+//      JMXConnector connector = JMXConnectorFactory.connect(serviceURL);
+//      MBeanServerConnection mbsc = connector.getMBeanServerConnection();
+//      
+//      ObjectName objName = new ObjectName(ManagementFactory.MEMORY_MXBEAN_NAME);
+//      Set<ObjectName> mbeans = mbsc.queryNames(objName, null);
+//      for (ObjectName name: mbeans)
+//      {
+//        MemoryMXBean mxBean;
+//        mxBean = ManagementFactory.newPlatformMXBeanProxy(mbsc, name.toString(), MemoryMXBean.class);
+//        memoryUsed = mxBean.getHeapMemoryUsage().getUsed();
+//  //    System.out.println("MemoryUsed:" + memoryUsed + " bytes (" + formatMem(memoryUsed).trim() + ")");
+//      }      
+//    }
+//    catch (Exception ex)
+//    {
+//      System.err.println("Oops 3 - " + ex.getLocalizedMessage());
+//      throw new RuntimeException(ex);
+//    }
+//    return memoryUsed;
+//  }
   
   public static String formatMem(long amount)
   {

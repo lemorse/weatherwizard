@@ -539,12 +539,12 @@ public class ChartAdjust
       {
         public void run()
         {
-          boolean ok = true;
+          boolean ok = false;
           while (ok)
           {
             try
             {
-              long mem = WWGnlUtilities.memoryProbe();
+              long mem = 0L; // WWGnlUtilities.memoryProbe();
               String memMess = "Memory used:" + WWGnlUtilities.formatMem(mem); // LOCALIZE
               WWContext.getInstance().fireSetStatus(memMess);
               try { Thread.sleep(5000L); } catch (Exception ignore) {}

@@ -1228,7 +1228,7 @@ public class AdjustFrame
           else
           {            
 //          WWContext.getInstance().fireInterruptProcess();
-            final String soundName = ((ParamPanel.DataFile) ParamPanel.data[ParamData.PLAY_SOUND_ON_JOB_COMPLETION][ParamData.VALUE_INDEX]).toString();
+            final String soundName = ((ParamPanel.SoundFile) ParamPanel.data[ParamData.PLAY_SOUND_ON_JOB_COMPLETION][ParamData.VALUE_INDEX]).toString();
             if (soundName.trim().length() > 0) // Play Sound on Completion
             {
               Thread playThread = new Thread()
@@ -1252,12 +1252,14 @@ public class AdjustFrame
                     }
                   }
                 };
+              System.out.println("Pouet-pouet");
               playThread.start();
             }
             // Fade gray panel
         //  grayPanelOption = Integer.parseInt(((ParamPanel.GrayPanelOptionList)(ParamPanel.data[ParamData.GRAY_PANEL_OPTION][ParamData.VALUE_INDEX])).getStringIndex());
             if (grayPanelOption != GRAY_PANEL_NO_FADE_OPTION)
             {
+              System.out.println("Gray panel disapears");
               synchronized (layers)
               {
 //              Runnable shiftGrayLayerDown = new Runnable()
