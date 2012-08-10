@@ -383,6 +383,7 @@ public class RoutingPanel extends JPanel
         {
           CommandPanel cp = ((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getCommandPanel();
           cp.setDrawBestRoute(showRoute.isSelected());
+          showLabels.setEnabled(showRoute.isSelected());
           cp.getChartPanel().repaint();
         }
       });
@@ -402,6 +403,7 @@ public class RoutingPanel extends JPanel
        public void setDisplayBestRoute(boolean b) 
        {
          showRoute.setSelected(b);
+         showLabels.setEnabled(showRoute.isSelected());
        }
        public void setDisplayRoutingLabels(boolean b) 
        {
@@ -419,7 +421,8 @@ public class RoutingPanel extends JPanel
     CommandPanel cp = ((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getCommandPanel();
     showIsochrons.setSelected(cp.isDrawIsochrons());
     showRoute.setSelected(cp.isDrawBestRoute());
-    showLabels.setSelected(cp.isPostitOnRoute());
+    showLabels.setEnabled(showRoute.isSelected());
+    showLabels.setSelected(showRoute.isSelected() && cp.isPostitOnRoute());
   }
   
   private void updateData()
