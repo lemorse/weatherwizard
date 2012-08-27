@@ -957,10 +957,10 @@ public class GribPDSParamTable
       }
     }
 
-    throw new NotSupportedException("Grib table not supported; cent " + center + ",sub " + subcenter + ",table " + number);
+    throw new NotSupportedException("Grib table not supported; center " + center + ", sub " + subcenter + ", table " + number);
 
-    //      System.out.println("cent, sub, tab: "+center+" "+subcenter+" "+number);
-    //      return null;
+  //System.out.println("cent, sub, tab: "+center+" "+subcenter+" "+number);
+  //return null;
   }
 
   /**

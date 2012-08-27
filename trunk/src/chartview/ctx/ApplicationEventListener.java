@@ -58,11 +58,21 @@ public abstract class ApplicationEventListener implements EventListener
   
   public void setProjection(int p) {}
   public void setContactParallel(double d) {}
-  public void setGlobeProjPrms(double lat, double lng, double tilt, boolean b) {}
-  public void setGlobeProjPrms(double lat, double lng) {}
-  public void setSatelliteProjPrms(double lat, double lng, double alt, boolean b) {}
+  public void setGlobeProjPrms(double lat, 
+                               double lng, 
+                               double tilt, 
+                               boolean b) {}
+  public void setGlobeProjPrms(double lat, 
+                               double lng) {}
+  public void setSatelliteProjPrms(double lat, 
+                                   double lng, 
+                                   double alt, 
+                                   boolean b) {}
   
-  public void setSatellitePrms(double l, double g, double a, boolean b) {}
+  public void setSatellitePrms(double l, 
+                               double g, 
+                               double a, 
+                               boolean b) {}
 
   public void rotate(double d) {}
 
@@ -125,10 +135,12 @@ public abstract class ApplicationEventListener implements EventListener
   public void plotBoatAt(GeoPoint gp, int hdg) {}
 
   public void highlightWayPoint(GeoPoint gp) {}
-  public void manuallyEnterBoatPosition(GeoPoint gp, int hdg) {}
+  public void manuallyEnterBoatPosition(GeoPoint gp, 
+                                        int hdg) {}
   
   public void setLoading(boolean b) { setLoading(b, WWGnlUtilities.buildMessage("loading")); }
-  public void setLoading(boolean b, String mess) {}
+  public void setLoading(boolean b, 
+                         String mess) {}
   public void stopAnyLoadingProgressBar() {}
   public void setStatus(String str) {}
   public void setGribSmoothing(int i) {}
@@ -166,13 +178,16 @@ public abstract class ApplicationEventListener implements EventListener
   public void readComposite() {}
   
   public void log(String str) {}
-  public void log(String str, int idx) {}
+  public void log(String str, 
+                  int idx) {}
   
   public void faxSelectedForPreview(String s) {}
   public void ddZoomConfirmChanged(boolean b) {}
   
-  public void routingAvailable(boolean b, List<RoutingPoint> bestRoute) {}
-  public void routingForecastAvailable(boolean b, List<RoutingPoint> route) {}
+  public void routingAvailable(boolean b, 
+                               List<RoutingPoint> bestRoute) {}
+  public void routingForecastAvailable(boolean b,
+                                       List<RoutingPoint> route) {}
   
   public void reloadFaxTree() {}
   public void reloadGRIBTree() {}
@@ -189,14 +204,21 @@ public abstract class ApplicationEventListener implements EventListener
   public void GRIBSliceInfoRequested(double d) {}
   public void GRIBSliceInfoRequestStop() {}
   
-  public void setGRIBWindValue(int twd, float tws) {}
+  public void setGRIBWindValue(int twd, 
+                               float tws) {}
   public void setGRIBPRMSLValue(float prmsl) {}
   public void setGRIB500HGTValue(float hgt500) {}
   public void setGRIBWaveHeight(float wh) {}
   public void setGRIBTemp(float t) {}
   public void setGRIBprate(float prate) {}
   
-  public void setGRIBData(int twd, float tws, float prmsl, float hgt500, float wh, float t, float prate) {}
+  public void setGRIBData(int twd, 
+                          float tws, 
+                          float prmsl, 
+                          float hgt500, 
+                          float wh, 
+                          float t, 
+                          float prate) {}
   public void gribDataPanelClosed() {}
   
   public void setOpenTabNum(int i) {}

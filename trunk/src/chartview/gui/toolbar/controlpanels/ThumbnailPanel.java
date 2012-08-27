@@ -1,20 +1,17 @@
 package chartview.gui.toolbar.controlpanels;
 
+
 import chart.components.ui.ChartPanel;
 
 import chartview.ctx.ApplicationEventListener;
-
 import chartview.ctx.WWContext;
 
 import chartview.gui.AdjustFrame;
-import chartview.gui.right.CompositeTabbedPane;
-
-import chartview.util.ImageUtil;
 
 import java.awt.AlphaComposite;
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -23,28 +20,36 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Shape;
+import java.awt.Toolkit;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-
+import java.awt.event.MouseMotionListener;
 import java.awt.geom.AffineTransform;
-
 import java.awt.geom.Area;
-import java.awt.geom.Ellipse2D;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
+
 
 @SuppressWarnings("serial")
 public class ThumbnailPanel
-  extends JPanel
+     extends JPanel
+implements MouseListener, 
+           MouseMotionListener
 {
   private BorderLayout borderLayout = new BorderLayout();
   private JPanel instance = this;
   
-  private double zoom = 1D;
+  private transient Rectangle2D visibleZone   = null;
+  private transient Rectangle2D fullChartView = null;
+  private Cursor cursorInZone = null;
+  private Cursor cusorDraggingInZone = null;
+  private boolean dragged = false;
+  private int draggedFromX = -1, draggedFromY = -1; 
+  private double imgRatio = 1d;
   
   public ThumbnailPanel()
   {
@@ -58,7 +63,6 @@ public class ThumbnailPanel
       e.printStackTrace();
     }
   }
-
   
   private void jbInit()
     throws Exception
@@ -88,6 +92,17 @@ public class ThumbnailPanel
             }
           }
         });
+    this.addMouseListener(this);
+    this.addMouseMotionListener(this);
+
+    Toolkit toolkit = Toolkit.getDefaultToolkit();
+    String imgFileName = "PanOpenHand32x32.png";
+    Image image = toolkit.getImage(ChartPanel.class.getResource(imgFileName));
+    cursorInZone = toolkit.createCustomCursor(image , new Point(15,15), imgFileName);
+    imgFileName = "PanClosedHand32x32.png";
+    image = toolkit.getImage(ChartPanel.class.getResource(imgFileName));
+    cusorDraggingInZone = toolkit.createCustomCursor(image , new Point(15,15), imgFileName);
+    
   }
   
   public void paintComponent(Graphics gr)
@@ -107,7 +122,7 @@ public class ThumbnailPanel
     final int h = tnImg.getHeight(null);
     double wFact = w / instance.getSize().getWidth();
     double hFact = h / instance.getSize().getHeight();
-    final double imgRatio = Math.max(wFact, hFact);
+    imgRatio = Math.max(wFact, hFact);
     final AffineTransform tx = new AffineTransform();
     double _tx = (instance.getSize().getWidth() - (w / imgRatio)) / 2d;
     double _ty = (instance.getSize().getHeight() - (h / imgRatio)) / 2d;
@@ -118,7 +133,11 @@ public class ThumbnailPanel
     
 //  Dimension dim = new Dimension((int)(w / imgRatio), (int)(h / imgRatio));
 //  this.setPreferredSize(dim);
-    g2d.drawImage(tnImg, tx, this);    
+    g2d.drawImage(tnImg, tx, this);
+    
+    g2d.setColor(Color.blue);
+    g2d.drawRect((int)_tx, (int)_ty, (int)(w / imgRatio), (int)(h / imgRatio));
+    
     // The actual view on the chart
     Point topLeft = ((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getCommandPanel().getChartPanel().getVisibleRect().getLocation();
     Rectangle rect = ((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getCommandPanel().getChartPanel().getVisibleRect();
@@ -130,6 +149,13 @@ public class ThumbnailPanel
     Shape big, small;    
     big   = new Rectangle2D.Double(0, 0, instance.getSize().getWidth(), instance.getSize().getHeight());
     small = new Rectangle2D.Double((_tx + (topLeft.x / imgRatio)), (_ty + (topLeft.y / imgRatio)), (rect.width / imgRatio), (rect.height / imgRatio));
+    
+    g2d.setColor(Color.red);
+    g2d.drawRect((int)(_tx + (topLeft.x / imgRatio)), (int)(_ty + (topLeft.y / imgRatio)), (int)(rect.width / imgRatio), (int)(rect.height / imgRatio));
+
+    visibleZone   = new Rectangle2D.Double((_tx + (topLeft.x / imgRatio)), (_ty + (topLeft.y / imgRatio)), (rect.width / imgRatio), (rect.height / imgRatio));
+    fullChartView = new Rectangle2D.Double(_tx, _ty, (w / imgRatio), (h / imgRatio)); 
+    
     Area bigArea = new Area(big);
     Area smallArea = new Area(small);
     bigArea.exclusiveOr(smallArea);
@@ -143,10 +169,91 @@ public class ThumbnailPanel
   
   private final void refreshThumbnail() throws Exception
   {
-    if (System.currentTimeMillis() - lastRefresh > 1000L) // No more than once every second
+    refreshThumbnail(false);
+  }
+  
+  private final void refreshThumbnail(boolean force) throws Exception
+  {
+    if (force || (!force && System.currentTimeMillis() - lastRefresh > 1000L)) // No more than once every second
     {
       lastRefresh = System.currentTimeMillis();
       repaint();
+    }
+  }
+
+  public void mouseClicked(MouseEvent e)
+  {
+  }
+
+  public void mousePressed(MouseEvent e)
+  {
+    if (visibleZone != null)
+    {
+      if (visibleZone.contains(new Point2D.Double(e.getX(), e.getY())))
+      {
+        this.setCursor(cusorDraggingInZone);
+        dragged = true;
+        draggedFromX = e.getX();
+        draggedFromY = e.getY();
+      }
+      else
+        mouseMoved(e);
+    }
+  }
+
+  public void mouseReleased(MouseEvent e)
+  {
+    dragged = false;
+    mouseMoved(e);
+  }
+
+  public void mouseEntered(MouseEvent e)
+  {
+  }
+
+  public void mouseExited(MouseEvent e)
+  {
+  }
+
+  public void mouseDragged(MouseEvent e)
+  {
+    if (visibleZone != null)
+    {
+      if (visibleZone.contains(new Point2D.Double(e.getX(), e.getY())) && dragged)
+      {
+        int x = ((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getCommandPanel().getChartPanel().getVisibleRect().x + (int)((e.getX() - draggedFromX) * imgRatio);
+        int y = ((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getCommandPanel().getChartPanel().getVisibleRect().y + (int)((e.getY() - draggedFromY) * imgRatio);
+        ((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getCommandPanel().getChartPanel().scrollRectToVisible(new Rectangle(x, 
+                                                                                                                                       y, 
+                                                                                                                                       ((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getCommandPanel().getChartPanel().getVisibleRect().width, 
+                                                                                                                                       ((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getCommandPanel().getChartPanel().getVisibleRect().height));
+        ((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getCommandPanel().getChartPanel().repaint();
+        try
+        {
+          refreshThumbnail(true);
+        }
+        catch (Exception ex)
+        {
+          ex.printStackTrace();
+        }
+      }
+      else
+        mouseMoved(e);
+    }
+  }
+
+  public void mouseMoved(MouseEvent e)
+  {
+    if (visibleZone != null)
+    {
+      if (visibleZone.contains(new Point2D.Double(e.getX(), e.getY())))
+      {
+        this.setCursor(cursorInZone);
+      }
+      else
+      {
+        this.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+      }
     }
   }
 }
