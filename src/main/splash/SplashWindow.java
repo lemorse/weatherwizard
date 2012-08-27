@@ -29,6 +29,8 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JWindow;
 
+import main.help.AboutBox;
+
 @SuppressWarnings("serial")
 public class SplashWindow extends JWindow
 {
@@ -101,7 +103,8 @@ public class SplashWindow extends JWindow
                 (screenDim.height - dim.height) / 2);
     JLayeredPane layer = new JLayeredPane();
     
-    ImageIcon img = new ImageIcon(this.getClass().getResource("LogiSail.png"));    
+//  ImageIcon img = new ImageIcon(this.getClass().getResource("LogiSail.png"));    
+    ImageIcon img = new ImageIcon(AboutBox.class.getResource("wizard150.png"));    
     JLabel imgHolder = new JLabel(img);
 //  imgHolder.setBorder(BorderFactory.createLineBorder(new Color(228, 24, 106), 2));
     imgHolder.setBounds(0, 10, 325, 150);
