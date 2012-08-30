@@ -900,8 +900,8 @@ public class RoutingUtil
     else if (clipboardOption == ParamPanel.RoutingOutputList.JSON)
     {
       clipboardContent += 
-       ("var wayPoint = new Array\n" +
-        "  {\n");
+       ("{\n" +
+        "  \"waypoints\": [\n");
     }
 
     if (closestPoint != null && allCalculatedIsochrons != null)
@@ -1073,8 +1073,8 @@ public class RoutingUtil
            ("    {\n" +
             "      \"datetime\":\"" + date + "\",\n" +
             "      \"position\": {\n" +
-            "                  \"latitude\":" + rp.getPosition().getL() + ",\n" +
-            "                  \"longitude\":" + rp.getPosition().getG() + "\n" +
+            "                  \"latitude\":\"" + rp.getPosition().getL() + "\",\n" +
+            "                  \"longitude\":\"" + rp.getPosition().getG() + "\"\n" +
             "                },\n" +
             "      \"tws\":" + tws + ",\n" +
             "      \"twd\":" + twd + ",\n" + 
@@ -1136,7 +1136,8 @@ public class RoutingUtil
       else if (clipboardOption == ParamPanel.RoutingOutputList.JSON)
       {
         clipboardContent += 
-         ("  };\n");
+         ("  ]\n" +
+          "}\n");
       }
 
       if (fileOutput != null && fileOutput.trim().length() > 0)            
