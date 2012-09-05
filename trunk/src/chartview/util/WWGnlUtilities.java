@@ -372,7 +372,7 @@ public class WWGnlUtilities
   }
 
   /**
-   * Get the direction
+   * Get the direction, in a GRIB
    * @param x horizontal displacement
    * @param y vertical displacement
    * @return the angle, in degrees
@@ -405,7 +405,7 @@ public class WWGnlUtilities
           dir = 270D;
       }
     }
-    dir += 180D;
+    dir += 180D; // Because it is a GRIB
     while (dir >= 360D) dir -= 360D;
     return dir;
   }

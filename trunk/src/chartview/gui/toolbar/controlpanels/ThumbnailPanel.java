@@ -135,8 +135,8 @@ implements MouseListener,
 //  this.setPreferredSize(dim);
     g2d.drawImage(tnImg, tx, this);
     
-    g2d.setColor(Color.blue);
-    g2d.drawRect((int)_tx, (int)_ty, (int)(w / imgRatio), (int)(h / imgRatio));
+//  g2d.setColor(Color.blue);
+//  g2d.drawRect((int)_tx, (int)_ty, (int)(w / imgRatio), (int)(h / imgRatio));
     
     // The actual view on the chart
     Point topLeft = ((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getCommandPanel().getChartPanel().getVisibleRect().getLocation();
@@ -150,8 +150,8 @@ implements MouseListener,
     big   = new Rectangle2D.Double(0, 0, instance.getSize().getWidth(), instance.getSize().getHeight());
     small = new Rectangle2D.Double((_tx + (topLeft.x / imgRatio)), (_ty + (topLeft.y / imgRatio)), (rect.width / imgRatio), (rect.height / imgRatio));
     
-    g2d.setColor(Color.red);
-    g2d.drawRect((int)(_tx + (topLeft.x / imgRatio)), (int)(_ty + (topLeft.y / imgRatio)), (int)(rect.width / imgRatio), (int)(rect.height / imgRatio));
+//  g2d.setColor(Color.red);
+//  g2d.drawRect((int)(_tx + (topLeft.x / imgRatio)), (int)(_ty + (topLeft.y / imgRatio)), (int)(rect.width / imgRatio), (int)(rect.height / imgRatio));
 
     visibleZone   = new Rectangle2D.Double((_tx + (topLeft.x / imgRatio)), (_ty + (topLeft.y / imgRatio)), (rect.width / imgRatio), (rect.height / imgRatio));
     fullChartView = new Rectangle2D.Double(_tx, _ty, (w / imgRatio), (h / imgRatio)); 
@@ -219,7 +219,7 @@ implements MouseListener,
   {
     if (visibleZone != null)
     {
-      if (visibleZone.contains(new Point2D.Double(e.getX(), e.getY())) && dragged)
+      if ( /* visibleZone.contains(new Point2D.Double(e.getX(), e.getY())) && */ dragged)
       {
         int x = ((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getCommandPanel().getChartPanel().getVisibleRect().x + (int)((e.getX() - draggedFromX) * imgRatio);
         int y = ((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getCommandPanel().getChartPanel().getVisibleRect().y + (int)((e.getY() - draggedFromY) * imgRatio);

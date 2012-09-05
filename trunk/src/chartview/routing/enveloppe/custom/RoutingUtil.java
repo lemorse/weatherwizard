@@ -26,6 +26,8 @@ import chartview.util.grib.GribHelper.GribConditionData;
 
 import chartview.util.progress.ProgressMonitor;
 
+import coreutilities.Utilities;
+
 import java.awt.Point;
 import java.awt.Polygon;
 
@@ -34,7 +36,10 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
+
+import java.net.URLEncoder;
 
 import java.text.NumberFormat;
 
@@ -1147,6 +1152,34 @@ public class RoutingUtil
           BufferedWriter bw = new BufferedWriter(new FileWriter(fileOutput));              
           bw.write(clipboardContent + "\n");
           bw.close();
+          if (clipboardOption == ParamPanel.RoutingOutputList.JSON) // Suggest view in Google maps
+          {
+            int resp = JOptionPane.showConfirmDialog(instance, "See in Google maps?", "Routing", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+            if (resp == JOptionPane.YES_OPTION)
+            {
+              File f = new File("routing/googlemaprouting.html");
+              if (f.exists())
+              {
+                String whatToOpen = f.toURI().toURL().toString() + "?data=" + new File(fileOutput).toURI().toURL().toString();
+                System.out.println("Opening:" + whatToOpen);
+                try
+                {
+                  Utilities.openInBrowser(whatToOpen);
+                  Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+                  StringSelection stringSelection = new StringSelection(whatToOpen);
+                  clipboard.setContents(stringSelection, null);          
+                  JOptionPane.showMessageDialog(instance, "In case there is a problem,\nthe URL to open is in the clipboard.\nCtrl+V in your browser...", "Google Routing", JOptionPane.INFORMATION_MESSAGE);
+                }
+                catch (Exception ex)
+                {
+                  String message = "Running in " + System.getProperty("user.dir") + "\n" + ex.getLocalizedMessage(); 
+                  JOptionPane.showMessageDialog(instance, message, "Routing in GoogleMaps", JOptionPane.ERROR_MESSAGE);
+                }
+              }
+              else
+                JOptionPane.showMessageDialog(instance, "File routing/googlemaprouting.html not found on your system...", "Google Routing", JOptionPane.WARNING_MESSAGE);
+            }
+          }
         }
         catch (Exception ex)
         {
