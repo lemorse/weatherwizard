@@ -22,7 +22,14 @@ import javax.swing.JOptionPane;
 public class SearchUtil
 {
   private static boolean verbose = false;
-  
+  /**
+   * Returns the List containing all the strings (file names) matching the pattern, starting from the startPath directory
+   * 
+   * @param pattern
+   * @param startPath
+   * @return
+   * @throws Exception
+   */
   public static List<String> findMatchingFiles(String pattern, String startPath) throws Exception
   {
     List<String> ret = null;
@@ -76,6 +83,14 @@ public class SearchUtil
     return list;
   }
  
+  /**
+   * Returns the most recent file matching a given pattern within the startpath directory and all its sub-directories
+   * 
+   * @param pattern
+   * @param startpath
+   * @return
+   * @throws Exception
+   */
   public static String findMostRecentFile(String pattern, String startpath) throws Exception
   {
     String ret = null;
@@ -171,6 +186,9 @@ public class SearchUtil
     return ret;
   }
   
+  /**
+   * The heart of the dynamic search
+   */
   public final static String SEARCH_PROTOCOL = "search:";
   public static String dynamicSearch(String searchString) throws Exception
   {
