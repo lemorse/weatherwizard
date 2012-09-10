@@ -797,7 +797,13 @@ public class DataFilePopup
       }
       if (dir.trim().length() > 0)
       {
-        try { Utilities.showFileSystem(dir); } catch (Exception e) { e.printStackTrace(); }          
+        try { Utilities.showFileSystem(dir); } 
+        catch (Exception e) 
+        { 
+          String errMess = "File directory is [" + dir + "]\n" + e.toString();
+          JOptionPane.showMessageDialog(this, errMess, "Show directory", JOptionPane.WARNING_MESSAGE);
+          e.printStackTrace(); 
+        }          
       }
     }
     else if (event.getActionCommand().equals(SORT_BY_DATE_DESC) && ((JMenu)((JPopupMenu)((JMenuItem)event.getSource()).getParent()).getInvoker()).getActionCommand().equals(SORT_BY_DATE))

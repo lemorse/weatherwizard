@@ -3035,7 +3035,12 @@ public class WWGnlUtilities
                 {
                   try { Utilities.showFileSystem(generateIn); } 
                   catch (Exception ex)
-                  { JOptionPane.showMessageDialog(cp, ex.toString(), "Oops...", JOptionPane.ERROR_MESSAGE); }
+                  {
+                    String errMess = "Your images have been successfully generated but showing their directory failed.\n" + 
+                                     "Image directory [" + generateIn + "]\n" + 
+                                     ex.toString();
+                    JOptionPane.showMessageDialog(cp, errMess, "Oops...", JOptionPane.ERROR_MESSAGE); 
+                  }
                 }
               }
               catch (IOException ioe)
