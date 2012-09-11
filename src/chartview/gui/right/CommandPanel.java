@@ -415,6 +415,10 @@ public class CommandPanel
   private ImageIcon zoomOutImage = new ImageIcon(this.getClass().getResource("zoomshrink.gif"));
   private final int buttonWidth = 15;
   
+  private transient Image blue = new ImageIcon(this.getClass().getResource("bullet_ball_glass_blue.png")).getImage();
+  private transient Image red  = new ImageIcon(this.getClass().getResource("bullet_ball_glass_red.png")).getImage();  
+  private final static boolean drawBall = true;
+  
   private boolean altToooltipWindowBeingDragged = false;
   private int dragStartX = 0, dragStartY = 0;
   private boolean displayAltTooltip = false;
@@ -6416,11 +6420,17 @@ public class CommandPanel
         if (showPlacesArray[i].booleanValue())
         {
           chartPanel.postit(gr, ptLabels[i].replace("\\n", "\n"), gp.x, gp.y, Color.yellow);
-          Color orig = gr.getColor();
-          gr.setColor(Color.red);
-          gr.drawOval(gp.x - 5, gp.y - 5, 10, 10);
-          gr.drawOval(gp.x - 3, gp.y - 3, 6, 6);
-          gr.setColor(orig);
+          // Draw a red ball
+          if (drawBall)
+            gr.drawImage(red, gp.x-8, gp.y-8, null);
+          else
+          {
+            Color orig = gr.getColor();
+            gr.setColor(Color.red);
+            gr.drawOval(gp.x - 5, gp.y - 5, 10, 10);
+            gr.drawOval(gp.x - 3, gp.y - 3, 6, 6);
+            gr.setColor(orig);
+          }
         }
       }
     }
@@ -6432,11 +6442,17 @@ public class CommandPanel
       {
         Point pt = chartPanel.getPanelPoint(sms.getGp());
         chartPanel.postit(gr, sms.getStationName().replace(" - ", "\n"), pt.x, pt.y, Color.blue);
-        Color orig = gr.getColor();
-        gr.setColor(Color.blue);
-        gr.drawOval(pt.x - 5, pt.y - 5, 10, 10);
-        gr.drawOval(pt.x - 3, pt.y - 3, 6, 6);
-        gr.setColor(orig);
+        // Draw a blue ball
+        if (drawBall)
+          gr.drawImage(blue, pt.x-8, pt.y-8, null);
+        else
+        {
+          Color orig = gr.getColor();
+          gr.setColor(Color.blue);
+          gr.drawOval(pt.x - 5, pt.y - 5, 10, 10);
+          gr.drawOval(pt.x - 3, pt.y - 3, 6, 6);
+          gr.setColor(orig);
+        }
       }
     }
     
@@ -6447,11 +6463,17 @@ public class CommandPanel
       {
         Point pt = chartPanel.getPanelPoint(ws.getGp());
         chartPanel.postit(gr, ws.getStationName(), pt.x, pt.y, Color.blue);
-        Color orig = gr.getColor();
-        gr.setColor(Color.blue);
-        gr.drawOval(pt.x - 5, pt.y - 5, 10, 10);
-        gr.drawOval(pt.x - 3, pt.y - 3, 6, 6);
-        gr.setColor(orig);
+        // Draw a blue ball
+        if (drawBall)
+          gr.drawImage(blue, pt.x-8, pt.y-8, null);
+        else
+        {
+          Color orig = gr.getColor();
+          gr.setColor(Color.blue);
+          gr.drawOval(pt.x - 5, pt.y - 5, 10, 10);
+          gr.drawOval(pt.x - 3, pt.y - 3, 6, 6);
+          gr.setColor(orig);
+        }
       }
     }    
     // Routing
