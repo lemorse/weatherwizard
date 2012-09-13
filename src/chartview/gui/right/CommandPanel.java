@@ -72,19 +72,13 @@ import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.Stroke;
 import java.awt.Toolkit;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.StringSelection;
-import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetDragEvent;
 import java.awt.dnd.DropTargetDropEvent;
 import java.awt.dnd.DropTargetEvent;
-import java.awt.dnd.DropTargetListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.awt.print.PageFormat;
@@ -110,7 +104,6 @@ import java.io.StringReader;
 
 import java.net.URL;
 
-import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 
 import java.util.ArrayList;
@@ -122,9 +115,7 @@ import java.util.GregorianCalendar;
 import java.util.Iterator;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.TimeZone;
-import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
@@ -1904,11 +1895,11 @@ public class CommandPanel
             displayStatus();
           }
         }
-        public void allLayerZoomIn() 
+        public void allLayerZoomIn(double scale) 
         {
          if (parent != null && parent.isVisible())
           {
-            double f = dataPanel.getZoomFactor();
+            double f = dataPanel.getZoomFactor() * scale;
             chartPanel.setZoomFactor(f);
             chartPanel.zoomIn();
             for (int i=0; faxImage!=null && i<faxImage.length; i++)
@@ -1917,11 +1908,11 @@ public class CommandPanel
           }
         }
 
-        public void allLayerZoomOut() 
+        public void allLayerZoomOut(double scale) 
         {
          if (parent != null && parent.isVisible())
           {
-            double f = dataPanel.getZoomFactor();
+            double f = dataPanel.getZoomFactor() * scale;
             chartPanel.setZoomFactor(f);
             chartPanel.zoomOut();
             for (int i=0; faxImage!=null && i<faxImage.length; i++)
@@ -6975,6 +6966,7 @@ public class CommandPanel
     int borderTWA           = ((Integer) ParamPanel.data[ParamData.AVOID_TWA_LT][ParamData.VALUE_INDEX]).intValue();            // -1;
     boolean stopOnExhausted = ((Boolean) ParamPanel.data[ParamData.STOP_ROUTING_ON_EXHAUSTED_GRIB][ParamData.VALUE_INDEX]).booleanValue();
     double polarFactor = 1.0;
+    double proximity   = 25.0;
 
     Date gribFrom    = wgd[0].getDate();
     Date gribTo      = wgd[wgd.length - 1].getDate();
@@ -7033,6 +7025,7 @@ public class CommandPanel
       startRoutingPanel.setStopRoutingOnExhaustedGRIB(stopOnExhausted);
       startRoutingPanel.setPolarFactor(((Double) ParamPanel.data[ParamData.POLAR_SPEED_FACTOR][ParamData.VALUE_INDEX]).doubleValue());
       startRoutingPanel.setAvoidLand(((Boolean) ParamPanel.data[ParamData.TRY_TO_AVOID_LAND][ParamData.VALUE_INDEX]).booleanValue());
+      startRoutingPanel.setProximity(((Double) ParamPanel.data[ParamData.STOP_ROUTING_WHEN_CLOSER_TO][ParamData.VALUE_INDEX]).doubleValue());
     }
     
     int resp = JOptionPane.showConfirmDialog(this, 
@@ -7049,6 +7042,7 @@ public class CommandPanel
       borderTWA = startRoutingPanel.getMinTWA();
       stopOnExhausted = startRoutingPanel.isStopRoutingOnExhaustedGRIB();
       polarFactor = startRoutingPanel.getPolarFactor();
+      proximity   = startRoutingPanel.getProximity();
       
       if (borderTWS != -1 || borderTWA != -1)
       {
@@ -7070,6 +7064,7 @@ public class CommandPanel
 //  if (isoFrom == null || from != isoFrom || isoTo == null || isoTo != to)
     {
       final boolean showProgressMonitor = true;
+      final double _proximity = proximity;
       // the Routing
       isochronThread = new Thread("routing-thread")
       {
@@ -7172,7 +7167,8 @@ public class CommandPanel
                                                                   limitTWA,
                                                                   stopIfTooOld,
                                                                   pf,
-                                                                  startRoutingPanel.avoidLand());
+                                                                  startRoutingPanel.avoidLand(),
+                                                                  _proximity);
           // Routing completed
           i = allCalculatedIsochrons.size();
           long after = System.currentTimeMillis();

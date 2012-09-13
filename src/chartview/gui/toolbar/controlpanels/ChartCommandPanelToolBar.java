@@ -1,8 +1,13 @@
 package chartview.gui.toolbar.controlpanels;
 
+import chart.components.ui.ChartPanel;
+
 import chartview.ctx.ApplicationEventListener;
 import chartview.ctx.WWContext;
 
+import chartview.gui.AdjustFrame;
+import chartview.gui.right.CommandPanel;
+import chartview.gui.right.CompositeTabbedPane;
 import chartview.gui.util.param.ParamData;
 import chartview.gui.util.param.ParamPanel;
 
@@ -17,10 +22,13 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import java.awt.event.MouseEvent;
+
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -36,6 +44,7 @@ public class ChartCommandPanelToolBar
   private JButton zoomInButton  = new JButton();
   private JButton zoomOutButton = new JButton();
   private JButton reloadButton  = new JButton();
+  private JButton resetZoomButton = new JButton();
 
   private JPanel extraComponentHolder = new JPanel(new BorderLayout());
   private JPanel radioButtonHolder    = new JPanel(new FlowLayout());
@@ -150,7 +159,26 @@ public class ChartCommandPanelToolBar
           WWContext.getInstance().fireLoadDynamicComposite(compositeName);
         }
       });
-
+    
+    resetZoomButton.setIcon(new ImageIcon(this.getClass().getResource("img/reset.gif")));
+    resetZoomButton.setToolTipText(WWGnlUtilities.buildMessage("reset-zoom"));
+    resetZoomButton.setPreferredSize(new Dimension(24, 24));
+    resetZoomButton.setBorderPainted(false);
+//  resetZoomButton.setEnabled(compositeName.trim().length() > 0);
+    resetZoomButton.addActionListener(new ActionListener()
+      {
+        public void actionPerformed(ActionEvent e)
+        {
+          JFrame jf = WWContext.getInstance().getMasterTopFrame();
+//        System.out.println("MasterTopFrame is a " + jf.getClass().getName());
+          CommandPanel cp = ((CompositeTabbedPane)((AdjustFrame)jf).getMasterTabPane().getSelectedComponent()).getCommandPanel();
+          ChartPanel chartPanel = cp.getChartPanel();
+          chartPanel.setH(cp.getHeight());
+          chartPanel.setWidthFromChart(chartPanel.getNorthL(), chartPanel.getSouthL(), chartPanel.getWestG(), chartPanel.getEastG());          
+          chartPanel.repaint();
+        }
+      });
+      
     expandCollapseControlButton.setIcon(new ImageIcon(this.getClass().getResource("img/monitors.png")));
     expandCollapseControlButton.setToolTipText(WWGnlUtilities.buildMessage("collapse"));
     expandCollapseControlButton.setPreferredSize(new Dimension(24, 24));
@@ -184,6 +212,7 @@ public class ChartCommandPanelToolBar
     this.add(zoomInButton);
     this.add(zoomOutButton);
     this.add(reloadButton);
+//  this.add(resetZoomButton);
     
     this.add(extraComponentHolder);
     extraComponentHolder.add(radioButtonHolder, BorderLayout.WEST);
@@ -248,23 +277,33 @@ public class ChartCommandPanelToolBar
     this.validate();
   }
 
+  private final static double SHIFT_ZOOM_FACTOR = 1.1;
+
   private void zoomInButton_actionPerformed(ActionEvent e)
   {
+    double scale = 1;
+    int mask = e.getModifiers();
+    if ((mask & MouseEvent.SHIFT_MASK) != 0)
+      scale = SHIFT_ZOOM_FACTOR;
     //  System.out.println("ZoomIn requested");
     for (int i = 0; i < WWContext.getInstance().getListeners().size(); i++)
     {
       ApplicationEventListener l = WWContext.getInstance().getListeners().get(i);
-      l.allLayerZoomIn();
+      l.allLayerZoomIn(scale);
     }
   }
 
   private void zoomOutButton_actionPerformed(ActionEvent e)
   {
+    double scale = 1;
+    int mask = e.getModifiers();
+    if ((mask & MouseEvent.SHIFT_MASK) != 0)
+      scale = SHIFT_ZOOM_FACTOR;
     //  System.out.println("ZoomOut requested");
     for (int i = 0; i < WWContext.getInstance().getListeners().size(); i++)
     {
       ApplicationEventListener l = WWContext.getInstance().getListeners().get(i);
-      l.allLayerZoomOut();
+      l.allLayerZoomOut(scale);
     }
   }
   

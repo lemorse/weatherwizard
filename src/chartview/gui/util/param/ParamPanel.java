@@ -372,6 +372,9 @@ public final class ParamPanel
       case ParamData.TRY_TO_AVOID_LAND:
         it = Boolean.FALSE;
         break;
+      case ParamData.STOP_ROUTING_WHEN_CLOSER_TO:
+        it = new Double(25.0);
+        break;
       default:
         break;
     }
@@ -442,7 +445,8 @@ public final class ParamPanel
               else if (i == ParamData.ROUTING_TIME_INTERVAL ||     // Doubles
                        i == ParamData.POLAR_SPEED_FACTOR ||
                        i == ParamData.DEFAULT_ZOOM_VALUE || 
-                       i == ParamData.DEFAULT_CHART_INC_VALUE)
+                       i == ParamData.DEFAULT_CHART_INC_VALUE ||
+                       i == ParamData.STOP_ROUTING_WHEN_CLOSER_TO)
                 data[i][ParamData.VALUE_INDEX] = new Double(s);
               else if (i == ParamData.ROUTING_FROM_CURR_LOC ||     // Booleans
                        i == ParamData.AUTO_UPDATES ||
@@ -586,7 +590,8 @@ public final class ParamPanel
         ParamData.SHOW_ISOCHRONS,
         ParamData.ROUTING_OUTPUT_FLAVOR,
         ParamData.ANEMOMETER_HAND_OPTION,
-        ParamData.TRY_TO_AVOID_LAND}, 
+        ParamData.TRY_TO_AVOID_LAND,
+        ParamData.STOP_ROUTING_WHEN_CLOSER_TO}, 
       new int[] // Misc
       { ParamData.GRIB_FILES_LOC, 
         ParamData.FAX_FILES_LOC, 
@@ -735,7 +740,8 @@ public final class ParamPanel
           if (currentIndex == ParamData.ROUTING_TIME_INTERVAL || // The double values
               currentIndex == ParamData.POLAR_SPEED_FACTOR ||
               currentIndex == ParamData.DEFAULT_ZOOM_VALUE ||
-              currentIndex == ParamData.DEFAULT_CHART_INC_VALUE)
+              currentIndex == ParamData.DEFAULT_CHART_INC_VALUE ||
+              currentIndex == ParamData.STOP_ROUTING_WHEN_CLOSER_TO)
           {
             try { /* double d = */ Double.parseDouble(after); }
             catch (Exception e) 
