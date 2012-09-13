@@ -77,6 +77,7 @@ public class StartRoutingPanel
   private JLabel jLabel2 = new JLabel();
   private DecimalFormat df = new DecimalFormat("#0.00");
   private JFormattedTextField polarFactorTextField = new JFormattedTextField(df);
+  private JCheckBox avoidLandCheckBox = new JCheckBox();
 
   public StartRoutingPanel()
   {
@@ -205,6 +206,7 @@ public class StartRoutingPanel
     polarFactorTextField.setHorizontalAlignment(JTextField.RIGHT);
     polarFactorTextField.setText("1.0");
     polarFactorTextField.setToolTipText(WWGnlUtilities.buildMessage("polar-speed-hint"));
+    avoidLandCheckBox.setText(WWGnlUtilities.buildMessage("avoid-land"));
     for (int i=0; i < WWGnlUtilities.MONTH.length; i++)
       monthComboBox.addItem(WWGnlUtilities.MONTH[i]);
     
@@ -307,6 +309,8 @@ public class StartRoutingPanel
     this.add(polarFactorTextField, 
              new GridBagConstraints(4, 12, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, 
                                     new Insets(0, 0, 0, 0), 0, 0));
+    this.add(avoidLandCheckBox, new GridBagConstraints(0, 13, 10, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
+          new Insets(0, 0, 0, 0), 0, 0));
   }
 
   public void setTimeInterval(int timeInterval)
@@ -427,6 +431,16 @@ public class StartRoutingPanel
     this.gribFrom = gribFrom;
   }
 
+  public boolean avoidLand()
+  {
+    return avoidLandCheckBox.isSelected();  
+  }
+  
+  public void setAvoidLand(boolean b)
+  {
+    avoidLandCheckBox.setSelected(b);
+  }
+  
   private void avoidTWSCheckBox_actionPerformed(ActionEvent e)
   {
     maxTWSTextField.setEnabled(avoidTWSCheckBox.isSelected());

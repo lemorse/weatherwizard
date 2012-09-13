@@ -5,6 +5,8 @@ import astro.calc.GreatCircle;
 
 import chart.components.ui.ChartPanel;
 
+import chart.components.util.World;
+
 import chartview.util.grib.GribHelper;
 
 import chartview.gui.toolbar.controlpanels.LoggingPanel;
@@ -122,7 +124,8 @@ public class RoutingUtil
                                                             int                            maxTWS,
                                                             int                            minTWA,
                                                             boolean                        stopIfGRIB2old,
-                                                            double                         speedCoeff)
+                                                            double                         speedCoeff,
+                                                            boolean                        avoidLand)
   {
     smallestDist = Double.MAX_VALUE; // Reset, for the next leg
     return calculateIsochrons(caller, 
@@ -139,7 +142,8 @@ public class RoutingUtil
                               maxTWS, 
                               minTWA, 
                               stopIfGRIB2old, 
-                              speedCoeff);
+                              speedCoeff,
+                              avoidLand);
   }
 
   private static List<List<RoutingPoint>> calculateIsochrons(RoutingClientInterface         caller, 
@@ -156,7 +160,8 @@ public class RoutingUtil
                                                             int                            maxTWS,
                                                             int                            minTWA,
                                                             boolean                        stopIfGRIB2old,
-                                                            double                         speedCoeff)
+                                                            double                         speedCoeff,
+                                                            boolean                        avoidLand)
   {
     wgd              = gribData;
     finalDestination = destination; // By default
@@ -322,7 +327,18 @@ public class RoutingUtil
                                                           Math.toRadians(newCurveCenter.getPosition().getG())), 
                                              dist, 
                                              bearing);
-                GeoPoint forecast = new GeoPoint(Math.toDegrees(dr.getL()), Math.toDegrees(dr.getG()));
+                GeoPoint forecast = new GeoPoint(Math.toDegrees(dr.getL()), Math.toDegrees(dr.getG()));                
+//              System.out.println("Routing point [" + forecast.toString() + "] in " + (World.isInLand(forecast)?"land <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<":"the water"));                  
+                // Avoid the land 
+                if (avoidLand && World.isInLand(forecast))
+                {
+//                System.out.println("..........................Avoiding land...");
+                  speed = 0D;
+                  allowOtherRoute = true;
+                  nbNonZeroSpeed--;
+                  continue;
+                }
+                
                 Point forecastPoint = null;
                 if (chartPanel != null)
                   forecastPoint = chartPanel.getPanelPoint(forecast);
@@ -584,7 +600,8 @@ public class RoutingUtil
                               maxTWS, 
                               minTWA, 
                               stopIfGRIB2old, 
-                              speedCoeff);
+                              speedCoeff,
+                              false); // TASK Tossion.
   }
   
   public static <T> List<T> revertList(List<T> list)

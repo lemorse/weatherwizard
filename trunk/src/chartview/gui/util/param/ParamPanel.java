@@ -369,6 +369,9 @@ public final class ParamPanel
       case ParamData.PLAY_SOUND_ON_JOB_COMPLETION:
         it = new SoundFile(new String[] {"wav", "ogg"}, WWGnlUtilities.buildMessage("sounds"), "." + File.separator + "sounds" + File.separator + "gong.wav");
         break;
+      case ParamData.TRY_TO_AVOID_LAND:
+        it = Boolean.FALSE;
+        break;
       default:
         break;
     }
@@ -453,7 +456,8 @@ public final class ParamPanel
                        i == ParamData.CLICK_SCROLL ||
                        i == ParamData.SHOW_ROUTING_LABELS ||
                        i == ParamData.SHOW_ISOCHRONS ||
-                       i == ParamData.EXPAND_CONTROLS_BY_DEFAULT)
+                       i == ParamData.EXPAND_CONTROLS_BY_DEFAULT ||
+                       i == ParamData.TRY_TO_AVOID_LAND)
                 data[i][ParamData.VALUE_INDEX] = new Boolean(s);    
               else if (i == ParamData.POLAR_FILE_LOC)              // DataFiles, Polars
                 data[i][ParamData.VALUE_INDEX] = new DataFile(new String[] {"xml", "polar-coeff"}, "Polars", s);
@@ -581,7 +585,8 @@ public final class ParamPanel
         ParamData.SHOW_ROUTING_LABELS,
         ParamData.SHOW_ISOCHRONS,
         ParamData.ROUTING_OUTPUT_FLAVOR,
-        ParamData.ANEMOMETER_HAND_OPTION }, 
+        ParamData.ANEMOMETER_HAND_OPTION,
+        ParamData.TRY_TO_AVOID_LAND}, 
       new int[] // Misc
       { ParamData.GRIB_FILES_LOC, 
         ParamData.FAX_FILES_LOC, 
@@ -811,7 +816,8 @@ public final class ParamPanel
                    currentIndex == ParamData.COLOR_RANGE ||
                    currentIndex == ParamData.DISPLAY_WIND_WITH_COLOR_WIND_RANGE ||
                    currentIndex == ParamData.CLICK_SCROLL ||
-                   currentIndex == ParamData.EXPAND_CONTROLS_BY_DEFAULT)
+                   currentIndex == ParamData.EXPAND_CONTROLS_BY_DEFAULT ||
+                   currentIndex == ParamData.TRY_TO_AVOID_LAND)
           {
             try { /* boolean b = */ new Boolean(after); }
             catch (Exception e) 
