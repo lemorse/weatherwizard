@@ -246,7 +246,8 @@ public class BlindRouting implements RoutingClientInterface
                                                             limitTWA,  
                                                             stopIfTooOld,
                                                             speedCoeff,
-                                                            "true".equals(System.getProperty("avoid.land", "false")));
+                                                            "true".equals(System.getProperty("avoid.land", "false")),
+                                                            25.0);
     
     int clipboardOption = -1;
     String fileOutput = outputFile;

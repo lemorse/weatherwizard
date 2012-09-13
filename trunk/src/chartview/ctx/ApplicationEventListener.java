@@ -35,8 +35,10 @@ public abstract class ApplicationEventListener implements EventListener
   public void chartZoomin() {}
   public void chartZoomout() {}
   
-  public void allLayerZoomIn() {}
-  public void allLayerZoomOut() {}
+  public void allLayerZoomIn() { allLayerZoomIn(1); }
+  public void allLayerZoomOut() { allLayerZoomIn(1); }
+  public void allLayerZoomIn(double scale) {}
+  public void allLayerZoomOut(double scale) {}
   
   public void chartLineColorChanged(Color c) {}
   public void chartLineThicknessChanged(int i) {}

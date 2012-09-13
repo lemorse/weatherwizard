@@ -2373,6 +2373,10 @@ public class AdjustFrame
     jSplitPane.setDividerLocation(i);
   }
   
+  public JTabbedPane getMasterTabPane ()
+  {
+    return masterTabPane;
+  }
 //  @SuppressWarnings("serial")
 //  public class HelpOpenAction extends AbstractAction
 //  {

@@ -78,6 +78,10 @@ public class StartRoutingPanel
   private DecimalFormat df = new DecimalFormat("#0.00");
   private JFormattedTextField polarFactorTextField = new JFormattedTextField(df);
   private JCheckBox avoidLandCheckBox = new JCheckBox();
+  private JLabel proximityLabel = new JLabel();
+  
+  private final static DecimalFormat MASK = new DecimalFormat("##0.00");
+  private JFormattedTextField proximityFormattedTextField = new JFormattedTextField(MASK);
 
   public StartRoutingPanel()
   {
@@ -135,7 +139,7 @@ public class StartRoutingPanel
     throws Exception
   {
     this.setLayout(gridBagLayout1);
-    this.setSize(new Dimension(400, 326));
+    this.setSize(new Dimension(400, 348));
     jLabel1.setText(WWGnlUtilities.buildMessage("routing-start-date"));
     jLabel1.setFont(new Font("Tahoma", 1, 12));
     message.setText("Message goes here");
@@ -207,6 +211,9 @@ public class StartRoutingPanel
     polarFactorTextField.setText("1.0");
     polarFactorTextField.setToolTipText(WWGnlUtilities.buildMessage("polar-speed-hint"));
     avoidLandCheckBox.setText(WWGnlUtilities.buildMessage("avoid-land"));
+    proximityLabel.setText(WWGnlUtilities.buildMessage("routing-completed-below"));
+    proximityFormattedTextField.setHorizontalAlignment(JTextField.RIGHT);
+    proximityFormattedTextField.setText("0.00");
     for (int i=0; i < WWGnlUtilities.MONTH.length; i++)
       monthComboBox.addItem(WWGnlUtilities.MONTH[i]);
     
@@ -310,6 +317,10 @@ public class StartRoutingPanel
              new GridBagConstraints(4, 12, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, 
                                     new Insets(0, 0, 0, 0), 0, 0));
     this.add(avoidLandCheckBox, new GridBagConstraints(0, 13, 10, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
+          new Insets(0, 0, 0, 0), 0, 0));
+    this.add(proximityLabel, new GridBagConstraints(0, 14, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
+          new Insets(0, 0, 0, 0), 0, 0));
+    this.add(proximityFormattedTextField, new GridBagConstraints(4, 14, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
           new Insets(0, 0, 0, 0), 0, 0));
   }
 
@@ -439,6 +450,16 @@ public class StartRoutingPanel
   public void setAvoidLand(boolean b)
   {
     avoidLandCheckBox.setSelected(b);
+  }
+  
+  public void setProximity(double d)
+  {
+    proximityFormattedTextField.setText(MASK.format(d));  
+  }
+  
+  public double getProximity()
+  {
+    return Double.parseDouble(proximityFormattedTextField.getText());
   }
   
   private void avoidTWSCheckBox_actionPerformed(ActionEvent e)

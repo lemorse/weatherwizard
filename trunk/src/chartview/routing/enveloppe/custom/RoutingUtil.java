@@ -125,7 +125,8 @@ public class RoutingUtil
                                                             int                            minTWA,
                                                             boolean                        stopIfGRIB2old,
                                                             double                         speedCoeff,
-                                                            boolean                        avoidLand)
+                                                            boolean                        avoidLand,
+                                                            double                         proximity)
   {
     smallestDist = Double.MAX_VALUE; // Reset, for the next leg
     return calculateIsochrons(caller, 
@@ -143,25 +144,27 @@ public class RoutingUtil
                               minTWA, 
                               stopIfGRIB2old, 
                               speedCoeff,
-                              avoidLand);
+                              avoidLand,
+                              proximity);
   }
 
   private static List<List<RoutingPoint>> calculateIsochrons(RoutingClientInterface         caller, 
-                                                            ChartPanel                     chartPanel,
-                                                            RoutingPoint                   startFrom,
-                                                            RoutingPoint                   destination,
-                                                            List<RoutingPoint>             intermediateWP,
-                                                            List<RoutingPoint>             bestRoute,
-                                                            Date                           fromDate,
-                                                            GribHelper.GribConditionData[] gribData,
-                                                            double                         timeInterval,
-                                                            int                            routingForkWidth,
-                                                            int                            routingStep,
-                                                            int                            maxTWS,
-                                                            int                            minTWA,
-                                                            boolean                        stopIfGRIB2old,
-                                                            double                         speedCoeff,
-                                                            boolean                        avoidLand)
+                                                             ChartPanel                     chartPanel,
+                                                             RoutingPoint                   startFrom,
+                                                             RoutingPoint                   destination,
+                                                             List<RoutingPoint>             intermediateWP,
+                                                             List<RoutingPoint>             bestRoute,
+                                                             Date                           fromDate,
+                                                             GribHelper.GribConditionData[] gribData,
+                                                             double                         timeInterval,
+                                                             int                            routingForkWidth,
+                                                             int                            routingStep,
+                                                             int                            maxTWS,
+                                                             int                            minTWA,
+                                                             boolean                        stopIfGRIB2old,
+                                                             double                         speedCoeff,
+                                                             boolean                        avoidLand,
+                                                             double                         proximity)
   {
     wgd              = gribData;
     finalDestination = destination; // By default
@@ -231,6 +234,7 @@ public class RoutingUtil
         List<List<RoutingPoint>> temp = new ArrayList<List<RoutingPoint>>();
         Iterator<List<RoutingPoint>> dimOne = data.iterator();
         int nbNonZeroSpeed = 0;
+        boolean metLand = false;
         boolean allowOtherRoute = false;
         long before = System.currentTimeMillis();
         while (!interruptRouting && dimOne.hasNext() && keepLooping)
@@ -239,6 +243,7 @@ public class RoutingUtil
           List<RoutingPoint> curve = dimOne.next(); 
           Iterator<RoutingPoint> dimTwo = curve.iterator();
           nbNonZeroSpeed = 0;
+          metLand = false;
           while (!interruptRouting && keepLooping && dimTwo.hasNext())
           {
 //          timer = logDiffTime(timer, "Milestone 3");
@@ -265,7 +270,7 @@ public class RoutingUtil
             else // Finer Routing
               brg = getBearingTo(newCurveCenter, aimFor);
             
-            nbNonZeroSpeed = 0;
+//          nbNonZeroSpeed = 0;
             // Calculate isochron from center
             for (int bearing=brg - routingForkWidth / 2; 
                  keepLooping && !interruptRouting && bearing<=brg + routingForkWidth / 2; 
@@ -333,6 +338,7 @@ public class RoutingUtil
                 if (avoidLand && World.isInLand(forecast))
                 {
 //                System.out.println("..........................Avoiding land...");
+                  metLand = true;
                   speed = 0D;
                   allowOtherRoute = true;
                   nbNonZeroSpeed--;
@@ -456,18 +462,27 @@ public class RoutingUtil
                 monitor.setCurrent(null, total);
             }
           }
-          JOptionPane.showMessageDialog(null, "Routing aborted, not progressing (dead-end),\nat isochron #" + Integer.toString(allIsochrons.size()), "Routing", JOptionPane.WARNING_MESSAGE);
+          JOptionPane.showMessageDialog(null, "(1) " + WWGnlUtilities.buildMessage("routing-aborted", new String[] { Integer.toString(allIsochrons.size()) }), WWGnlUtilities.buildMessage("routing"), JOptionPane.WARNING_MESSAGE);
         }
         else
         {
           keepLooping = false;
-          System.out.println("Destination reached ? aiming [" + (aimFor!=null?aimFor.getPosition().toString():"none") + "] finalDestination [" + finalDestination.getPosition().toString() + "]");
+          System.out.println("Destination reached? aiming [" + (aimFor!=null?aimFor.getPosition().toString():"none") + "] finalDestination [" + finalDestination.getPosition().toString() + "]");
           System.out.println("LocalSmallOne:" + localSmallOne);
           System.out.println("SmallestDistance:" + smallestDist);
-          if (allowOtherRoute && nbNonZeroSpeed == 0)
+          if ((allowOtherRoute && nbNonZeroSpeed == 0) || metLand)
           {
-            smallestDist = localSmallOne;
             keepLooping = true; // Try again, even if the distance was not shrinking
+            smallestDist = localSmallOne;
+            if (metLand)
+            {
+              System.out.println("--------------- Try again, maybe mnet land.--------------");
+//            JOptionPane.showMessageDialog(null, "Met Land?", "Bing", JOptionPane.PLAIN_MESSAGE);
+              if (smallestDist < proximity)
+                keepLooping = false;
+              else
+                smallestDist *= 1.5; // Boo... Should do some backtracking
+            }
           }
           if (localSmallOne != Double.MAX_VALUE)
           {
@@ -509,9 +524,9 @@ public class RoutingUtil
                 }
               }
               if (interruptedBecauseTooOld)
-                JOptionPane.showMessageDialog(null, "Routing aborted (GRIB exhausted),\nat isochron #" + Integer.toString(allIsochrons.size()), "Routing", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(null, WWGnlUtilities.buildMessage("grib-exhausted", new String[] { Integer.toString(allIsochrons.size()) }), WWGnlUtilities.buildMessage("routing"), JOptionPane.WARNING_MESSAGE);
               else
-                JOptionPane.showMessageDialog(null, "Routing aborted, not progressing (dead-end),\nat isochron #" + Integer.toString(allIsochrons.size()), "Routing", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(null, "(2) " + WWGnlUtilities.buildMessage("routing-aborted", new String[] { Integer.toString(allIsochrons.size()) }), WWGnlUtilities.buildMessage("routing"), JOptionPane.WARNING_MESSAGE);
             }
           }
           else
@@ -528,9 +543,9 @@ public class RoutingUtil
               }
             }
             if (interruptedBecauseTooOld)
-              JOptionPane.showMessageDialog(null, "Routing aborted (GRIB exhausted),\nat isochron #" + Integer.toString(allIsochrons.size()), "Routing", JOptionPane.WARNING_MESSAGE);
+              JOptionPane.showMessageDialog(null, WWGnlUtilities.buildMessage("grib-exhausted", new String[] { Integer.toString(allIsochrons.size()) }), WWGnlUtilities.buildMessage("routing"), JOptionPane.WARNING_MESSAGE);
             else
-              JOptionPane.showMessageDialog(null, "Routing aborted, not progressing (dead-end),\nat isochron #" + Integer.toString(allIsochrons.size()), "Routing", JOptionPane.WARNING_MESSAGE);
+              JOptionPane.showMessageDialog(null,"(3) " +  WWGnlUtilities.buildMessage("routing-aborted", new String[] { Integer.toString(allIsochrons.size()) }), WWGnlUtilities.buildMessage("routing"), JOptionPane.WARNING_MESSAGE);
           }
         }
         allowOtherRoute = false;
@@ -601,7 +616,8 @@ public class RoutingUtil
                               minTWA, 
                               stopIfGRIB2old, 
                               speedCoeff,
-                              false); // TASK Tossion.
+                              false,                     // TASK Tossion.
+                              25.0);
   }
   
   public static <T> List<T> revertList(List<T> list)
