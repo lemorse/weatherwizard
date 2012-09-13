@@ -90,8 +90,9 @@ public class ParamData
   public final static int GPSD_PORT                      = 75;
   public final static int ANEMOMETER_HAND_OPTION         = 76;
   public final static int PLAY_SOUND_ON_JOB_COMPLETION   = 77;
+  public final static int TRY_TO_AVOID_LAND              = 78;
 
-  public final static int NB_PRFERENCES         = 78; 
+  public final static int NB_PRFERENCES         = 79; 
   
   private final static String[] labels = 
   { 
@@ -172,7 +173,8 @@ public class ParamData
     WWGnlUtilities.buildMessage("nmea-hostname"),
     WWGnlUtilities.buildMessage("gpsd-port"),
     WWGnlUtilities.buildMessage("anemometer-hand-option"),
-    WWGnlUtilities.buildMessage("play-sound-on-job-completion")
+    WWGnlUtilities.buildMessage("play-sound-on-job-completion"),
+    WWGnlUtilities.buildMessage("avoid-land")
   };
 
   private final static String[] helptext = 
@@ -254,7 +256,8 @@ public class ParamData
     WWGnlUtilities.buildMessage("help-nmea-hostname"),
     WWGnlUtilities.buildMessage("help-gpsd-port"),
     WWGnlUtilities.buildMessage("help-anemometer-hand-option"),
-    WWGnlUtilities.buildMessage("help-play-sound-on-job-completion")
+    WWGnlUtilities.buildMessage("help-play-sound-on-job-completion"),
+    WWGnlUtilities.buildMessage("help-avoid-land")
   };
     
   public static String[] getLabels()

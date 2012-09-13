@@ -7032,6 +7032,7 @@ public class CommandPanel
       startRoutingPanel.setMinTWA(borderTWA);
       startRoutingPanel.setStopRoutingOnExhaustedGRIB(stopOnExhausted);
       startRoutingPanel.setPolarFactor(((Double) ParamPanel.data[ParamData.POLAR_SPEED_FACTOR][ParamData.VALUE_INDEX]).doubleValue());
+      startRoutingPanel.setAvoidLand(((Boolean) ParamPanel.data[ParamData.TRY_TO_AVOID_LAND][ParamData.VALUE_INDEX]).booleanValue());
     }
     
     int resp = JOptionPane.showConfirmDialog(this, 
@@ -7170,7 +7171,8 @@ public class CommandPanel
                                                                   limitTWS, 
                                                                   limitTWA,
                                                                   stopIfTooOld,
-                                                                  pf);
+                                                                  pf,
+                                                                  startRoutingPanel.avoidLand());
           // Routing completed
           i = allCalculatedIsochrons.size();
           long after = System.currentTimeMillis();
@@ -7441,6 +7443,7 @@ public class CommandPanel
       {
         mess += (GeomUtil.decToSex(gp.getL(), GeomUtil.SWING, GeomUtil.NS) + "\n");
         mess += (GeomUtil.decToSex(gp.getG(), GeomUtil.SWING, GeomUtil.EW) + "\n");
+        mess += ("In " + (World.isInLand(gp)?"land":"the water") + "\n");
       }
       if (wgd != null)
       {
