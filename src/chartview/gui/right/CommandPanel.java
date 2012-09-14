@@ -7075,6 +7075,21 @@ public class CommandPanel
     {
       final boolean showProgressMonitor = true;
       final double _proximity = proximity;
+      
+      if (startRoutingPanel.avoidLand() && (World.isInLand(from) || World.isInLand(to)))
+      {
+        String message = "";
+        if (World.isInLand(from))
+          message += "You starting point " + from.toString() + " is in land.\n";
+        if (World.isInLand(to))
+          message += "You destination point " + to.toString() + " is in land.\n";
+        message += "Is that OK to continue?";
+      
+        resp = JOptionPane.showConfirmDialog(this, message, "Routing", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
+        if (resp == JOptionPane.CANCEL_OPTION)
+          return;
+      }
+      
       // the Routing
       isochronThread = new Thread("routing-thread")
       {

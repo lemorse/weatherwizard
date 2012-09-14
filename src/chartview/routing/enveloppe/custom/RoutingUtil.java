@@ -171,7 +171,7 @@ public class RoutingUtil
     timeStep         = timeInterval;
     closest          = null;
     finalClosest     = null;
-    
+
     RoutingPoint center = startFrom;
     
     int nbIntermediateIndex = 0;
@@ -335,6 +335,7 @@ public class RoutingUtil
                 GeoPoint forecast = new GeoPoint(Math.toDegrees(dr.getL()), Math.toDegrees(dr.getG()));                
 //              System.out.println("Routing point [" + forecast.toString() + "] in " + (World.isInLand(forecast)?"land <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<":"the water"));                  
                 // Avoid the land 
+             // if (avoidLand && (World.isInLand(forecast) || World.isRouteCrossingLand(newCurveCenter.getPosition(), forecast) != null))
                 if (avoidLand && World.isInLand(forecast))
                 {
 //                System.out.println("..........................Avoiding land...");
