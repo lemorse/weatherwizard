@@ -266,6 +266,8 @@ public class CommandPanel
   
   private boolean drawChart = true;
   private boolean drawIsochrons = ((Boolean)ParamPanel.data[ParamData.SHOW_ISOCHRONS][ParamData.VALUE_INDEX]).booleanValue();
+  
+  private boolean paintChart = false;
 
   private boolean drawBestRoute = true;
   private boolean drawGRIB = true;
@@ -5649,7 +5651,14 @@ public class CommandPanel
 //  gr.setColor(this.getBackground());
 //  gr.fillRect(0, 0, this.getWidth(), this.getHeight());
 //  gr.setColor(before);
-    
+    if (paintChart)
+    {
+      DOMParser parser = WWContext.getInstance().getParser();
+//    synchronized (parser)
+      {
+        World.paintChart(parser, chartPanel, (Graphics2D)gr, Color.orange);
+      }
+    }
     // Set Wind Options
     if (WWContext.getInstance().getUseColorRangeForWindSpeed().booleanValue())
     {
@@ -6318,6 +6327,7 @@ public class CommandPanel
 //      System.out.println("y top:" + pt.y);
 //    if (chartPanel.getProjection() == ChartPanel.LAMBERT)
 //      System.out.println("Lambert detected");
+
       World.drawChart(chartPanel, gr); 
     }
       

@@ -459,7 +459,14 @@ public class StartRoutingPanel
   
   public double getProximity()
   {
-    return Double.parseDouble(proximityFormattedTextField.getText());
+    double d = 1.0;
+    try { d = MASK.parse(proximityFormattedTextField.getText()).doubleValue(); }
+    catch (Exception nfe) 
+    { 
+      System.out.println(proximityFormattedTextField.getText() + " is not a valid double."); 
+      d = 1.0;
+    }
+    return d;
   }
   
   private void avoidTWSCheckBox_actionPerformed(ActionEvent e)
