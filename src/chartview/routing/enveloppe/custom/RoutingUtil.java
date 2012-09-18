@@ -652,6 +652,27 @@ public class RoutingUtil
     return bestRoute;
   }
   
+  public static RoutingPoint getClosestRoutingPoint(List<List<RoutingPoint>> isochrons,
+                                                    int draggedIsochronIdx,
+                                                    GeoPoint mousePosition)
+  {
+    RoutingPoint rp = null;
+    List<RoutingPoint> isochron = isochrons.get(isochrons.size() - draggedIsochronIdx - 1);
+//  System.out.println("Dragged isochron has " + isochron.size() + " point(s)");
+    double minDist = Double.MAX_VALUE;
+    for (RoutingPoint lrp : isochron)
+    {
+      double dist = GreatCircle.getDistanceInNM(lrp.getPosition(), mousePosition);
+      if (dist < minDist)
+      {
+        minDist = dist;
+        rp = lrp;
+      }
+    }    
+//  System.out.println("Smallest distance is " + minDist);
+    return rp;
+  }
+  
   private static long timer = 0L;
   private static long logDiffTime(long before, String mess)
   {
