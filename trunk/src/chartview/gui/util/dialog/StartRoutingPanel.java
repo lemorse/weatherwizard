@@ -211,6 +211,13 @@ public class StartRoutingPanel
     polarFactorTextField.setText("1.0");
     polarFactorTextField.setToolTipText(WWGnlUtilities.buildMessage("polar-speed-hint"));
     avoidLandCheckBox.setText(WWGnlUtilities.buildMessage("avoid-land"));
+    avoidLandCheckBox.addActionListener(new ActionListener()
+      {
+        public void actionPerformed(ActionEvent e)
+        {
+          avoidLandCheckBox_actionPerformed(e);
+        }
+      });
     proximityLabel.setText(WWGnlUtilities.buildMessage("routing-completed-below"));
     proximityFormattedTextField.setHorizontalAlignment(JTextField.RIGHT);
     proximityFormattedTextField.setText("0.00");
@@ -450,6 +457,7 @@ public class StartRoutingPanel
   public void setAvoidLand(boolean b)
   {
     avoidLandCheckBox.setSelected(b);
+    proximityFormattedTextField.setEnabled(b);
   }
   
   public void setProximity(double d)
@@ -483,5 +491,10 @@ public class StartRoutingPanel
     angleLabel.setEnabled(avoidTWACheckBox.isSelected());
     if (!avoidTWACheckBox.isSelected())
       minTWATextField.setText("-1");
+  }
+
+  private void avoidLandCheckBox_actionPerformed(ActionEvent e)
+  {
+    proximityFormattedTextField.setEnabled(avoidLandCheckBox.isSelected());
   }
 }

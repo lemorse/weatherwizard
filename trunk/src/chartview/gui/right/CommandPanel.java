@@ -4769,7 +4769,7 @@ public class CommandPanel
                     else
                       gr.setColor(colors[colorIndex]);
                     Stroke strokeOne = null;
-                    if (nbIsochron == (allCalculatedIsochrons.size() - routingPointDragged - 2))
+                    if (false && nbIsochron == (allCalculatedIsochrons.size() - routingPointDragged - 2)) // Deactivated
                     {
                       strokeOne = ((Graphics2D)gr).getStroke();
                       Stroke stroke = new BasicStroke(4f, 0, 2);
@@ -5680,8 +5680,8 @@ public class CommandPanel
         }
       }
 
-      // Detection of a routing point
-      if (bestRoute != null && bestRoute.size() > 0)
+      // Detection of a routing point. Deactivated for now.
+      if (false && bestRoute != null && bestRoute.size() > 0)
       {
         int ptIdx = 0;
         routingPointDragged = -1;
