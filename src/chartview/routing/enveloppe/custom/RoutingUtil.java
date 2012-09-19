@@ -702,7 +702,7 @@ public class RoutingUtil
          returnCurve.add(newPoint);
        }
     }
-    String mess = "Reducing from " + returnCurve.size() + " point(s)... ";
+    String mess = "Reducing from " + returnCurve.size() + " ";
     // Calculate final curve - Here is the skill
     dimOne = bulkPoints.iterator();
     while (!interruptRouting && dimOne.hasNext())
