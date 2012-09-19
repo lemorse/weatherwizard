@@ -98,9 +98,9 @@ public class CommandPanelUtils
   private static final int ALT_WINDOW_MIN_NUM_LINES      =   8;
   private static final int ALT_WINDOW_TITLE_MIN_BASELINE =  20;
   private static final int ALT_WINDOW_TITLE_OFFSET       =  10;
-  
+
   private static final int ALT_WINDOW_3BUTTON_WIDTH = 80;
-  
+
   private static int altTooltipX = 10;
   private static int altTooltipY = 10;
   private static int altTooltipW = ALT_WINDOW_MIN_WIDTH;
@@ -109,12 +109,12 @@ public class CommandPanelUtils
   private static ImageIcon closeImage   = new ImageIcon(CommandPanelUtils.class.getResource("close.gif"));
   private static ImageIcon zoomInImage  = new ImageIcon(CommandPanelUtils.class.getResource("zoomexpand.gif"));
   private static ImageIcon zoomOutImage = new ImageIcon(CommandPanelUtils.class.getResource("zoomshrink.gif"));
-  private final static int buttonWidth = 15;
+  private final static int buttonWidth  = 15;
 
   public final static int CLOSE_IMAGE       = 1;
   public final static int ZOOMEXPAND_IMAGE  = 2;
   public final static int ZOOMSHRINK_IMAGE  = 3;
-    
+
   public static void setDisplayAltTooltip(ChartPanel chartPanel, Graphics graphics, String winTitle, String dataString)
   {
     int imageWidth = 24;
@@ -130,6 +130,7 @@ public class CommandPanelUtils
       if ((strWidth + ALT_WINDOW_TITLE_OFFSET + ALT_WINDOW_3BUTTON_WIDTH) > altTooltipW)
         altTooltipW = strWidth + ALT_WINDOW_TITLE_OFFSET + ALT_WINDOW_3BUTTON_WIDTH;
     }
+    
     if (dataString != null)
     {
       graphics.setFont(dataFont);
@@ -150,16 +151,16 @@ public class CommandPanelUtils
         nl = ALT_WINDOW_MIN_NUM_LINES;
       if (((nl * (strHeight + 2)) + ALT_WINDOW_HEADER_SIZE + (2 * ALT_WINDOW_BORDER_SIZE)) > altTooltipH)
         altTooltipH = ((nl * (strHeight + 2)) + ALT_WINDOW_HEADER_SIZE + (2 * ALT_WINDOW_BORDER_SIZE));
-    }    
+    }
   //  System.out.println("Repainting AltWin:" + altTooltipX + ", " + altTooltipY);
 
     int x = (int)chartPanel.getVisibleRect().getX();
-    int y = (int)chartPanel.getVisibleRect().getY();    
-    
+    int y = (int)chartPanel.getVisibleRect().getY();
+
     GradientPaint gradient = new GradientPaint(x + altTooltipX, y + altTooltipY, startColor, x + altTooltipX + altTooltipH, y + altTooltipY + altTooltipW, endColor); // Diagonal, top-left to bottom-right
-  //  GradientPaint gradient = new GradientPaint(x + altTooltipX, x + altTooltipX + altTooltipH, startColor, y + altTooltipY + altTooltipW, y + altTooltipY, endColor); // Horizontal
-  //  GradientPaint gradient = new GradientPaint(x + altTooltipX, y + altTooltipY, startColor, x + altTooltipX, x + altTooltipX + altTooltipH, endColor); // vertical
-  //  GradientPaint gradient = new GradientPaint(x + altTooltipX, x + altTooltipX + altTooltipH, startColor, x + altTooltipX, y + altTooltipY, endColor); // vertical, upside down
+//  GradientPaint gradient = new GradientPaint(x + altTooltipX, x + altTooltipX + altTooltipH, startColor, y + altTooltipY + altTooltipW, y + altTooltipY, endColor); // Horizontal
+//  GradientPaint gradient = new GradientPaint(x + altTooltipX, y + altTooltipY, startColor, x + altTooltipX, x + altTooltipX + altTooltipH, endColor); // vertical
+//  GradientPaint gradient = new GradientPaint(x + altTooltipX, x + altTooltipX + altTooltipH, startColor, x + altTooltipX, y + altTooltipY, endColor); // vertical, upside down
     ((Graphics2D)graphics).setPaint(gradient);
 
   //  Color bgColor = new Color(0.0f, 0.0f, 0.75f, 0.55f);
@@ -177,17 +178,17 @@ public class CommandPanelUtils
     xi = altTooltipX + altTooltipW - (3 * imageWidth);
     yi = altTooltipY;
     graphics.drawImage(zoomOutImage.getImage(), x + xi, y + yi, null);
-    
+
     // The data frame (area)
     int xs = x + altTooltipX + ALT_WINDOW_BORDER_SIZE;
     int ys = y + altTooltipY + ALT_WINDOW_HEADER_SIZE;
     graphics.setColor(new Color(1f, 1f, 1f, 0.5f));
-    graphics.fillRoundRect(xs, 
-                           ys, 
-                           altTooltipW - (2 * ALT_WINDOW_BORDER_SIZE), 
-                           altTooltipH - ((2 * ALT_WINDOW_BORDER_SIZE) + ALT_WINDOW_HEADER_SIZE), 
+    graphics.fillRoundRect(xs,
+                           ys,
+                           altTooltipW - (2 * ALT_WINDOW_BORDER_SIZE),
+                           altTooltipH - ((2 * ALT_WINDOW_BORDER_SIZE) + ALT_WINDOW_HEADER_SIZE),
                            10, 10);
-    
+
     chartPanel.setPositionToolTipEnabled(false);
     // Win Title here
     if (winTitle != null)
@@ -207,8 +208,8 @@ public class CommandPanelUtils
       graphics.setColor(Color.blue);
       for (int i=0; i<dataLine.length; i++)
       {
-        graphics.drawString(dataLine[i], 
-                            xs + ALT_WINDOW_DATA_OFFSET_SIZE, 
+        graphics.drawString(dataLine[i],
+                            xs + ALT_WINDOW_DATA_OFFSET_SIZE,
                             ys + dataFont.getSize());
         ys += (dataFont.getSize() + 2);
       }
@@ -220,7 +221,7 @@ public class CommandPanelUtils
     boolean resp = false;
     if (displayAltTooltip)
     {
-      int x = me.getX() - (int)chartPanel.getVisibleRect().getX(), 
+      int x = me.getX() - (int)chartPanel.getVisibleRect().getX(),
           y = me.getY() - (int)chartPanel.getVisibleRect().getY();
       if (x > altTooltipX &&
           y > altTooltipY &&
@@ -230,31 +231,31 @@ public class CommandPanelUtils
     }
     return resp;
   }
-  
+
   public static int isMouseOnAltWindowButton(MouseEvent me, boolean displayAltTooltip, ChartPanel chartPanel)
   {
     int button = 0;
     if (!displayAltTooltip)
       return button;
-    int x = me.getX() - (int)chartPanel.getVisibleRect().getX(), 
+    int x = me.getX() - (int)chartPanel.getVisibleRect().getX(),
         y = me.getY() - (int)chartPanel.getVisibleRect().getY();
   //  System.out.println("X:" + x + ", Y:" + y + " (winY:" + altTooltipY + ", winX:" + altTooltipX + ", winW:" + altTooltipW);
     if (y > altTooltipY + 7 &&
         y < altTooltipY + 21)
     {
-      if (x < (altTooltipX + altTooltipW - 3) && 
+      if (x < (altTooltipX + altTooltipW - 3) &&
           x > (altTooltipX + altTooltipW - (3 + buttonWidth)))
       {
   //    System.out.println("Close");
         button = CLOSE_IMAGE;
       }
-      else if (x < (altTooltipX + altTooltipW - 30) && 
+      else if (x < (altTooltipX + altTooltipW - 30) &&
                x > (altTooltipX + altTooltipW - (30 + buttonWidth)))
       {
   //    System.out.println("Expand");
         button = ZOOMEXPAND_IMAGE;
       }
-      else if (x < (altTooltipX + altTooltipW - 50) && 
+      else if (x < (altTooltipX + altTooltipW - 50) &&
                x > (altTooltipX + altTooltipW - (50 + buttonWidth)))
       {
   //    System.out.println("Shrink");
@@ -308,7 +309,7 @@ public class CommandPanelUtils
   {
     return altTooltipW;
   }
-  
+
   public static void setAltTooltipW(int w)
   {
     CommandPanelUtils.altTooltipW = w;
@@ -323,7 +324,7 @@ public class CommandPanelUtils
   {
     return altTooltipH;
   }
-  
+
   public static double resetDir(double dir)
   {
     dir = 180D - dir;
@@ -331,7 +332,7 @@ public class CommandPanelUtils
     while (dir < 0D) dir += 360D;
     return dir;
   }
-  
+
   public static void print(CommandPanel cp)
   {
     PrintOptionsPanel pop = new PrintOptionsPanel();
@@ -350,15 +351,15 @@ public class CommandPanelUtils
         PrintUtilities.printComponent(view);
     }
   }
-  
+
   public static int[] genImage(CommandPanel cp)
   {
     int[] ret = null;
-    String fName = WWGnlUtilities.chooseFile(cp, 
-                                             JFileChooser.FILES_ONLY, 
-                                             new String[] { "jpg", "jpeg", "png" }, 
+    String fName = WWGnlUtilities.chooseFile(cp,
+                                             JFileChooser.FILES_ONLY,
+                                             new String[] { "jpg", "jpeg", "png" },
                                              WWGnlUtilities.buildMessage("image-files"),
-                                             ".", WWGnlUtilities.buildMessage("save"), 
+                                             ".", WWGnlUtilities.buildMessage("save"),
                                              WWGnlUtilities.buildMessage("generate-image"));
     if (fName.trim().length() > 0)
     {
@@ -366,10 +367,10 @@ public class CommandPanelUtils
       String suffix = "";
       if (fName.trim().indexOf(".") == -1)
       {
-        JOptionPane.showMessageDialog(cp, 
-                                      WWGnlUtilities.buildMessage("please-provide-extension"), 
-                                      WWGnlUtilities.buildMessage("generate-image"), 
-                                      JOptionPane.ERROR_MESSAGE); 
+        JOptionPane.showMessageDialog(cp,
+                                      WWGnlUtilities.buildMessage("please-provide-extension"),
+                                      WWGnlUtilities.buildMessage("generate-image"),
+                                      JOptionPane.ERROR_MESSAGE);
       }
       else
       {
@@ -379,19 +380,19 @@ public class CommandPanelUtils
             !suffix.toLowerCase().equals("jpeg") &&
             !suffix.toLowerCase().equals("png"))
         {
-          JOptionPane.showMessageDialog(cp, 
-                                        WWGnlUtilities.buildMessage("bad-extension", 
-                                                                    new String[] { suffix.toLowerCase() }), 
-                                        WWGnlUtilities.buildMessage("generate-image"), 
-                                        JOptionPane.ERROR_MESSAGE); 
+          JOptionPane.showMessageDialog(cp,
+                                        WWGnlUtilities.buildMessage("bad-extension",
+                                                                    new String[] { suffix.toLowerCase() }),
+                                        WWGnlUtilities.buildMessage("generate-image"),
+                                        JOptionPane.ERROR_MESSAGE);
         }
         else
         {
           ret = cp.getChartPanel().genImage(prefix, suffix.toLowerCase());
-          JOptionPane.showMessageDialog(cp, 
-                                        WWGnlUtilities.buildMessage("file-generated", 
-                                                                    new String[] { fName }), 
-                                        WWGnlUtilities.buildMessage("generate-image"), 
+          JOptionPane.showMessageDialog(cp,
+                                        WWGnlUtilities.buildMessage("file-generated",
+                                                                    new String[] { fName }),
+                                        WWGnlUtilities.buildMessage("generate-image"),
                                         JOptionPane.INFORMATION_MESSAGE);
         }
       }
@@ -400,16 +401,16 @@ public class CommandPanelUtils
   }
 
   public static void runStorageThread(CommandPanel cp,
-                                      boolean update, 
-                                      String compositeName, 
+                                      boolean update,
+                                      String compositeName,
                                       GribHelper.GribConditionData wgd[])
   {
     WWContext.getInstance().fireSetLoading(true, "Please wait, storing..."); // LOCALIZE
     XMLDocument storage = new XMLDocument();
-    
+
     XMLElement root = (XMLElement)storage.createElement("storage");
     storage.appendChild(root);
-    
+
     if (cp.getCurrentComment().length() > 0)
     {
       XMLElement compositeComment = (XMLElement)storage.createElement("composite-comment");
@@ -417,10 +418,10 @@ public class CommandPanelUtils
       CDATASection cdata = storage.createCDATASection(cp.getCurrentComment());
       compositeComment.appendChild(cdata);
     }
-    
+
     XMLElement faxcollection = (XMLElement)storage.createElement("fax-collection");
     root.appendChild(faxcollection);
-    
+
     for (int i=0; cp.getFaxImage() !=null && i<cp.getFaxImage().length; i++)
     {
       XMLElement fax = (XMLElement)storage.createElement("fax");
@@ -440,31 +441,31 @@ public class CommandPanelUtils
       Text faxScaleText = storage.createTextNode("#text");
       faxScaleText.setNodeValue(Double.toString(cp.getFaxImage()[i].imageScale));
       faxScale.appendChild(faxScaleText);
-      
+
       XMLElement faxXoffset = (XMLElement)storage.createElement("faxXoffset");
       fax.appendChild(faxXoffset);
       Text faxXoffsetText = storage.createTextNode("#text");
       faxXoffsetText.setNodeValue(Integer.toString(cp.getFaxImage()[i].imageHOffset));
       faxXoffset.appendChild(faxXoffsetText);
-      
+
       XMLElement faxYoffset = (XMLElement)storage.createElement("faxYoffset");
       fax.appendChild(faxYoffset);
       Text faxYoffsetText = storage.createTextNode("#text");
       faxYoffsetText.setNodeValue(Integer.toString(cp.getFaxImage()[i].imageVOffset));
       faxYoffset.appendChild(faxYoffsetText);
-                  
+
       XMLElement faxRotation = (XMLElement)storage.createElement("faxRotation");
       fax.appendChild(faxRotation);
       Text faxRotationText = storage.createTextNode("#text");
       faxRotationText.setNodeValue(Double.toString(cp.getFaxImage()[i].imageRotationAngle));
       faxRotation.appendChild(faxRotationText);
-                  
+
       XMLElement faxOrigin = (XMLElement)storage.createElement("faxOrigin");
       fax.appendChild(faxOrigin);
       Text faxOriginText = storage.createTextNode("#text");
       faxOriginText.setNodeValue(cp.getFaxImage()[i].faxOrigin);
       faxOrigin.appendChild(faxOriginText);
-                  
+
       XMLElement faxTitle = (XMLElement)storage.createElement("faxTitle");
       fax.appendChild(faxTitle);
       Text faxTitleText = storage.createTextNode("#text");
@@ -476,14 +477,14 @@ public class CommandPanelUtils
     // Obsolete - 13-Oct-2009
   //  grib.setAttribute("wind-only", Boolean.toString(windOnly));
   //  grib.setAttribute("with-contour", Boolean.toString(displayContourLines));
-    
+
     grib.setAttribute("display-TWS-Data",    Boolean.toString(cp.isDisplayTws()));
     grib.setAttribute("display-PRMSL-Data",  Boolean.toString(cp.isDisplayPrmsl()));
     grib.setAttribute("display-500HGT-Data", Boolean.toString(cp.isDisplay500mb()));
     grib.setAttribute("display-WAVES-Data",  Boolean.toString(cp.isDisplayWaves()));
     grib.setAttribute("display-TEMP-Data",   Boolean.toString(cp.isDisplayTemperature()));
     grib.setAttribute("display-PRATE-Data",  Boolean.toString(cp.isDisplayRain()));
-    
+
     grib.setAttribute("display-TWS-contour",    Boolean.toString(cp.isDisplayContourTWS()));
     grib.setAttribute("display-PRMSL-contour",  Boolean.toString(cp.isDisplayContourPRMSL()));
     grib.setAttribute("display-500HGT-contour", Boolean.toString(cp.isDisplayContour500mb()));
@@ -502,7 +503,7 @@ public class CommandPanelUtils
   //  System.out.println("GRIB File Name :" + gribFileName);
     grib.setAttribute("grib-request", cp.getGribRequest());
     root.appendChild(grib);
-    
+
   //  System.out.println("GRIB File Name:" + gribFileName);
     boolean inLineGRIBContent = false;
     if (!update)
@@ -511,7 +512,7 @@ public class CommandPanelUtils
       if (!gf.exists())
         inLineGRIBContent = true;
     }
-    if (update || !inLineGRIBContent)  
+    if (update || !inLineGRIBContent)
     {
       Text gribText = storage.createTextNode("#text");
       gribText.setNodeValue(cp.getGribFileName().replace(File.separatorChar, '/'));
@@ -521,7 +522,7 @@ public class CommandPanelUtils
     {
       grib.setAttribute("in-line", "true");
       grib.setAttribute("in-line-request", cp.getGribFileName());
-      if (wgd != null)           
+      if (wgd != null)
       {
         try
         {
@@ -538,7 +539,7 @@ public class CommandPanelUtils
             encoder.writeObject(wgd);
             encoder.close();
             String gribContent = baos.toString();
-            StringReader sr = new StringReader(gribContent);              
+            StringReader sr = new StringReader(gribContent);
             DOMParser parser = WWContext.getInstance().getParser();
             XMLDocument doc = null;
             synchronized (parser)
@@ -568,7 +569,7 @@ public class CommandPanelUtils
             encoder.close();
             Text gribText = storage.createTextNode("#text");
             gribText.setNodeValue((gribDir + File.separator + ilGribFileName).replace(File.separatorChar, '/'));
-            grib.appendChild(gribText);                  
+            grib.appendChild(gribText);
           }
         }
         catch (Exception pe)
@@ -584,7 +585,7 @@ public class CommandPanelUtils
     if (cp.getGPXData() != null)
     {
       XMLElement gpxDataNode = (XMLElement)storage.createElement("gpx-data");
-      root.appendChild(gpxDataNode);  
+      root.appendChild(gpxDataNode);
       // Loop on the GPX Data content
       for (GeoPoint gpxPoint : cp.getGPXData())
       {
@@ -593,10 +594,10 @@ public class CommandPanelUtils
         XMLElement gpxNode = (XMLElement)storage.createElement("gpx-point");
         gpxNode.setAttribute("lat", Double.toString(l));
         gpxNode.setAttribute("lng", Double.toString(g));
-        gpxDataNode.appendChild(gpxNode);              
+        gpxDataNode.appendChild(gpxNode);
       }
     }
-    
+
     XMLElement projection = (XMLElement)storage.createElement("projection");
     root.appendChild(projection);
     switch (cp.getChartPanel().getProjection())
@@ -626,16 +627,16 @@ public class CommandPanelUtils
         break;
       case ChartPanel.SATELLITE_VIEW:
         projection.setAttribute("type", CommandPanel.SATELLITE);
-        projection.setAttribute("nadir-latitude", Double.toString(cp.getChartPanel().getSatelliteLatitude()));              
-        projection.setAttribute("nadir-longitude", Double.toString(cp.getChartPanel().getSatelliteLongitude()));              
-        projection.setAttribute("altitude", Double.toString(cp.getChartPanel().getSatelliteAltitude()));              
-        projection.setAttribute("opaque", Boolean.toString(!cp.getChartPanel().isTransparentGlobe()));              
+        projection.setAttribute("nadir-latitude", Double.toString(cp.getChartPanel().getSatelliteLatitude()));
+        projection.setAttribute("nadir-longitude", Double.toString(cp.getChartPanel().getSatelliteLongitude()));
+        projection.setAttribute("altitude", Double.toString(cp.getChartPanel().getSatelliteAltitude()));
+        projection.setAttribute("opaque", Boolean.toString(!cp.getChartPanel().isTransparentGlobe()));
         break;
       default:
         projection.setAttribute("type", CommandPanel.MERCATOR);
         break;
     }
-   
+
     XMLElement north = (XMLElement)storage.createElement("north");
     root.appendChild(north);
     Text northText = storage.createTextNode("#text");
@@ -647,37 +648,37 @@ public class CommandPanelUtils
     Text southText = storage.createTextNode("#text");
     southText.setNodeValue(Double.toString(cp.getSLat()));
     south.appendChild(southText);
-    
+
     XMLElement east = (XMLElement)storage.createElement("east");
     root.appendChild(east);
     Text eastText = storage.createTextNode("#text");
     eastText.setNodeValue(Double.toString(cp.getELong()));
     east.appendChild(eastText);
-   
+
     XMLElement west = (XMLElement)storage.createElement("west");
     root.appendChild(west);
     Text westText = storage.createTextNode("#text");
     westText.setNodeValue(Double.toString(cp.getWLong()));
     west.appendChild(westText);
-   
+
     XMLElement chartwidth = (XMLElement)storage.createElement("chartwidth");
     root.appendChild(chartwidth);
     Text chartwidthText = storage.createTextNode("#text");
     chartwidthText.setNodeValue(Integer.toString(cp.getChartPanel().getWidth()));
     chartwidth.appendChild(chartwidthText);
-   
+
     XMLElement chartheight = (XMLElement)storage.createElement("chartheight");
     root.appendChild(chartheight);
     Text chartheightText = storage.createTextNode("#text");
     chartheightText.setNodeValue(Integer.toString(cp.getChartPanel().getHeight()));
     chartheight.appendChild(chartheightText);
 
-    XMLElement scroll = (XMLElement)storage.createElement("scroll");    
+    XMLElement scroll = (XMLElement)storage.createElement("scroll");
     root.appendChild(scroll);
     scroll.setAttribute("x", Integer.toString(cp.getChartPanelScrollPane().getViewport().getViewPosition().x));
     scroll.setAttribute("y", Integer.toString(cp.getChartPanelScrollPane().getViewport().getViewPosition().y));
-    
-    XMLElement faxOption = (XMLElement)storage.createElement("fax-option");    
+
+    XMLElement faxOption = (XMLElement)storage.createElement("fax-option");
     root.appendChild(faxOption);
     faxOption.setAttribute("value", (cp.getCheckBoxPanelOption() == CommandPanel.CHECKBOX_OPTION?"CHECKBOX":"RADIOBUTTON"));
 
@@ -690,15 +691,15 @@ public class CommandPanelUtils
       boatLocation.setAttribute("lng", Double.toString(cp.getBoatPosition().getG()));
       boatLocation.setAttribute("hdg", Integer.toString(cp.getBoatHeading()));
     }
-    
-    String fileName = "";    
+
+    String fileName = "";
     if (!update && compositeName == null)
-      fileName = WWGnlUtilities.chooseFile(cp, 
-                                           JFileChooser.FILES_ONLY, 
-                                           new String[] { "waz" }, // , "xml" }, 
-                                           "Composites", 
-                                           ParamPanel.data[ParamData.COMPOSITE_ROOT_DIR][ParamData.VALUE_INDEX].toString(), 
-                                           "Save", 
+      fileName = WWGnlUtilities.chooseFile(cp,
+                                           JFileChooser.FILES_ONLY,
+                                           new String[] { "waz" }, // , "xml" },
+                                           "Composites",
+                                           ParamPanel.data[ParamData.COMPOSITE_ROOT_DIR][ParamData.VALUE_INDEX].toString(),
+                                           "Save",
                                            "Composite File");
     else
       fileName = compositeName;
@@ -721,10 +722,10 @@ public class CommandPanelUtils
         boolean ok = true;
         if (composite.exists())
         {
-          int resp = JOptionPane.showConfirmDialog(cp, 
-                                                   WWGnlUtilities.buildMessage("composite-already-exist", new String[] { fileName }), 
-                                                   WWGnlUtilities.buildMessage("store-composite"), 
-                                                   JOptionPane.YES_NO_OPTION, 
+          int resp = JOptionPane.showConfirmDialog(cp,
+                                                   WWGnlUtilities.buildMessage("composite-already-exist", new String[] { fileName }),
+                                                   WWGnlUtilities.buildMessage("store-composite"),
+                                                   JOptionPane.YES_NO_OPTION,
                                                    JOptionPane.WARNING_MESSAGE);
           if (resp == JOptionPane.NO_OPTION)
             ok = false;
@@ -747,13 +748,13 @@ public class CommandPanelUtils
       {
   //      System.out.println("Archiving " + fileName);
         boolean autoDownloadAndSave = fileName != null && !update;
-        WWGnlUtilities.archiveComposite(fileName, autoDownloadAndSave); 
+        WWGnlUtilities.archiveComposite(fileName, autoDownloadAndSave);
         WWContext.getInstance().fireReloadCompositeTree();
         WWContext.getInstance().fireReloadFaxTree();
         WWContext.getInstance().fireReloadGRIBTree();
-        // Finally, reload composite from archive, 
+        // Finally, reload composite from archive,
         // to have the faxes and GRIBs pointing in the archive
-        WWContext.getInstance().fireProgressing(WWGnlUtilities.buildMessage("swapping-pointers")); 
+        WWContext.getInstance().fireProgressing(WWGnlUtilities.buildMessage("swapping-pointers"));
         cp.restoreComposite(archiveName);
       }
     }
@@ -763,10 +764,10 @@ public class CommandPanelUtils
       if (fileName.toUpperCase().endsWith(".WAZ")) // Archive required
       {
   //      WWContext.getInstance().fireInterruptProcess();
-        int resp = JOptionPane.showConfirmDialog(cp, 
-                                                 WWGnlUtilities.buildMessage("updating-composite", new String[] { fileName }), 
-                                                 WWGnlUtilities.buildMessage("store-composite"), 
-                                                 JOptionPane.YES_NO_OPTION, 
+        int resp = JOptionPane.showConfirmDialog(cp,
+                                                 WWGnlUtilities.buildMessage("updating-composite", new String[] { fileName }),
+                                                 WWGnlUtilities.buildMessage("store-composite"),
+                                                 JOptionPane.YES_NO_OPTION,
                                                  JOptionPane.WARNING_MESSAGE);
         if (resp == JOptionPane.YES_OPTION)
         {
@@ -786,12 +787,12 @@ public class CommandPanelUtils
       else
         System.out.println("Ooops!");
     }
-    WWContext.getInstance().fireSetCompositeFileName(fileName);  
-    WWContext.getInstance().fireSetLoading(false, "Please wait...");               
-  }  
-  
-  public static void createFromPattern(String fileName, 
-                                       CommandPanel cp, 
+    WWContext.getInstance().fireSetCompositeFileName(fileName);
+    WWContext.getInstance().fireSetLoading(false, "Please wait...");
+  }
+
+  public static void createFromPattern(String fileName,
+                                       CommandPanel cp,
                                        int blurSharpOption)
   {
     try
@@ -807,7 +808,7 @@ public class CommandPanelUtils
             patternURL = new URL(fileName);
           else
             patternURL = new File(fileName).toURI().toURL();
-          parser.parse(patternURL); 
+          parser.parse(patternURL);
         }
         catch (FileNotFoundException fnfe) // Possibly happens at startup?
         {
@@ -904,7 +905,7 @@ public class CommandPanelUtils
         cp.setSLat(sLat);
         cp.setELong(eLong);;
         cp.setWLong(wLong);
-        
+
         int w = Integer.parseInt(doc.selectNodes("//chartwidth").item(0).getFirstChild().getNodeValue());
         int h = Integer.parseInt(doc.selectNodes("//chartheight").item(0).getFirstChild().getNodeValue());
 
@@ -915,7 +916,7 @@ public class CommandPanelUtils
           yScroll = Integer.parseInt(((XMLElement)doc.selectNodes("//scroll").item(0)).getAttribute("y"));
         }
         catch (Exception ignore) { }
-        
+
         try
         {
           XMLElement faxOption = (XMLElement)(doc.selectNodes("//fax-option").item(0));
@@ -927,10 +928,10 @@ public class CommandPanelUtils
           else
             System.out.println("Unknown option [" + opt + "]");
         }
-        catch (Exception ignore) 
+        catch (Exception ignore)
         {
-        }        
-        
+        }
+
         if (cp.getChartPanel().getProjection() != ChartPanel.GLOBE_VIEW &&
             cp.getChartPanel().getProjection() != ChartPanel.SATELLITE_VIEW)
           cp.getChartPanel().setWidthFromChart(nLat, sLat, wLong, eLong);
@@ -944,10 +945,10 @@ public class CommandPanelUtils
         cp.getChartPanel().setH(h);
         cp.getChartPanel().setBounds(0,0,w,h);
 
-        cp.getChartPanel().repaint();  
-        
-        try 
-        { 
+        cp.getChartPanel().repaint();
+
+        try
+        {
           NodeList faxes = doc.selectNodes("//fax-collection/fax");
           cp.setFaxImage(new CommandPanel.FaxImage[faxes.getLength()]);
           FaxType[] ft = new FaxType[faxes.getLength()];
@@ -969,12 +970,12 @@ public class CommandPanelUtils
                 if (!ok2go)
                 {
     //            String mess = GnlUtilities.buildMessage("you-are-not-on-line", new String[] { url });
-                  int resp = JOptionPane.showConfirmDialog(cp, 
-                                                           WWGnlUtilities.buildMessage("you-are-not-on-line", 
-                                                                                        new String[] { url }), 
-                                                           WWGnlUtilities.buildMessage("dynamic-pattern"), 
-                                                           JOptionPane.YES_NO_OPTION, 
-                                                           JOptionPane.QUESTION_MESSAGE);                            
+                  int resp = JOptionPane.showConfirmDialog(cp,
+                                                           WWGnlUtilities.buildMessage("you-are-not-on-line",
+                                                                                        new String[] { url }),
+                                                           WWGnlUtilities.buildMessage("dynamic-pattern"),
+                                                           JOptionPane.YES_NO_OPTION,
+                                                           JOptionPane.QUESTION_MESSAGE);
                   if (resp == JOptionPane.YES_OPTION)
                     ok2go = true;
                 }
@@ -989,7 +990,7 @@ public class CommandPanelUtils
                   dir = WWGnlUtilities.translatePath(dir, now).replace('/', File.separatorChar);
                   SimpleDateFormat sdf = new SimpleDateFormat(pattern);
                   faxName = dir + File.separator + prefix + sdf.format(now) + "." + ext;
-                  
+
                   File faxDir = new File(dir);
                   if (!faxDir.exists())
                     faxDir.mkdirs();
@@ -1009,8 +1010,8 @@ public class CommandPanelUtils
               }
               else // Non HTTP protocols
               {
-                // Non http protocols! 
-                if (url.startsWith(SearchUtil.SEARCH_PROTOCOL)) // (local search, for SailMail)               
+                // Non http protocols!
+                if (url.startsWith(SearchUtil.SEARCH_PROTOCOL)) // (local search, for SailMail)
                 {
                   // Parse Expression, like search:chartview.util.SearchUtil.findMostRecentFax(pattern, rootPath)
                   faxName = SearchUtil.dynamicSearch(url);
@@ -1020,18 +1021,18 @@ public class CommandPanelUtils
                 {
                   String internStr = url.substring(WWContext.INTERNAL_RESOURCE_PREFIX.length());
                   if (internStr.equals(WWContext.BG_MERCATOR_GREENWICH_CENTERED_ALIAS))
-                    internStr = WWContext.BG_MERCATOR_GREENWICH_CENTERED; 
+                    internStr = WWContext.BG_MERCATOR_GREENWICH_CENTERED;
                   else if (internStr.equals(WWContext.BG_MERCATOR_ANTIMERIDIAN_CENTERED_ALIAS))
-                    internStr = WWContext.BG_MERCATOR_ANTIMERIDIAN_CENTERED; 
+                    internStr = WWContext.BG_MERCATOR_ANTIMERIDIAN_CENTERED;
                   else if (internStr.equals(WWContext.BG_MERCATOR_NE_ATLANTIC_ALIAS))
-                    internStr = WWContext.BG_MERCATOR_NE_ATLANTIC; 
+                    internStr = WWContext.BG_MERCATOR_NE_ATLANTIC;
                   URL intern = new URL(internStr);
                   Image image = null;
                   try
                   {
                     image = ImageIO.read(intern);
                     File temp = File.createTempFile("resource.bg.", ".png");
-                    ImageIO.write(ImageUtil.toBufferedImage(image), "png", temp);  
+                    ImageIO.write(ImageUtil.toBufferedImage(image), "png", temp);
                     faxName = temp.getAbsolutePath();
                     temp.deleteOnExit();
                   }
@@ -1040,22 +1041,22 @@ public class CommandPanelUtils
                     System.err.println("For URL: [" + url + "] => [" + internStr + "]");
                     WWContext.getInstance().fireExceptionLogging(e);
                     e.printStackTrace();
-                  }                 
+                  }
                 }
               }
             }
             else // Non dynamic, prompt the user.
             {
-              // Prompt for the file          
+              // Prompt for the file
               String firstDir = ((ParamPanel.DataPath) ParamPanel.data[ParamData.FAX_FILES_LOC][ParamData.VALUE_INDEX]).toString().split(File.pathSeparator)[0];
-              faxName = WWGnlUtilities.chooseFile(cp, JFileChooser.FILES_ONLY, 
-                                                  new String[] { "gif", "jpg", "jpeg", "tif", "tiff", "png" }, 
-                                                  hintName, 
-                                                  firstDir, 
+              faxName = WWGnlUtilities.chooseFile(cp, JFileChooser.FILES_ONLY,
+                                                  new String[] { "gif", "jpg", "jpeg", "tif", "tiff", "png" },
+                                                  hintName,
+                                                  firstDir,
                                                   WWGnlUtilities.buildMessage("open"),
                                                   hintName,
                                                   true);
-            }             
+            }
             // Fax identified, loading.
             if (faxName.trim().length() > 0)
             {
@@ -1067,19 +1068,19 @@ public class CommandPanelUtils
               String colorChangeStr = fax.getAttribute("color-change");
               if (strRatio.trim().length() > 0)
               {
-                try { cp.setWHRatio(Double.parseDouble(strRatio)); } 
+                try { cp.setWHRatio(Double.parseDouble(strRatio)); }
                 catch (Exception ignore) { ignore.printStackTrace(); }
               }
               else
                 cp.setWHRatio(1D);
-              
+
               double imageScale = Double.parseDouble(fax.selectNodes("./faxScale").item(0).getFirstChild().getNodeValue());
               int imageHOffset  = Integer.parseInt(fax.selectNodes("./faxXoffset").item(0).getFirstChild().getNodeValue());
               int imageVOffset  = Integer.parseInt(fax.selectNodes("./faxYoffset").item(0).getFirstChild().getNodeValue());
               double imageRotation  = 0D;
-              try { imageRotation = Double.parseDouble(fax.selectNodes("./faxRotation").item(0).getFirstChild().getNodeValue()); } 
+              try { imageRotation = Double.parseDouble(fax.selectNodes("./faxRotation").item(0).getFirstChild().getNodeValue()); }
               catch (Exception ignore) { System.err.println("Rotation:" + ignore.getLocalizedMessage()); }
-              
+
               cp.getFaxImage()[i] = new CommandPanel.FaxImage();
               cp.getFaxImage()[i].fileName = faxName;
               cp.getFaxImage()[i].color = c;
@@ -1089,7 +1090,7 @@ public class CommandPanelUtils
               cp.getFaxImage()[i].imageRotationAngle = imageRotation;
               cp.getFaxImage()[i].comment = WWGnlUtilities.getHeader(faxName);
               String faxOrigin = "";
-              try { faxOrigin = ((XMLElement)fax.selectNodes("./dynamic-resource").item(0)).getAttribute("url") ; } 
+              try { faxOrigin = ((XMLElement)fax.selectNodes("./dynamic-resource").item(0)).getAttribute("url") ; }
               catch (Exception ignore) { ignore.printStackTrace(); }
               cp.getFaxImage()[i].faxOrigin = faxOrigin;
               if (cp.getFaxImage()[i].comment.equals(faxName))
@@ -1103,18 +1104,18 @@ public class CommandPanelUtils
               }
               if (cp.getFaxImage()[i].comment.trim().length() > 0 && (cp.getFaxImage()[i].faxTitle == null || cp.getFaxImage()[i].faxTitle.trim().length() == 0))
                 cp.getFaxImage()[i].faxTitle = cp.getFaxImage()[i].comment;
-              
+
               cp.getFaxImage()[i].show = true;
               if (transparentStr == null || transparentStr.trim().length() == 0)
                 cp.getFaxImage()[i].transparent = true;
               else
                 cp.getFaxImage()[i].transparent = transparentStr.equals("true");
-              
+
               if (colorChangeStr == null || colorChangeStr.trim().length() == 0)
                 cp.getFaxImage()[i].colorChange = true;
               else
                 cp.getFaxImage()[i].colorChange = colorChangeStr.equals("true");
-              
+
               try
               {
                 if (cp.getFaxImage()[i].transparent)
@@ -1154,18 +1155,18 @@ public class CommandPanelUtils
           WWContext.getInstance().fireFaxLoaded();
           WWContext.getInstance().fireFaxesLoaded(ft);
         }
-        catch (Exception ex) 
+        catch (Exception ex)
         {
           WWContext.getInstance().fireExceptionLogging(ex);
           ex.printStackTrace();
           cp.unsetFaxImage();
         }
-        
+
         String gribRequest = "";
-        try 
-        { 
+        try
+        {
           XMLElement gribNode = (XMLElement)doc.selectNodes("//grib").item(0);
-          
+
           String twsData = gribNode.getAttribute("display-TWS-Data");
           if (twsData.trim().length() > 0) // New version
           {
@@ -1175,14 +1176,14 @@ public class CommandPanelUtils
             cp.setDisplayWaves("true".equals(gribNode.getAttribute("display-WAVES-Data")));
             cp.setDisplayTemperature("true".equals(gribNode.getAttribute("display-TEMP-Data")));
             cp.setDisplayRain("true".equals(gribNode.getAttribute("display-PRATE-Data")));
-            
+
             cp.setDisplayContourTWS("true".equals(gribNode.getAttribute("display-TWS-contour")));
             cp.setDisplayContourPRMSL("true".equals(gribNode.getAttribute("display-PRMSL-contour")));
             cp.setDisplayContour500mb("true".equals(gribNode.getAttribute("display-500HGT-contour")));
             cp.setDisplayContourWaves("true".equals(gribNode.getAttribute("display-WAVES-contour")));
             cp.setDisplayContourTemp("true".equals(gribNode.getAttribute("display-TEMP-contour")));
             cp.setDisplayContourPrate("true".equals(gribNode.getAttribute("display-PRATE-contour")));
-          
+
             cp.setDisplay3DTws("true".equals(gribNode.getAttribute("display-TWS-3D")));
             cp.setDisplay3DPrmsl("true".equals(gribNode.getAttribute("display-PRMSL-3D")));
             cp.setDisplay3D500mb("true".equals(gribNode.getAttribute("display-500HGT-3D")));
@@ -1212,9 +1213,9 @@ public class CommandPanelUtils
             if (gribHint.trim().length() > 0)
             {
               String firstDir = ((ParamPanel.DataPath) ParamPanel.data[ParamData.GRIB_FILES_LOC][ParamData.VALUE_INDEX]).toString().split(File.pathSeparator)[0];
-              String grib = WWGnlUtilities.chooseFile(cp, JFileChooser.FILES_ONLY, 
-                                                    new String[] { "grb", "grib" }, gribHint, 
-                                                    firstDir, WWGnlUtilities.buildMessage("open"), 
+              String grib = WWGnlUtilities.chooseFile(cp, JFileChooser.FILES_ONLY,
+                                                    new String[] { "grb", "grib" }, gribHint,
+                                                    firstDir, WWGnlUtilities.buildMessage("open"),
                                                     gribHint);
               if (grib != null && grib.trim().length() > 0)
               {
@@ -1233,7 +1234,7 @@ public class CommandPanelUtils
             XMLElement saildocs = (XMLElement)gribNode.selectNodes("dynamic-grib").item(0);
             String request      = saildocs.getAttribute("request");
             gribRequest = request;
-            if (gribRequest.startsWith(SearchUtil.SEARCH_PROTOCOL)) // From the disc             
+            if (gribRequest.startsWith(SearchUtil.SEARCH_PROTOCOL)) // From the disc
             {
               // Parse Expression, like search:chartview.util.SearchUtil.findMostRecentFax(pattern, rootPath)
               String gribFileName = SearchUtil.dynamicSearch(gribRequest);
@@ -1257,7 +1258,7 @@ public class CommandPanelUtils
               gribDir = WWGnlUtilities.translatePath(gribDir, now);
               SimpleDateFormat sdf = new SimpleDateFormat(gribPattern);
               String gribFileName = gribDir + File.separator + girbPrefix + sdf.format(now) + "." + gribExt;
-  
+
               WWContext.getInstance().fireLogging(WWGnlUtilities.buildMessage("loading2", new String[] { request }) + "\n", LoggingPanel.WHITE_STYLE);
               File dir = new File(gribDir);
               if (!dir.exists())
@@ -1275,13 +1276,13 @@ public class CommandPanelUtils
                 ex.printStackTrace();
                 WWContext.getInstance().fireInterruptProcess();
                 return;
-              }              
+              }
             }
           }
         }
-        catch (Exception ex)  
-        { 
-  //      StaticObjects.getInstance().fireLogging("No GRIB node..."); 
+        catch (Exception ex)
+        {
+  //      StaticObjects.getInstance().fireLogging("No GRIB node...");
           cp.unsetGribData();
           gribRequest = "";
         }
@@ -1315,19 +1316,19 @@ public class CommandPanelUtils
             dir = WWGnlUtilities.translatePath(dir, now).replace('/', File.separatorChar);
             SimpleDateFormat sdf = new SimpleDateFormat(pattern);
             String saveAsName = dir + File.separator + prefix + sdf.format(now) + "." + ext;
-            
+
             File faxDir = new File(dir);
             if (!faxDir.exists())
               faxDir.mkdirs();
-            
+
             cp.runStorageThread(false, saveAsName);
             System.out.println("-- Saved as [" + saveAsName + "]");
           }
           catch (Exception ex)
           {
-            String message = "Error: " + ex.getLocalizedMessage() + "\nfor [" + 
+            String message = "Error: " + ex.getLocalizedMessage() + "\nfor [" +
                             ((String)ParamPanel.data[ParamData.AUTO_SAVE_DEFAULT_COMPOSITE][ParamData.VALUE_INDEX]) + "]";
-            JOptionPane.showMessageDialog(cp, message, "Auto-save", JOptionPane.ERROR_MESSAGE);            
+            JOptionPane.showMessageDialog(cp, message, "Auto-save", JOptionPane.ERROR_MESSAGE);
           }
         }
       }
@@ -1336,7 +1337,7 @@ public class CommandPanelUtils
     {
       WWContext.getInstance().fireExceptionLogging(e);
       e.printStackTrace();
-    }    
+    }
   }
 
   public static void buildPlaces(CommandPanel cp)
@@ -1393,7 +1394,7 @@ public class CommandPanelUtils
       ex.printStackTrace();
     }
   }
-  
+
   public static void buildSailMailStations(CommandPanel cp)
   {
     cp.setSma(new ArrayList<WWGnlUtilities.SailMailStation>());
@@ -1445,7 +1446,7 @@ public class CommandPanelUtils
       ex.printStackTrace();
     }
   }
-  
+
   public static void buildWeatherStations(CommandPanel cp)
   {
     cp.setWsta(new ArrayList<WWGnlUtilities.WeatherStation>());
@@ -1497,10 +1498,10 @@ public class CommandPanelUtils
       ex.printStackTrace();
     }
   }
-  
-  public static int restoreComposite(String fileName, 
-                                     String option, 
-                                     Pattern faxPattern, 
+
+  public static int restoreComposite(String fileName,
+                                     String option,
+                                     Pattern faxPattern,
                                      boolean withBoatAndTrack,
                                      CommandPanel cp,
                                      int blurSharpOption)
@@ -1511,9 +1512,9 @@ public class CommandPanelUtils
     XMLDocument doc = null;
     DOMParser parser = WWContext.getInstance().getParser();
     synchronized (parser)
-    {    
+    {
       parser.setValidationMode(DOMParser.NONVALIDATING);
-      WWContext.getInstance().setCurrentComposite(fileName);  
+      WWContext.getInstance().setCurrentComposite(fileName);
       try
       {
         if (fileName.endsWith(WWContext.WAZ_EXTENSION))
@@ -1540,7 +1541,7 @@ public class CommandPanelUtils
           }
         }
         doc = parser.getDocument();
-  
+
         if (doc.selectNodes("//composite-comment").getLength() > 0)
         {
           cp.setCurrentComment(Utilities.superTrim(doc.selectNodes("//composite-comment").item(0).getFirstChild().getNodeValue()));
@@ -1551,7 +1552,7 @@ public class CommandPanelUtils
           WWContext.getInstance().fireLogging("Reseting Comment...\n");
           cp.setCurrentComment("");
         }
-        
+
         String projType = "";
         try { projType = ((XMLElement)doc.selectNodes("//projection").item(0)).getAttribute("type"); } catch (Exception ignore) { projType = CommandPanel.MERCATOR; }
         if (projType.equals(CommandPanel.MERCATOR))
@@ -1618,7 +1619,7 @@ public class CommandPanelUtils
         try { w = Integer.parseInt(doc.selectNodes("//chartwidth").item(0).getFirstChild().getNodeValue()); } catch (Exception ex) {}
         int h = 0;
         try { h = Integer.parseInt(doc.selectNodes("//chartheight").item(0).getFirstChild().getNodeValue()); } catch (Exception ex) {}
-        
+
         int xScroll = 0, yScroll = 0;
         try
         {
@@ -1626,7 +1627,7 @@ public class CommandPanelUtils
           xScroll = Integer.parseInt(scroll.getAttribute("x"));
           yScroll = Integer.parseInt(scroll.getAttribute("y"));
         }
-        catch (Exception ignore) 
+        catch (Exception ignore)
         {
           ignore.printStackTrace();
           doc.print(System.err);
@@ -1642,12 +1643,12 @@ public class CommandPanelUtils
           else
             System.out.println("Unknown option [" + opt + "]");
         }
-        catch (Exception ignore) 
+        catch (Exception ignore)
         {
           ignore.printStackTrace();
           doc.print(System.err);
         }
-        
+
         // Boat Position?
         if ((withBoatAndTrack || option.equals(TwoFilePanel.EVERY_THING)) && doc.selectNodes("//boat-position").getLength() == 1)
         {
@@ -1658,8 +1659,8 @@ public class CommandPanelUtils
           cp.setBoatPosition(new GeoPoint(l, g));
           cp.setBoatHeading(hdg);
         }
-        
-        if (cp.getChartPanel().getProjection() != cp.getChartPanel().GLOBE_VIEW && 
+
+        if (cp.getChartPanel().getProjection() != cp.getChartPanel().GLOBE_VIEW &&
             cp.getChartPanel().getProjection() != cp.getChartPanel().SATELLITE_VIEW)
           cp.getChartPanel().setWidthFromChart(cp.getNLat(), cp.getSLat(), cp.getWLong(), cp.getELong());
   //    eLong = cp.getChartPanel().calculateEastG(nLat, sLat, wLong);
@@ -1672,12 +1673,12 @@ public class CommandPanelUtils
         cp.getChartPanel().setH(h);
         cp.getChartPanel().setBounds(0, 0, w, h);
 
-        cp.getChartPanel().repaint();  
-  
+        cp.getChartPanel().repaint();
+
         if (option.equals(TwoFilePanel.EVERY_THING) || option.equals(TwoFilePanel.JUST_FAXES))
         {
-          try 
-          { 
+          try
+          {
             NodeList faxes = doc.selectNodes("//fax-collection/fax");
             cp.setFaxImage(new CommandPanel.FaxImage[faxes.getLength()]);
             FaxType[] ft = new FaxType[faxes.getLength()];
@@ -1698,7 +1699,7 @@ public class CommandPanelUtils
               String strRatio = fax.getAttribute("wh-ratio");
               if (strRatio.trim().length() > 0)
               {
-                try { cp.setWHRatio(Double.parseDouble(strRatio)); } 
+                try { cp.setWHRatio(Double.parseDouble(strRatio)); }
                 catch (Exception ignore) { ignore.printStackTrace(); }
               }
               else
@@ -1709,16 +1710,16 @@ public class CommandPanelUtils
               int imageHOffset  = Integer.parseInt(fax.selectNodes("./faxXoffset").item(0).getFirstChild().getNodeValue());
               int imageVOffset  = Integer.parseInt(fax.selectNodes("./faxYoffset").item(0).getFirstChild().getNodeValue());
               double imageRotation = 0D;
-              try { imageRotation = Double.parseDouble(fax.selectNodes("./faxRotation").item(0).getFirstChild().getNodeValue()); } 
+              try { imageRotation = Double.parseDouble(fax.selectNodes("./faxRotation").item(0).getFirstChild().getNodeValue()); }
               catch (Exception ignore) { ignore.printStackTrace(); }
               // New items (15-sep-2009)
               String faxTitle = "";
               String faxOrigin = "";
-              try { faxTitle = fax.selectNodes("./faxTitle").item(0).getFirstChild().getNodeValue(); } 
+              try { faxTitle = fax.selectNodes("./faxTitle").item(0).getFirstChild().getNodeValue(); }
               catch (Exception ignore) { /* ignore.printStackTrace(); */ }
-              try { faxOrigin = fax.selectNodes("./faxOrigin").item(0).getFirstChild().getNodeValue(); } 
+              try { faxOrigin = fax.selectNodes("./faxOrigin").item(0).getFirstChild().getNodeValue(); }
               catch (Exception ignore) { /* ignore.printStackTrace(); */ }
-              
+
               cp.getFaxImage()[i] = new CommandPanel.FaxImage();
               cp.getFaxImage()[i].fileName = faxName;
               cp.getFaxImage()[i].color = c;
@@ -1763,7 +1764,7 @@ public class CommandPanelUtils
                       cp.getFaxImage()[i].faxImage = ImageUtil.makeColorTransparent(ImageUtil.readImage(is, tif), Color.white, blurSharpOption);
                   }
                   else
-                    cp.getFaxImage()[i].faxImage = ImageUtil.readImage(is, tif);     
+                    cp.getFaxImage()[i].faxImage = ImageUtil.readImage(is, tif);
                   is.close();
                 }
                 else
@@ -1803,7 +1804,7 @@ public class CommandPanelUtils
               cp.setCheckBoxes(ft);
             }
           }
-          catch (Exception ex) 
+          catch (Exception ex)
           {
             WWContext.getInstance().fireExceptionLogging(ex);
             ex.printStackTrace();
@@ -1813,8 +1814,8 @@ public class CommandPanelUtils
         // TODO IF there is a GRIB...
         if (option.equals(TwoFilePanel.EVERY_THING) || option.equals(TwoFilePanel.JUST_GRIBS))
         {
-          try 
-          { 
+          try
+          {
             XMLElement gribNode = (XMLElement)doc.selectNodes("//grib").item(0);
 
             String twsData = gribNode.getAttribute("display-TWS-Data");
@@ -1826,14 +1827,14 @@ public class CommandPanelUtils
               cp.setDisplayWaves("true".equals(gribNode.getAttribute("display-WAVES-Data")));
               cp.setDisplayTemperature("true".equals(gribNode.getAttribute("display-TEMP-Data")));
               cp.setDisplayRain("true".equals(gribNode.getAttribute("display-PRATE-Data")));
-              
+
               cp.setDisplayContourTWS("true".equals(gribNode.getAttribute("display-TWS-contour")));
               cp.setDisplayContourPRMSL("true".equals(gribNode.getAttribute("display-PRMSL-contour")));
               cp.setDisplayContour500mb("true".equals(gribNode.getAttribute("display-500HGT-contour")));
               cp.setDisplayContourWaves("true".equals(gribNode.getAttribute("display-WAVES-contour")));
               cp.setDisplayContourTemp("true".equals(gribNode.getAttribute("display-TEMP-contour")));
               cp.setDisplayContourPrate("true".equals(gribNode.getAttribute("display-PRATE-contour")));
-  
+
               cp.setDisplay3DTws("true".equals(gribNode.getAttribute("display-TWS-3D")));
               cp.setDisplay3DPrmsl("true".equals(gribNode.getAttribute("display-PRMSL-3D")));
               cp.setDisplay3D500mb("true".equals(gribNode.getAttribute("display-500HGT-3D")));
@@ -1847,7 +1848,7 @@ public class CommandPanelUtils
             String wc = gribNode.getAttribute("with-contour"); // deprecated
             if (wc.trim().length() > 0)
               cp.setDisplayContourLines(Boolean.valueOf(wc));
-            
+
             String inLine = gribNode.getAttribute("in-line");
             if (inLine != null && inLine.trim().equals("true"))
             {
@@ -1856,8 +1857,8 @@ public class CommandPanelUtils
     //        XMLElement gribContent = (XMLElement)gribNode.getChildrenByTagName("java").item(0);
     //        StringWriter sw = new StringWriter();
     //        gribContent.print(sw);
-              
-              cp.setGribFileName(gribNode.getFirstChild().getNodeValue()); 
+
+              cp.setGribFileName(gribNode.getFirstChild().getNodeValue());
               WWContext.getInstance().fireProgressing(WWGnlUtilities.buildMessage("restoring-grib"));
               String displayFileName = cp.getGribFileName();
               InputStream is = null;
@@ -1869,7 +1870,7 @@ public class CommandPanelUtils
               }
               else
                 is = new FileInputStream(new File(cp.getGribFileName()));
-              
+
     //        XMLDecoder decoder = new XMLDecoder(new ByteArrayInputStream(sw.toString().getBytes()));
               XMLDecoder decoder = new XMLDecoder(is);
               Object o = decoder.readObject();
@@ -1890,7 +1891,7 @@ public class CommandPanelUtils
             }
             else
             {
-              cp.setGribFileName(gribNode.getFirstChild().getNodeValue()); 
+              cp.setGribFileName(gribNode.getFirstChild().getNodeValue());
               WWContext.getInstance().fireProgressing(WWGnlUtilities.buildMessage("restoring-grib"));
               String displayFileName = cp.getGribFileName();
               GribHelper.GribConditionData wgd[] = null;
@@ -1900,7 +1901,7 @@ public class CommandPanelUtils
                   cp.setGribFileName(cp.getGribFileName().substring(WWContext.WAZ_PROTOCOL_PREFIX.length()));
                 synchronized (cp)
                 {
-                  InputStream is = waz.getInputStream(waz.getEntry(cp.getGribFileName()));       
+                  InputStream is = waz.getInputStream(waz.getEntry(cp.getGribFileName()));
                   try
                   {
                     wgd = GribHelper.getGribData(is, cp.getGribFileName());
@@ -1914,19 +1915,19 @@ public class CommandPanelUtils
                     else
                       throw rte;
                   }
-                  is.close();           
+                  is.close();
                 }
               }
               else
                 wgd = GribHelper.getGribData(cp.getGribFileName(), true);
-              
+
               cp.setGribData(wgd, displayFileName);
             }
             nbComponents++;
           }
-          catch (Exception ex)  
-          { 
-    //      StaticObjects.getInstance().fireLogging("No GRIB node..."); 
+          catch (Exception ex)
+          {
+    //      StaticObjects.getInstance().fireLogging("No GRIB node...");
             cp.unsetGribData();
           }
         }
@@ -1935,12 +1936,12 @@ public class CommandPanelUtils
   //        cp.getChartPanel().setW(w);
   //        cp.getChartPanel().setH(h);
   //        cp.getChartPanel().setBounds(0,0,w,h);
-        
+
         // GPX Data?
         if (withBoatAndTrack || option.equals(TwoFilePanel.EVERY_THING))
         {
-          try 
-          { 
+          try
+          {
             NodeList gpxList = doc.selectNodes("//gpx-data/gpx-point");
             int nl = gpxList.getLength();
             if (nl == 0)
@@ -1956,14 +1957,14 @@ public class CommandPanelUtils
                 cp.getGPXData().add(gp);
               }
               nbComponents++;
-            }            
+            }
           }
           catch (Exception ex)
           {
-            ex.printStackTrace();   
+            ex.printStackTrace();
           }
         }
-        
+
         if (xScroll != 0 || yScroll != 0)
         {
           cp.getChartPanelScrollPane().getViewport().setViewPosition(new Point(xScroll, yScroll));
@@ -1973,7 +1974,7 @@ public class CommandPanelUtils
       {
         WWContext.getInstance().fireExceptionLogging(e);
         e.printStackTrace();
-      }    
+      }
     }
     return nbComponents;
   }
