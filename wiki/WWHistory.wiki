@@ -11,7 +11,7 @@ This page takes over and replaces the one [http://donpedro.lediouris.net/softwar
 = Details =
 
 || *Date* || *Description* || *Impacted file(s)* ||
-|| 19-Sep-2012 || Improved the TideEngine,<br>improved the routing (avoiding land). || tideengine.jar, chartadjust.jar ||
+|| 19-Sep-2012 || Improved the tide engine,<br>improved the routing (avoiding land). || tideengine.jar, chartadjust.jar ||
 || 10-Sep-2012 || More work on the Mac platform (Thanks to SV Settlement). || olivsoft.mac ||
 || 2-Aug-2012 || Fixed the file type option when saving a routing. || chartadjust.jar ||
 || 27-Jul-2012 || Added chexboxes in the routing summary. || chartadjust.jar ||
