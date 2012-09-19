@@ -468,22 +468,26 @@ public class RoutingUtil
         else
         {
           keepLooping = false;
-          System.out.println("Destination reached? aiming [" + (aimFor!=null?aimFor.getPosition().toString():"none") + "] finalDestination [" + finalDestination.getPosition().toString() + "]");
+          System.out.println("Destination reached? aiming WP [" + (aimFor!=null?aimFor.getPosition().toString():"none") + "] finalDestination [" + finalDestination.getPosition().toString() + "]");
           System.out.println("LocalSmallOne:" + localSmallOne);
           System.out.println("SmallestDistance:" + smallestDist);
           if ((allowOtherRoute && nbNonZeroSpeed == 0) || metLand)
           {
             keepLooping = true; // Try again, even if the distance was not shrinking
-            smallestDist = localSmallOne;
+//          smallestDist = localSmallOne;
             if (metLand)
             {
-              System.out.println("--------------- Try again, maybe mnet land.--------------");
+              System.out.println("--------------- Try again, maybe met land. (smallest:" + smallestDist + ", local:" + localSmallOne + ", prox:" + proximity + ") --------------");
 //            JOptionPane.showMessageDialog(null, "Met Land?", "Bing", JOptionPane.PLAIN_MESSAGE);
               if (smallestDist < proximity)
+              {
                 keepLooping = false;
+                System.out.println("Close enough.");
+              }
               else
                 smallestDist *= 1.5; // Boo... Should do some backtracking
             }
+            smallestDist = localSmallOne;
           }
           if (localSmallOne != Double.MAX_VALUE)
           {
@@ -505,7 +509,7 @@ public class RoutingUtil
                 else
                 {
                   keepLooping = false;
-                  System.out.println("Destination reached aiming [" + (aimFor!=null?aimFor.getPosition().toString():"none") + "] finalDestination [" + finalDestination.getPosition().toString() + "]");
+                  System.out.println("Destination reached, aiming (inter-WP) [" + (aimFor!=null?aimFor.getPosition().toString():"none") + "] finalDestination [" + finalDestination.getPosition().toString() + "]");
                 }
               }
             }
@@ -736,8 +740,8 @@ public class RoutingUtil
       }
     }
     long after = System.currentTimeMillis();
-    WWContext.getInstance().fireLogging(mess + "to " + returnCurve.size() + " point(s), curve reducing calculated in " + Long.toString(after - before) + " ms");
-    System.out.println(mess + "to " + returnCurve.size() + " point(s), curve reducing calculated in " + Long.toString(after - before) + " ms");
+    WWContext.getInstance().fireLogging(mess + "to " + returnCurve.size() + " point(s), curve reduction calculated in " + Long.toString(after - before) + " ms");
+    System.out.println(mess + "to " + returnCurve.size() + " point(s), curve reduction calculated in " + Long.toString(after - before) + " ms");
     
     return returnCurve;
   }
