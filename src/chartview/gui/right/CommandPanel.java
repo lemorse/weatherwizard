@@ -4087,20 +4087,27 @@ public class CommandPanel
                   }
                   // Current
                   double cSpeed = 0D, cDir = 0D;
-                  if (gribData.getGribPointData()[h][w].getCdr() != -1D &&
-                      gribData.getGribPointData()[h][w].getCsp() != -1D)
+                  try
                   {
-                    cSpeed = gribData.getGribPointData()[h][w].getCsp();
-                    cDir = gribData.getGribPointData()[h][w].getCdr();
+                    if (gribData.getGribPointData()[h][w].getCdr() != -1D &&
+                        gribData.getGribPointData()[h][w].getCsp() != -1D)
+                    {
+                      cSpeed = gribData.getGribPointData()[h][w].getCsp();
+                      cDir = gribData.getGribPointData()[h][w].getCdr();
+                    }
+                    else
+                    {
+                      float x = gribData.getGribPointData()[h][w].getUOgrd();
+                      float y = -gribData.getGribPointData()[h][w].getVOgrd();
+                      cSpeed = Math.sqrt(x * x + y * y);
+                      cSpeed *= 3.60D;
+                      cSpeed /= 1.852D;
+                      cDir = WWGnlUtilities.getDir(x, y);
+                    }
                   }
-                  else
+                  catch (NullPointerException npe)
                   {
-                    float x = gribData.getGribPointData()[h][w].getUOgrd();
-                    float y = -gribData.getGribPointData()[h][w].getVOgrd();
-                    cSpeed = Math.sqrt(x * x + y * y);
-                    cSpeed *= 3.60D;
-                    cSpeed /= 1.852D;
-                    cDir = WWGnlUtilities.getDir(x, y);
+                    npe.printStackTrace();
                   }
       //          gr.setColor(getWindColor(speed));
                   // We have speed, direction, wind color

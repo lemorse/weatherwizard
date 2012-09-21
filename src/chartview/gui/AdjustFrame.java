@@ -1228,7 +1228,9 @@ public class AdjustFrame
           else
           {            
 //          WWContext.getInstance().fireInterruptProcess();
-            final String soundName = ((ParamPanel.SoundFile) ParamPanel.data[ParamData.PLAY_SOUND_ON_JOB_COMPLETION][ParamData.VALUE_INDEX]).toString();
+            String _soundName = "";
+            try { _soundName = ((ParamPanel.SoundFile) ParamPanel.data[ParamData.PLAY_SOUND_ON_JOB_COMPLETION][ParamData.VALUE_INDEX]).toString(); } catch (NullPointerException npe) {}
+            final String soundName = _soundName;
             if (soundName.trim().length() > 0) // Play Sound on Completion
             {
               Thread playThread = new Thread()
