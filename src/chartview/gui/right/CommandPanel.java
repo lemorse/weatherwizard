@@ -141,7 +141,8 @@ public class CommandPanel
 
   private Cursor backupCursor = null;
   private Cursor cursorOverWayPoint = null;
-  private Cursor cusorDraggingWayPoint = null;
+  private Cursor cursorDraggingWayPoint = null;
+  private Cursor cursorFingerRoutingPoint = null;
 
   private int defaultWindOption = Integer.parseInt(((ParamPanel.WindOptionList)(ParamPanel.data[ParamData.PREFERRED_WIND_DISPLAY][ParamData.VALUE_INDEX])).getStringIndex());
 
@@ -259,6 +260,7 @@ public class CommandPanel
 
   private transient RoutingPoint closestPoint = null;
   private List<RoutingPoint> bestRoute = null;
+  private List<RoutingPoint> routeFromMouse = null;
   private transient GeoPoint boatPosition = null;
   private int boatHeading = -1;
   private transient GeoPoint wp2highlight = null;
@@ -1257,7 +1259,8 @@ public class CommandPanel
     cursorOverWayPoint = toolkit.createCustomCursor(image , new Point(15,15), imgFileName);
     imgFileName = "PanClosedHand32x32.png";
     image = toolkit.getImage(ChartPanel.class.getResource(imgFileName));
-    cusorDraggingWayPoint = toolkit.createCustomCursor(image , new Point(15,15), imgFileName);
+    cursorDraggingWayPoint = toolkit.createCustomCursor(image , new Point(15,15), imgFileName);
+    cursorFingerRoutingPoint = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
 
     ael = new ApplicationEventListener()
       {
@@ -4768,16 +4771,7 @@ public class CommandPanel
                       gr.setColor((Color) ParamPanel.data[ParamData.OLD_ISOCHRONS_COLOR][ParamData.VALUE_INDEX]);
                     else
                       gr.setColor(colors[colorIndex]);
-                    Stroke strokeOne = null;
-                    if (false && nbIsochron == (allCalculatedIsochrons.size() - routingPointDragged - 2)) // Deactivated
-                    {
-                      strokeOne = ((Graphics2D)gr).getStroke();
-                      Stroke stroke = new BasicStroke(4f, 0, 2);
-                      ((Graphics2D)gr).setStroke(stroke);
-                    }
                     gr.drawLine(previous.x, previous.y, pp.x, pp.y);
-                    if (strokeOne != null)
-                      ((Graphics2D)gr).setStroke(strokeOne);
                     gr.setColor(c);
                   }
                   previous = pp;
@@ -4905,6 +4899,39 @@ public class CommandPanel
         }
 //      else
 //        System.out.println("Closest is null");
+        if (routeFromMouse != null)
+        {
+          RoutingPoint thisPoint = routeFromMouse.get(0);
+          Point fromPoint = chartPanel.getPanelPoint(thisPoint.getPosition());
+          // Postit at this point
+          String bubbleContent = thisPoint.getPosition().toString() + 
+                                 "\n" + WWGnlUtilities.SDF_UT_3.format(thisPoint.getDate()) +
+//                               "\nWind:" + WWGnlUtilities.XXX12.format(thisPoint.getTws()) + " kts @ " + Integer.toString(thisPoint.getTwd()) + "\272t" +
+                                 "\nBSP :" + WWGnlUtilities.XXX12.format(thisPoint.getBsp()) + " kts" +
+                                 "\nHDG :" + Integer.toString(thisPoint.getHdg()) + "\272t";
+          chartPanel.bubble(gr,
+                            bubbleContent,
+                            fromPoint.x,
+                            fromPoint.y,
+                            Color.yellow,
+                            Color.black,
+                            0.40f);
+          boolean go = true;
+          while (go)
+          {
+            RoutingPoint next = thisPoint.getAncestor();
+            if (next == null)
+              go = false;
+            else
+            {
+              Point toPoint = chartPanel.getPanelPoint(next.getPosition());
+              gr.drawLine(fromPoint.x, fromPoint.y, toPoint.x, toPoint.y);
+              gr.fillOval(toPoint.x - 4, toPoint.y - 4, 8, 8); // A dot
+              thisPoint = next;
+              fromPoint = toPoint;
+            }
+          }
+        }
       }
       else
         if (routingMode) System.out.println("No isochron yet");
@@ -5494,7 +5521,6 @@ public class CommandPanel
   private boolean fromBeingDragged = false;
   private boolean toBeingDragged = false;
   private int intermediatePointDragged = -1;
-  private int routingPointDragged = -1;
 
   public boolean onEvent(EventObject e, int type)
   {
@@ -5680,23 +5706,67 @@ public class CommandPanel
         }
       }
 
-      // Detection of a routing point. Deactivated for now.
-      if (false && bestRoute != null && bestRoute.size() > 0)
+      // Detection of a routing point. 
+      if (drawIsochrons && bestRoute != null && bestRoute.size() > 0)
       {
-        int ptIdx = 0;
-        routingPointDragged = -1;
-        for (RoutingPoint rp : bestRoute)
+        RoutingPoint mouseOverRoutingPoint = null;
+        for (List<RoutingPoint> isoc : allCalculatedIsochrons)
         {
-          Point pt = chartPanel.getPanelPoint(rp.getPosition());
-          if (pt.x >= x-1 && pt.x <= x+1 && pt.y >= y-1 && pt.y <= y+1)
+          for (RoutingPoint rp : isoc)
           {
-            backupCursor = chartPanel.getCursor();
-            chartPanel.setCursor(cursorOverWayPoint);
-//          System.out.println("Over a routing point (" + ptIdx + ")");
-            routingPointDragged = ptIdx;
-            break;
+            Point pt = chartPanel.getPanelPoint(rp.getPosition());
+            final int OFFSET_FROM_POINT = 2;
+            if (pt.x >= x-OFFSET_FROM_POINT && pt.x <= x+OFFSET_FROM_POINT && pt.y >= y-OFFSET_FROM_POINT && pt.y <= y+OFFSET_FROM_POINT)
+            {
+              backupCursor = chartPanel.getCursor();
+              chartPanel.setCursor(cursorFingerRoutingPoint); 
+//            System.out.println("Over a routing point (" + ptIdx + ")");
+              mouseOverRoutingPoint = rp;
+              break;
+            }
           }
-          ptIdx++;
+          if (mouseOverRoutingPoint != null)
+            break;          
+        }        
+        routeFromMouse = null;
+        if (mouseOverRoutingPoint != null)
+        {
+          // Find closest (from the mouse) calculated routing point
+          RoutingPoint closest = mouseOverRoutingPoint; // RoutingUtil.getClosestRoutingPoint(allCalculatedIsochrons, routingPointOver + 1, mousePos);
+          if (closest != null)
+          {
+            routeFromMouse = new ArrayList<RoutingPoint>();
+            RoutingPoint parentPoint = (RoutingPoint)closest.clone(); 
+            routeFromMouse.add(parentPoint);
+
+            RoutingPoint ancestor = parentPoint;
+            boolean rebuildRoute = true;
+            while (rebuildRoute)
+            {
+              ancestor = ancestor.getAncestor();
+              if (ancestor == null)
+                rebuildRoute = false;
+              else
+              {
+                try
+                {
+                  RoutingPoint rp = (RoutingPoint)ancestor.clone();
+                  parentPoint.setAncestor(rp);
+//                rp.setAncestor(parentPoint);
+                  routeFromMouse.add(rp);
+                  parentPoint = rp;
+                }
+                catch (Exception ex)
+                {
+                  System.err.println("Index...:" + ex.getLocalizedMessage());
+                  rebuildRoute = false;
+                }
+              }
+            }
+          }
+          else
+            System.out.println("...No closets point.");
+          
         }
       }
 
@@ -5797,7 +5867,7 @@ public class CommandPanel
         tooltipMess = mess.trim() + (mess.trim().length() > 0?"\n":"") + WWGnlUtilities.getSolarTimeTooltip(gp) + footer;
         // System.out.println("mess:" + mess + ", tooltip:" + tooltipMess);
       }
-      if (displayAltTooltip)
+      if (displayAltTooltip || routeFromMouse != null)
         chartPanel.repaint();
     }
     else if (type == ChartPanel.MOUSE_DRAGGED)
@@ -5845,53 +5915,6 @@ public class CommandPanel
         chartPanel.repaint();
         return false;
       }
-      if (routingPointDragged != -1)
-      {
-        if (bestRoute != null && bestRoute.size() > routingPointDragged)
-        {
-          System.out.println("Dragging on Isochron # " + routingPointDragged + "/" + bestRoute.size());
-          int x = ((MouseEvent)e).getX();
-          int y = ((MouseEvent)e).getY();
-          GeoPoint gp = chartPanel.getGeoPos(x, y);
-
-          // Find closest calculated routing point
-          RoutingPoint closest = RoutingUtil.getClosestRoutingPoint(allCalculatedIsochrons, routingPointDragged + 1, gp);
-          if (closest != null)
-          {
-            // Recalculate everything here (BSP, TWS, etc)
-            bestRoute.set(routingPointDragged, closest); // ? -1 ?
-            try {  bestRoute.get(routingPointDragged - 1).setAncestor(closest); } catch (Exception ex) { System.err.println("Descendant:" + ex.getLocalizedMessage()); }
-            RoutingPoint ancestor = closest;
-            int routeIdx = routingPointDragged + 1;
-            boolean rebuildRoute = true;
-            while (rebuildRoute)
-            {
-              ancestor = ancestor.getAncestor();
-              if (ancestor == null)
-                rebuildRoute = false;
-              else
-              {
-                try
-                {
-                  bestRoute.set(routeIdx++, ancestor);
-                }
-                catch (Exception ex)
-                {
-                  System.err.println("Index...:" + ex.getLocalizedMessage());
-                  rebuildRoute = false;
-                }
-              }
-            }
-            // TODO Bottom Part
-          }
-          else
-            System.out.println("...No closets point.");
-          chartPanel.repaint();
-        }
-        else
-          System.out.println("Dragging a missing routing point...");
-        return false;
-      }
     }
     else if (type == ChartPanel.MOUSE_RELEASED)
     {
@@ -5899,7 +5922,7 @@ public class CommandPanel
       fromBeingDragged              = false;
       toBeingDragged                = false;
       intermediatePointDragged      = -1;
-      routingPointDragged = -1;
+      routeFromMouse = null;
       wpBeingDragged = null;
       if (backupCursor != null)
       {
@@ -5959,7 +5982,7 @@ public class CommandPanel
         if (pt.x >= x-1 && pt.x <= x+1 && pt.y >= y-1 && pt.y <= y+1)
         {
 //        System.out.println("Pressed on the from Point, dragging !!");
-          chartPanel.setCursor(cusorDraggingWayPoint);
+          chartPanel.setCursor(cursorDraggingWayPoint);
           fromBeingDragged = true;
           return false;
         }
@@ -5973,7 +5996,7 @@ public class CommandPanel
         if (pt.x >= x-1 && pt.x <= x+1 && pt.y >= y-1 && pt.y <= y+1)
         {
 //        System.out.println("Pressed on the to Point, dragging !!");
-          chartPanel.setCursor(cusorDraggingWayPoint);
+          chartPanel.setCursor(cursorDraggingWayPoint);
           toBeingDragged = true;
           return false;
         }
@@ -5989,7 +6012,7 @@ public class CommandPanel
           if (pt.x >= x-1 && pt.x <= x+1 && pt.y >= y-1 && pt.y <= y+1)
           {
 //          System.out.println("Pressed on the Point[" + ptIdx + "], dragging !!");
-            chartPanel.setCursor(cusorDraggingWayPoint);
+            chartPanel.setCursor(cursorDraggingWayPoint);
             intermediatePointDragged = ptIdx;
             return false;
           }

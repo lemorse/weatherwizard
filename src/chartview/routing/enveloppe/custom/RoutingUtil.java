@@ -685,7 +685,7 @@ public class RoutingUtil
     return after;
   }
      
-  // TASK Possible optimization ?   
+  // Possible optimization ?   
   private static List<RoutingPoint> calculateEnveloppe(List<List<RoutingPoint>> bulkPoints, RoutingPoint center)
   {
     List<RoutingPoint> returnCurve = new ArrayList<RoutingPoint>();
