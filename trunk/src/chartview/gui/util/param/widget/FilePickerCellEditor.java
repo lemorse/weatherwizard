@@ -58,8 +58,9 @@ public class FilePickerCellEditor
 
   public Object getCellEditorValue()
   {
-    String str = this.getTextField().getText();
-    str = RelativePath.getRelativePath(System.getProperty("user.dir"), str).replace(File.separatorChar, '/');
+    String str = this.getTextField().getText().trim();
+    if (str.length() > 0)
+      str = RelativePath.getRelativePath(System.getProperty("user.dir"), str).replace(File.separatorChar, '/');
     ((ParamPanel.DataFile)super.getValue()).setValue(str);
     return (ParamPanel.DataFile)super.getValue();
   }
