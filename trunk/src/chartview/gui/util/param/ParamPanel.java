@@ -403,7 +403,9 @@ public final class ParamPanel
             try
             {
               data[i][ParamData.NAME_INDEX] = new ParamDisplayLabel(ParamData.getLabels()[i], ParamData.getHelptext()[i]);
-              String s = nl.item(0).getFirstChild().getNodeValue();    
+              String s = "";
+              if (nl.item(0) != null && nl.item(0).getFirstChild() != null)
+                s = nl.item(0).getFirstChild().getNodeValue();    
               
               if (i == ParamData.CHART_COLOR ||                    // Colors
                   i == ParamData.GRID_COLOR ||
@@ -502,7 +504,10 @@ public final class ParamPanel
               else if (i == ParamData.ANEMOMETER_HAND_OPTION)
                 data[i][ParamData.VALUE_INDEX] = new AnemometerHandOptionList(Integer.parseInt(s));  
               else if (i == ParamData.PLAY_SOUND_ON_JOB_COMPLETION)              // DataFiles, Sound
-                data[i][ParamData.VALUE_INDEX] = new SoundFile(new String[] {"wav", "ogg"}, "Sounds", s);
+              {
+                if (s != null && s.trim().length() > 0)
+                  data[i][ParamData.VALUE_INDEX] = new SoundFile(new String[] {"wav", "ogg"}, "Sounds", s);
+              }
               else                                               // Strings
                 data[i][ParamData.VALUE_INDEX] = s;
             }
@@ -710,7 +715,8 @@ public final class ParamPanel
     {
       for (int i=0; i<localData.length; i++)
       {
-        String before = (data[((int[])categoryIndexes[currentCategoryIndex])[i]][ParamData.VALUE_INDEX]).toString();
+        String before = "";
+        try { before = (data[((int[])categoryIndexes[currentCategoryIndex])[i]][ParamData.VALUE_INDEX]).toString(); } catch (NullPointerException npe) {}
         if (localData[i][ParamData.VALUE_INDEX] == null)
           continue;
         String after = localData[i][ParamData.VALUE_INDEX].toString();
