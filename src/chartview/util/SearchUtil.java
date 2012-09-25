@@ -21,7 +21,7 @@ import javax.swing.JOptionPane;
 
 public class SearchUtil
 {
-  private static boolean verbose = false;
+  private static boolean verbose = "true".equals(System.getProperty("verbose", "false"));
   /**
    * Returns the List containing all the strings (file names) matching the pattern, starting from the startPath directory
    * 
@@ -126,6 +126,7 @@ public class SearchUtil
     }       
     if (ret != null)
       ret = Utilities.replaceString(ret, HEADER_EXTENSION, FAX_EXTENSION);
+    System.out.println("findMostRecentFax found [" + ret + "] for [" + pattern + "], from [" + startPath + "]");
     return ret;
   }
   

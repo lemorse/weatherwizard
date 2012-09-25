@@ -1051,7 +1051,10 @@ public final class ParamPanel
       if (value == null)
       {
         curValue = table.getValueAt(row, column);
-        System.out.println("Defaulting to curValue [" + (curValue==null?"null":curValue.getClass().getName()) + "]");
+        String lineName = "";
+        if (column == 1)
+          lineName = table.getValueAt(row, 0).toString();
+        System.out.println("Defaulting " + ((lineName != null && lineName.trim().length() > 0)?"[" + lineName + "]":"") +" to curValue [" + (curValue==null?"null":curValue.getClass().getName()) + "]");
       }
       else
         curValue = value;
@@ -1103,10 +1106,10 @@ public final class ParamPanel
             g.setFont(g.getFont().deriveFont(Font.BOLD, g.getFont().getSize()));
           g.drawString(curValue.toString(), 1, getHeight() - 1);
         }
-        else
-        {
-          System.out.println("Not a color, but null");
-        }
+//        else
+//        {
+//          System.out.println("Not a color, but null");
+//        }
       }
     }
   }
@@ -1144,11 +1147,12 @@ public final class ParamPanel
     {
       if (value == null)
       {
-        System.out.println("Value is null!!!");
+        System.out.print("New value is null");
         if (originalValue != null)
           value = originalValue;
         else
-          System.out.println("Original too!");
+          System.out.print(", original too");
+        System.out.println(".");
       }
       originalValue = value;
       if (column == 1 && value instanceof Color)

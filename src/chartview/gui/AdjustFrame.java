@@ -803,7 +803,18 @@ public class AdjustFrame
           public void actionPerformed(ActionEvent ae)
           {
             String compositeDir = ((ParamPanel.DataDirectory)ParamPanel.data[ParamData.COMPOSITE_ROOT_DIR][ParamData.VALUE_INDEX]).toString();
-            WWGnlUtilities.generateImagesFromComposites(compositeDir, ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel());
+            boolean ok = true;
+            if (((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().isDisplayAltTooltip())
+            {
+              // LOCALIZE
+              int resp = JOptionPane.showConfirmDialog(instance, "Tooltip window is on,\ndo we still proceed?", "Image generation", JOptionPane.YES_NO_OPTION ,JOptionPane.WARNING_MESSAGE);
+              if (resp == JOptionPane.YES_OPTION)
+                ok = true;
+              else
+                ok = false;
+            }
+            if (ok)
+              WWGnlUtilities.generateImagesFromComposites(compositeDir, ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel());
           }
         });
     menuAdmin.add(menuDetectUnusedFiles);
