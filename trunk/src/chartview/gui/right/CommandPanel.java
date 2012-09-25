@@ -700,7 +700,20 @@ public class CommandPanel
 
   public int[] genImage()
   {
-    return CommandPanelUtils.genImage(this);
+    boolean ok = true;
+    if (isDisplayAltTooltip())
+    {
+      // LOCALIZE
+      int resp = JOptionPane.showConfirmDialog(this, "Tooltip window is on,\ndo we still proceed?", "Image generation", JOptionPane.YES_NO_OPTION ,JOptionPane.WARNING_MESSAGE);
+      if (resp == JOptionPane.YES_OPTION)
+        ok = true;
+      else
+        ok = false;
+    }
+    if (ok)
+      return CommandPanelUtils.genImage(this);
+    else
+      return null;
   }
 
   private int faxIndex(String str)
