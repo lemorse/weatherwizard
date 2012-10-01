@@ -668,7 +668,7 @@ public class ChartAdjust
     {
       e.printStackTrace();
     }
-    final String messToSend = "Weather Wizard usage detected:\n"        +
+    final String messToSend = "Weather Wizard (" + WWContext.PRODUCT_ID + ") usage detected:\n"        +
       "date:" + new Date().toString() + ",\n" +
       "user.country:" + System.getProperty("user.country")                 + ",\n" + 
       "sun.os.patch.level:" + System.getProperty("sun.os.patch.level")     + ",\n" + 
@@ -686,7 +686,7 @@ public class ChartAdjust
     
     final String username = System.getProperty("user.name");
     final String macaddress = mac;
-    final String productname = "weather_assistant";
+    final String productname = WWContext.PRODUCT_ID;
     
   //  System.out.println(messToSend);
     // Posting the message
