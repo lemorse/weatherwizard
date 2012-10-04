@@ -910,15 +910,13 @@ public class AdjustFrame
                 ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().getTo() != null && 
                 ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().getGribData() != null)
             {
-  //          int resp = JOptionPane.showConfirmDialog(null, "Start routing computation?", "Routing", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
-  //          if (resp == JOptionPane.OK_OPTION)
-              {
-                ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().calculateRouting();
-              }
+              ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().calculateRouting();
             }
             else
             {
-              JOptionPane.showMessageDialog(instance, WWGnlUtilities.buildMessage("orig-dest-routing"), WWGnlUtilities.buildMessage("routing"), 
+              JOptionPane.showMessageDialog(instance, 
+                                            WWGnlUtilities.buildMessage("orig-dest-routing"), 
+                                            WWGnlUtilities.buildMessage("routing"), 
                                             JOptionPane.WARNING_MESSAGE);
             }
           }

@@ -82,6 +82,7 @@ public class StartRoutingPanel
   
   private final static DecimalFormat MASK = new DecimalFormat("##0.00");
   private JFormattedTextField proximityFormattedTextField = new JFormattedTextField(MASK);
+  private JLabel jLabel3 = new JLabel();
 
   public StartRoutingPanel()
   {
@@ -221,6 +222,7 @@ public class StartRoutingPanel
     proximityLabel.setText(WWGnlUtilities.buildMessage("routing-completed-below"));
     proximityFormattedTextField.setHorizontalAlignment(JTextField.RIGHT);
     proximityFormattedTextField.setText("0.00");
+    jLabel3.setText("nm");
     for (int i=0; i < WWGnlUtilities.MONTH.length; i++)
       monthComboBox.addItem(WWGnlUtilities.MONTH[i]);
     
@@ -329,6 +331,8 @@ public class StartRoutingPanel
           new Insets(0, 0, 0, 0), 0, 0));
     this.add(proximityFormattedTextField, new GridBagConstraints(4, 14, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
           new Insets(0, 0, 0, 0), 0, 0));
+    this.add(jLabel3, new GridBagConstraints(6, 14, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
+          new Insets(0, 2, 0, 0), 0, 0));
   }
 
   public void setTimeInterval(int timeInterval)
@@ -458,6 +462,7 @@ public class StartRoutingPanel
   {
     avoidLandCheckBox.setSelected(b);
     proximityFormattedTextField.setEnabled(b);
+    jLabel3.setEnabled(b);
   }
   
   public void setProximity(double d)
@@ -496,5 +501,6 @@ public class StartRoutingPanel
   private void avoidLandCheckBox_actionPerformed(ActionEvent e)
   {
     proximityFormattedTextField.setEnabled(avoidLandCheckBox.isSelected());
+    jLabel3.setEnabled(avoidLandCheckBox.isSelected());
   }
 }
