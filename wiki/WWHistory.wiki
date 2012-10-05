@@ -11,6 +11,8 @@ This page takes over and replaces the one [http://donpedro.lediouris.net/softwar
 = Details =
 
 || *Date* || *Description* || *Impacted file(s)* ||
+|| 5-Oct-2012  || Bug fixes. Decimal separator for non-English. || coreutilities.jar, nmeareader.jar, googlelocator.jar,
+ almanactools.jar, desktop.jar ||
 || 20-Sep-2012 || Routing back tracking. Mouse the mouse on the isochrones... || chartadjust.jar ||
 || 19-Sep-2012 || Improved the tide engine,<br>improved the routing (avoiding land). || tideengine.jar, chartadjust.jar ||
 || 10-Sep-2012 || More work on the Mac platform (Thanks to SV Settlement). || olivsoft.mac ||
