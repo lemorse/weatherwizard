@@ -11,9 +11,12 @@ import java.awt.Insets;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComboBox;
+import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+
+import javax.swing.text.NumberFormatter;
 
 import user.util.GeomUtil;
 
@@ -25,13 +28,13 @@ public class PositionInputPanel extends JPanel
   private JLabel jLabel1 = new JLabel();
   private JLabel jLabel2 = new JLabel();
   private JLabel jLabel3 = new JLabel();
-  private JTextField LDeg = new JTextField();
+  private JFormattedTextField LDeg = new JFormattedTextField("##0");
   private JLabel jLabel4 = new JLabel();
-  private JTextField LMin = new JTextField();
+  private JFormattedTextField LMin = new JFormattedTextField("00.00");
   private JComboBox LSign = new JComboBox();
   private JComboBox GSign = new JComboBox();
-  private JTextField GMin = new JTextField();
-  private JTextField GDeg = new JTextField();
+  private JFormattedTextField GMin = new JFormattedTextField("##0.0");
+  private JFormattedTextField GDeg = new JFormattedTextField("00.00");
   private JLabel jLabel5 = new JLabel();
   private JLabel jLabel6 = new JLabel();
   private JTextField headingTextField = new JTextField();
@@ -66,7 +69,7 @@ public class PositionInputPanel extends JPanel
     LDeg.setPreferredSize(new Dimension(40, 20));
     LDeg.setMinimumSize(new Dimension(40, 20));
     jLabel4.setText("°");
-    LMin.setText("00.00");
+    LMin.setText(((NumberFormatter)LMin.getFormatter()).getFormat().format(0.0));
     LMin.setHorizontalAlignment(JTextField.RIGHT);
     LMin.setPreferredSize(new Dimension(50, 20));
     LMin.setMinimumSize(new Dimension(50, 20));
@@ -79,7 +82,7 @@ public class PositionInputPanel extends JPanel
     GSign.setMinimumSize(new Dimension(35, 20));
     GSign.addItem("E");
     GSign.addItem("W");
-    GMin.setText("00.00");
+    GMin.setText(((NumberFormatter)GMin.getFormatter()).getFormat().format(0.0));
     GMin.setHorizontalAlignment(JTextField.RIGHT);
     GMin.setPreferredSize(new Dimension(50, 20));
     GMin.setMinimumSize(new Dimension(50, 20));
