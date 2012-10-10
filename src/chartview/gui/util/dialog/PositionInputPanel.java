@@ -9,6 +9,8 @@ import java.awt.GridBagLayout;
 
 import java.awt.Insets;
 
+import java.text.DecimalFormat;
+
 import javax.swing.BorderFactory;
 import javax.swing.JComboBox;
 import javax.swing.JFormattedTextField;
@@ -28,16 +30,16 @@ public class PositionInputPanel extends JPanel
   private JLabel jLabel1 = new JLabel();
   private JLabel jLabel2 = new JLabel();
   private JLabel jLabel3 = new JLabel();
-  private JFormattedTextField LDeg = new JFormattedTextField("##0");
+  private JFormattedTextField LDeg = new JFormattedTextField(new DecimalFormat("#0"));
   private JLabel jLabel4 = new JLabel();
-  private JFormattedTextField LMin = new JFormattedTextField("00.00");
+  private JFormattedTextField LMin = new JFormattedTextField(new DecimalFormat("00.00"));
   private JComboBox LSign = new JComboBox();
   private JComboBox GSign = new JComboBox();
-  private JFormattedTextField GMin = new JFormattedTextField("##0.0");
-  private JFormattedTextField GDeg = new JFormattedTextField("00.00");
+  private JFormattedTextField GMin = new JFormattedTextField(new DecimalFormat("00.00"));
+  private JFormattedTextField GDeg = new JFormattedTextField(new DecimalFormat("##0"));
   private JLabel jLabel5 = new JLabel();
   private JLabel jLabel6 = new JLabel();
-  private JTextField headingTextField = new JTextField();
+  private JFormattedTextField headingTextField = new JFormattedTextField(new DecimalFormat("##0"));
   private JLabel jLabel7 = new JLabel();
 
   public PositionInputPanel()
@@ -142,9 +144,17 @@ public class PositionInputPanel extends JPanel
   public double getL()
   {
     double l = 0.0;
-    String d = LDeg.getText();
-    String m = LMin.getText();
-    l = GeomUtil.sexToDec(d, m);
+    try
+    {
+      double d = ((DecimalFormat)((NumberFormatter)LDeg.getFormatter()).getFormat()).parse(LDeg.getText()).doubleValue(); // Double.parseDouble(degreeTextField.getText());
+      double m = ((DecimalFormat)((NumberFormatter)LMin.getFormatter()).getFormat()).parse(LMin.getText()).doubleValue(); // Double.parseDouble(minuteTextField.getText());
+      l = d + (m / 60d);
+    }
+    catch (Exception ex)
+    {
+      ex.printStackTrace();
+    }
+//  l = GeomUtil.sexToDec(d, m);
     String ns = (String)LSign.getSelectedItem();
     if (ns.toUpperCase().equals("S"))
       l *= -1;
@@ -154,9 +164,19 @@ public class PositionInputPanel extends JPanel
   public double getG()
   {
     double g = 0.0;
-    String d = GDeg.getText();
-    String m = GMin.getText();
-    g = GeomUtil.sexToDec(d, m);
+//  String d = GDeg.getText();
+//  String m = GMin.getText();
+    try
+    {
+      double d = ((DecimalFormat)((NumberFormatter)GDeg.getFormatter()).getFormat()).parse(GDeg.getText()).doubleValue(); // Double.parseDouble(degreeTextField.getText());
+      double m = ((DecimalFormat)((NumberFormatter)GMin.getFormatter()).getFormat()).parse(GMin.getText()).doubleValue(); // Double.parseDouble(minuteTextField.getText());
+      g = d + (m / 60d);
+    }
+    catch (Exception ex)
+    {
+      ex.printStackTrace();
+    }
+//  g = GeomUtil.sexToDec(d, m);
     String ew = (String)GSign.getSelectedItem();
     if (ew.toUpperCase().equals("W"))
       g *= -1;
