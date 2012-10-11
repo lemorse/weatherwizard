@@ -265,11 +265,11 @@ public class ParamData
     
   public static String[] getLabels()
   {
-    return labels;
+    return labels.clone();
   }
 
   public static String[] getHelptext()
   {
-    return helptext;
+    return helptext.clone();
   }
 }

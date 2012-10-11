@@ -1534,7 +1534,7 @@ public final class ParamPanel
         }  
       }
       else
-        JOptionPane.showMessageDialog(WWContext.getInstance().getMasterTopFrame(), WWGnlUtilities.buildMessage("null-value", new String[] { Integer.toString(i) }));
+        JOptionPane.showMessageDialog(WWContext.getInstance().getMasterTopFrame(), WWGnlUtilities.buildMessage("null-value", new String[] { ParamData.getLabels()[i] /* Integer.toString(i) */ }));
       param.appendChild(val);
     }
     OutputStream os = null;
