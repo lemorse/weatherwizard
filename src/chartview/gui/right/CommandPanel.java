@@ -1,6 +1,5 @@
 package chartview.gui.right;
 
-
 import astro.calc.GeoPoint;
 import astro.calc.GreatCircle;
 
@@ -122,17 +121,17 @@ import org.w3c.dom.Text;
 
 import user.util.GeomUtil;
 
-
 /**
  * Warning: This is a big file...
  * See also CommandPanelUtils
  */
-@SuppressWarnings("serial")
 public class CommandPanel
      extends JPanel
   implements ChartPanelParentInterface_II,
              RoutingClientInterface
 {
+  @SuppressWarnings("compatibility:1577580852669342174")
+  private final static long serialVersionUID = 1L;
   private long id = 0L;
   private final static Color CUSTOM_LIGHT_BLUE = new Color(85, 115, 170);
 
@@ -5595,7 +5594,7 @@ public class CommandPanel
     //      boatHeading = 45;
             if (boatPosition != null && ((Boolean) ParamPanel.data[ParamData.ROUTING_FROM_CURR_LOC][ParamData.VALUE_INDEX]).booleanValue())
             {
-              if (allCalculatedIsochrons != null && !insertRoutingWP) // reset
+              if (allCalculatedIsochrons != null && allCalculatedIsochrons.size() > 0 && !insertRoutingWP) // reset
               {
                 int resp = JOptionPane.showConfirmDialog(this,
                                                          WWGnlUtilities.buildMessage("confirm-drop-routing"),
@@ -5612,7 +5611,8 @@ public class CommandPanel
               }
               else
               {
-                from = boatPosition;
+                from = boatPosition; 
+                System.out.println("Starting routing from boat position");
                 if (!insertRoutingWP)
                   to = null;
               }
