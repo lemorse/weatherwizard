@@ -1012,6 +1012,16 @@ public class JTreeFilePanel
         parser.setValidationMode(XMLParser.NONVALIDATING);
         parser.parse(new File(fName).toURI().toURL());
         XMLDocument doc = parser.getDocument();
+        try 
+        {
+          String author = ((XMLElement)doc.selectNodes("//author").item(0)).getAttribute("name");
+          if (author != null && author.trim().length() > 0)
+            str += (WWGnlUtilities.buildMessage("author") + " " + author + "<br>");
+        }
+        catch (Exception ex)
+        {
+          // System.out.println("No Author.");
+        }
         NodeList fax = doc.selectNodes("//fax-collection/fax");
         for (int i=0; i<fax.getLength(); i++)
         {
