@@ -1,6 +1,5 @@
 package chartview.gui;
 
-import chartview.gui.toolbar.controlpanels.FaxPreviewPanel;
 
 import chartview.util.WWGnlUtilities;
 
@@ -13,6 +12,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
+
 
 @SuppressWarnings("serial")
 public class ShiftTabPopup

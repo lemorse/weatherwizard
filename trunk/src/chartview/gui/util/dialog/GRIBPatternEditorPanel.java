@@ -27,7 +27,10 @@ import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JSpinner;
 import javax.swing.JTextField;
+import javax.swing.SpinnerModel;
+import javax.swing.SpinnerNumberModel;
 
 @SuppressWarnings("serial")
 public final class GRIBPatternEditorPanel
@@ -90,6 +93,12 @@ public final class GRIBPatternEditorPanel
   private JCheckBox contourWavesCheckBox = new JCheckBox();
   private JCheckBox contourTemperatureCheckBox = new JCheckBox();
   private JCheckBox contourPrateCheckBox = new JCheckBox();
+  private JLabel twoDSmoothLabel = new JLabel();
+  private JLabel timeSmoothLabel = new JLabel();
+  private transient SpinnerModel model2D = new SpinnerNumberModel(1, 1, 50, 1);
+  private JSpinner twoDSpinner = new JSpinner(model2D);
+  private transient SpinnerModel modelTime = new SpinnerNumberModel(1, 1, 50, 1);
+  private JSpinner timeSpinner = new JSpinner(modelTime);
 
   public GRIBPatternEditorPanel()
   {
@@ -264,6 +273,12 @@ public final class GRIBPatternEditorPanel
     contourTemperatureCheckBox.setText("Temp Cont.");
     contourPrateCheckBox.setText("prate Cont.");
 
+    twoDSmoothLabel.setText("2D Smooth"); // LOCALIZE
+    timeSmoothLabel.setText("Time Smooth"); // LOCALIZE
+    twoDSpinner.setMinimumSize(new Dimension(50, 19));
+    twoDSpinner.setPreferredSize(new Dimension(50, 19));
+    timeSpinner.setMinimumSize(new Dimension(50, 19));
+    timeSpinner.setPreferredSize(new Dimension(50, 19));
     gribDataOptionPanel.setLayout(new GridBagLayout());
     
     gribDataOptionPanel.add(prmslDataCheckBox, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
@@ -320,9 +335,8 @@ public final class GRIBPatternEditorPanel
     bottomPanel.add(prefixTextField,
                    new GridBagConstraints(1, 3, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
                                           new Insets(0, 0, 0, 0), 0, 0));
-    bottomPanel.add(patternLabel,
-                   new GridBagConstraints(2, 3, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
-                                          new Insets(0, 8, 0, 0), 0, 0));
+    bottomPanel.add(patternLabel, new GridBagConstraints(2, 3, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE,
+          new Insets(0, 8, 0, 0), 0, 0));
     bottomPanel.add(patternTextField,
                    new GridBagConstraints(3, 3, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                                           new Insets(0, 0, 0, 0), 0, 0));
@@ -340,6 +354,14 @@ public final class GRIBPatternEditorPanel
     bottomPanel.add(directoryPanel,
                    new GridBagConstraints(1, 2, 5, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                                           new Insets(0, 0, 0, 0), 0, 0));
+    bottomPanel.add(twoDSmoothLabel, new GridBagConstraints(0, 4, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE,
+          new Insets(5, 0, 5, 0), 0, 0));
+    bottomPanel.add(timeSmoothLabel, new GridBagConstraints(2, 4, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE,
+          new Insets(5, 0, 5, 0), 0, 0));
+    bottomPanel.add(twoDSpinner, new GridBagConstraints(1, 4, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
+          new Insets(0, 0, 0, 0), 0, 0));
+    bottomPanel.add(timeSpinner, new GridBagConstraints(3, 4, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
+          new Insets(0, 0, 0, 0), 0, 0));
   }
 
   public boolean getGribOption()
@@ -390,6 +412,11 @@ public final class GRIBPatternEditorPanel
     prefixTextField.setEnabled(b);
     patternTextField.setEnabled(b);
     extensionTextField.setEnabled(b);
+    
+    twoDSmoothLabel.setEnabled(b);
+    twoDSpinner.setEnabled(b);
+    timeSmoothLabel.setEnabled(b);
+    timeSpinner.setEnabled(b);
   }
   
   private void gribCheckBox_actionPerformed(ActionEvent e)
@@ -448,6 +475,35 @@ public final class GRIBPatternEditorPanel
                       Boolean contourTEMP,
                       Boolean contourPRATE)
   {
+    setData(h, rq, d, pre, patt, ext, prmslData, mb500Data, wavesData, tempData, prateData, tws3D, prmsl3D, mb5003D, waves3D, temp3D, prate3D, contourTWS, contourPRMSL, contour500MB, contourWAVES, contourTEMP, contourPRATE, 1, 1);
+  }
+
+  public void setData(String h, 
+                      String rq,
+                      ParamPanel.DataDirectory d,
+                      String pre,
+                      String patt,
+                      String ext,
+                      Boolean prmslData,
+                      Boolean mb500Data,
+                      Boolean wavesData,
+                      Boolean tempData,
+                      Boolean prateData,
+                      Boolean tws3D,
+                      Boolean prmsl3D,
+                      Boolean mb5003D,
+                      Boolean waves3D,
+                      Boolean temp3D,
+                      Boolean prate3D,
+                      Boolean contourTWS,
+                      Boolean contourPRMSL,
+                      Boolean contour500MB,
+                      Boolean contourWAVES,
+                      Boolean contourTEMP,
+                      Boolean contourPRATE,
+                      int two2Smooth,
+                      int timeSmooth)
+  {
     setHint(h);
     setRequest(rq);
     setDir(d);
@@ -472,6 +528,9 @@ public final class GRIBPatternEditorPanel
     setWAVESContour(contourWAVES);
     setTEMPContour(contourTEMP);
     setPRATEContour(contourPRATE);
+    
+    set2DSmooth(two2Smooth);
+    setTimeSmooth(timeSmooth);
   }
   
 //  public void setJustWind(boolean b) 
@@ -524,6 +583,9 @@ public final class GRIBPatternEditorPanel
   public void setTEMPContour(boolean b) { contourTemperatureCheckBox.setSelected(b); }
   public void setPRATEContour(boolean b) { contourPrateCheckBox.setSelected(b); }
 
+  public void set2DSmooth(int i) { twoDSpinner.setValue(new Integer(i)); }
+  public void setTimeSmooth(int i) { timeSpinner.setValue(new Integer(i)); }
+
   public boolean getPRMSLData() { return prmslDataCheckBox.isSelected(); }
   public boolean get500MBData() { return mb500DataCheckBox.isSelected(); }
   public boolean getWAVESData() { return wavesDataCheckBox.isSelected(); }
@@ -559,4 +621,7 @@ public final class GRIBPatternEditorPanel
   public String getPrefix() { return prefixTextField.getText(); }
   public String getPattern() { return patternTextField.getText(); }
   public String getExtension() { return extensionTextField.getText(); }
+  
+  public int get2DSmooth() { return ((Integer)twoDSpinner.getValue()).intValue(); }
+  public int getTimeSmooth() { return ((Integer)timeSpinner.getValue()).intValue(); }
 }

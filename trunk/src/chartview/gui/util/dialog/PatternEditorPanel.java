@@ -6,6 +6,7 @@ import chartview.gui.util.param.ParamPanel;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -13,7 +14,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JCheckBox;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 
 @SuppressWarnings("serial")
@@ -29,8 +32,11 @@ public class PatternEditorPanel
   private boolean grib = false;
   private JCheckBox fitColumnsCheckBox = new JCheckBox();
   private GridBagLayout gridBagLayout1 = new GridBagLayout();
+  private JLabel authorLabel = new JLabel();
+  private JTextField authorTextField = new JTextField();
 
-  public PatternEditorPanel(int projection,
+  public PatternEditorPanel(String author,
+                            int projection,
                             double northBoundary, 
                             double southBoundary, 
                             double eastBoundary, 
@@ -40,8 +46,12 @@ public class PatternEditorPanel
                             int xOffset, 
                             int yOffset, 
                             Object[][] f, 
-                            Object[][] g)
+                            Object[][] g,
+                            int twoDSmooth,
+                            int timeSmooth)
   {
+    authorTextField.setText(author);
+    
     chartDimensionEditorPanel.setProjection(projection);
     chartDimensionEditorPanel.setTopLat(northBoundary);
     chartDimensionEditorPanel.setBottomLat(southBoundary);
@@ -77,7 +87,9 @@ public class PatternEditorPanel
                                    (Boolean)gribData[0][19],
                                    (Boolean)gribData[0][20],
                                    (Boolean)gribData[0][21],
-                                   (Boolean)gribData[0][22]); 
+                                   (Boolean)gribData[0][22],
+                                   twoDSmooth,
+                                   timeSmooth); 
     try
     {
       jbInit();
@@ -102,15 +114,21 @@ public class PatternEditorPanel
           fitColumnsCheckBox_actionPerformed(e);
         }
       });
-    this.add(chartDimensionEditorPanel, new GridBagConstraints(0, 0, 2, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+    this.add(chartDimensionEditorPanel, new GridBagConstraints(0, 1, 2, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
           new Insets(0, 0, 0, 0), 0, 0));
-    this.add(faxPatternEditTablePanel, new GridBagConstraints(0, 1, 2, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+    this.add(faxPatternEditTablePanel, new GridBagConstraints(0, 2, 2, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH,
           new Insets(0, 0, 0, 0), 0, 0));
-    this.add(fitColumnsCheckBox, new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
+    this.add(fitColumnsCheckBox, new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
           new Insets(0, 0, 0, 0), 0, 0));
-    this.add(gribPatternEditorPanel, new GridBagConstraints(0, 3, 2, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+    this.add(gribPatternEditorPanel, new GridBagConstraints(0, 4, 2, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH,
           new Insets(0, 0, 0, 0), -80, 0));
+    this.add(authorLabel, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE,
+          new Insets(0, 0, 0, 10), 0, 0));
+    this.add(authorTextField, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL,
+          new Insets(0, 0, 0, 0), 0, 0));
     fitColumnsCheckBox.setSelected(faxPatternEditTablePanel.getTableResize() == TableResizeValue.ON);
+    authorLabel.setText("Author");  // LOCALIZE
+    authorLabel.setFont(new Font("Tahoma", 2, 11));
   }
 
   public void setFaxData(Object[][] faxData)
@@ -243,5 +261,19 @@ public class PatternEditorPanel
   private void fitColumnsCheckBox_actionPerformed(ActionEvent e)
   {
     faxPatternEditTablePanel.setTableResize(fitColumnsCheckBox.isSelected()? TableResizeValue.ON : TableResizeValue.OFF);
+  }
+  
+  public String getAuthor()
+  {
+    return authorTextField.getText();
+  }
+  
+  public int get2DSmooth()
+  {
+    return gribPatternEditorPanel.get2DSmooth();
+  }
+  public int getTimeSmooth()
+  {
+    return gribPatternEditorPanel.getTimeSmooth();
   }
 }

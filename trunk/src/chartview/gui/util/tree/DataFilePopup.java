@@ -69,6 +69,7 @@ import oracle.xml.parser.v2.XMLElement;
 
 import oracle.xml.parser.v2.XMLParser;
 
+import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 @SuppressWarnings("serial")
@@ -262,6 +263,15 @@ public class DataFilePopup
             parser.setValidationMode(XMLParser.NONVALIDATING);
             parser.parse(new File(fullpath).toURI().toURL());
             XMLDocument doc = parser.getDocument();
+            String author = "";
+            try 
+            {
+              author = ((XMLElement)doc.selectNodes("//author").item(0)).getAttribute("name");
+            }
+            catch (Exception ex)
+            {
+              // System.out.println("No Author.");
+            }
             NodeList faxList = doc.selectNodes("//fax-collection/fax");
   //        System.out.println("Found " + faxList.getLength() + " fax(es)");
             Object[][] faxData = new Object[faxList.getLength()][13];
@@ -451,6 +461,11 @@ public class DataFilePopup
                 catch (Exception ignore) { /* for backward compatibility */ }
               }
             }
+            int twoDSmooth = 1;
+            int timeSmooth = 1;
+            try { twoDSmooth = Integer.parseInt(((XMLElement)doc.selectNodes("//grib").item(0)).getAttribute("smooth")); } catch (Exception ignore) {}     
+            try { timeSmooth = Integer.parseInt(((XMLElement)doc.selectNodes("//grib").item(0)).getAttribute("time-smooth")); } catch (Exception ignore) {}     
+            
             // Chart data
             int projection = -1;
             double northBoundary = 0d;
@@ -494,7 +509,8 @@ public class DataFilePopup
             } 
             catch (Exception ignore) {}
             // TODO In FaxData, add Scale, Offset (X & Y), Rotation
-            PatternEditorPanel pep = new PatternEditorPanel(projection, 
+            PatternEditorPanel pep = new PatternEditorPanel(author,
+                                                            projection, 
                                                             northBoundary, 
                                                             southBoundary, 
                                                             eastBoundary, 
@@ -504,12 +520,23 @@ public class DataFilePopup
                                                             xOffset, 
                                                             yOffset, 
                                                             faxData, 
-                                                            gribData);
+                                                            gribData,
+                                                            twoDSmooth, 
+                                                            timeSmooth);
             pep.setGrib(withGrib);
             // UI
             int resp = JOptionPane.showConfirmDialog(this, pep, WWGnlUtilities.buildMessage("edit-pattern"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);            
             if (resp == JOptionPane.OK_OPTION)
             {
+              if (doc.selectNodes("//author").getLength() > 0)
+                ((XMLElement)doc.selectNodes("//author").item(0)).setAttribute("name", pep.getAuthor());
+              else
+              {
+                XMLElement root = (XMLElement)doc.selectNodes("/pattern").item(0);
+                XMLElement authorElem = (XMLElement)doc.createElement("author");
+                root.appendChild(authorElem);
+                authorElem.setAttribute("name", pep.getAuthor());
+              }
               // Get Chart Parameters
               doc.selectNodes("/pattern/north").item(0).setTextContent(Double.toString(pep.getTopLat()));
               doc.selectNodes("/pattern/south").item(0).setTextContent(Double.toString(pep.getBottomLat()));
@@ -633,7 +660,11 @@ public class DataFilePopup
                 gribNode.setAttribute("display-500HGT-contour", ((Boolean)newGribData[0][19]).toString());
                 gribNode.setAttribute("display-WAVES-contour",  ((Boolean)newGribData[0][20]).toString());                                                                            
                 gribNode.setAttribute("display-TEMP-contour",   ((Boolean)newGribData[0][21]).toString());                                                                            
-                gribNode.setAttribute("display-PRATE-contour",  ((Boolean)newGribData[0][22]).toString());                                                                            
+                gribNode.setAttribute("display-PRATE-contour",  ((Boolean)newGribData[0][22]).toString());    
+                
+                gribNode.setAttribute("smooth", Integer.toString(pep.get2DSmooth()));  
+                gribNode.setAttribute("time-smooth", Integer.toString(pep.getTimeSmooth()));  
+                
                 XMLElement grib = null;
                 if (gribNode.selectNodes("dynamic-grib").getLength() > 0)
                 {

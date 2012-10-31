@@ -511,7 +511,14 @@ public class RoutingPanel extends JPanel
   public void setHdg(int hdg)
   {
     this.hdg = hdg;
-    headingPanel.setHdg(hdg);
+    try
+    {
+      headingPanel.setHdg(hdg);
+    }
+    catch (Exception ex)
+    {
+      System.err.println(ex.toString());
+    }
   }
 
   public int getHdg()

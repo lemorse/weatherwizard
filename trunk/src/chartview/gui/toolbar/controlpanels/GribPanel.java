@@ -4,9 +4,13 @@ package chartview.gui.toolbar.controlpanels;
 import chartview.ctx.ApplicationEventListener;
 import chartview.ctx.WWContext;
 
+import chartview.gui.AdjustFrame;
+import chartview.gui.right.CompositeTabbedPane;
+
 import chartview.util.WWGnlUtilities;
 
 import java.awt.Color;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
@@ -29,6 +33,8 @@ import javax.swing.event.ChangeListener;
 public class GribPanel
      extends JPanel
 {
+  private GribPanel instance = this;
+  
   private JButton forwardButton = new JButton();
   private JButton backwardButton = new JButton();
   private JButton animateButton = new JButton();
@@ -122,6 +128,20 @@ public class GribPanel
           gribSlider.setEnabled(false);
           googleLabel.setEnabled(false);
           WWContext.getInstance().setGribFile(null);
+        }
+
+        public void updateGribSmoothingValue(int i) 
+        {
+          CompositeTabbedPane ctp = WWGnlUtilities.findFirstParentOfType(instance, CompositeTabbedPane.class);
+          if (ctp != null && ctp.getSelectedIndex() == ((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getMasterTabPane().getSelectedIndex())
+            smoothValue.setText(Integer.toString(i));
+        }
+        
+        public void updateGribTimeSmoothingValue(int i) 
+        {
+          CompositeTabbedPane ctp = WWGnlUtilities.findFirstParentOfType(instance, CompositeTabbedPane.class);
+          if (ctp != null && ctp.getSelectedIndex() == ((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getMasterTabPane().getSelectedIndex())
+            smoothTimeValue.setText(Integer.toString(i));
         }
         
         public void setGribInfo(int currentIndex, 

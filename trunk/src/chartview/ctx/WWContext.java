@@ -3,6 +3,8 @@ package chartview.ctx;
 import astro.calc.GeoPoint;
 import astro.calc.GreatCircle;
 
+import chart.components.util.Spatial.Chart;
+
 import chartview.gui.right.CommandPanel;
 import chartview.gui.util.dialog.FaxType;
 
@@ -61,14 +63,14 @@ public class WWContext
   public final static String WAZ_EXTENSION       = ".waz";
   
   public final static String INTERNAL_RESOURCE_PREFIX = "resource://";
-  public final static String BG_MERCATOR_GREENWICH_CENTERED = CommandPanel.class.getResource("background/world.1.jpg").toString();
-  public final static String BG_MERCATOR_GREENWICH_CENTERED_ALIAS = "GREENWICH_CENTERED_MERCATOR_BG";
-  public final static String BG_MERCATOR_ANTIMERIDIAN_CENTERED = CommandPanel.class.getResource("background/world.2.jpg").toString();
-  public final static String BG_MERCATOR_ANTIMERIDIAN_CENTERED_ALIAS = "180_CENTERED_MERCATOR_BG";
   
-  public final static String BG_MERCATOR_NE_ATLANTIC = CommandPanel.class.getResource("background/NEAtlantic.png").toString();
-  public final static String BG_MERCATOR_NE_ATLANTIC_ALIAS = "BG_MERCATOR_NE_ATLANTIC_ALIAS";
-
+//  public final static String BG_MERCATOR_GREENWICH_CENTERED = CommandPanel.class.getResource("background/world.1.jpg").toString();
+//  public final static String BG_MERCATOR_GREENWICH_CENTERED_ALIAS = "GREENWICH_CENTERED_MERCATOR_BG";
+//  public final static String BG_MERCATOR_ANTIMERIDIAN_CENTERED = CommandPanel.class.getResource("background/world.2.jpg").toString();
+//  public final static String BG_MERCATOR_ANTIMERIDIAN_CENTERED_ALIAS = "180_CENTERED_MERCATOR_BG";
+//  public final static String BG_MERCATOR_NE_ATLANTIC = CommandPanel.class.getResource("background/NEAtlantic.png").toString();
+//  public final static String BG_MERCATOR_NE_ATLANTIC_ALIAS = "BG_MERCATOR_NE_ATLANTIC_ALIAS";
+  
   public final static String SAILMAIL_STATIONS = "sailmail-stations.xml";
   public final static String NOAA_STATIONS     = "noaa-stations.xml";
   
@@ -620,6 +622,24 @@ public class WWContext
     {
       ApplicationEventListener l = this.getListeners().get(i);
       l.setGribTimeSmoothing(smooth);
+    }    
+  }
+  
+  public void fireGribSmoothingValue(int smooth)
+  {
+    for (int i=0; i < this.getListeners().size(); i++)
+    {
+      ApplicationEventListener l = this.getListeners().get(i);
+      l.updateGribSmoothingValue(smooth);
+    }    
+  }
+  
+  public void fireGribTimeSmoothingValue(int smooth)
+  {
+    for (int i=0; i < this.getListeners().size(); i++)
+    {
+      ApplicationEventListener l = this.getListeners().get(i);
+      l.updateGribTimeSmoothingValue(smooth);
     }    
   }
   
