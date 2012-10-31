@@ -115,6 +115,30 @@ public class CommandPanelUtils
   public final static int ZOOMEXPAND_IMAGE  = 2;
   public final static int ZOOMSHRINK_IMAGE  = 3;
 
+  public enum BackGround
+  {
+    MERCATOR_GREENWICH_CENTERED   ("GREENWICH_CENTERED_MERCATOR_BG", "background/world.1.jpg"),
+    MERCATOR_ANTIMERIDIAN_CENTERED("180_CENTERED_MERCATOR_BG",       "background/world.2.jpg"),
+    MERCATOR_NE_ATLANTIC          ("BG_MERCATOR_NE_ATLANTIC_ALIAS",  "background/NEAtlantic.png"),
+    CALIFORNIA_COAST_MAP          ("CALIFORNIA_COAST_MAP",           "background/CalCoastMap.png"),
+    CALIFORNIA_COAST_SAT          ("CALIFORNIA_COAST_SAT",           "background/CalCoastSat.png");
+
+    @SuppressWarnings("compatibility:8619290224382482962")
+    public final static long serialVersionUID = 1L;
+
+    private final String label;
+    private final String resource;
+
+    BackGround(String label, String resource)
+    {
+      this.label = label;
+      this.resource = resource;
+    }
+    
+    public String label() { return this.label; }
+    public String resource() { return this.resource; }
+  };
+
   public static void setDisplayAltTooltip(ChartPanel chartPanel, Graphics graphics, String winTitle, String dataString)
   {
     int imageWidth = 24;
@@ -498,6 +522,9 @@ public class CommandPanelUtils
     grib.setAttribute("display-WAVES-3D",  Boolean.toString(cp.isDisplay3DWaves()));
     grib.setAttribute("display-TEMP-3D",   Boolean.toString(cp.isDisplay3DTemperature()));
     grib.setAttribute("display-PRATE-3D",  Boolean.toString(cp.isDisplay3DRain()));
+    
+    grib.setAttribute("smooth", Integer.toString(cp.getSmooth()));
+    grib.setAttribute("time-smooth", Integer.toString(cp.getTimeSmooth()));
 
   //  System.out.println("GRIB Request :" + gribRequest);
   //  System.out.println("GRIB File Name :" + gribFileName);
@@ -1020,12 +1047,25 @@ public class CommandPanelUtils
                 else if (url.startsWith(WWContext.INTERNAL_RESOURCE_PREFIX)) // like Backgrounds
                 {
                   String internStr = url.substring(WWContext.INTERNAL_RESOURCE_PREFIX.length());
-                  if (internStr.equals(WWContext.BG_MERCATOR_GREENWICH_CENTERED_ALIAS))
-                    internStr = WWContext.BG_MERCATOR_GREENWICH_CENTERED;
-                  else if (internStr.equals(WWContext.BG_MERCATOR_ANTIMERIDIAN_CENTERED_ALIAS))
-                    internStr = WWContext.BG_MERCATOR_ANTIMERIDIAN_CENTERED;
-                  else if (internStr.equals(WWContext.BG_MERCATOR_NE_ATLANTIC_ALIAS))
-                    internStr = WWContext.BG_MERCATOR_NE_ATLANTIC;
+                  
+//                  if (internStr.equals(WWContext.BG_MERCATOR_GREENWICH_CENTERED_ALIAS))
+//                    internStr = WWContext.BG_MERCATOR_GREENWICH_CENTERED;
+//                  else if (internStr.equals(WWContext.BG_MERCATOR_ANTIMERIDIAN_CENTERED_ALIAS))
+//                    internStr = WWContext.BG_MERCATOR_ANTIMERIDIAN_CENTERED;
+//                  else if (internStr.equals(WWContext.BG_MERCATOR_NE_ATLANTIC_ALIAS))
+//                    internStr = WWContext.BG_MERCATOR_NE_ATLANTIC;
+                   
+                  for (BackGround bg : BackGround.values())
+                  {
+                    if (internStr.equals(bg.label()))                      
+                    {
+//                    System.out.println("Looking for [" + bg.resource() + "]");
+                      URL resourceURL = CommandPanel.class.getResource(bg.resource());
+//                    System.out.println("URL is [" + resourceURL + "]");
+                      internStr = resourceURL.toString();
+                      break;
+                    }
+                  }
                   URL intern = new URL(internStr);
                   Image image = null;
                   try
@@ -1279,6 +1319,17 @@ public class CommandPanelUtils
               }
             }
           }
+          int smooth = 1;
+          int timeSmooth = 1;
+          
+          try { smooth = Integer.parseInt(gribNode.getAttribute("smooth")); } catch (Exception ignore) {}
+          try { timeSmooth = Integer.parseInt(gribNode.getAttribute("time-smooth")); } catch (Exception ignore) {}
+          // GRIB Smoothing ?
+          WWContext.getInstance().fireGribSmoothing(smooth);
+          WWContext.getInstance().fireGribTimeSmoothing(timeSmooth);     
+          // Broadcast those values
+          WWContext.getInstance().fireGribSmoothingValue(smooth);
+          WWContext.getInstance().fireGribTimeSmoothingValue(timeSmooth);     
         }
         catch (Exception ex)
         {
@@ -1924,6 +1975,19 @@ public class CommandPanelUtils
               cp.setGribData(wgd, displayFileName);
             }
             nbComponents++;
+
+            // GRIB Smoothing
+            int smooth = 1;
+            int timeSmooth = 1;
+            
+            try { smooth = Integer.parseInt(gribNode.getAttribute("smooth")); } catch (Exception ignore) {}
+            try { timeSmooth = Integer.parseInt(gribNode.getAttribute("time-smooth")); } catch (Exception ignore) {}
+            // GRIB Smoothing ?
+            WWContext.getInstance().fireGribSmoothing(smooth);
+            WWContext.getInstance().fireGribTimeSmoothing(timeSmooth);     
+            // Broadcast those values
+            WWContext.getInstance().fireGribSmoothingValue(smooth);
+            WWContext.getInstance().fireGribTimeSmoothingValue(timeSmooth);     
           }
           catch (Exception ex)
           {

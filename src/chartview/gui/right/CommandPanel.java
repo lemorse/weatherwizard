@@ -6,6 +6,7 @@ import astro.calc.GreatCircle;
 import chart.components.ui.ChartPanel;
 import chart.components.ui.ChartPanelInterface;
 import chart.components.ui.ChartPanelParentInterface_II;
+import chart.components.util.Spatial;
 import chart.components.util.World;
 
 import chartview.ctx.ApplicationEventListener;
@@ -367,6 +368,8 @@ public class CommandPanel
   private List<GeoPoint> gpxData = null;
 
   private boolean canRepaint = true;
+  
+  private Spatial spatial = null;
 
   public boolean isBusy() // Is there a Composite in the panel?
   {
@@ -4073,6 +4076,7 @@ public class CommandPanel
             try
             {
               // TASK It seems that the next lines throws an NPE some times, or an IndexOutOfBoundsException...
+              // When working on a smoothed GRIB?
               for (int w=0; gribData.getGribPointData()[h] != null && w<gribData.getGribPointData()[h].length; w++)
               {
                 if (gribData.getGribPointData()[h][w] != null) // Border of the smoothed frame
@@ -4557,12 +4561,14 @@ public class CommandPanel
     // Chart itself
     if (drawChart)
     {
-//      Point pt = chartPanel.getPanelPoint(65D, -130D) ;
-//      System.out.println("y top:" + pt.y);
-//    if (chartPanel.getProjection() == ChartPanel.LAMBERT)
-//      System.out.println("Lambert detected");
-
-      World.drawChart(chartPanel, gr);
+      if (false)
+      {
+        if (spatial == null)
+          spatial = new Spatial(Spatial.Chart.WEST_COAST);
+        spatial.drawChart(chartPanel, gr);
+      }
+      else
+        World.drawChart(chartPanel, gr);
     }
 
     // Globe view: draw the eye nadir
@@ -4960,16 +4966,22 @@ public class CommandPanel
     if (gpxData != null)
     {
       GeoPoint previous = null;
+      Graphics2D g2 = (Graphics2D)gr;
+      originalStroke = g2.getStroke();
+      Stroke stroke = new BasicStroke(4f, 0, 2);
+      g2.setStroke(stroke);
       for (GeoPoint gp : gpxData)
       {
+        Point _to   = chartPanel.getPanelPoint(gp);
+        gr.fillOval(_to.x - 3, _to.y - 3, 6, 6);
         if (previous != null)
         {
           Point _from = chartPanel.getPanelPoint(previous);
-          Point _to   = chartPanel.getPanelPoint(gp);
           gr.drawLine(_from.x, _from.y, _to.x, _to.y);
         }
         previous = gp;
       }
+      g2.setStroke(originalStroke);
     }
 
     if (wp2highlight != null)
@@ -7028,6 +7040,16 @@ public class CommandPanel
   public List<WWGnlUtilities.WeatherStation> getWsta()
   {
     return wsta;
+  }
+
+  public int getSmooth()
+  {
+    return smooth;
+  }
+
+  public int getTimeSmooth()
+  {
+    return timeSmooth;
   }
 
   public static class FaxImage implements Cloneable

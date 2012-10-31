@@ -41,6 +41,7 @@ import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontFormatException;
@@ -4131,6 +4132,30 @@ public class WWGnlUtilities
     }
     line.drain();
     line.close();
+  }
+  
+  public static <T extends Container> T findFirstParentOfType(Container container, Class<T> cl)
+  {
+    boolean b = true;
+    Container component = null;
+    Container parent = container.getParent();
+    while (b)
+    {
+      if (parent != null)
+      {
+//      System.out.println("- Parent is a " + parent.getClass().getName());
+        if (cl.isInstance(parent))
+        {
+          component = parent;
+          b = false;
+        }
+        else
+          parent = parent.getParent();
+      }
+      else
+        b = false;
+    }
+    return (T)component;
   }
   
   public static void main__(String[] args)
