@@ -700,6 +700,22 @@ public class CommandPanelUtils
     chartheightText.setNodeValue(Integer.toString(cp.getChartPanel().getHeight()));
     chartheight.appendChild(chartheightText);
 
+    // Show Chart
+    boolean showChart = cp.isDrawChart(); 
+    if (!showChart)
+    {
+      int resp = JOptionPane.showConfirmDialog(cp, 
+                                               "Chart will not be drawn (by default) for this composite.\nDo you confirm?", // LOCALIZE                                                    
+                                               WWGnlUtilities.buildMessage("store-composite"),
+                                               JOptionPane.YES_NO_OPTION,
+                                               JOptionPane.WARNING_MESSAGE);
+      if (resp == JOptionPane.NO_OPTION)
+        showChart = true;
+    }
+    XMLElement chartOpt = (XMLElement)storage.createElement("chart-opt");
+    root.appendChild(chartOpt);
+    chartOpt.setAttribute("show", showChart?"yes":"no");    
+    
     XMLElement scroll = (XMLElement)storage.createElement("scroll");
     root.appendChild(scroll);
     scroll.setAttribute("x", Integer.toString(cp.getChartPanelScrollPane().getViewport().getViewPosition().x));
@@ -972,6 +988,12 @@ public class CommandPanelUtils
         cp.getChartPanel().setH(h);
         cp.getChartPanel().setBounds(0,0,w,h);
 
+        // Show / Hide chart
+        boolean drawChart = true;
+        try { drawChart = "yes".equals(((XMLElement)doc.selectNodes("//chart-opt").item(0)).getAttribute("show")); }
+        catch (Exception ignore) {}
+        cp.setDrawChart(drawChart);
+        
         cp.getChartPanel().repaint();
 
         try
@@ -1044,9 +1066,13 @@ public class CommandPanelUtils
                   faxName = SearchUtil.dynamicSearch(url);
                   // System.out.println("For " + hintName + ", search: found [" + faxName + "]");
                 }
-                else if (url.startsWith(WWContext.INTERNAL_RESOURCE_PREFIX)) // like Backgrounds
+                else if (url.startsWith(WWContext.INTERNAL_RESOURCE_PREFIX) ||
+                         url.startsWith(WWContext.EXTERNAL_RESOURCE_PREFIX)) // like Backgrounds
                 {
-                  String internStr = url.substring(WWContext.INTERNAL_RESOURCE_PREFIX.length());
+                  String internStr = "";
+                  if (url.startsWith(WWContext.INTERNAL_RESOURCE_PREFIX))
+                  {
+                    internStr = url.substring(WWContext.INTERNAL_RESOURCE_PREFIX.length());
                   
 //                  if (internStr.equals(WWContext.BG_MERCATOR_GREENWICH_CENTERED_ALIAS))
 //                    internStr = WWContext.BG_MERCATOR_GREENWICH_CENTERED;
@@ -1055,15 +1081,33 @@ public class CommandPanelUtils
 //                  else if (internStr.equals(WWContext.BG_MERCATOR_NE_ATLANTIC_ALIAS))
 //                    internStr = WWContext.BG_MERCATOR_NE_ATLANTIC;
                    
-                  for (BackGround bg : BackGround.values())
-                  {
-                    if (internStr.equals(bg.label()))                      
+                    for (BackGround bg : BackGround.values())
                     {
-//                    System.out.println("Looking for [" + bg.resource() + "]");
-                      URL resourceURL = CommandPanel.class.getResource(bg.resource());
-//                    System.out.println("URL is [" + resourceURL + "]");
-                      internStr = resourceURL.toString();
-                      break;
+                      if (internStr.equals(bg.label()))                      
+                      {
+  //                    System.out.println("Looking for [" + bg.resource() + "]");
+                        URL resourceURL = CommandPanel.class.getResource(bg.resource());
+  //                    System.out.println("URL is [" + resourceURL + "]");
+                        internStr = resourceURL.toString();
+                        break;
+                      }
+                    }
+                  }
+                  else if (url.startsWith(WWContext.EXTERNAL_RESOURCE_PREFIX))
+                  {
+                    internStr = url.substring(WWContext.EXTERNAL_RESOURCE_PREFIX.length());
+                    try
+                    {
+                   /* URL testUrl = */ new URL(internStr);
+                    }
+                    catch (Exception ex)
+                    {
+                      // try file
+                      try { internStr = new File(internStr).toURI().toURL().toString(); }
+                      catch (Exception ex2)
+                      {
+                        System.err.println(ex2.toString());
+                      }
                     }
                   }
                   URL intern = new URL(internStr);
@@ -1671,6 +1715,15 @@ public class CommandPanelUtils
         int h = 0;
         try { h = Integer.parseInt(doc.selectNodes("//chartheight").item(0).getFirstChild().getNodeValue()); } catch (Exception ex) {}
 
+        boolean showChart = true;
+        try
+        { 
+          XMLElement chartOpt = (XMLElement)(doc.selectNodes("//chart-opt").item(0));
+          showChart = "yes".equals(chartOpt.getAttribute("show")); 
+        } 
+        catch (Exception ignore) {}
+        cp.setDrawChart(showChart);
+        
         int xScroll = 0, yScroll = 0;
         try
         {

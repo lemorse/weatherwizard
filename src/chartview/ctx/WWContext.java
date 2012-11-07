@@ -50,7 +50,8 @@ public class WWContext
 //public final static String VERSION_NUMBER = "0.9.0.6";
 //public final static String VERSION_NUMBER = "3.0.0.3";
 //public final static String VERSION_NUMBER = "3.0.0.4"; // Sept-10, 2012
-  public final static String VERSION_NUMBER = "3.0.1.0"; // Sept-17, 2012
+//public final static String VERSION_NUMBER = "3.0.1.0"; // Sept-17, 2012
+  public final static String VERSION_NUMBER = "3.0.1.1"; // Oct-31, 2012
   public final static String PRODUCT_ID     = "weather_assistant." + VERSION_NUMBER;
   
   public final static String PRODUCT_KEY    = "WW";
@@ -63,6 +64,7 @@ public class WWContext
   public final static String WAZ_EXTENSION       = ".waz";
   
   public final static String INTERNAL_RESOURCE_PREFIX = "resource://";
+  public final static String EXTERNAL_RESOURCE_PREFIX = "ext-resource://";
   
 //  public final static String BG_MERCATOR_GREENWICH_CENTERED = CommandPanel.class.getResource("background/world.1.jpg").toString();
 //  public final static String BG_MERCATOR_GREENWICH_CENTERED_ALIAS = "GREENWICH_CENTERED_MERCATOR_BG";
@@ -1124,6 +1126,18 @@ public class WWContext
   {
     for (ApplicationEventListener l : WWContext.getInstance().getListeners())
       l.setDisplayIsochrons(b);
+  }
+  
+  public void fireDisplayGRIBDateLabel(boolean b)
+  {
+    for (ApplicationEventListener l : WWContext.getInstance().getListeners())
+      l.displayGRIBDateLabel(b);
+  }
+  
+  public void fireTimeZoneForLabel(String tz)
+  {
+    for (ApplicationEventListener l : WWContext.getInstance().getListeners())
+      l.setTimeZoneForLabel(tz);
   }
   
   public void setUseGRIBWindSpeedTransparency(Boolean useGRIBWindSpeedTransparency)

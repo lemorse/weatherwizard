@@ -234,4 +234,7 @@ public abstract class ApplicationEventListener implements EventListener
   public void setDisplayBestRoute(boolean b) {}
   public void setDisplayRoutingLabels(boolean b) {}
   public void setDisplayIsochrons(boolean b) {}
+  
+  public void displayGRIBDateLabel(boolean b) {}
+  public void setTimeZoneForLabel(String tz) {}
 }

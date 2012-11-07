@@ -16,6 +16,7 @@ import java.awt.Insets;
 
 import java.text.DecimalFormat;
 
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
@@ -57,6 +58,7 @@ public class ChartDimensionInputPanel
   private JLabel projectionLabel = new JLabel();
   private JComboBox projectionComboBox = new JComboBox();
   private JSeparator jSeparator3 = new JSeparator();
+  private JCheckBox showChartCheckBox = new JCheckBox();
 
   public ChartDimensionInputPanel()
   {
@@ -121,6 +123,8 @@ public class ChartDimensionInputPanel
     xOffsetFormattedTextField.setHorizontalAlignment(JTextField.CENTER);
     yOffsetFormattedTextField.setHorizontalAlignment(JTextField.CENTER);
     projectionLabel.setText("Projection");
+    showChartCheckBox.setText("Show Chart");
+    showChartCheckBox.setSelected(true);
     this.add(topLatTextField, new GridBagConstraints(1, 1, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
           new Insets(0, 0, 0, 0), 0, 0));
     this.add(nLabel, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE,
@@ -177,6 +181,8 @@ public class ChartDimensionInputPanel
           new Insets(0, 0, 0, 0), 0, 0));
     this.add(jSeparator3, new GridBagConstraints(0, 5, 6, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
           new Insets(5, 0, 5, 0), 0, 0));
+    this.add(showChartCheckBox, new GridBagConstraints(4, 4, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
+          new Insets(0, 10, 0, 0), 0, 0));
   }
 
   public void setTopLat(double d)
@@ -348,5 +354,15 @@ public class ChartDimensionInputPanel
       }
     }
     return index;    
+  }
+  
+  public void setShowChart(boolean b)
+  {
+    showChartCheckBox.setSelected(b);
+  }
+  
+  public boolean getShowChart()
+  {
+    return showChartCheckBox.isSelected();
   }
 }

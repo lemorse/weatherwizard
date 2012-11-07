@@ -430,12 +430,19 @@ public class RoutingUtil
           else
             gc.setArrival(new GeoPoint(Math.toRadians(aimFor.getPosition().getL()),
                                        Math.toRadians(aimFor.getPosition().getG())));
-          gc.calculateGreatCircle(10);                                       
-          gcDistance = Math.toDegrees(gc.getDistance() * 60D);
-          if (gcDistance < localSmallOne)
+          try
           {
-            localSmallOne = gcDistance;
-            closest = forecast;
+            gc.calculateGreatCircle(10);                                       
+            gcDistance = Math.toDegrees(gc.getDistance() * 60D);
+            if (gcDistance < localSmallOne)
+            {
+              localSmallOne = gcDistance;
+              closest = forecast;
+            }
+          }
+          catch (Exception ex)
+          {
+            ex.printStackTrace();
           }
         }
 //      timer = logDiffTime(timer, "Milestone 11");

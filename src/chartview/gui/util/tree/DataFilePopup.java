@@ -476,6 +476,7 @@ public class DataFilePopup
             int chartHeight = 0;
             int xOffset = 0;
             int yOffset = 0;
+            boolean showChart = true;
             try { northBoundary = Double.parseDouble(doc.selectNodes("/pattern/north").item(0).getTextContent()); } catch (Exception ignore) {}
             try { southBoundary = Double.parseDouble(doc.selectNodes("/pattern/south").item(0).getTextContent()); } catch (Exception ignore) {}
             try { eastBoundary = Double.parseDouble(doc.selectNodes("/pattern/east").item(0).getTextContent()); } catch (Exception ignore) {}
@@ -483,6 +484,9 @@ public class DataFilePopup
 
             try { chartWidth = Integer.parseInt(doc.selectNodes("/pattern/chartwidth").item(0).getTextContent()); } catch (Exception ignore) {}
             try { chartHeight = Integer.parseInt(doc.selectNodes("/pattern/chartheight").item(0).getTextContent()); } catch (Exception ignore) {}
+            
+            
+            try { showChart = "yes".equals(((XMLElement)doc.selectNodes("/pattern/chart-opt").item(0)).getAttribute("show")); } catch (Exception ignore) {}
             
             try { xOffset = Integer.parseInt(((XMLElement)(doc.selectNodes("/pattern/scroll").item(0))).getAttribute("x")); } catch (Exception ignore) {}
             try { yOffset = Integer.parseInt(((XMLElement)(doc.selectNodes("/pattern/scroll").item(0))).getAttribute("y")); } catch (Exception ignore) {}
@@ -515,6 +519,7 @@ public class DataFilePopup
                                                             southBoundary, 
                                                             eastBoundary, 
                                                             westBoundary, 
+                                                            showChart,
                                                             chartWidth, 
                                                             chartHeight,
                                                             xOffset, 
@@ -555,6 +560,14 @@ public class DataFilePopup
               ((XMLElement)(doc.selectNodes("/pattern/scroll").item(0))).setAttribute("x", Integer.toString(pep.getXOffset()));
               ((XMLElement)(doc.selectNodes("/pattern/scroll").item(0))).setAttribute("y", Integer.toString(pep.getYOffset()));
               
+              nl = doc.selectNodes("/pattern/chart-opt");
+              if (nl.getLength() == 0)
+              {
+                XMLElement scroll = (XMLElement)doc.createElement("chart-opt");
+                doc.selectNodes("/pattern").item(0).appendChild(scroll);
+              }
+              ((XMLElement)(doc.selectNodes("/pattern/chart-opt").item(0))).setAttribute("show", pep.getShowChart()?"yes":"no");
+
               projection = pep.getProjection();
               String prjStr = "";
               switch (projection)
