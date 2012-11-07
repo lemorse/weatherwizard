@@ -76,8 +76,8 @@ public class GribPanel
   private JTextField smoothTimeValue = new JTextField();
   private JButton smoothTimeButton = new JButton();
   
-  private JCheckBox withLabelOnGribCheckBox = new JCheckBox("");
-  private JLabel timeZoneLabel = new JLabel("Etc/UTC");
+  private JCheckBox withLabelOnGribCheckBox = new JCheckBox("Etc/UTC");
+//private JLabel timeZoneLabel = new JLabel("Etc/UTC");
 
   public GribPanel()
   {
@@ -122,7 +122,7 @@ public class GribPanel
           smoothTimeValue.setText("1");
           
           withLabelOnGribCheckBox.setEnabled(true);
-          timeZoneLabel.setEnabled(withLabelOnGribCheckBox.isSelected());
+//        timeZoneLabel.setEnabled(withLabelOnGribCheckBox.isSelected());
         }
         
         public void gribUnloaded()
@@ -144,7 +144,7 @@ public class GribPanel
           gribSlider.setEnabled(false);
           googleLabel.setEnabled(false);
           withLabelOnGribCheckBox.setEnabled(false);
-          timeZoneLabel.setEnabled(false);
+//        timeZoneLabel.setEnabled(false);
           WWContext.getInstance().setGribFile(null);
         }
 
@@ -260,40 +260,53 @@ public class GribPanel
     buttonPanel.add(forwardButton, null);
     buttonPanel.add(animateButton, null);
     
-    withLabelOnGribCheckBox.setToolTipText("Display GRIB Date");
+    withLabelOnGribCheckBox.setToolTipText("Display GRIB Date, with this TimeZone");
+
     buttonPanel.add(withLabelOnGribCheckBox, null);
     withLabelOnGribCheckBox.setEnabled(false);
     withLabelOnGribCheckBox.addActionListener(new ActionListener()
       {
         public void actionPerformed(ActionEvent e)
         {
-          timeZoneLabel.setEnabled(withLabelOnGribCheckBox.isSelected());
+//        timeZoneLabel.setEnabled(withLabelOnGribCheckBox.isSelected());
           WWContext.getInstance().fireDisplayGRIBDateLabel(withLabelOnGribCheckBox.isSelected());
-        }
-      });
-    timeZoneLabel.addMouseListener(new MouseAdapter()
-       {
-        @Override
-        public void mouseClicked(MouseEvent e)
-        {
-          super.mouseClicked(e);
-          if (timeZoneLabel.isEnabled())
+          if (withLabelOnGribCheckBox.isSelected())
           {
             TimeZoneTable tzt = new TimeZoneTable(TimeZone.getAvailableIDs());
             int resp = JOptionPane.showConfirmDialog(instance, tzt, "Time Zones", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
             if (resp == JOptionPane.OK_OPTION)
             {
               String s = tzt.getSelectedTimeZoneData();
-              timeZoneLabel.setText(s);
+              System.out.println("Was [" + withLabelOnGribCheckBox.getText() + "], now [" + s +"]");
+              withLabelOnGribCheckBox.setText(s);
               WWContext.getInstance().fireTimeZoneForLabel(s);
             }
           }
         }
       });
-    timeZoneLabel.setPreferredSize(new Dimension(100, 21));
-    timeZoneLabel.setToolTipText("TimeZone for GRIB date display");
-    buttonPanel.add(withLabelOnGribCheckBox, null);
-    buttonPanel.add(timeZoneLabel, null);
+//    timeZoneLabel.addMouseListener(new MouseAdapter()
+//       {
+//        @Override
+//        public void mouseClicked(MouseEvent e)
+//        {
+//          super.mouseClicked(e);
+//          if (timeZoneLabel.isEnabled())
+//          {
+//            TimeZoneTable tzt = new TimeZoneTable(TimeZone.getAvailableIDs());
+//            int resp = JOptionPane.showConfirmDialog(instance, tzt, "Time Zones", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+//            if (resp == JOptionPane.OK_OPTION)
+//            {
+//              String s = tzt.getSelectedTimeZoneData();
+//              System.out.println("Was [" + timeZoneLabel.getText() + "], now [" + s +"]");
+//              timeZoneLabel.setText(s);
+//              WWContext.getInstance().fireTimeZoneForLabel(s);
+//            }
+//          }
+//        }
+//      });
+//    timeZoneLabel.setPreferredSize(new Dimension(100, 21));
+//    timeZoneLabel.setToolTipText("TimeZone for GRIB date display");
+//    buttonPanel.add(timeZoneLabel, null);
     
     this.add(topPanel, 
              new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, 
