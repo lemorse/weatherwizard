@@ -41,6 +41,7 @@ public class PatternEditorPanel
                             double southBoundary, 
                             double eastBoundary, 
                             double westBoundary, 
+                            boolean showChart,
                             int chartWidth, 
                             int chartHeight, 
                             int xOffset, 
@@ -61,6 +62,7 @@ public class PatternEditorPanel
     chartDimensionEditorPanel.setChartHeight(chartHeight);
     chartDimensionEditorPanel.setXOffset(xOffset);
     chartDimensionEditorPanel.setYOffset(yOffset);
+    chartDimensionEditorPanel.setShowChart(showChart);
     
     faxData = f;
     gribData = g;
@@ -261,6 +263,11 @@ public class PatternEditorPanel
   private void fitColumnsCheckBox_actionPerformed(ActionEvent e)
   {
     faxPatternEditTablePanel.setTableResize(fitColumnsCheckBox.isSelected()? TableResizeValue.ON : TableResizeValue.OFF);
+  }
+  
+  public boolean getShowChart()
+  {
+    return chartDimensionEditorPanel.getShowChart();
   }
   
   public String getAuthor()

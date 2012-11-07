@@ -369,7 +369,9 @@ public class CommandPanel
 
   private boolean canRepaint = true;
   
-  private Spatial spatial = null;
+  private transient Spatial spatial = null;
+  private boolean displayDateOnGrib = false;
+  private String tzForDateDisplay = "Etc/UTC";
 
   public boolean isBusy() // Is there a Composite in the panel?
   {
@@ -3418,6 +3420,20 @@ public class CommandPanel
         {
           gribAtTheMouse = b;
         }
+        
+        public void displayGRIBDateLabel(boolean b) 
+        {
+//        System.out.println("Display Date on GRIB:" + b);
+          displayDateOnGrib = b;
+          chartPanel.repaint();
+        }
+        
+        public void setTimeZoneForLabel(String tz) 
+        {
+//        System.out.println("TimeZone for Display:" + tz);
+          tzForDateDisplay = tz;
+          chartPanel.repaint();
+        }
       };
 
     WWContext.getInstance().addApplicationListener(ael);
@@ -4386,6 +4402,21 @@ public class CommandPanel
       } // gribData != null
 //    else
 //      System.out.println("No GRIB Data");
+      if (displayDateOnGrib)
+      {
+        WWGnlUtilities.SDF_GRIB.setTimeZone(TimeZone.getTimeZone(tzForDateDisplay));
+        String s = WWGnlUtilities.SDF_GRIB.format(gribData.getDate());
+//      System.out.println("GRIB Date:" + s);
+        Font f = gr.getFont();
+        gr.setFont(f.deriveFont(Font.BOLD | Font.ITALIC, 24f));
+        int x = chartPanelScrollPane.getViewport().getViewPosition().x + 10;
+        int y = chartPanelScrollPane.getViewport().getViewPosition().y + 2;
+        gr.setColor(Color.gray);
+        gr.drawString(s, x + 4, y + 4 + 24);        
+        gr.setColor(Color.red);
+        gr.drawString(s, x, y + 24);        
+        gr.setFont(f);
+      }
     }
 
     // Transparent faxes

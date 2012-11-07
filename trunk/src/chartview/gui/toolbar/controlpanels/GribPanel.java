@@ -19,9 +19,19 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import java.awt.event.MouseAdapter;
+
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+
+import java.util.TimeZone;
+
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
@@ -65,6 +75,9 @@ public class GribPanel
   private JLabel smoothTimeLabel = new JLabel(WWGnlUtilities.buildMessage("grib-time-smooth"));
   private JTextField smoothTimeValue = new JTextField();
   private JButton smoothTimeButton = new JButton();
+  
+  private JCheckBox withLabelOnGribCheckBox = new JCheckBox("");
+  private JLabel timeZoneLabel = new JLabel("Etc/UTC");
 
   public GribPanel()
   {
@@ -107,6 +120,9 @@ public class GribPanel
           gribSlider.setEnabled(true);
           googleLabel.setEnabled(true);
           smoothTimeValue.setText("1");
+          
+          withLabelOnGribCheckBox.setEnabled(true);
+          timeZoneLabel.setEnabled(withLabelOnGribCheckBox.isSelected());
         }
         
         public void gribUnloaded()
@@ -127,6 +143,8 @@ public class GribPanel
           smoothTimeButton.setEnabled(false);
           gribSlider.setEnabled(false);
           googleLabel.setEnabled(false);
+          withLabelOnGribCheckBox.setEnabled(false);
+          timeZoneLabel.setEnabled(false);
           WWContext.getInstance().setGribFile(null);
         }
 
@@ -241,8 +259,42 @@ public class GribPanel
     buttonPanel.add(backwardButton, null);
     buttonPanel.add(forwardButton, null);
     buttonPanel.add(animateButton, null);
-
-
+    
+    withLabelOnGribCheckBox.setToolTipText("Display GRIB Date");
+    buttonPanel.add(withLabelOnGribCheckBox, null);
+    withLabelOnGribCheckBox.setEnabled(false);
+    withLabelOnGribCheckBox.addActionListener(new ActionListener()
+      {
+        public void actionPerformed(ActionEvent e)
+        {
+          timeZoneLabel.setEnabled(withLabelOnGribCheckBox.isSelected());
+          WWContext.getInstance().fireDisplayGRIBDateLabel(withLabelOnGribCheckBox.isSelected());
+        }
+      });
+    timeZoneLabel.addMouseListener(new MouseAdapter()
+       {
+        @Override
+        public void mouseClicked(MouseEvent e)
+        {
+          super.mouseClicked(e);
+          if (timeZoneLabel.isEnabled())
+          {
+            TimeZoneTable tzt = new TimeZoneTable(TimeZone.getAvailableIDs());
+            int resp = JOptionPane.showConfirmDialog(instance, tzt, "Time Zones", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+            if (resp == JOptionPane.OK_OPTION)
+            {
+              String s = tzt.getSelectedTimeZoneData();
+              timeZoneLabel.setText(s);
+              WWContext.getInstance().fireTimeZoneForLabel(s);
+            }
+          }
+        }
+      });
+    timeZoneLabel.setPreferredSize(new Dimension(100, 21));
+    timeZoneLabel.setToolTipText("TimeZone for GRIB date display");
+    buttonPanel.add(withLabelOnGribCheckBox, null);
+    buttonPanel.add(timeZoneLabel, null);
+    
     this.add(topPanel, 
              new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, 
                                     new Insets(0, 0, 0, 0), 0, 0));
