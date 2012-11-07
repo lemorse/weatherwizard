@@ -196,7 +196,7 @@ public class WWGnlUtilities
     SDF_UT_3.setTimeZone(TimeZone.getTimeZone("UTC"));
   }
   
-  public final static SimpleDateFormat SDF_GRIB = new SimpleDateFormat("E d MMM yyyy HH:mm z Z");
+  public final static SimpleDateFormat SDF_GRIB = new SimpleDateFormat("E d MMM yyyy HH:mm z ('Z'Z)");
   
   public final static Color PURPLE = new Color(165, 0, 165);
   
