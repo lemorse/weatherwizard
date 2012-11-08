@@ -34,6 +34,8 @@ import java.util.Hashtable;
 
 import java.util.List;
 
+import java.util.TimeZone;
+
 import javax.swing.JFrame;
 import javax.swing.filechooser.FileFilter;
 
@@ -102,9 +104,11 @@ public class WWContext
   private String currentComposite = "";
   
   private JFrame masterTopFrame = null;
+  private TimeZone originalDefaultTimeZone = null;
     
   private WWContext()
   {
+    originalDefaultTimeZone = TimeZone.getDefault();
     parser = new DOMParser();
     parser.setValidationMode(XMLParser.NONVALIDATING);
 
@@ -1311,6 +1315,11 @@ public class WWContext
   public static int getDebugLevel()
   {
     return debugLevel;
+  }
+
+  public TimeZone getOriginalDefaultTimeZone()
+  {
+    return originalDefaultTimeZone;
   }
 
   public static class ToolFileFilter extends FileFilter
