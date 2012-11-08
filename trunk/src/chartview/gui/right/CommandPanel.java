@@ -3424,15 +3424,21 @@ public class CommandPanel
         public void displayGRIBDateLabel(boolean b) 
         {
 //        System.out.println("Display Date on GRIB:" + b);
-          displayDateOnGrib = b;
-          chartPanel.repaint();
+          if (instance.isVisible())
+          {
+            displayDateOnGrib = b;
+            chartPanel.repaint();
+          }
         }
         
         public void setTimeZoneForLabel(String tz) 
         {
 //        System.out.println("TimeZone for Display:" + tz);
-          tzForDateDisplay = tz;
-          chartPanel.repaint();
+          if (instance.isVisible())
+          {
+            tzForDateDisplay = tz;
+            chartPanel.repaint();
+          }
         }
       };
 
@@ -4684,7 +4690,7 @@ public class CommandPanel
     }
 
     // Some plots - places.xml
-    for (int i=0; showPlaces && drawChart && gpa != null && i<gpa.length; i++)
+    for (int i=0; showPlaces /*&& drawChart*/ && gpa != null && i<gpa.length; i++)
     {
       Point gp = chartPanel.getPanelPoint(gpa[i].getL(), gpa[i].getG());
       if (gp != null && isVisible(gpa[i].getL(), gpa[i].getG()))

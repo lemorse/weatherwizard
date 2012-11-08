@@ -144,7 +144,9 @@ public abstract class ApplicationEventListener implements EventListener
   public void setLoading(boolean b, 
                          String mess) {}
   public void stopAnyLoadingProgressBar() {}
-  public void setStatus(String str) {}  public void setGribSmoothing(int i) {}
+  public void setStatus(String str) {}  
+  
+  public void setGribSmoothing(int i) {}
   public void setGribTimeSmoothing(int i) {}
 
   public void updateGribSmoothingValue(int i) {}

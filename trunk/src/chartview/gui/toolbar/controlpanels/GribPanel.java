@@ -76,7 +76,7 @@ public class GribPanel
   private JTextField smoothTimeValue = new JTextField();
   private JButton smoothTimeButton = new JButton();
   
-  private JCheckBox withLabelOnGribCheckBox = new JCheckBox("Etc/UTC");
+  private JCheckBox withLabelOnGribCheckBox = new JCheckBox(WWContext.getInstance().getOriginalDefaultTimeZone().getID()); // "Etc/UTC"
 //private JLabel timeZoneLabel = new JLabel("Etc/UTC");
 
   public GribPanel()
@@ -150,15 +150,19 @@ public class GribPanel
 
         public void updateGribSmoothingValue(int i) 
         {
-          CompositeTabbedPane ctp = WWGnlUtilities.findFirstParentOfType(instance, CompositeTabbedPane.class);
-          if (ctp != null && ctp.getSelectedIndex() == ((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getMasterTabPane().getSelectedIndex())
+          CompositeTabbedPane ctp = WWGnlUtilities.findFirstParentOfType(instance, CompositeTabbedPane.class);          
+//        if (ctp != null && ctp.getSelectedIndex() == ((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getMasterTabPane().getSelectedIndex())
+//        if (ctp != null && ctp.equals(((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getMasterTabPane().getSelectedComponent()))
+          if (ctp != null && ctp.isVisible())
             smoothValue.setText(Integer.toString(i));
         }
         
         public void updateGribTimeSmoothingValue(int i) 
         {
           CompositeTabbedPane ctp = WWGnlUtilities.findFirstParentOfType(instance, CompositeTabbedPane.class);
-          if (ctp != null && ctp.getSelectedIndex() == ((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getMasterTabPane().getSelectedIndex())
+//        if (ctp != null && ctp.getSelectedIndex() == ((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getMasterTabPane().getSelectedIndex())
+//        if (ctp != null && ctp.equals(((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getMasterTabPane().getSelectedComponent()))
+          if (ctp != null && ctp.isVisible())
             smoothTimeValue.setText(Integer.toString(i));
         }
         
@@ -277,10 +281,10 @@ public class GribPanel
             if (resp == JOptionPane.OK_OPTION)
             {
               String s = tzt.getSelectedTimeZoneData();
-              System.out.println("Was [" + withLabelOnGribCheckBox.getText() + "], now [" + s +"]");
+//            System.out.println("Was [" + withLabelOnGribCheckBox.getText() + "], now [" + s +"]");
               withLabelOnGribCheckBox.setText(s);
-              WWContext.getInstance().fireTimeZoneForLabel(s);
             }
+            WWContext.getInstance().fireTimeZoneForLabel(withLabelOnGribCheckBox.getText());
           }
         }
       });
