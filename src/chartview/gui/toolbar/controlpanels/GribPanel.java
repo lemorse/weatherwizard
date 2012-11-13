@@ -1,6 +1,5 @@
 package chartview.gui.toolbar.controlpanels;
 
-
 import chartview.ctx.ApplicationEventListener;
 import chartview.ctx.WWContext;
 
@@ -37,7 +36,6 @@ import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-
 
 @SuppressWarnings("serial")
 public class GribPanel
@@ -119,7 +117,6 @@ public class GribPanel
           smoothTimeButton.setEnabled(true);
           gribSlider.setEnabled(true);
           googleLabel.setEnabled(true);
-          smoothTimeValue.setText("1");
           
           withLabelOnGribCheckBox.setEnabled(true);
 //        timeZoneLabel.setEnabled(withLabelOnGribCheckBox.isSelected());
@@ -154,16 +151,22 @@ public class GribPanel
 //        if (ctp != null && ctp.getSelectedIndex() == ((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getMasterTabPane().getSelectedIndex())
 //        if (ctp != null && ctp.equals(((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getMasterTabPane().getSelectedComponent()))
           if (ctp != null && ctp.isVisible())
+          {
+//          System.out.println("Setting smooth value from " + smoothValue.getText() + " to " + i);
             smoothValue.setText(Integer.toString(i));
+          }
         }
         
         public void updateGribTimeSmoothingValue(int i) 
         {
-          CompositeTabbedPane ctp = WWGnlUtilities.findFirstParentOfType(instance, CompositeTabbedPane.class);
+          CompositeTabbedPane ctp = WWGnlUtilities.findFirstParentOfType(instance, CompositeTabbedPane.class); // TODO Apply this to othe methods of the listener
 //        if (ctp != null && ctp.getSelectedIndex() == ((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getMasterTabPane().getSelectedIndex())
 //        if (ctp != null && ctp.equals(((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getMasterTabPane().getSelectedComponent()))
           if (ctp != null && ctp.isVisible())
+          {
+//          System.out.println("Setting time smooth value from " + smoothTimeValue.getText() + " to " + i);
             smoothTimeValue.setText(Integer.toString(i));
+          }
         }
         
         public void setGribInfo(int currentIndex, 
