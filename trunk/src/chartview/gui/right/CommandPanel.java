@@ -131,7 +131,7 @@ public class CommandPanel
   implements ChartPanelParentInterface_II,
              RoutingClientInterface
 {
-  @SuppressWarnings("compatibility:1577580852669342174")
+  @SuppressWarnings("compatibility:-5526533803856372297")
   private final static long serialVersionUID = 1L;
   private long id = 0L;
   private final static Color CUSTOM_LIGHT_BLUE = new Color(85, 115, 170);
@@ -936,7 +936,7 @@ public class CommandPanel
       if (compositeCheckBox == null)
         compositeCheckBox = new JCheckBox[EXTRA_CHECK_BOXES + 1]; // + 1 pour le GRIB
       compositeCheckBox[i] = new JCheckBox("");
-      compositeCheckBox[i].setSelected(this.isDrawChart());
+      compositeCheckBox[i].setSelected(this.isDrawGRIB());
       compositeCheckBox[i].setBackground((Color) ParamPanel.data[ParamData.GRIB_WIND_COLOR][ParamData.VALUE_INDEX]);
       compositeCheckBox[i].addActionListener(new ActionListener()
           {
