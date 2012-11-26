@@ -53,6 +53,8 @@ public class CommandPanelPopup
   extends JPopupMenu
   implements ActionListener, PopupMenuListener
 {
+  @SuppressWarnings("compatibility:-8486677894088376025")
+  private final static long serialVersionUID = 1L;
   private CommandPanel parent;
 
   private transient List<UserExitAction> userExitList = null;
@@ -94,6 +96,8 @@ public class CommandPanelPopup
   private JMenuItem chartColor;
   private JMenuItem gridColor;
   private JMenuItem chartBgColor;
+  private JMenuItem removeLastDrawing;
+  private JMenuItem chooseDrawingColor;
 
   private JCheckBoxMenuItem showChart;
   private JCheckBoxMenuItem showPlaces;
@@ -159,6 +163,8 @@ public class CommandPanelPopup
   private final String SHOW_CHART = WWGnlUtilities.buildMessage("show-chart");
   private final String SHOW_PLACES = WWGnlUtilities.buildMessage("show-places");
   private final String SHOW_SAILMAIL = WWGnlUtilities.buildMessage("show-sailmail");
+  private final String REMOVE_LAST_DRAWING = WWGnlUtilities.buildMessage("remove-last-drawing");
+  private final String CHOOSE_DRAWING_COLOR = WWGnlUtilities.buildMessage("choose-drawing-color");
   
   private final String ROUTING_MENU = WWGnlUtilities.buildMessage("routing-options-menu");
   private final String SHOW_ISOCHRONS = WWGnlUtilities.buildMessage("show-isochrones");
@@ -310,6 +316,18 @@ public class CommandPanelPopup
 
     chartMenu = new JMenu(CHART_MENU);
     this.add(chartMenu);
+    
+    chooseDrawingColor = new JMenuItem(CHOOSE_DRAWING_COLOR);
+    chartMenu.add(chooseDrawingColor);
+    chooseDrawingColor.addActionListener(this);
+    chooseDrawingColor.setBackground(Color.white);
+
+    removeLastDrawing = new JMenuItem(REMOVE_LAST_DRAWING);
+    if (ccp.getChartPanel().getHandDrawing() != null && ccp.getChartPanel().getHandDrawing().size() > 0)
+      chartMenu.add(removeLastDrawing);
+    removeLastDrawing.addActionListener(this);
+    removeLastDrawing.setBackground(Color.white);
+      
     chartColor = new JMenuItem(CHART_COLOR);
     chartMenu.add(chartColor);
     chartColor.addActionListener(this);
@@ -740,6 +758,20 @@ public class CommandPanelPopup
       if (newColor != null)
       {
         parent.chartPanel.setChartBackGround(newColor);
+        parent.chartPanel.repaint();
+      }
+    }
+    else if (event.getActionCommand().equals(REMOVE_LAST_DRAWING))
+    {
+      parent.chartPanel.undoLastHandDrawing();
+      parent.chartPanel.repaint();      
+    }
+    else if (event.getActionCommand().equals(CHOOSE_DRAWING_COLOR))
+    {
+      Color c = JColorChooser.showDialog(this, "Drawing Color", parent.chartPanel.getDrawColor());
+      if (c != null)
+      {
+        parent.chartPanel.setDrawColor(c);
         parent.chartPanel.repaint();
       }
     }

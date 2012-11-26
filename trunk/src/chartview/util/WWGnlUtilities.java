@@ -3578,6 +3578,9 @@ public class WWGnlUtilities
               extends JPanel
            implements PropertyChangeListener
   {
+    @SuppressWarnings("compatibility:-4402332360298856105")
+    private final static long serialVersionUID = 1L;
+    
     JButton playButton = new JButton("Play"); // LOCALIZE
     String soundFileName = null;
     
@@ -4139,7 +4142,7 @@ public class WWGnlUtilities
   public static <T extends Container> T findFirstParentOfType(Container container, Class<T> cl)
   {
     boolean b = true;
-    Container component = null;
+ /* Container */ T component = null;
     Container parent = container.getParent();
     while (b)
     {
@@ -4148,7 +4151,7 @@ public class WWGnlUtilities
 //      System.out.println("- Parent is a " + parent.getClass().getName());
         if (cl.isInstance(parent))
         {
-          component = parent;
+          component = cl.cast(parent);
           b = false;
         }
         else
@@ -4157,7 +4160,7 @@ public class WWGnlUtilities
       else
         b = false;
     }
-    return (T)component;
+    return component;
   }
   
   public static void main__(String[] args)

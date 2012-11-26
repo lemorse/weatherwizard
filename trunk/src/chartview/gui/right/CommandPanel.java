@@ -64,6 +64,8 @@ import java.awt.dnd.DropTargetDropEvent;
 import java.awt.dnd.DropTargetEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
@@ -828,7 +830,7 @@ public class CommandPanel
     checkBoxCompositePanel.repaint();
   }
 
-  private final int EXTRA_CHECK_BOXES = 5; // 4: Chart, Grid, Places, SailMail, Weather.
+  private final int EXTRA_CHECK_BOXES = 6; // 6: Chart, Grid, Drawing, Places, SailMail, WeatherStations.
 
   public void setCheckBoxes(FaxType[] faxes)
   {
@@ -953,7 +955,7 @@ public class CommandPanel
                            new GridBagConstraints(0, pos++, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
                                                   new Insets(5, 5, 5, 5), 0, 0));
     }
-    // Add 5, for the chart, and for the grid, places, sailmail stations, weather stations
+    // Add 6, for the chart, and for the grid, drawing, places, sailmail stations, weather stations
     if (compositeCheckBox == null)
       compositeCheckBox = new JCheckBox[EXTRA_CHECK_BOXES];
     i = (faxes==null?0:(checkBoxPanelOption == CHECKBOX_OPTION?faxes.length:0)) + (wgd!=null?1:0);
@@ -991,6 +993,26 @@ public class CommandPanel
             }
           });
       String tooltip = WWGnlUtilities.buildMessage("show-grid");
+      compositeCheckBox[i].setToolTipText(tooltip);
+      checkBoxCompositePanel.add(compositeCheckBox[i],
+                           new GridBagConstraints(0, pos++, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
+                                                  new Insets(5, 5, 5, 5), 0, 0));
+    }
+    i++;
+    { // Drawing
+      final int cbIdx = i;
+      compositeCheckBox[i] = new JCheckBox("");
+      compositeCheckBox[i].setSelected(chartPanel.isPlotHandDrawing());
+      compositeCheckBox[i].setBackground((Color) ParamPanel.data[ParamData.GRID_COLOR][ParamData.VALUE_INDEX]);
+      compositeCheckBox[i].addActionListener(new ActionListener()
+          {
+            public void actionPerformed(ActionEvent e)
+            {
+              chartPanel.setPlotHandDrawing(compositeCheckBox[cbIdx].isSelected());
+              chartPanel.repaint();
+            }
+          });
+      String tooltip = WWGnlUtilities.buildMessage("show-drawing");
       compositeCheckBox[i].setToolTipText(tooltip);
       checkBoxCompositePanel.add(compositeCheckBox[i],
                            new GridBagConstraints(0, pos++, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
@@ -1443,6 +1465,10 @@ public class CommandPanel
               case ChartCommandPanelToolBar.GRAB_SCROLL:
                 chartPanel.setMouseDraggedEnabled(true);
                 chartPanel.setMouseDraggedType(ChartPanel.MOUSE_DRAG_GRAB_SCROLL);
+                break;
+              case ChartCommandPanelToolBar.PENCIL_CURSOR:
+                chartPanel.setMouseDraggedEnabled(true);
+                chartPanel.setMouseDraggedType(ChartPanel.MOUSE_DRAW_ON_CHART);
                 break;
               case ChartCommandPanelToolBar.CROSS_HAIR_CURSOR:
                 chartPanel.setMouseDraggedEnabled(true);

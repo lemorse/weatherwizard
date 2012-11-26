@@ -54,6 +54,7 @@ public class ChartCommandPanelToolBar
   private JRadioButton ddRadioButton    = new JRadioButton();
   private JRadioButton grabRadioButton  = new JRadioButton();
   private JRadioButton crossRadioButton = new JRadioButton();
+  private JRadioButton pencilRadioButton = new JRadioButton();
   private JRadioButton arrowRadioButton = new JRadioButton();
   
   private JButton expandCollapseControlButton = new JButton();
@@ -63,7 +64,8 @@ public class ChartCommandPanelToolBar
   public static final int DD_ZOOM           = 0;
   public static final int GRAB_SCROLL       = 1;
   public static final int CROSS_HAIR_CURSOR = 2;
-  public static final int REGULAR_CURSOR    = 3; // Keep this one the last one
+  public static final int PENCIL_CURSOR     = 3; 
+  public static final int REGULAR_CURSOR    = 4; // Keep this one the last one
 
   private int grab = DD_ZOOM;
 
@@ -86,6 +88,9 @@ public class ChartCommandPanelToolBar
              break;
            case CROSS_HAIR_CURSOR:  
              crossRadioButton.setSelected(true);
+             break;
+           case PENCIL_CURSOR:
+             pencilRadioButton.setSelected(true);
              break;
            case REGULAR_CURSOR:
              arrowRadioButton.setSelected(true);
@@ -223,27 +228,32 @@ public class ChartCommandPanelToolBar
     radioButtonHolder.add(ddRadioButton, null);
     radioButtonHolder.add(grabRadioButton, null);
     radioButtonHolder.add(crossRadioButton, null);
+    radioButtonHolder.add(pencilRadioButton, null);
     radioButtonHolder.add(arrowRadioButton, null);
 
     buttonGroup.add(ddRadioButton);
     buttonGroup.add(grabRadioButton);
     buttonGroup.add(crossRadioButton);
+    buttonGroup.add(pencilRadioButton);
     buttonGroup.add(arrowRadioButton);
 
     ddRadioButton.setSelected(true);
     grabRadioButton.setSelected(false);
     crossRadioButton.setSelected(false);
+    pencilRadioButton.setSelected(false);
     arrowRadioButton.setSelected(false);
 
     ddRadioButton.setText("<html><img src='" + this.getClass().getResource("img/ddz.png").toString() + "'></html>");
     grabRadioButton.setText("<html><img src='" + this.getClass().getResource("img/grab.png").toString() + "'></html>");
     crossRadioButton.setText("<html><img src='" + this.getClass().getResource("img/ch.png").toString() + "'></html>");
+    pencilRadioButton.setText("<html><img src='" + ChartPanel.class.getResource("crayon.16x16.png").toString() + "'></html>");
     arrowRadioButton.setText("<html><img src='" + this.getClass().getResource("img/arrow.png").toString() + "'></html>");
 
     ddRadioButton.setToolTipText(WWGnlUtilities.buildMessage("set-to-dd"));
     grabRadioButton.setToolTipText(WWGnlUtilities.buildMessage("set-to-gs"));
     crossRadioButton.setToolTipText(WWGnlUtilities.buildMessage("set-to-ch"));
     arrowRadioButton.setToolTipText(WWGnlUtilities.buildMessage("set-to-rp"));
+    pencilRadioButton.setToolTipText(WWGnlUtilities.buildMessage("set-to-pencil"));
 
     ddRadioButton.addActionListener(new ActionListener()
       {
@@ -273,7 +283,13 @@ public class ChartCommandPanelToolBar
           newCursorSelected();
         }
       });
-
+    pencilRadioButton.addActionListener(new ActionListener()
+      {
+        public void actionPerformed(ActionEvent e)
+        {
+          newCursorSelected();
+        }
+      });
     this.validate();
   }
 
@@ -327,6 +343,8 @@ public class ChartCommandPanelToolBar
       grab = CROSS_HAIR_CURSOR;
     else if (arrowRadioButton.isSelected())
       grab = REGULAR_CURSOR;
+    else if (pencilRadioButton.isSelected())
+      grab = PENCIL_CURSOR;
 
     WWContext.getInstance().fireSetCursor(grab);
   }
