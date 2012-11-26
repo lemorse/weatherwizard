@@ -9,6 +9,7 @@ import chartview.gui.util.param.ParamPanel;
 
 import chartview.util.WWGnlUtilities;
 
+import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -270,7 +271,7 @@ public class GRIBVisualPanel extends JPanel // TransparentPanel
                                                new Point(displayCenterX, displayCenterY), 
                                                (displayRadius - 4), 
                                                Color.lightGray, 
-                                               Color.darkGray, 
+                                               Color.black, // Color.darkGray, 
                                                1f);
     }
     else
@@ -296,9 +297,11 @@ public class GRIBVisualPanel extends JPanel // TransparentPanel
     // Rose
     int externalCircleRadius = (int)((double)displayRadius * 0.95);
     int internalCircleRadius = (int)((double)displayRadius * 0.25);
-    g.setColor(new Color(0, 0, 0, displayBackGroundOpacity));
-
-    for (int i = 0; i < 360; i += 10)
+    
+//  g.setColor(new Color(0, 0, 0, displayBackGroundOpacity));
+    g.setColor(Color.white);
+    
+    for (int i = 0; i < 360; i += 10) // One tick every 10 degrees
     {
       int x1 = displayCenterX + (int) ((externalCircleRadius - 10) * Math.cos(Math.toRadians(i)));
       int y1 = displayCenterY + (int) ((externalCircleRadius - 10) * Math.sin(Math.toRadians(i)));
@@ -319,57 +322,62 @@ public class GRIBVisualPanel extends JPanel // TransparentPanel
                                 new int[] {one.y, two.y, three.y},
                                 3));      
     }
-    g.setColor(Color.white);
     int fontSize = h / 10;
     Font cardFont = new Font(origFont.getName(), Font.BOLD /* origFont.getStyle()*/, fontSize);
     g.setFont(cardFont);
-    String card = "N";
-    int l = g.getFontMetrics(cardFont).stringWidth(card);
-    int x = displayCenterX - (l / 2);
-    int y = displayCenterY - externalCircleRadius + (fontSize / 2);
-    g.drawString(card, x, y);
-    g.setColor(Color.darkGray);
-    g.drawString(card, x + 2, y + 2);
-    g.setColor(Color.white);
-    card = "S";
-    l = g.getFontMetrics(cardFont).stringWidth(card);
-    x = displayCenterX - (l / 2);
-    y = displayCenterY + externalCircleRadius + (fontSize / 2);
-    g.drawString(card, x, y);
-    g.setColor(Color.darkGray);
-    g.drawString(card, x + 2, y + 2);
-    g.setColor(Color.white);
-    card = "W";
-    l = g.getFontMetrics(cardFont).stringWidth(card);
-    x = displayCenterX - externalCircleRadius - (l / 2);
-    y = displayCenterY + (fontSize / 2);
-    g.drawString(card, x, y);
-    g.setColor(Color.darkGray);
-    g.drawString(card, x + 2, y + 2);
-    g.setColor(Color.white);
-    card = "E";
-    l = g.getFontMetrics(cardFont).stringWidth(card);
-    x = displayCenterX + externalCircleRadius - (l / 2);
-    y = displayCenterY + (fontSize / 2);
-    g.drawString(card, x, y);
-    g.setColor(Color.darkGray);
-    g.drawString(card, x + 2, y + 2);
-
-    g.setColor(Color.white);
+    
+    if (false) // NSEW
+    {
+      g.setColor(Color.white);
+      String card = "N";
+      int l = g.getFontMetrics(cardFont).stringWidth(card);
+      int x = displayCenterX - (l / 2);
+      int y = displayCenterY - externalCircleRadius + (fontSize / 2);
+      g.drawString(card, x, y);
+      g.setColor(Color.darkGray);
+      g.drawString(card, x + 2, y + 2);
+      g.setColor(Color.white);
+      card = "S";
+      l = g.getFontMetrics(cardFont).stringWidth(card);
+      x = displayCenterX - (l / 2);
+      y = displayCenterY + externalCircleRadius + (fontSize / 2);
+      g.drawString(card, x, y);
+      g.setColor(Color.darkGray);
+      g.drawString(card, x + 2, y + 2);
+      g.setColor(Color.white);
+      card = "W";
+      l = g.getFontMetrics(cardFont).stringWidth(card);
+      x = displayCenterX - externalCircleRadius - (l / 2);
+      y = displayCenterY + (fontSize / 2);
+      g.drawString(card, x, y);
+      g.setColor(Color.darkGray);
+      g.drawString(card, x + 2, y + 2);
+      g.setColor(Color.white);
+      card = "E";
+      l = g.getFontMetrics(cardFont).stringWidth(card);
+      x = displayCenterX + externalCircleRadius - (l / 2);
+      y = displayCenterY + (fontSize / 2);
+      g.drawString(card, x, y);
+      g.setColor(Color.darkGray);
+      g.drawString(card, x + 2, y + 2);
+    }
+//  g.setColor(Color.white);
+    g.setColor(Color.green);
     String twd = "TWD";
     int labelLength = g.getFontMetrics().stringWidth(twd);
     int labelY = g.getFont().getSize() + 1;
-    g.drawString(twd, displayCenterX - (labelLength / 2) + 2, displayCenterY - (externalCircleRadius / 2) + 2);
-    g.setColor(Color.darkGray);
+//  g.drawString(twd, displayCenterX - (labelLength / 2) + 2, displayCenterY - (externalCircleRadius / 2) + 2);
+//  g.setColor(Color.darkGray);
     g.drawString(twd, displayCenterX - (labelLength / 2), displayCenterY - (externalCircleRadius / 2));
     
     // Actual direction (value)
-    g.setColor(Color.white);
+//  g.setColor(Color.white);
+    g.setColor(Color.green);
     twd = Integer.toString(truewinddir) + "\272";
     labelLength = g.getFontMetrics().stringWidth(twd);
     labelY = g.getFont().getSize() + 1;
-    g.drawString(twd, displayCenterX - (labelLength / 2) + 2, displayCenterY + (externalCircleRadius / 2) + 2);
-    g.setColor(Color.darkGray);
+//  g.drawString(twd, displayCenterX - (labelLength / 2) + 2, displayCenterY + (externalCircleRadius / 2) + 2);
+//  g.setColor(Color.darkGray);
     g.drawString(twd, displayCenterX - (labelLength / 2), displayCenterY + (externalCircleRadius / 2));
     
     // Wind dir - Hand
@@ -381,24 +389,32 @@ public class GRIBVisualPanel extends JPanel // TransparentPanel
     Point pTwo = new Point((int)(displayCenterX + (Math.sin(Math.toRadians(truewinddir + 70)) * internalCircleRadius)), 
                            (int)(displayCenterY - (Math.cos(Math.toRadians(truewinddir + 70)) * internalCircleRadius)));    
     // Hand Shadow
-    g.setColor(Color.gray);
-//  g.drawLine(displayCenterX + 3, displayCenterY + 3, handEndX + 3, handEndY + 3);    
-    g.fillPolygon(new Polygon(new int[] { pOne.x + 3, handEndX + 3, pTwo.x + 3, displayCenterX + 3 },
-                              new int[] { pOne.y + 3, handEndY + 3, pTwo.y + 3, displayCenterY + 3 },
-                              4));
+    if (false)
+    {
+      g.setColor(Color.gray);
+//    g.drawLine(displayCenterX + 3, displayCenterY + 3, handEndX + 3, handEndY + 3);    
+      g.fillPolygon(new Polygon(new int[] { pOne.x + 3, handEndX + 3, pTwo.x + 3, displayCenterX + 3 },
+                                new int[] { pOne.y + 3, handEndY + 3, pTwo.y + 3, displayCenterY + 3 },
+                                4));
+    }
     // Hand
-    g.setColor(new Color(Color.blue.getRed(), Color.blue.getGreen(), Color.blue.getBlue(), COLOR_OPACITY));
-//  g.drawLine(displayCenterX, displayCenterY, handEndX, handEndY);    
-    g.fillPolygon(new Polygon(new int[] { pOne.x, handEndX, pTwo.x, displayCenterX },
+    Polygon hand = new Polygon(new int[] { pOne.x, handEndX, pTwo.x, displayCenterX },
                               new int[] { pOne.y, handEndY, pTwo.y, displayCenterY },
-                              4));
+                              4);
+    g.setColor(Color.cyan);
+    g.drawPolygon(hand);
+    g.setColor(new Color(Color.blue.getRed(), Color.blue.getGreen(), Color.blue.getBlue(), COLOR_OPACITY));
+    ((Graphics2D)g).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
+//  g.drawLine(displayCenterX, displayCenterY, handEndX, handEndY);    
+    g.fillPolygon(hand);
     // Center
     g.setColor(new Color(0, 0, 0, displayBackGroundOpacity));
     g.fillOval(displayCenterX - 4,
                displayCenterY - 4,
                2 * 4,
                2 * 4);
-
+    ((Graphics2D)g).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
+    
     // Text data
     Font dataFont = new Font("Courier", Font.BOLD /* origFont.getStyle() */, 10);
     g.setFont(dataFont);

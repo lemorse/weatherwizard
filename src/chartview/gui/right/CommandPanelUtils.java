@@ -734,7 +734,30 @@ public class CommandPanelUtils
       boatLocation.setAttribute("lng", Double.toString(cp.getBoatPosition().getG()));
       boatLocation.setAttribute("hdg", Integer.toString(cp.getBoatHeading()));
     }
-
+    
+    // Hand drawing
+    if (cp.getChartPanel().getHandDrawing() != null && cp.getChartPanel().getHandDrawing().size() > 0)
+    {
+      XMLElement handDrawing = (XMLElement)storage.createElement("hand-drawings");  
+      root.appendChild(handDrawing);
+      List<ChartPanel.PointList<GeoPoint>> hd = cp.getChartPanel().getHandDrawing();
+      int idx = 0;
+      for (ChartPanel.PointList<GeoPoint> oneDrawing : hd)
+      {
+        XMLElement oneLine = (XMLElement)storage.createElement("hand-drawing-line");
+        oneLine.setAttribute("color", WWGnlUtilities.colorToString(oneDrawing.getLineColor()));
+        handDrawing.appendChild(oneLine);
+        oneLine.setAttribute("idx", Integer.toString(++idx));
+        for (GeoPoint gp : oneDrawing)
+        {
+          XMLElement geoPoint = (XMLElement)storage.createElement("gp");
+          oneLine.appendChild(geoPoint);
+          geoPoint.setAttribute("lat", Double.toString(gp.getL()));
+          geoPoint.setAttribute("lng", Double.toString(gp.getG()));
+        }
+      }
+    }
+    
     String fileName = "";
     if (!update && compositeName == null)
       fileName = WWGnlUtilities.chooseFile(cp,
@@ -2081,7 +2104,32 @@ public class CommandPanelUtils
             ex.printStackTrace();
           }
         }
-
+        // Hand drawing
+        NodeList hd = doc.selectNodes("//hand-drawings/hand-drawing-line");
+        if (hd != null && hd.getLength() > 0)
+        {
+          List<ChartPanel.PointList<GeoPoint>> drawings = new ArrayList<ChartPanel.PointList<GeoPoint>>();
+          for (int i=0; i<hd.getLength(); i++)
+          {
+            XMLElement line = (XMLElement)hd.item(i);
+            Color c = Color.red;
+            String att = line.getAttribute("color");
+            if (att != null)
+              c = WWGnlUtilities.buildColor(att);
+            ChartPanel.PointList<GeoPoint> oneLine = new ChartPanel.PointList<GeoPoint>(c);
+            drawings.add(oneLine);
+            NodeList pointList = line.selectNodes("gp");
+            for (int j=0; j<pointList.getLength(); j++)
+            {
+              XMLElement gp = (XMLElement)pointList.item(j);
+              GeoPoint point = new GeoPoint(Double.parseDouble(gp.getAttribute("lat")),
+                                            Double.parseDouble(gp.getAttribute("lng")));
+              oneLine.add(point);
+            }
+          }
+          cp.getChartPanel().setHandDrawing(drawings);
+        }
+                
         if (xScroll != 0 || yScroll != 0)
         {
           cp.getChartPanelScrollPane().getViewport().setViewPosition(new Point(xScroll, yScroll));
