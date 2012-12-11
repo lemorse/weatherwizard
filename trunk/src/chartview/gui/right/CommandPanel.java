@@ -437,7 +437,7 @@ public class CommandPanel
       previousBlurSharpOption = blurSharpOption;
     }
     smoothColorCheckBox = new JCheckBox("");
-    smoothColorCheckBox.setToolTipText("<html>Smooth Colors<br><i>Demanding!</i></html>");
+    smoothColorCheckBox.setToolTipText("<html>Smooth GRIB Colors<br><i>Demanding!</i></html>");
 //  JSeparator sep1 = new JSeparator();
 //  sep1.setOrientation(JSeparator.HORIZONTAL);
 
