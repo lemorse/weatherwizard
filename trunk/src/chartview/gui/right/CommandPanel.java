@@ -169,6 +169,7 @@ public class CommandPanel
   private JRadioButton noChangeRadioButton;
   private JRadioButton sharpRadioButton;
   private ButtonGroup blurSharpGroup = new ButtonGroup();
+  private JCheckBox smoothColorCheckBox;
 
   private int previousBlurSharpOption = ImageUtil.NO_CHANGE;
   private int blurSharpOption = ImageUtil.NO_CHANGE;
@@ -421,7 +422,7 @@ public class CommandPanel
     sharpRadioButton.setToolTipText(WWGnlUtilities.buildMessage("fax-sharp"));
     blurSharpGroup.add(blurRadioButton);
     blurSharpGroup.add(noChangeRadioButton);
-    blurSharpGroup.add(sharpRadioButton);
+    blurSharpGroup.add(sharpRadioButton);    
     {
       int blurIndex = Integer.parseInt(((ParamPanel.FaxBlurList)(ParamPanel.data[ParamData.DEFAULT_FAX_BLUR][ParamData.VALUE_INDEX])).getStringIndex());
       blurRadioButton.setSelected(blurIndex == -1);
@@ -435,6 +436,8 @@ public class CommandPanel
         blurSharpOption = ImageUtil.SHARPEN;
       previousBlurSharpOption = blurSharpOption;
     }
+    smoothColorCheckBox = new JCheckBox("");
+    smoothColorCheckBox.setToolTipText("<html>Smooth Colors<br><i>Demanding!</i></html>");
 //  JSeparator sep1 = new JSeparator();
 //  sep1.setOrientation(JSeparator.HORIZONTAL);
 
@@ -459,6 +462,13 @@ public class CommandPanel
                                               GridBagConstraints.CENTER,
                                               GridBagConstraints.NONE,
                                               new Insets(5, 5, 5, 5), 0, 0));
+        
+    blurSharpPanel.add(smoothColorCheckBox,
+                       new GridBagConstraints(0, vpos++, 1, 1, 0.0, 0.0,
+                                              GridBagConstraints.CENTER,
+                                              GridBagConstraints.NONE,
+                                              new Insets(5, 5, 5, 5), 0, 0));
+
     blurRadioButton.addActionListener(new ActionListener()
         {
           public void actionPerformed(ActionEvent e)
@@ -486,7 +496,13 @@ public class CommandPanel
               adjustFuzziness();
           }
         });
-
+    smoothColorCheckBox.addActionListener(new ActionListener()
+        {
+          public void actionPerformed(ActionEvent e)
+          {
+            repaint();
+          }
+        });
     checkBoxCompositePanel = new JPanel();
     checkBoxPanelHolder = new JPanel();
     checkBoxPanelHolder.setLayout(new BorderLayout());
@@ -4097,7 +4113,7 @@ public class CommandPanel
           if (displayGribPrateContour && islandsPrate != null && displayContourPrate)
             WWGnlUtilities.drawIsoPoints(gr, chartPanel, islandsPrate, (Color)ParamPanel.data[ParamData.PRATE_CONTOUR][ParamData.VALUE_INDEX], ((ParamPanel.ContourLinesList)ParamPanel.data[ParamData.ISOPRATE_LIST][ParamData.VALUE_INDEX]).getBoldIndexes());
         }
-        boolean smoothColors = false; // TODO Parameter
+        boolean smoothColors = smoothColorCheckBox.isSelected(); 
         Graphics stbyGraphics = gr;
         BufferedImage bufferedImage = null;
         if (smoothColors)
