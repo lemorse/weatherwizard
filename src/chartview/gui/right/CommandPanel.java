@@ -109,6 +109,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JSlider;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
@@ -440,15 +441,10 @@ public class CommandPanel
     }
     smoothColorCheckBox = new JCheckBox("");
     smoothColorCheckBox.setToolTipText(WWGnlUtilities.buildMessage("matrix-tooltip"));
-//  JSeparator sep1 = new JSeparator();
-//  sep1.setOrientation(JSeparator.HORIZONTAL);
+    JSeparator sep1 = new JSeparator();
+    sep1.setOrientation(JSeparator.HORIZONTAL);
 
     int vpos = 0;
-//  blurSharpPanel.add(sep1,
-//                     new GridBagConstraints(0, vpos++, 1, 1, 0.0, 0.0,
-//                                            GridBagConstraints.CENTER,
-//                                            GridBagConstraints.HORIZONTAL,
-//                                            new Insets(5, 5, 5, 5), 0, 0));
     blurSharpPanel.add(blurRadioButton,
                        new GridBagConstraints(0, vpos++, 1, 1, 0.0, 0.0,
                                               GridBagConstraints.CENTER,
@@ -465,6 +461,11 @@ public class CommandPanel
                                               GridBagConstraints.NONE,
                                               new Insets(5, 5, 5, 5), 0, 0));
         
+    blurSharpPanel.add(sep1,
+                       new GridBagConstraints(0, vpos++, 1, 1, 0.0, 0.0,
+                                              GridBagConstraints.CENTER,
+                                              GridBagConstraints.HORIZONTAL,
+                                              new Insets(5, 5, 5, 5), 0, 0));
     blurSharpPanel.add(smoothColorCheckBox,
                        new GridBagConstraints(0, vpos++, 1, 1, 0.0, 0.0,
                                               GridBagConstraints.CENTER,
