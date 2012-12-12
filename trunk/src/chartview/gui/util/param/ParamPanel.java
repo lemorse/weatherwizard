@@ -505,7 +505,7 @@ public final class ParamPanel
                 data[i][ParamData.VALUE_INDEX] = new AnemometerHandOptionList(Integer.parseInt(s));  
               else if (i == ParamData.PLAY_SOUND_ON_JOB_COMPLETION)              // DataFiles, Sound
               {
-                if (s != null && s.trim().length() > 0)
+//              if (s != null && s.trim().length() > 0)
                   data[i][ParamData.VALUE_INDEX] = new SoundFile(new String[] {"wav", "ogg"}, "Sounds", s);
               }
               else                                               // Strings
@@ -1055,6 +1055,7 @@ public final class ParamPanel
         if (column == 1)
           lineName = table.getValueAt(row, 0).toString();
         System.out.println("Defaulting " + ((lineName != null && lineName.trim().length() > 0)?"[" + lineName + "]":"") +" to curValue [" + (curValue==null?"null":curValue.getClass().getName()) + "]");
+        curValue = "";
       }
       else
         curValue = value;
@@ -1534,7 +1535,11 @@ public final class ParamPanel
         }  
       }
       else
-        JOptionPane.showMessageDialog(WWContext.getInstance().getMasterTopFrame(), WWGnlUtilities.buildMessage("null-value", new String[] { ParamData.getLabels()[i] /* Integer.toString(i) */ }));
+      {
+        if (i != ParamData.PLAY_SOUND_ON_JOB_COMPLETION)
+          JOptionPane.showMessageDialog(WWContext.getInstance().getMasterTopFrame(), WWGnlUtilities.buildMessage("null-value", new String[] { ParamData.getLabels()[i] /* Integer.toString(i) */ }));
+        val.setNodeValue("");
+      }
       param.appendChild(val);
     }
     OutputStream os = null;
