@@ -14,6 +14,7 @@ import chartview.ctx.WWContext;
 
 import chartview.gui.toolbar.controlpanels.ChartCommandPanelToolBar;
 import chartview.gui.toolbar.controlpanels.MainZoomPanel;
+import chartview.gui.util.dialog.BlurMatrixDimPanel;
 import chartview.gui.util.dialog.FaxPatternTablePanel;
 import chartview.gui.util.dialog.FaxPatternType;
 import chartview.gui.util.dialog.FaxType;
@@ -170,6 +171,7 @@ public class CommandPanel
   private JRadioButton sharpRadioButton;
   private ButtonGroup blurSharpGroup = new ButtonGroup();
   private JCheckBox smoothColorCheckBox;
+  private int blurMatrixDim = 14;
 
   private int previousBlurSharpOption = ImageUtil.NO_CHANGE;
   private int blurSharpOption = ImageUtil.NO_CHANGE;
@@ -437,7 +439,7 @@ public class CommandPanel
       previousBlurSharpOption = blurSharpOption;
     }
     smoothColorCheckBox = new JCheckBox("");
-    smoothColorCheckBox.setToolTipText("<html>Smooth GRIB Colors<br><i>Demanding!</i></html>");
+    smoothColorCheckBox.setToolTipText(WWGnlUtilities.buildMessage("matrix-tooltip"));
 //  JSeparator sep1 = new JSeparator();
 //  sep1.setOrientation(JSeparator.HORIZONTAL);
 
@@ -501,6 +503,31 @@ public class CommandPanel
           public void actionPerformed(ActionEvent e)
           {
             repaint();
+          }
+        });
+    smoothColorCheckBox.addMouseListener(new MouseAdapter()
+        {
+          @Override
+          public void mouseClicked(MouseEvent me)
+          {
+//          super.mouseClicked(e);
+            int mask = me.getModifiers();
+            if ((mask & MouseEvent.BUTTON2_MASK) != 0 || (mask & MouseEvent.BUTTON3_MASK) != 0) // Right click
+            {
+              BlurMatrixDimPanel bmdp = new BlurMatrixDimPanel();
+              bmdp.setMatrixSize(blurMatrixDim);
+              int resp = JOptionPane.showConfirmDialog(smoothColorCheckBox, bmdp, "Blur Matrix Dimension", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
+              if (resp ==  JOptionPane.OK_OPTION)
+              {
+                int newVal = bmdp.getMatrixSize();
+                if (newVal != blurMatrixDim)
+                {
+                  blurMatrixDim = newVal;
+                  repaint();
+                }
+              }
+              me.consume();
+            }
           }
         });
     checkBoxCompositePanel = new JPanel();
@@ -4442,8 +4469,10 @@ public class CommandPanel
         if (smoothColors)
         {
           gr.dispose();
-          int matrixDim = 14; //(int)Math.round(Math.max(gribData.getStepX(), gribData.getStepY()));
-          bufferedImage = ImageUtil.blur(bufferedImage, matrixDim);
+//        int matrixDim = 14;
+//        int matrixDim = (int)Math.round(Math.max(gribData.getStepX(), gribData.getStepY()));
+//        System.out.println("Using Matrix DIM:" + matrixDim);
+          bufferedImage = ImageUtil.blur(bufferedImage, blurMatrixDim);
           gr = stbyGraphics;
           gr.drawImage(bufferedImage, 0, 0, null);
         }
