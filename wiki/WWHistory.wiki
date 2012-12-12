@@ -11,7 +11,7 @@ This page takes over and replaces the one [http://donpedro.lediouris.net/softwar
 = Details =
 
 || *Date* || *Description* || *Impacted file(s)* ||
-|| 12-Dec-2012  || Cosmetic, minor bugs. Blur for the GRIB display (bottom left check box). || chartadjust.jar ||
+|| 12-Dec-2012  || Cosmetic, minor bugs. Blur for the GRIB display (bottom right check-box). || chartadjust.jar ||
 || 27-Nov-2012  || Version 3.0.1.2 released. Added the possibility to draw (free hand) on the chart. || ||
 || 7-Nov-2012  || Micro patterns, ext-resource://, date on the grib display. || chartadjust.jar ||
 || 5-Oct-2012  || Bug fixes. Decimal separator for non-English. || coreutilities.jar, nmeareader.jar, googlelocator.jar, almanactools.jar, desktop.jar ||
