@@ -352,6 +352,16 @@ public class ChartAdjust
        }
      });
     checkForUpdate.start();
+    try 
+    { 
+      System.out.println("Check for Update thread is started");
+      checkForUpdate.join(); 
+      System.out.println("... and joined!");
+    } 
+    catch (Exception ex) 
+    {
+      ex.printStackTrace();
+    }
   }
 
   private final static String NOTIFICATION_PROP_FILE_NAME = "notification_" + WWContext.PRODUCT_KEY + ".properties";

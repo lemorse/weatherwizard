@@ -92,6 +92,8 @@ import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TimeZone;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -113,6 +115,7 @@ import javax.swing.JSeparator;
 import javax.swing.JSlider;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -135,7 +138,7 @@ public class CommandPanel
   implements ChartPanelParentInterface_II,
              RoutingClientInterface
 {
-  @SuppressWarnings("compatibility:-5526533803856372297")
+  @SuppressWarnings("compatibility:-3751240057959193755")
   private final static long serialVersionUID = 1L;
   private long id = 0L;
   private final static Color CUSTOM_LIGHT_BLUE = new Color(85, 115, 170);
@@ -503,7 +506,13 @@ public class CommandPanel
         {
           public void actionPerformed(ActionEvent e)
           {
-            repaint();
+            SwingUtilities.invokeLater(new Runnable()
+                                       {
+                                         public void run()
+                                         {
+                                           repaint();
+                                         }
+                                       });
           }
         });
     smoothColorCheckBox.addMouseListener(new MouseAdapter()
