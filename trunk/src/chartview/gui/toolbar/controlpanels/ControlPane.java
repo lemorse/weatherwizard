@@ -12,13 +12,9 @@ import chartview.routing.enveloppe.custom.RoutingUtil;
 import chartview.util.WWGnlUtilities;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-
-import java.util.ArrayList;
-
 import java.util.List;
 
 import javax.swing.JPanel;
@@ -66,6 +62,7 @@ public class ControlPane
         imageZoomout();
       }
     };
+    
   @SuppressWarnings("serial")
   private ButtonCommandPanel chartCommandPanel = new ButtonCommandPanel()
     {
@@ -129,53 +126,53 @@ public class ControlPane
   private SingleControlPane thumbnailControl = null;
 
   private transient ApplicationEventListener ael = new ApplicationEventListener()
-        {
-          public String toString()
-          {
-            return "from ChartControlPane.";
-          }
-          public void faxLoaded()
-          {
-            imageCommandPanel.setEnabled(true);
-            selectFaxPanel.setEnabled(true);
-            rotationPanel.setEnabled(true);
-            faxControl.setEnabled(true);
-          }
+    {
+      public String toString()
+      {
+        return "from ChartControlPane.";
+      }
+      public void faxLoaded()
+      {
+        imageCommandPanel.setEnabled(true);
+        selectFaxPanel.setEnabled(true);
+        rotationPanel.setEnabled(true);
+        faxControl.setEnabled(true);
+      }
 
-          public void faxUnloaded()
-          {
-            imageCommandPanel.setEnabled(false);
-            selectFaxPanel.setEnabled(false);
-            rotationPanel.setEnabled(false);
-            faxControl.setEnabled(false);
-          }
+      public void faxUnloaded()
+      {
+        imageCommandPanel.setEnabled(false);
+        selectFaxPanel.setEnabled(false);
+        rotationPanel.setEnabled(false);
+        faxControl.setEnabled(false);
+      }
 
-          public void gribLoaded() 
-          {
-            gribControl.setEnabled(true);
-            gribVisualControl.setEnabled(true);
-          }
+      public void gribLoaded() 
+      {
+        gribControl.setEnabled(true);
+        gribVisualControl.setEnabled(true);
+      }
 
-          public void gribUnloaded()
-          {
-            gribControl.setEnabled(false);
-            WWContext.getInstance().setGribFile(null);
-            gribVisualControl.setEnabled(false);
-          }
+      public void gribUnloaded()
+      {
+        gribControl.setEnabled(false);
+        WWContext.getInstance().setGribFile(null);
+        gribVisualControl.setEnabled(false);
+      }
 
-          public void routingAvailable(boolean b, List<RoutingPoint> bestRoute)
-          {
+      public void routingAvailable(boolean b, List<RoutingPoint> bestRoute)
+      {
 //          System.out.println("Routing is " + (b?"":"not ") + "available");
-            routingPreviewControl.setEnabled(b);
-            routingPanel.setBestRoute(bestRoute, RoutingUtil.REAL_ROUTING);
-          }
-          
-          public void routingForecastAvailable(boolean b, List<RoutingPoint> route)
-          {
-            routingPreviewControl.setEnabled(b);
-            routingPanel.setBestRoute(route, RoutingUtil.WHAT_IF_ROUTING);
-          }
-        };
+        routingPreviewControl.setEnabled(b);
+        routingPanel.setBestRoute(bestRoute, RoutingUtil.REAL_ROUTING);
+      }
+      
+      public void routingForecastAvailable(boolean b, List<RoutingPoint> route)
+      {
+        routingPreviewControl.setEnabled(b);
+        routingPanel.setBestRoute(route, RoutingUtil.WHAT_IF_ROUTING);
+      }
+    };
   
   public ControlPane()
   {
@@ -292,41 +289,37 @@ public class ControlPane
 
   private void imageUp()
   {
-    for (int i = 0; i < WWContext.getInstance().getListeners().size(); 
-         i++)
+    for (int i = 0; i < WWContext.getInstance().getListeners().size(); i++)
     {
       ApplicationEventListener l = WWContext.getInstance().getListeners().get(i);
-      l.imageUp();
+      l.imageUp(imageCommandPanel.shiftDown?10:1);
     }
   }
 
   private void imageDown()
   {
-    for (int i = 0; i < WWContext.getInstance().getListeners().size(); 
-         i++)
+    for (int i = 0; i < WWContext.getInstance().getListeners().size(); i++)
     {
       ApplicationEventListener l = WWContext.getInstance().getListeners().get(i);
-      l.imageDown();
+      l.imageDown(imageCommandPanel.shiftDown?10:1);
     }
   }
 
   private void imageLeft()
   {
-    for (int i = 0; i < WWContext.getInstance().getListeners().size(); 
-         i++)
+    for (int i = 0; i < WWContext.getInstance().getListeners().size(); i++)
     {
       ApplicationEventListener l = WWContext.getInstance().getListeners().get(i);
-      l.imageLeft();
+      l.imageLeft(imageCommandPanel.shiftDown?10:1);
     }
   }
 
   private void imageRight()
   {
-    for (int i = 0; i < WWContext.getInstance().getListeners().size(); 
-         i++)
+    for (int i = 0; i < WWContext.getInstance().getListeners().size(); i++)
     {
       ApplicationEventListener l = WWContext.getInstance().getListeners().get(i);
-      l.imageRight();
+      l.imageRight(imageCommandPanel.shiftDown?10:1);
     }
   }
 
@@ -336,7 +329,7 @@ public class ControlPane
          i++)
     {
       ApplicationEventListener l = WWContext.getInstance().getListeners().get(i);
-      l.imageZoomin();
+      l.imageZoomin(imageCommandPanel.shiftDown?1.1:1);
     }
   }
 
@@ -346,17 +339,16 @@ public class ControlPane
          i++)
     {
       ApplicationEventListener l = WWContext.getInstance().getListeners().get(i);
-      l.imageZoomout();
+      l.imageZoomout(imageCommandPanel.shiftDown?1.1:1);
     }
   }
 
   private void chartUp()
   {
-    for (int i = 0; i < WWContext.getInstance().getListeners().size(); 
-         i++)
+    for (int i = 0; i < WWContext.getInstance().getListeners().size();  i++)
     {
       ApplicationEventListener l = WWContext.getInstance().getListeners().get(i);
-      l.chartUp();
+      l.chartUp(chartCommandPanel.shiftDown?10:1);
     }
   }
 
@@ -366,7 +358,7 @@ public class ControlPane
          i++)
     {
       ApplicationEventListener l = WWContext.getInstance().getListeners().get(i);
-      l.chartDown();
+      l.chartDown(chartCommandPanel.shiftDown?10:1);
     }
   }
 
@@ -376,7 +368,7 @@ public class ControlPane
          i++)
     {
       ApplicationEventListener l = WWContext.getInstance().getListeners().get(i);
-      l.chartLeft();
+      l.chartLeft(chartCommandPanel.shiftDown?10:1);
     }
   }
 
@@ -386,7 +378,7 @@ public class ControlPane
          i++)
     {
       ApplicationEventListener l = WWContext.getInstance().getListeners().get(i);
-      l.chartRight();
+      l.chartRight(chartCommandPanel.shiftDown?10:1);
     }
   }
 
@@ -396,7 +388,7 @@ public class ControlPane
          i++)
     {
       ApplicationEventListener l = WWContext.getInstance().getListeners().get(i);
-      l.chartZoomin();
+      l.chartZoomin(chartCommandPanel.shiftDown?1.1:1);
     }
   }
 
@@ -406,7 +398,7 @@ public class ControlPane
          i++)
     {
       ApplicationEventListener l = WWContext.getInstance().getListeners().get(i);
-      l.chartZoomout();
+      l.chartZoomout(chartCommandPanel.shiftDown?1.1:1);
     }
   }
 

@@ -1,6 +1,7 @@
 package chartview.gui.util.dialog;
 
 
+import chartview.gui.right.CommandPanel;
 import chartview.gui.util.TableResizeValue;
 import chartview.gui.util.param.ParamPanel;
 
@@ -13,9 +14,11 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
 
@@ -34,6 +37,11 @@ public class PatternEditorPanel
   private GridBagLayout gridBagLayout1 = new GridBagLayout();
   private JLabel authorLabel = new JLabel();
   private JTextField authorTextField = new JTextField();
+  private JPanel jPanel1 = new JPanel(new GridBagLayout());
+  private JLabel faxDisplayLabel = new JLabel();
+  private JRadioButton checkBoxOptionRadioButton = new JRadioButton();
+  private JRadioButton radioButtonOptionRadioButton = new JRadioButton();
+  private ButtonGroup bg = new ButtonGroup();
 
   public PatternEditorPanel(String author,
                             int projection,
@@ -106,8 +114,8 @@ public class PatternEditorPanel
     throws Exception
   {
     this.setLayout(gridBagLayout1);
-    this.setSize(new Dimension(595, 605));
-    this.setPreferredSize(new Dimension(595, 605));
+    this.setSize(new Dimension(619, 687));
+    this.setPreferredSize(new Dimension(619, 687));
     fitColumnsCheckBox.setText("Auto-resize Columns"); // LOCALIZE
     fitColumnsCheckBox.addActionListener(new ActionListener()
       {
@@ -120,17 +128,35 @@ public class PatternEditorPanel
           new Insets(0, 0, 0, 0), 0, 0));
     this.add(faxPatternEditTablePanel, new GridBagConstraints(0, 2, 2, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH,
           new Insets(0, 0, 0, 0), 0, 0));
-    this.add(fitColumnsCheckBox, new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
+    this.add(fitColumnsCheckBox, new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
           new Insets(0, 0, 0, 0), 0, 0));
-    this.add(gribPatternEditorPanel, new GridBagConstraints(0, 4, 2, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH,
-          new Insets(0, 0, 0, 0), -80, 0));
-    this.add(authorLabel, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE,
-          new Insets(0, 0, 0, 10), 0, 0));
-    this.add(authorTextField, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL,
+    this.add(gribPatternEditorPanel,
+             new GridBagConstraints(0, 5, 2, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                                    new Insets(0, 0, 0, 0), -80, 0));
+    this.add(authorLabel,
+             new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 0,
+                                                                                                                       10), 0,
+                                    0));
+    this.add(authorTextField,
+             new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL,
+                                    new Insets(0, 0, 0, 0), 0, 0));
+    this.add(jPanel1, new GridBagConstraints(0, 4, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
+          new Insets(0, 0, 0, 0), 0, 0));
+    jPanel1.add(faxDisplayLabel, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
+          new Insets(0, 5, 0, 5), 0, 0));
+    bg.add(checkBoxOptionRadioButton);
+    bg.add(radioButtonOptionRadioButton);
+    jPanel1.add(checkBoxOptionRadioButton, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
+          new Insets(0, 0, 0, 0), 0, 0));
+    jPanel1.add(radioButtonOptionRadioButton, new GridBagConstraints(2, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
           new Insets(0, 0, 0, 0), 0, 0));
     fitColumnsCheckBox.setSelected(faxPatternEditTablePanel.getTableResize() == TableResizeValue.ON);
     authorLabel.setText("Author");  // LOCALIZE
     authorLabel.setFont(new Font("Tahoma", 2, 11));
+    faxDisplayLabel.setText("Fax Display Option");
+    checkBoxOptionRadioButton.setText("Check Box");
+    checkBoxOptionRadioButton.setSelected(true);
+    radioButtonOptionRadioButton.setText("Radio Button");
   }
 
   public void setFaxData(Object[][] faxData)
@@ -282,5 +308,18 @@ public class PatternEditorPanel
   public int getTimeSmooth()
   {
     return gribPatternEditorPanel.getTimeSmooth();
+  }
+  
+  public void setFaxOption(int fo)
+  {
+    radioButtonOptionRadioButton.setSelected(fo == CommandPanel.RADIOBUTTON_OPTION);
+    checkBoxOptionRadioButton.setSelected(fo == CommandPanel.CHECKBOX_OPTION);
+  }
+  public int getFaxOption()
+  {
+    if (radioButtonOptionRadioButton.isSelected())
+      return CommandPanel.RADIOBUTTON_OPTION;
+    else
+      return CommandPanel.CHECKBOX_OPTION;
   }
 }

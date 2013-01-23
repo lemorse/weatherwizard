@@ -19,6 +19,8 @@ public class ZoomPanel
   private JButton zoomOutButton = new JButton();
   private JButton zoomInButton = new JButton();
 
+  protected boolean shiftDown = false;
+
   public ZoomPanel(ButtonCommandPanel bcp)
   {
     parent = bcp;
@@ -56,6 +58,7 @@ public class ZoomPanel
             zoomOutButton_actionPerformed(e);
           }
         });
+    zoomOutButton.setToolTipText("Shift: x1.1");
 //  zoomInButton.setIcon(new ImageIcon(this.getClass().getResource("zoomin.png")));
     zoomInButton.setIcon(new ImageIcon(this.getClass().getResource("img/zoomin.gif")));
     zoomInButton.setPreferredSize(new Dimension(24, 24));
@@ -70,17 +73,20 @@ public class ZoomPanel
             zoomInButton_actionPerformed(e);
           }
         });
+    zoomInButton.setToolTipText("Shift: x1.1");
     this.add(zoomOutButton, null);
     this.add(zoomInButton, null);
   }
 
   private void zoomOutButton_actionPerformed(ActionEvent e)
   {
+    shiftDown = ((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
     parent.zoomOut();
   }
 
   private void zoomInButton_actionPerformed(ActionEvent e)
   {
+    shiftDown = ((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
     parent.zoomIn();
   }
   
