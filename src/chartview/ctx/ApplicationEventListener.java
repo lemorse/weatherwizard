@@ -21,19 +21,19 @@ public abstract class ApplicationEventListener implements EventListener
 {
   public void applicationLoaded() {}
   public void collapseExpandToolBar(boolean b) {}
-  public void imageUp() {}
-  public void imageDown() {}
-  public void imageLeft() {}
-  public void imageRight() {}
-  public void imageZoomin() {}
-  public void imageZoomout() {}
+  public void imageUp(int factor) {}
+  public void imageDown(int factor) {}
+  public void imageLeft(int factor) {}
+  public void imageRight(int factor) {}
+  public void imageZoomin(double factor) {}
+  public void imageZoomout(double factor) {}
 
-  public void chartUp() {}
-  public void chartDown() {}
-  public void chartLeft() {}
-  public void chartRight() {}
-  public void chartZoomin() {}
-  public void chartZoomout() {}
+  public void chartUp(int factor) {}
+  public void chartDown(int factor) {}
+  public void chartLeft(int factor) {}
+  public void chartRight(int factor) {}
+  public void chartZoomin(double factor) {}
+  public void chartZoomout(double factor) {}
   
   public void allLayerZoomIn() { allLayerZoomIn(1); }
   public void allLayerZoomOut() { allLayerZoomIn(1); }

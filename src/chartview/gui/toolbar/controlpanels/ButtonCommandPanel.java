@@ -9,6 +9,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JPanel;
@@ -22,6 +23,8 @@ public abstract class ButtonCommandPanel
   private JButton leftButton = new JButton();
   private ZoomPanel zoomPanel = new ZoomPanel(this);
   private GridBagLayout gridBagLayout = new GridBagLayout();
+  
+  protected boolean shiftDown = false;
 
   public ButtonCommandPanel()
   {
@@ -58,6 +61,7 @@ public abstract class ButtonCommandPanel
             upButton_actionPerformed(e);
           }
         });
+    upButton.setToolTipText("Shift: x10");
 //  downButton.setIcon(new ImageIcon(this.getClass().getResource("down.png")));
     downButton.setIcon(new ImageIcon(this.getClass().getResource("img/pandown.gif")));
     downButton.setPreferredSize(new Dimension(24, 24));
@@ -72,6 +76,7 @@ public abstract class ButtonCommandPanel
             downButton_actionPerformed(e);
           }
         });
+    downButton.setToolTipText("Shift: x10");
 //  rightButton.setIcon(new ImageIcon(this.getClass().getResource("right.png")));
     rightButton.setIcon(new ImageIcon(this.getClass().getResource("img/panright.gif")));
     rightButton.setPreferredSize(new Dimension(24, 24));
@@ -86,6 +91,7 @@ public abstract class ButtonCommandPanel
             rightButton_actionPerformed(e);
           }
         });
+    rightButton.setToolTipText("Shift: x10");
 //  leftButton.setIcon(new ImageIcon(this.getClass().getResource("left.png")));
     leftButton.setIcon(new ImageIcon(this.getClass().getResource("img/panleft.gif")));
     leftButton.setPreferredSize(new Dimension(24, 24));
@@ -100,6 +106,7 @@ public abstract class ButtonCommandPanel
             leftButton_actionPerformed(e);
           }
         });
+    leftButton.setToolTipText("Shift: x10");
     zoomPanel.setSize(new Dimension(60, 30));
     zoomPanel.setPreferredSize(new Dimension(60, 30));
     this.add(upButton, 
@@ -118,31 +125,37 @@ public abstract class ButtonCommandPanel
 
   private void upButton_actionPerformed(ActionEvent e)
   {
+    shiftDown = ((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
     fireUp();
   }
 
   private void downButton_actionPerformed(ActionEvent e)
   {
+    shiftDown = ((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
     fireDown();
   }
 
   private void leftButton_actionPerformed(ActionEvent e)
   {
+    shiftDown = ((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
     fireLeft();
   }
 
   private void rightButton_actionPerformed(ActionEvent e)
   {
+    shiftDown = ((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
     fireRight();
   }
   
   public void zoomIn()
   {
+    shiftDown = zoomPanel.shiftDown;
     fireZoomIn();
   }
   
   public void zoomOut()
   {
+    shiftDown = zoomPanel.shiftDown;
     fireZoomOut();
   }
   

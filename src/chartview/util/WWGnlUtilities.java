@@ -4094,6 +4094,7 @@ public class WWGnlUtilities
     catch (Exception e)
     {
       System.err.println(e.getLocalizedMessage());
+      throw e;
 //      e.printStackTrace();
 //      System.exit(1);
     }

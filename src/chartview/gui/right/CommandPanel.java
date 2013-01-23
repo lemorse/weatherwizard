@@ -65,8 +65,6 @@ import java.awt.dnd.DropTargetDropEvent;
 import java.awt.dnd.DropTargetEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
@@ -890,13 +888,15 @@ public class CommandPanel
     removeCompositeCheckBoxes();
     compositeCheckBox = null;
     int nbFaxes = 0;
+    int ecb = 0;
+
     if (faxes != null)
     {
       faxOpacitySlider.setEnabled(true);
       nbFaxes = faxes.length;
     }
     gribOpacitySlider.setEnabled(wgd != null);
-
+     
     if (checkBoxPanelOption == CHECKBOX_OPTION)
     {
       compositeCheckBox = new JCheckBox[nbFaxes + EXTRA_CHECK_BOXES + (wgd!=null?1:0)];
@@ -904,27 +904,38 @@ public class CommandPanel
     if (checkBoxPanelOption == RADIOBUTTON_OPTION)
     {
       compositeRadioButton = new JRadioButton[nbFaxes];
-      compositeCheckBox = new JCheckBox[EXTRA_CHECK_BOXES + (wgd!=null?1:0)];
-    }
 
+      for (int i=0; i<nbFaxes; i++)
+      {
+        if (faxes[i].getOrigin().startsWith(WWContext.INTERNAL_RESOURCE_PREFIX) || faxes[i].getOrigin().startsWith(WWContext.EXTERNAL_RESOURCE_PREFIX))
+          ecb++;
+      }
+      compositeCheckBox = new JCheckBox[EXTRA_CHECK_BOXES + ecb + (wgd!=null?1:0)];
+
+    }
+    
+    boolean firstRadio = true;
+    int nbCB = 0;
+    int nbRB = 0;
     for (int i=0; faxes != null && faxes.length > 0 && i<faxes.length; i++)
     {
       if (faxes[i] == null)
         continue;
-      if (checkBoxPanelOption == CHECKBOX_OPTION)
+      if (checkBoxPanelOption == CHECKBOX_OPTION || faxes[i].getOrigin().startsWith(WWContext.INTERNAL_RESOURCE_PREFIX) || faxes[i].getOrigin().startsWith(WWContext.EXTERNAL_RESOURCE_PREFIX))
       {
-        compositeCheckBox[i] = new JCheckBox("");
-        compositeCheckBox[i].setBackground(faxes[i].getColor());
-  //    compositeCheckBox[i].setForeground(faxes[i].getColor());
-  //    compositeCheckBox[i].setBorderPaintedFlat(false);
-        compositeCheckBox[i].setSelected(faxes[i].isShow());
+        compositeCheckBox[nbCB] = new JCheckBox("");
+        compositeCheckBox[nbCB].setBackground(faxes[i].getColor());
+  //    compositeCheckBox[nbCB].setForeground(faxes[i].getColor());
+  //    compositeCheckBox[nbCB].setBorderPaintedFlat(false);
+        compositeCheckBox[nbCB].setSelected(faxes[i].isShow());
         final int fIdx = i;
-        compositeCheckBox[i].addActionListener(new ActionListener()
+        final int cbIdx = nbCB;
+        compositeCheckBox[nbCB].addActionListener(new ActionListener()
             {
               public void actionPerformed(ActionEvent e)
               {
-  //            System.out.println("Fax[] " + (faxCheckBox[fIdx].isSelected()?"show":"hide"));
-                faxImage[fIdx].show = compositeCheckBox[fIdx].isSelected();
+                System.out.println("Fax[" + fIdx + "] " + compositeCheckBox[cbIdx].getToolTipText() + ", " + (compositeCheckBox[cbIdx].isSelected()?"show":"hide"));
+                faxImage[fIdx].show = compositeCheckBox[cbIdx].isSelected();
                 chartPanel.repaint();
               }
             });
@@ -935,30 +946,39 @@ public class CommandPanel
           tooltip = faxes[i].getValue();
         if (tooltip.indexOf("/") > -1)
           tooltip = tooltip.substring(tooltip.lastIndexOf("/") + 1);
-        compositeCheckBox[i].setToolTipText(tooltip);
-        checkBoxCompositePanel.add(compositeCheckBox[i],
+        compositeCheckBox[nbCB].setToolTipText(tooltip);
+        checkBoxCompositePanel.add(compositeCheckBox[nbCB],
                              new GridBagConstraints(0, i, 1, 1, 0.0, 0.0,
                                                     GridBagConstraints.CENTER,
                                                     GridBagConstraints.NONE,
                                                     new Insets(5, 5, 5, 5), 0, 0));
+        nbCB++;
       }
-      if (checkBoxPanelOption == RADIOBUTTON_OPTION)
+      if (checkBoxPanelOption == RADIOBUTTON_OPTION && !faxes[i].getOrigin().startsWith(WWContext.INTERNAL_RESOURCE_PREFIX) && !faxes[i].getOrigin().startsWith(WWContext.EXTERNAL_RESOURCE_PREFIX))
       {
-        compositeRadioButton[i] = new JRadioButton("");
-        compositeRadioButton[i].setBackground(faxes[i].getColor());
-      //    compositeCheckBox[i].setForeground(faxes[i].getColor());
-      //    compositeCheckBox[i].setBorderPaintedFlat(false);
-        compositeRadioButton[i].setSelected(i == 0);
-        faxImage[i].show = (i == 0);
+        compositeRadioButton[nbRB] = new JRadioButton("");
+        compositeRadioButton[nbRB].setBackground(faxes[i].getColor());
+      //    compositeCheckBox[nbRB].setForeground(faxes[i].getColor());
+      //    compositeCheckBox[nbRB].setBorderPaintedFlat(false);
+        compositeRadioButton[nbRB].setSelected(nbRB == 0);
+        
+        faxImage[i].show = firstRadio;
+        firstRadio = false;
         final int fIdx = i;
-        compositeRadioButton[i].addActionListener(new ActionListener()
+        final int rbIdx = nbRB;
+        final int _ecb = ecb;
+        compositeRadioButton[nbRB].addActionListener(new ActionListener()
             {
               public void actionPerformed(ActionEvent e)
               {
-      //        System.out.println("Fax[] " + (faxCheckBox[fIdx].isSelected()?"show":"hide"));
+                System.out.println("A. Fax[" + fIdx + "] \"" + compositeRadioButton[rbIdx].getToolTipText() + "\" " + (compositeRadioButton[rbIdx].isSelected()?"show":"hide"));
       //        faxImage[fIdx].show = compositeRadioButton[fIdx].isSelected();
-                for (int i = 0; i<faxImage.length; i++)
-                  faxImage[i].show = compositeRadioButton[i].isSelected();
+                
+                for (int i=0; i<compositeRadioButton.length; i++)
+                {
+                  if (compositeRadioButton[i] != null)
+                    faxImage[i + _ecb].show = compositeRadioButton[i].isSelected();
+                }
                 chartPanel.repaint();
               }
             });
@@ -969,31 +989,39 @@ public class CommandPanel
           tooltip = faxes[i].getValue();
         if (tooltip.indexOf("/") > -1)
           tooltip = tooltip.substring(tooltip.lastIndexOf("/") + 1);
-        compositeRadioButton[i].setToolTipText(tooltip);
-        checkBoxCompositePanel.add(compositeRadioButton[i],
+        compositeRadioButton[nbRB].setToolTipText(tooltip);
+        checkBoxCompositePanel.add(compositeRadioButton[nbRB],
                              new GridBagConstraints(0, i, 1, 1, 0.0, 0.0,
                                                     GridBagConstraints.CENTER,
                                                     GridBagConstraints.NONE,
                                                     new Insets(5, 5, 5, 5), 0, 0));
-        buttonGroup.add(compositeRadioButton[i]);
+        buttonGroup.add(compositeRadioButton[nbRB]);
+        nbRB++;
       }
     }
     if (checkBoxPanelOption == RADIOBUTTON_OPTION)
     {
-      for (int i=0; i<compositeRadioButton.length; i++)
-        compositeRadioButton[i].setSelected(i == 0);
+      boolean first = true;
+      for (int i=0; + i<compositeRadioButton.length; i++)
+      {
+        if (compositeRadioButton[i] != null)
+        {
+          compositeRadioButton[i].setSelected(first);
+          first = false;
+        }
+      }
     }
-    int i = (faxes==null?0:(checkBoxPanelOption == CHECKBOX_OPTION?faxes.length:0));
+    int i = ecb + (faxes==null?0:(checkBoxPanelOption == CHECKBOX_OPTION?faxes.length:0));
     int pos = (faxes==null?0:faxes.length);
     if (wgd != null) // One for the GRIBs
     {
       final int cbIdx = i;
       if (compositeCheckBox == null)
-        compositeCheckBox = new JCheckBox[EXTRA_CHECK_BOXES + 1]; // + 1 pour le GRIB
-      compositeCheckBox[i] = new JCheckBox("");
-      compositeCheckBox[i].setSelected(this.isDrawGRIB());
-      compositeCheckBox[i].setBackground((Color) ParamPanel.data[ParamData.GRIB_WIND_COLOR][ParamData.VALUE_INDEX]);
-      compositeCheckBox[i].addActionListener(new ActionListener()
+        compositeCheckBox = new JCheckBox[ecb + EXTRA_CHECK_BOXES + 1]; // + 1 pour le GRIB
+      compositeCheckBox[cbIdx] = new JCheckBox("");
+      compositeCheckBox[cbIdx].setSelected(this.isDrawGRIB());
+      compositeCheckBox[cbIdx].setBackground((Color) ParamPanel.data[ParamData.GRIB_WIND_COLOR][ParamData.VALUE_INDEX]);
+      compositeCheckBox[cbIdx].addActionListener(new ActionListener()
           {
             public void actionPerformed(ActionEvent e)
             {
@@ -1002,22 +1030,22 @@ public class CommandPanel
             }
           });
       String tooltip = WWGnlUtilities.buildMessage("show-grib");
-      compositeCheckBox[i].setToolTipText(tooltip);
-      compositeCheckBox[i].setToolTipText("GRIB");
-      checkBoxCompositePanel.add(compositeCheckBox[i],
+      compositeCheckBox[cbIdx].setToolTipText(tooltip);
+      compositeCheckBox[cbIdx].setToolTipText("GRIB");
+      checkBoxCompositePanel.add(compositeCheckBox[cbIdx],
                            new GridBagConstraints(0, pos++, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
                                                   new Insets(5, 5, 5, 5), 0, 0));
     }
     // Add 6, for the chart, and for the grid, drawing, places, sailmail stations, weather stations
     if (compositeCheckBox == null)
-      compositeCheckBox = new JCheckBox[EXTRA_CHECK_BOXES];
-    i = (faxes==null?0:(checkBoxPanelOption == CHECKBOX_OPTION?faxes.length:0)) + (wgd!=null?1:0);
+      compositeCheckBox = new JCheckBox[ecb + EXTRA_CHECK_BOXES];
+    i = ecb + (faxes==null?0:(checkBoxPanelOption == CHECKBOX_OPTION?faxes.length:0)) + (wgd!=null?1:0);
     { // Chart
       final int cbIdx = i;
-      compositeCheckBox[i] = new JCheckBox("");
-      compositeCheckBox[i].setSelected(this.isDrawChart());
-      compositeCheckBox[i].setBackground((Color) ParamPanel.data[ParamData.CHART_COLOR][ParamData.VALUE_INDEX]);
-      compositeCheckBox[i].addActionListener(new ActionListener()
+      compositeCheckBox[cbIdx] = new JCheckBox("");
+      compositeCheckBox[cbIdx].setSelected(this.isDrawChart());
+      compositeCheckBox[cbIdx].setBackground((Color) ParamPanel.data[ParamData.CHART_COLOR][ParamData.VALUE_INDEX]);
+      compositeCheckBox[cbIdx].addActionListener(new ActionListener()
           {
             public void actionPerformed(ActionEvent e)
             {
@@ -1026,8 +1054,8 @@ public class CommandPanel
             }
           });
       String tooltip = WWGnlUtilities.buildMessage("show-chart");
-      compositeCheckBox[i].setToolTipText(tooltip);
-      checkBoxCompositePanel.add(compositeCheckBox[i],
+      compositeCheckBox[cbIdx].setToolTipText(tooltip);
+      checkBoxCompositePanel.add(compositeCheckBox[cbIdx],
                            new GridBagConstraints(0, pos++, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
                                                   new Insets(5, 5, 5, 5), 0, 0));
     }
@@ -1121,7 +1149,7 @@ public class CommandPanel
           {
             public void actionPerformed(ActionEvent e)
             {
-              setShowWeathertations(compositeCheckBox[cbIdx].isSelected());
+              setShowWeatherStations(compositeCheckBox[cbIdx].isSelected());
               repaint();
             }
           });
@@ -1360,7 +1388,7 @@ public class CommandPanel
         {
           return "{" + Long.toString(id) + "} from CommandPanel.";
         }
-        public void imageUp()
+        public void imageUp(int factor)
         {
          if (parent != null && parent.isVisible())
           {
@@ -1371,10 +1399,10 @@ public class CommandPanel
                 if (currentFaxIndex == -1)
                 {
                   for (int i=0; faxImage!=null && i<faxImage.length; i++)
-                    faxImage[i].imageVOffset -= dataPanel.getFaxInc();
+                    faxImage[i].imageVOffset -= (factor * dataPanel.getFaxInc());
                 }
                 else
-                  faxImage[currentFaxIndex].imageVOffset -= dataPanel.getFaxInc();
+                  faxImage[currentFaxIndex].imageVOffset -= (factor * dataPanel.getFaxInc());
               }
               catch (Exception ex)
               {
@@ -1386,7 +1414,7 @@ public class CommandPanel
             repaint();
           }
         }
-        public void imageDown()
+        public void imageDown(int factor)
         {
          if (parent != null && parent.isVisible())
           {
@@ -1397,10 +1425,10 @@ public class CommandPanel
                 if (currentFaxIndex == -1)
                 {
                   for (int i=0; faxImage!=null && i<faxImage.length; i++)
-                    faxImage[i].imageVOffset += dataPanel.getFaxInc();
+                    faxImage[i].imageVOffset += (factor * dataPanel.getFaxInc());
                 }
                 else
-                  faxImage[currentFaxIndex].imageVOffset += dataPanel.getFaxInc();
+                  faxImage[currentFaxIndex].imageVOffset += (factor * dataPanel.getFaxInc());
               }
               catch (Exception e)
               {
@@ -1412,7 +1440,7 @@ public class CommandPanel
             repaint();
           }
         }
-        public void imageLeft()
+        public void imageLeft(int factor)
         {
          if (parent != null && parent.isVisible())
           {
@@ -1423,10 +1451,10 @@ public class CommandPanel
                 if (currentFaxIndex == -1)
                 {
                   for (int i=0; faxImage!=null && i<faxImage.length; i++)
-                    faxImage[i].imageHOffset -= dataPanel.getFaxInc();
+                    faxImage[i].imageHOffset -= (factor * dataPanel.getFaxInc());
                 }
                 else
-                  faxImage[currentFaxIndex].imageHOffset -= dataPanel.getFaxInc();
+                  faxImage[currentFaxIndex].imageHOffset -= (factor * dataPanel.getFaxInc());
               }
               catch (Exception e)
               {
@@ -1438,7 +1466,7 @@ public class CommandPanel
             repaint();
           }
         }
-        public void imageRight()
+        public void imageRight(int factor)
         {
          if (parent != null && parent.isVisible())
           {
@@ -1449,10 +1477,10 @@ public class CommandPanel
                 if (currentFaxIndex == -1)
                 {
                   for (int i=0; faxImage!=null && i<faxImage.length; i++)
-                    faxImage[i].imageHOffset += dataPanel.getFaxInc();
+                    faxImage[i].imageHOffset += (factor * dataPanel.getFaxInc());
                 }
                 else
-                  faxImage[currentFaxIndex].imageHOffset += dataPanel.getFaxInc();
+                  faxImage[currentFaxIndex].imageHOffset += (factor * dataPanel.getFaxInc());
               }
               catch (Exception e)
               {
@@ -1464,7 +1492,7 @@ public class CommandPanel
             repaint();
           }
         }
-        public void imageZoomin()
+        public void imageZoomin(double factor)
         {
          if (parent != null && parent.isVisible())
           {
@@ -1473,16 +1501,16 @@ public class CommandPanel
               if (currentFaxIndex == -1)
               {
                 for (int i=0; faxImage!=null && i<faxImage.length; i++)
-                  faxImage[i].imageScale *= dataPanel.getZoomFactor();
+                  faxImage[i].imageScale *= (factor * dataPanel.getZoomFactor());
               }
               else
-                faxImage[currentFaxIndex].imageScale *= dataPanel.getZoomFactor();
+                faxImage[currentFaxIndex].imageScale *= (factor * dataPanel.getZoomFactor());
             }
             displayStatus();
             repaint();
           }
         }
-        public void imageZoomout()
+        public void imageZoomout(double factor)
         {
          if (parent != null && parent.isVisible())
           {
@@ -1491,10 +1519,10 @@ public class CommandPanel
               if (currentFaxIndex == -1)
               {
                 for (int i=0; faxImage!=null && i<faxImage.length; i++)
-                  faxImage[i].imageScale /= dataPanel.getZoomFactor();
+                  faxImage[i].imageScale /= (factor * dataPanel.getZoomFactor());
               }
               else
-                faxImage[currentFaxIndex].imageScale /= dataPanel.getZoomFactor();
+                faxImage[currentFaxIndex].imageScale /= (factor * dataPanel.getZoomFactor());
             }
             displayStatus();
             repaint();
@@ -1557,7 +1585,7 @@ public class CommandPanel
           }
         }
 
-        public void chartUp()
+        public void chartUp(int factor)
         {
          if (parent != null && parent.isVisible())
           {
@@ -1565,21 +1593,21 @@ public class CommandPanel
             {
               if (chartPanel.getProjection() == ChartPanel.GLOBE_VIEW)
               {
-                double foreAft = chartPanel.getGlobeViewForeAftRotation() - dataPanel.getLatLongInc();
+                double foreAft = chartPanel.getGlobeViewForeAftRotation() - (factor * dataPanel.getLatLongInc());
                 chartPanel.setGlobeViewForeAftRotation(foreAft);
                 WWContext.getInstance().fireSetGlobeParameters(foreAft,
                                                                    chartPanel.getGlobeViewLngOffset());
               }
               else if (chartPanel.getProjection() == ChartPanel.SATELLITE_VIEW)
               {
-                double satLat = chartPanel.getSatelliteLatitude() - dataPanel.getLatLongInc();
+                double satLat = chartPanel.getSatelliteLatitude() - (factor * dataPanel.getLatLongInc());
                 chartPanel.setSatelliteLatitude(satLat);
                 WWContext.getInstance().fireSetSatelliteParameters(chartPanel.getSatelliteLatitude(), chartPanel.getSatelliteLongitude(), chartPanel.getSatelliteAltitude(), !chartPanel.isTransparentGlobe());
               }
               else
               {
-                nLat -= dataPanel.getLatLongInc();
-                sLat -= dataPanel.getLatLongInc();
+                nLat -= (factor * dataPanel.getLatLongInc());
+                sLat -= (factor * dataPanel.getLatLongInc());
               }
             }
             catch (Exception e)
@@ -1599,7 +1627,7 @@ public class CommandPanel
             displayStatus();
           }
         }
-        public void chartDown()
+        public void chartDown(int factor)
         {
          if (parent != null && parent.isVisible())
           {
@@ -1607,21 +1635,21 @@ public class CommandPanel
             {
               if (chartPanel.getProjection() == ChartPanel.GLOBE_VIEW)
               {
-                double foreAft = chartPanel.getGlobeViewForeAftRotation() + dataPanel.getLatLongInc();
+                double foreAft = chartPanel.getGlobeViewForeAftRotation() + (factor * dataPanel.getLatLongInc());
                 chartPanel.setGlobeViewForeAftRotation(foreAft);
                 WWContext.getInstance().fireSetGlobeParameters(foreAft,
                                                                    chartPanel.getGlobeViewLngOffset());
               }
               else if (chartPanel.getProjection() == ChartPanel.SATELLITE_VIEW)
               {
-                double satLat = chartPanel.getSatelliteLatitude() + dataPanel.getLatLongInc();
+                double satLat = chartPanel.getSatelliteLatitude() + (factor * dataPanel.getLatLongInc());
                 chartPanel.setSatelliteLatitude(satLat);
                 WWContext.getInstance().fireSetSatelliteParameters(chartPanel.getSatelliteLatitude(), chartPanel.getSatelliteLongitude(), chartPanel.getSatelliteAltitude(), !chartPanel.isTransparentGlobe());
               }
               else
               {
-                nLat += dataPanel.getLatLongInc();
-                sLat += dataPanel.getLatLongInc();
+                nLat += (factor * dataPanel.getLatLongInc());
+                sLat += (factor * dataPanel.getLatLongInc());
               }
             }
             catch (Exception e)
@@ -1641,7 +1669,7 @@ public class CommandPanel
             displayStatus();
           }
         }
-        public void chartLeft()
+        public void chartLeft(int factor)
         {
          if (parent != null && parent.isVisible())
           {
@@ -1649,21 +1677,21 @@ public class CommandPanel
             {
               if (chartPanel.getProjection() == ChartPanel.GLOBE_VIEW)
               {
-                double leftRight = chartPanel.getGlobeViewLngOffset() + dataPanel.getLatLongInc();
+                double leftRight = chartPanel.getGlobeViewLngOffset() + (factor * dataPanel.getLatLongInc());
                 chartPanel.setGlobeViewLngOffset(leftRight);
                 WWContext.getInstance().fireSetGlobeParameters(chartPanel.getGlobeViewForeAftRotation(),
                                                                    leftRight);
               }
               else if (chartPanel.getProjection() == ChartPanel.SATELLITE_VIEW)
               {
-                double satLng = chartPanel.getSatelliteLongitude() + dataPanel.getLatLongInc();
+                double satLng = chartPanel.getSatelliteLongitude() + (factor * dataPanel.getLatLongInc());
                 chartPanel.setSatelliteLongitude(satLng);
                 WWContext.getInstance().fireSetSatelliteParameters(chartPanel.getSatelliteLatitude(), chartPanel.getSatelliteLongitude(), chartPanel.getSatelliteAltitude(), !chartPanel.isTransparentGlobe());
               }
               else
               {
-                wLong += dataPanel.getLatLongInc();
-                eLong += dataPanel.getLatLongInc();
+                wLong += (factor * dataPanel.getLatLongInc());
+                eLong += (factor * dataPanel.getLatLongInc());
               }
             }
             catch (Exception e)
@@ -1683,7 +1711,7 @@ public class CommandPanel
             displayStatus();
           }
         }
-        public void chartRight()
+        public void chartRight(int factor)
         {
          if (parent != null && parent.isVisible())
           {
@@ -1692,21 +1720,21 @@ public class CommandPanel
               if (chartPanel.getProjection() == ChartPanel.GLOBE_VIEW)
               {
                 double currOffset = chartPanel.getGlobeViewLngOffset();
-                double newOffset  = currOffset - dataPanel.getLatLongInc();
+                double newOffset  = currOffset - (factor * dataPanel.getLatLongInc());
                 chartPanel.setGlobeViewLngOffset(newOffset);
                 WWContext.getInstance().fireSetGlobeParameters(chartPanel.getGlobeViewForeAftRotation(),
                                                                    newOffset);
               }
               else if (chartPanel.getProjection() == ChartPanel.SATELLITE_VIEW)
               {
-                double satLng = chartPanel.getSatelliteLongitude() - dataPanel.getLatLongInc();
+                double satLng = chartPanel.getSatelliteLongitude() - (factor * dataPanel.getLatLongInc());
                 chartPanel.setSatelliteLongitude(satLng);
                 WWContext.getInstance().fireSetSatelliteParameters(chartPanel.getSatelliteLatitude(), chartPanel.getSatelliteLongitude(), chartPanel.getSatelliteAltitude(), !chartPanel.isTransparentGlobe());
               }
               else
               {
-                wLong -= dataPanel.getLatLongInc();
-                eLong -= dataPanel.getLatLongInc();
+                wLong -= (factor * dataPanel.getLatLongInc());
+                eLong -= (factor * dataPanel.getLatLongInc());
               }
             }
             catch (Exception e)
@@ -1726,20 +1754,20 @@ public class CommandPanel
             displayStatus();
           }
         }
-        public void chartZoomin()
+        public void chartZoomin(double factor)
         {
          if (parent != null && parent.isVisible())
           {
-            chartPanel.setZoomFactor(dataPanel.getZoomFactor());
+            chartPanel.setZoomFactor(factor * dataPanel.getZoomFactor());
             chartPanel.zoomIn();
             displayStatus();
           }
         }
-        public void chartZoomout()
+        public void chartZoomout(double factor)
         {
          if (parent != null && parent.isVisible())
           {
-            chartPanel.setZoomFactor(dataPanel.getZoomFactor());
+            chartPanel.setZoomFactor(factor * dataPanel.getZoomFactor());
             chartPanel.zoomOut();
             displayStatus();
           }
@@ -4795,7 +4823,7 @@ public class CommandPanel
     }
 
     // SailMail Stations
-    if (showSMStations && drawChart && sma != null)
+    if (showSMStations /* && drawChart */ && sma != null)
     {
       for (WWGnlUtilities.SailMailStation sms : sma)
       {
@@ -4816,7 +4844,7 @@ public class CommandPanel
     }
 
     // Weather Stations
-    if (showWeatherStations && drawChart && wsta != null)
+    if (showWeatherStations /* && drawChart */ && wsta != null)
     {
       for (WWGnlUtilities.WeatherStation ws : wsta)
       {
@@ -6836,7 +6864,7 @@ public class CommandPanel
     return showSMStations;
   }
 
-  public void setShowWeathertations(boolean showWeatherStations)
+  public void setShowWeatherStations(boolean showWeatherStations)
   {
     this.showWeatherStations = showWeatherStations;
   }

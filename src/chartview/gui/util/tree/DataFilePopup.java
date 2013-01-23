@@ -491,6 +491,15 @@ public class DataFilePopup
             try { xOffset = Integer.parseInt(((XMLElement)(doc.selectNodes("/pattern/scroll").item(0))).getAttribute("x")); } catch (Exception ignore) {}
             try { yOffset = Integer.parseInt(((XMLElement)(doc.selectNodes("/pattern/scroll").item(0))).getAttribute("y")); } catch (Exception ignore) {}
 
+            int faxOption = CommandPanel.CHECKBOX_OPTION;
+            try
+            {
+              String fo = ((XMLElement)doc.selectNodes("//fax-option").item(0)).getAttribute("value");
+              if (fo.equals("RADIOBUTTON"))
+                faxOption = CommandPanel.RADIOBUTTON_OPTION;
+            }
+            catch (Exception ex){ }
+
             try 
             { 
               String prjStr = ((XMLElement)(doc.selectNodes("/pattern/projection").item(0))).getAttribute("type");
@@ -529,6 +538,7 @@ public class DataFilePopup
                                                             twoDSmooth, 
                                                             timeSmooth);
             pep.setGrib(withGrib);
+            pep.setFaxOption(faxOption);
             // UI
             int resp = JOptionPane.showConfirmDialog(this, pep, WWGnlUtilities.buildMessage("edit-pattern"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);            
             if (resp == JOptionPane.OK_OPTION)
@@ -709,6 +719,14 @@ public class DataFilePopup
                   gribNode.removeChild(grib);
                 }
               }
+              nl = doc.selectNodes("/pattern/fax-option");
+              if (nl.getLength() == 0)
+              {
+                XMLElement faxOp = (XMLElement)doc.createElement("fax-option");
+                doc.selectNodes("/pattern").item(0).appendChild(faxOp);
+              }
+              ((XMLElement)(doc.selectNodes("/pattern/fax-option").item(0))).setAttribute("value", pep.getFaxOption()==CommandPanel.RADIOBUTTON_OPTION?"RADIOBUTTON":"CHECKBOX");
+              
               doc.print(System.out);
               doc.print(new FileOutputStream(fullpath));
             }
