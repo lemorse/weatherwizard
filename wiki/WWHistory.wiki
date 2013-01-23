@@ -11,6 +11,7 @@ This page takes over and replaces the one [http://donpedro.lediouris.net/softwar
 = Details =
 
 || *Date* || *Description* || *Impacted file(s)* ||
+|| 22-Jan-2013  || Improved the radio-group/background features. || chartadjust.jar ||
 || 17-Jan-2013  || Fixed a sound bug. || chartadjust.jar ||
 || 11-Jan-2013  || Slim down, minor improvements. || coreutilities.jar, nmeareader.jar ||
 || 12-Dec-2012  || Cosmetic, minor bugs. Blur (color smoothing) for the GRIB display (bottom right check-box). || chartadjust.jar ||
