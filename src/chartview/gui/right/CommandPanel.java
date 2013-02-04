@@ -5141,6 +5141,7 @@ public class CommandPanel
 
     if (wpBeingDragged != null) // Postit
     {
+//    System.out.println("Dragging Way Point " + wpBeingDragged.toString());
       Point p = chartPanel.getPanelPoint(wpBeingDragged);
       chartPanel.bubble(gr,
                         wpBeingDragged.toString(),
@@ -6080,6 +6081,7 @@ public class CommandPanel
         int y = ((MouseEvent)e).getY();
         to = chartPanel.getGeoPos(x, y);
         wpBeingDragged = to;
+//      System.out.println("TO being dragged:" + to.toString());
         chartPanel.repaint();
         return false;
       }
