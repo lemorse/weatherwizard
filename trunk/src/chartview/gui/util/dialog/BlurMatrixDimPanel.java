@@ -22,6 +22,9 @@ public class BlurMatrixDimPanel
   private transient SpinnerModel spinnerModel = new SpinnerNumberModel(1, 1, 100, 1);
   private JSpinner matrixSpinner = new JSpinner(spinnerModel);
 
+  @SuppressWarnings("compatibility:-5951699133653371924")
+  private final static long serialVersionUID = 1L;
+  
   public BlurMatrixDimPanel()
   {
     try

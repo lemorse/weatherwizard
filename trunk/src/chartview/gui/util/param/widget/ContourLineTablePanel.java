@@ -52,9 +52,9 @@ public final class ContourLineTablePanel
   static final String[] names =
   { VALUE, BOLD };
 
-  TableModel dataModel;
+  private transient TableModel dataModel;
 
-  private Object[][] data = new Object[0][0];
+  private transient Object[][] data = new Object[0][0];
 
   JTable table;
   JScrollPane scrollPane;

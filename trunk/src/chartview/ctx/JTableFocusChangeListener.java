@@ -12,9 +12,9 @@ import javax.swing.JTable;
 public class JTableFocusChangeListener
   implements PropertyChangeListener
 {
-  boolean wasIn = true;
-  Window originalWindowFocusOwner = null;
-  JTable jTable;
+  private boolean wasIn = true;
+  private Window originalWindowFocusOwner = null;
+  private JTable jTable;
 
   public JTableFocusChangeListener(JTable jt)
   {
