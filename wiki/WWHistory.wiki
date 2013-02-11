@@ -11,7 +11,7 @@ This page takes over and replaces the one [http://donpedro.lediouris.net/softwar
 = Details =
 
 || *Date* || *Description* || *Impacted file(s)* ||
-|| 11-Feb-2013  || GRIB Control Panel: added replay speed for the GRIB animation || chartadjust.jar ||
+|| 11-Feb-2013  || GRIB Control Panel: added replay speed for the GRIB animation. Quite useful for the micro-patterns. || chartadjust.jar ||
 || 07-Feb-2013  || GRIB Control check box... || chartadjust.jar ||
 || 23-Jan-2013  || Composite editor improvement. || chartadjust.jar ||
 || 22-Jan-2013  || Improved the radio-group/background features. || chartadjust.jar ||
