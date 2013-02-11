@@ -239,4 +239,6 @@ public abstract class ApplicationEventListener implements EventListener
   
   public void displayGRIBDateLabel(boolean b) {}
   public void setTimeZoneForLabel(String tz) {}
+
+  public void setReplayDelay(int i) {}
 }

@@ -74,7 +74,9 @@ public class GribPanel
   private JTextField smoothTimeValue = new JTextField();
   private JButton smoothTimeButton = new JButton();
   
-  private JCheckBox withLabelOnGribCheckBox = new JCheckBox(WWContext.getInstance().getOriginalDefaultTimeZone().getID()); // "Etc/UTC"
+  private JCheckBox withLabelOnGribCheckBox = new JCheckBox(WWContext.getInstance().getOriginalDefaultTimeZone().getID());
+  private GridBagLayout gridBagLayout3 = new GridBagLayout();
+  private JSlider replaySpeedSlider = new JSlider(); // "Etc/UTC"
 //private JLabel timeZoneLabel = new JLabel("Etc/UTC");
 
   public GribPanel()
@@ -263,13 +265,17 @@ public class GribPanel
           }
         });
     JPanel buttonPanel = new JPanel();
-    buttonPanel.add(backwardButton, null);
-    buttonPanel.add(forwardButton, null);
-    buttonPanel.add(animateButton, null);
+    buttonPanel.add(backwardButton, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
+          new Insets(5, 0, 5, 0), 0, 0));
+    buttonPanel.add(forwardButton, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
+          new Insets(5, 0, 5, 0), 0, 0));
+    buttonPanel.add(animateButton, new GridBagConstraints(2, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
+          new Insets(5, 0, 5, 0), 0, 0));
     
     withLabelOnGribCheckBox.setToolTipText("Display GRIB Date, with this TimeZone");
 
-    buttonPanel.add(withLabelOnGribCheckBox, null);
+    buttonPanel.add(withLabelOnGribCheckBox, new GridBagConstraints(3, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
+          new Insets(5, 0, 5, 0), 0, 0));
     withLabelOnGribCheckBox.setEnabled(false);
     withLabelOnGribCheckBox.addActionListener(new ActionListener()
       {
@@ -314,48 +320,77 @@ public class GribPanel
 //    timeZoneLabel.setPreferredSize(new Dimension(100, 21));
 //    timeZoneLabel.setToolTipText("TimeZone for GRIB date display");
 //    buttonPanel.add(timeZoneLabel, null);
+
+    replaySpeedSlider.setToolTipText("Animation replay speed");
+    replaySpeedSlider.addChangeListener(new ChangeListener()
+      {
+        public void stateChanged(ChangeEvent evt)
+        {
+          JSlider slider = (JSlider) evt.getSource();
+
+          if (!slider.getValueIsAdjusting())
+          {
+            int sv = slider.getValue();
+            String tootltipMess = "Normal Speed";
+            if (sv < 10)
+              tootltipMess = "Veeeeeery slow";
+            else if (sv < 40)
+              tootltipMess = "Slow";
+            else if (sv < 60)
+              tootltipMess = "Normal Speed";
+            else if (sv < 80)
+              tootltipMess = "Fast";
+            else
+              tootltipMess = "As fast as possible";
+            slider.setToolTipText(tootltipMess);
+            // Broadcast replay delay (not speed).
+            WWContext.getInstance().fireSetReplayDelay(100 - sv);
+          }
+        }
+      });
     
-    this.add(topPanel, 
-             new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, 
-                                    new Insets(0, 0, 0, 0), 0, 0));
+    buttonPanel.setLayout(gridBagLayout3);
+    this.add(topPanel, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL,
+          new Insets(0, 0, 0, 0), 0, 0));
     this.add(gribSmoothingPanel, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH,
           new Insets(0, 0, 0, 0), 0, 0));
 
     this.add(buttonPanel, new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
           new Insets(5, 4, 1, 0), 0, 0));
-    this.add(gribInfoLineTwo, new GridBagConstraints(0, 4, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL,
+    this.add(gribInfoLineTwo, new GridBagConstraints(0, 5, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL,
           new Insets(5, 5, 0, 0), 0, 0));
-    this.add(gribInfoLineThree,
-             new GridBagConstraints(0, 5, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL,
+    this.add(gribInfoLineThree, new GridBagConstraints(0, 6, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL,
           new Insets(0, 5, 0, 0), 0, 0));
-    this.add(gribInfoLineFour, new GridBagConstraints(0, 6, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL,
+    this.add(gribInfoLineFour, new GridBagConstraints(0, 7, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL,
           new Insets(0, 5, 10, 0), 0, 0));
-    this.add(dataOptionsPanel, new GridBagConstraints(0, 7, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+    this.add(dataOptionsPanel, new GridBagConstraints(0, 8, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH,
           new Insets(0, 0, 0, 0), 0, 0));
 
     gribSlider.setMinimum(1);
-    this.add(gribSlider, new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+    this.add(gribSlider, new GridBagConstraints(0, 4, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
           new Insets(0, 0, 2, 0), 0, 0));
+    this.add(replaySpeedSlider, new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+          new Insets(0, 0, 0, 0), 0, 0));
     gribSlider.addChangeListener(new ChangeListener()
+      {
+        public void stateChanged(ChangeEvent evt)
         {
-          public void stateChanged(ChangeEvent evt)
-          {
-            JSlider slider = (JSlider) evt.getSource();
+          JSlider slider = (JSlider) evt.getSource();
 
-            if (!slider.getValueIsAdjusting())
+          if (!slider.getValueIsAdjusting())
+          {
+            int sv = slider.getValue();
+            if (sv != sliderValue)
             {
-              int sv = slider.getValue();
-              if (sv != sliderValue)
-              {
-                sliderValue = sv;
-//              System.out.println("Slider Value:" + sliderValue);
-                updateSliderData();
-              }
-              slider.setToolTipText("Frame #" + Integer.toString(sv));
+              sliderValue = sv;
+              //              System.out.println("Slider Value:" + sliderValue);
+              updateSliderData();
             }
+            slider.setToolTipText("Frame #" + Integer.toString(sv));
           }
-        });
-                                    
+        }
+      });
+
     dataOptionsPanel.add(windLabel, null);
     dataOptionsPanel.add(prmslLabel, null);
     dataOptionsPanel.add(hgtLabel, null);
@@ -375,12 +410,12 @@ public class GribPanel
     googleButton.setActionCommand("googleMap");
     googleButton.setToolTipText(WWGnlUtilities.buildMessage("show-wind-in-google-map"));
     googleButton.addActionListener(new ActionListener()
+      {
+        public void actionPerformed(ActionEvent e)
         {
-          public void actionPerformed(ActionEvent e)
-          {
-            googleButton_actionPerformed(e);
-          }
-        });
+          googleButton_actionPerformed(e);
+        }
+      });
     googleButton.setEnabled(false);
     googleButton.setMaximumSize(new Dimension(24, 24));
     googleButton.setMinimumSize(new Dimension(24, 24));
@@ -416,35 +451,35 @@ public class GribPanel
     gribSmoothingPanel.setLayout(gridBagLayout2);
     gribSmoothingPanel.add(smoothLabel,
                            new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE,
-          new Insets(0, 0, 0, 0), 0, 0));
+                                                  new Insets(0, 0, 0, 0), 0, 0));
     smoothValue.setPreferredSize(new Dimension(30, 20));
     smoothValue.setToolTipText(WWGnlUtilities.buildMessage("grib-smooth-tooltip"));
     smoothValue.setHorizontalAlignment(JTextField.CENTER);
     gribSmoothingPanel.add(smoothValue,
                            new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
-          new Insets(0, 0, 0, 0), 0, 0));
+                                                  new Insets(0, 0, 0, 0), 0, 0));
     smoothButton.setText("...");
     smoothButton.setToolTipText(WWGnlUtilities.buildMessage("apply-smooth"));
     smoothButton.setPreferredSize(new Dimension(30, 20));
     smoothButton.addActionListener(new ActionListener()
+      {
+        public void actionPerformed(ActionEvent e)
         {
-          public void actionPerformed(ActionEvent e)
-          {
-            smoothButton_actionPerformed(e);
-          }
-        });
+          smoothButton_actionPerformed(e);
+        }
+      });
     gribSmoothingPanel.add(smoothButton,
                            new GridBagConstraints(2, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
-          new Insets(0, 5, 0, 0), 0, 0));
+                                                  new Insets(0, 5, 0, 0), 0, 0));
     gribSmoothingPanel.add(smoothTimeLabel,
                            new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE,
-          new Insets(0, 0, 0, 0), 0, 0));
+                                                  new Insets(0, 0, 0, 0), 0, 0));
     gribSmoothingPanel.add(smoothTimeValue,
                            new GridBagConstraints(1, 1, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
-          new Insets(0, 0, 0, 0), 0, 0));
+                                                  new Insets(0, 0, 0, 0), 0, 0));
     gribSmoothingPanel.add(smoothTimeButton,
                            new GridBagConstraints(2, 1, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
-          new Insets(0, 5, 0, 0), 0, 0));
+                                                  new Insets(0, 5, 0, 0), 0, 0));
     smoothLabel.setEnabled(false);
     smoothValue.setEnabled(false);
     smoothButton.setEnabled(false);
