@@ -81,6 +81,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 
+import java.lang.reflect.InvocationTargetException;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.ConcurrentModificationException;
@@ -380,6 +382,8 @@ public class CommandPanel
   private boolean displayDateOnGrib = false;
   private String tzForDateDisplay = "Etc/UTC";
 
+  private long replayDelay = 500L;
+  
   public boolean isBusy() // Is there a Composite in the panel?
   {
     return (wgd != null || faxImage != null);
@@ -2708,6 +2712,13 @@ public class CommandPanel
           }
         }
 
+        public void setReplayDelay(int i) 
+        {
+          // Normal 500
+//        System.out.println("i=" + i + ", makes delay " + (i * 10));
+          replayDelay = i * 10;
+        }
+        
         public void showWindInGoogle()
         {
          if (parent != null && parent.isVisible())
@@ -3783,7 +3794,48 @@ public class CommandPanel
 
   private void updateGRIBDisplay()
   {
-    chartPanel.repaint();
+    updateGRIBDisplay(false);
+  }
+  private void updateGRIBDisplay(boolean wait)
+  {
+    if (wait)
+    {
+      Thread thread = new Thread()
+        {
+          public void run()
+          {
+            try
+            {
+              SwingUtilities.invokeAndWait(new Runnable()
+                {
+                  public void run()
+                  {
+                    chartPanel.repaint();
+                  }
+                });
+            }
+            catch (InvocationTargetException ite)
+            {
+              ite.printStackTrace();
+            }
+            catch (InterruptedException ie)
+            {
+              ie.printStackTrace();
+            }
+          }
+        };
+      try
+      {
+        thread.start();
+        thread.join();
+      }
+      catch (InterruptedException ie)
+      {
+        ie.printStackTrace();
+      }
+    }
+    else
+      chartPanel.repaint();
     gribData = null;
     if (wgd != null)
     {
@@ -4252,7 +4304,8 @@ public class CommandPanel
                   }
                   catch (NullPointerException npe)
                   {
-                    npe.printStackTrace();
+                    System.err.println(npe.toString());
+//                  npe.printStackTrace();
                   }
       //          gr.setColor(getWindColor(speed));
                   // We have speed, direction, wind color
@@ -7307,8 +7360,9 @@ public class CommandPanel
         if (gribIndex >= wgd.length)
           gribIndex = 0;
         smoothingRequired = true;
-        updateGRIBDisplay();
-        try { Thread.sleep(500L); } // was 2000
+        updateGRIBDisplay(true);
+//      System.out.println("Sleeping " + replayDelay + " ms");
+        try { Thread.sleep(replayDelay); } 
         catch (Exception ignore) { System.out.println("Interrupted"); }
       }
     }
