@@ -1895,10 +1895,16 @@ public class WWGnlUtilities
     return str.replaceAll("&apos;", "'").replaceAll("&quot;", "\"").replaceAll("&lt;", "<").replaceAll("&gt;", ">");
   }
 
-  public static void archiveCompositeDirectory(final String compositeDirectoryName)
+  /**
+   * Old version, turns XML into WAZ
+   * @deprecated
+   */
+  public static void archiveCompositeDirectory_(final String compositeDirectoryName) 
   {
     // 1 - Ask: Copy or Move
-    int resp = JOptionPane.showConfirmDialog(WWContext.getInstance().getMasterTopFrame(), WWGnlUtilities.buildMessage("do-you-wish-to-delete"), WWGnlUtilities.buildMessage("archive-composite"), 
+    int resp = JOptionPane.showConfirmDialog(WWContext.getInstance().getMasterTopFrame(), 
+                                             WWGnlUtilities.buildMessage("do-you-wish-to-delete"), 
+                                             WWGnlUtilities.buildMessage("archive-composite"), 
                                              JOptionPane.YES_NO_CANCEL_OPTION, 
                                              JOptionPane.QUESTION_MESSAGE);
     final Boolean deleteWhenDone = Boolean.valueOf(resp == JOptionPane.YES_OPTION);
@@ -1913,13 +1919,100 @@ public class WWGnlUtilities
         WWContext.getInstance().fireSetLoading(true, WWGnlUtilities.buildMessage("archiving"));
         int nb = drillDownAndArchive(dir, deleteWhenDone);
         WWContext.getInstance().fireSetLoading(false, WWGnlUtilities.buildMessage("archiving"));
-        JOptionPane.showMessageDialog(WWContext.getInstance().getMasterTopFrame(), WWGnlUtilities.buildMessage("archived-x-composites", new String[] { Integer.toString(nb) }), WWGnlUtilities.buildMessage("archive-composite"), 
+        JOptionPane.showMessageDialog(WWContext.getInstance().getMasterTopFrame(), 
+                                      WWGnlUtilities.buildMessage("archived-x-composites", 
+                                                                  new String[] { Integer.toString(nb) }), 
+                                      WWGnlUtilities.buildMessage("archive-composite"), 
                                       JOptionPane.INFORMATION_MESSAGE);
       }
     };
     archiver.start();
   }
 
+  public static void archiveCompositeDirectory(final String compositeDirectoryName)
+  {
+    System.out.println("Will archive " + compositeDirectoryName); // Like D:\OlivSoft\all-scripts\.\composites\2010
+    Thread archiver = new Thread("directory-archiver")
+      {
+         public void run()
+         {
+           String archiveName = compositeDirectoryName.substring(compositeDirectoryName.lastIndexOf(File.separator) + 1);
+           try
+           {
+             archiveName += ".zip";
+             final String _archiveName = archiveName;
+             archiveName = compositeDirectoryName + File.separator + archiveName;
+             System.out.println("Generating " + archiveName);
+             JOptionPane.showMessageDialog(WWContext.getInstance().getMasterTopFrame(), 
+                                           WWGnlUtilities.buildMessage("will-generate", new String[] { archiveName }),
+                                           WWGnlUtilities.buildMessage("archive-composite"), 
+                                           JOptionPane.INFORMATION_MESSAGE);
+             ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(archiveName));
+             File root = new File(compositeDirectoryName);
+             FilenameFilter fnf = new FilenameFilter()
+             {
+               public boolean accept(File dir, String name)
+               {
+                 return (!name.equals(_archiveName));
+               }
+             };
+             recurseFile(root, zos, root, fnf);
+             zos.close();
+             // Now delete
+             File[] dd = root.listFiles(fnf);
+             for (File f : dd)
+               recurseDelete(f, fnf);
+           }
+           catch (Exception ex)
+           {
+             ex.printStackTrace();
+             JOptionPane.showMessageDialog(WWContext.getInstance().getMasterTopFrame(), 
+                                           ex.toString(), 
+                                           WWGnlUtilities.buildMessage("archive-composite"), 
+                                           JOptionPane.ERROR_MESSAGE);
+           }
+           int resp = JOptionPane.showConfirmDialog(WWContext.getInstance().getMasterTopFrame(), 
+                                                    WWGnlUtilities.buildMessage("archiving-completed", new String[] { archiveName }), 
+                                                    WWGnlUtilities.buildMessage("archive-composite"), 
+                                                    JOptionPane.YES_NO_OPTION,
+                                                    JOptionPane.QUESTION_MESSAGE);
+           if (resp == JOptionPane.YES_OPTION)
+           {
+             try { Utilities.showFileSystem(archiveName.substring(0, archiveName.lastIndexOf(File.separator))); } 
+             catch (Exception e) 
+             {
+               e.printStackTrace();
+             }
+           }
+         }
+      };
+    try
+    {
+      archiver.start();
+      archiver.join();
+    }
+    catch (Exception ex)
+    {
+      ex.printStackTrace();
+    }
+  }
+  
+  private static void recurseDelete(File f, FilenameFilter fnf)
+  {
+    if (f.isDirectory())
+    {
+      File[] child = f.listFiles(fnf);
+      for (File c : child)
+        recurseDelete(c, fnf);
+    }
+    boolean b = f.delete();
+    if (!b)
+    {
+      System.out.println("Could not delete " + f.toString());
+      f.deleteOnExit();
+    }
+  }
+  
   private static int drillDownAndGenerateImage(File dir, 
                                                File imgDir, 
                                                CommandPanel cp, 
@@ -2796,10 +2889,15 @@ public class WWGnlUtilities
 
   private static void recurseFile(File f, ZipOutputStream zip, File rootDir) throws Exception
   {
+    recurseFile(f, zip, rootDir, null);
+  }
+  
+  private static void recurseFile(File f, ZipOutputStream zip, File rootDir, FilenameFilter fnf) throws Exception
+  {
     if (f.isDirectory())
     {
 //    System.out.println("Looking into:" + f.getAbsolutePath());
-      File[] toArchive = f.listFiles();
+      File[] toArchive = (fnf==null?f.listFiles():f.listFiles(fnf));
       for (int i=0; i<toArchive.length; i++)
         recurseFile(toArchive[i], zip, rootDir);
     }
@@ -2808,7 +2906,7 @@ public class WWGnlUtilities
       String fullFileName = f.getAbsolutePath();
       if (fullFileName.startsWith(rootDir.getAbsolutePath()))
         fullFileName = fullFileName.substring(rootDir.getAbsolutePath().length() + 1);
-//    System.out.println("Archiving:" + f.getAbsolutePath() + " as " + fullFileName);
+//    System.out.println("  --  Archiving:" + f.getAbsolutePath() + " as " + fullFileName);
       writeToArchive(zip, f.getAbsolutePath(), Utilities.replaceString(fullFileName, File.separator, "/"));
     }
   }

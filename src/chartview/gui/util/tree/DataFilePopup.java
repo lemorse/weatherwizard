@@ -955,12 +955,27 @@ public class DataFilePopup
     {
       if (dtn instanceof JTreeFilePanel.DirectoryTreeNode)
       {
-        JTreeFilePanel.DirectoryTreeNode dirtn = (JTreeFilePanel.DirectoryTreeNode)dtn;
-        WWGnlUtilities.archiveCompositeDirectory(dirtn.dir); 
-//      refreshTree();
-        WWContext.getInstance().fireReloadCompositeTree();
-        WWContext.getInstance().fireReloadFaxTree();
-        WWContext.getInstance().fireReloadGRIBTree();
+        final JTreeFilePanel.DirectoryTreeNode dirtn = (JTreeFilePanel.DirectoryTreeNode)dtn;
+        Thread t = new Thread()
+        {
+          public void run()
+          {
+            WWGnlUtilities.archiveCompositeDirectory(dirtn.dir);    
+    //      refreshTree();
+            WWContext.getInstance().fireReloadCompositeTree();
+            WWContext.getInstance().fireReloadFaxTree();
+            WWContext.getInstance().fireReloadGRIBTree();
+          }
+        };
+        try
+        {
+          t.start();
+//        t.join();
+        }
+        catch (Exception ex)
+        {
+          ex.printStackTrace();
+        }
       }
     }
     this.setVisible(false); // Shut popup when done.
