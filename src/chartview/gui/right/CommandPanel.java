@@ -3554,7 +3554,8 @@ public class CommandPanel
 //        System.out.println("TimeZone for Display:" + tz);
           if (instance.isVisible())
           {
-            tzForDateDisplay = tz;
+            if (tz != null)
+              tzForDateDisplay = tz;
             chartPanel.repaint();
           }
         }

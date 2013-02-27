@@ -1939,29 +1939,52 @@ public class WWGnlUtilities
            String archiveName = compositeDirectoryName.substring(compositeDirectoryName.lastIndexOf(File.separator) + 1);
            try
            {
+             File root = new File(compositeDirectoryName);
              archiveName += ".zip";
              final String _archiveName = archiveName;
              archiveName = compositeDirectoryName + File.separator + archiveName;
-             System.out.println("Generating " + archiveName);
-             JOptionPane.showMessageDialog(WWContext.getInstance().getMasterTopFrame(), 
-                                           WWGnlUtilities.buildMessage("will-generate", new String[] { archiveName }),
-                                           WWGnlUtilities.buildMessage("archive-composite"), 
-                                           JOptionPane.INFORMATION_MESSAGE);
-             ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(archiveName));
-             File root = new File(compositeDirectoryName);
              FilenameFilter fnf = new FilenameFilter()
              {
                public boolean accept(File dir, String name)
                {
                  return (!name.equals(_archiveName));
                }
-             };
-             recurseFile(root, zos, root, fnf);
-             zos.close();
-             // Now delete
-             File[] dd = root.listFiles(fnf);
-             for (File f : dd)
-               recurseDelete(f, fnf);
+             };             
+             int[] counter = countFilesAndDir(root, fnf, 0, 0);
+             System.out.println("Generating " + archiveName);
+                          
+             int resp = JOptionPane.showConfirmDialog(WWContext.getInstance().getMasterTopFrame(), 
+                                                      WWGnlUtilities.buildMessage("will-generate", new String[] { _archiveName, 
+                                                                                                                  compositeDirectoryName ,
+                                                                                                                  Integer.toString(counter[NBFILE_POS]),
+                                                                                                                  Integer.toString(counter[NBDIR_POS]) }),
+                                                      WWGnlUtilities.buildMessage("archive-composite"), 
+                                                      JOptionPane.OK_CANCEL_OPTION,
+                                                      JOptionPane.QUESTION_MESSAGE);
+             if (resp == JOptionPane.OK_OPTION)
+             {
+               ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(archiveName));
+               
+               recurseFile(root, zos, root, fnf);
+               zos.close();
+               // Now delete
+               File[] dd = root.listFiles(fnf);
+               for (File f : dd)
+                 recurseDelete(f, fnf);
+               resp = JOptionPane.showConfirmDialog(WWContext.getInstance().getMasterTopFrame(), 
+                                                    WWGnlUtilities.buildMessage("archiving-completed", new String[] { archiveName }), 
+                                                    WWGnlUtilities.buildMessage("archive-composite"), 
+                                                    JOptionPane.YES_NO_OPTION,
+                                                    JOptionPane.QUESTION_MESSAGE);
+               if (resp == JOptionPane.YES_OPTION)
+               {
+                 try { Utilities.showFileSystem(archiveName.substring(0, archiveName.lastIndexOf(File.separator))); } 
+                 catch (Exception e) 
+                 {
+                   e.printStackTrace();
+                 }
+               }
+             }
            }
            catch (Exception ex)
            {
@@ -1970,19 +1993,6 @@ public class WWGnlUtilities
                                            ex.toString(), 
                                            WWGnlUtilities.buildMessage("archive-composite"), 
                                            JOptionPane.ERROR_MESSAGE);
-           }
-           int resp = JOptionPane.showConfirmDialog(WWContext.getInstance().getMasterTopFrame(), 
-                                                    WWGnlUtilities.buildMessage("archiving-completed", new String[] { archiveName }), 
-                                                    WWGnlUtilities.buildMessage("archive-composite"), 
-                                                    JOptionPane.YES_NO_OPTION,
-                                                    JOptionPane.QUESTION_MESSAGE);
-           if (resp == JOptionPane.YES_OPTION)
-           {
-             try { Utilities.showFileSystem(archiveName.substring(0, archiveName.lastIndexOf(File.separator))); } 
-             catch (Exception e) 
-             {
-               e.printStackTrace();
-             }
            }
          }
       };
@@ -2890,6 +2900,23 @@ public class WWGnlUtilities
   private static void recurseFile(File f, ZipOutputStream zip, File rootDir) throws Exception
   {
     recurseFile(f, zip, rootDir, null);
+  }
+  
+  private final static int NBFILE_POS = 0;
+  private final static int NBDIR_POS  = 1;
+  private static int[] countFilesAndDir(File f, FilenameFilter fnf, int nbFile, int nbDir) throws Exception
+  {
+    int[] retVal = new int[] {nbFile, nbDir};
+    if (f.isDirectory())
+    {
+      retVal[NBDIR_POS]++;
+      File[] toCount = (fnf==null?f.listFiles():f.listFiles(fnf));
+      for (int i=0; i<toCount.length; i++)
+        retVal = countFilesAndDir(toCount[i], fnf, retVal[NBFILE_POS], retVal[NBDIR_POS]);
+    }
+    else
+      retVal[NBFILE_POS]++;
+    return retVal;
   }
   
   private static void recurseFile(File f, ZipOutputStream zip, File rootDir, FilenameFilter fnf) throws Exception
