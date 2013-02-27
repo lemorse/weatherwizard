@@ -291,7 +291,8 @@ public class GribPanel
             {
               String s = tzt.getSelectedTimeZoneData();
 //            System.out.println("Was [" + withLabelOnGribCheckBox.getText() + "], now [" + s +"]");
-              withLabelOnGribCheckBox.setText(s);
+              if (s != null)
+                withLabelOnGribCheckBox.setText(s);
             }
             WWContext.getInstance().fireTimeZoneForLabel(withLabelOnGribCheckBox.getText());
           }
