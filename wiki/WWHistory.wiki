@@ -11,7 +11,7 @@ This page takes over and replaces the one [http://donpedro.lediouris.net/softwar
 = Details =
 
 || *Date* || *Description* || *Impacted file(s)* ||
-|| 11-Mar-2013  || Added the json over http for the NMEA rebroadcasting. || desktop.jar, nmeareader.jar.jar ||
+|| 11-Mar-2013  || Added the json over http for the NMEA rebroadcasting. || desktop.jar, nmeareader.jar ||
 || 27-Feb-2013  || Fixed a minor time zone issue. || chartadjust.jar ||
 || 25-Feb-2013  || Added composite archiving feature. || chartadjust.jar ||
 || 11-Feb-2013  || GRIB Control Panel: added replay speed for the GRIB animation. Quite useful for the micro-patterns. || chartadjust.jar ||
