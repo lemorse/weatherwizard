@@ -1872,7 +1872,7 @@ public class CommandPanel
                   {
                     String newFileName = faxImage[i].fileName;
                     File f = new File(newFileName);
-                    String zipEntryName = "faxes/" + f.getName();
+                    String zipEntryName = "faxes/" + Integer.toString(i + 1) + "_" +  f.getName();
                     faxImage[i].fileName = WWContext.WAZ_PROTOCOL_PREFIX + zipEntryName; // TODO Suggest to delete the newly added files?
                     WWGnlUtilities.writeToArchive(out, f.getAbsolutePath(), zipEntryName);
                   }

@@ -2199,9 +2199,9 @@ public class WWGnlUtilities
               faxDirectory.mkdirs();
             String newFax = "";
             if (faxName.indexOf("/") > -1)
-              newFax = faxName.substring(faxName.lastIndexOf("/") + 1);
+              newFax = Integer.toString(i + 1) + "_" + faxName.substring(faxName.lastIndexOf("/") + 1);
             else
-             newFax = faxName.substring(faxName.lastIndexOf(File.separator) + 1); // Legacy
+              newFax = Integer.toString(i + 1) + "_" + faxName.substring(faxName.lastIndexOf(File.separator) + 1); // Legacy
     //      System.out.println("Copying " + faxName + " into " + newFax);
             FileInputStream fis = null;
             FileOutputStream fos = null;
