@@ -26,6 +26,26 @@ Its signature is
 {{{
     public static String findMostRecentFax(String pattern, String startPath) throws Exception
 }}}
+All the method you want to use with the {{{ serach: }}} protocol must take zero or more String(s) as parameters, return a String (containing the location of the file containing the resource), and possibly throwing an Exception.
+<br/>
+To know what method are available, check the {{{ chartview.util.SearchUtil }}} class in the source section.
+<br/>
+Or you can use javap:
+{{{
+  prompt> javap -cp chartadjust.jar chartview.util.SearchUtil
+  public class chartview.util.SearchUtil {
+  public static final java.lang.String SEARCH_PROTOCOL;
+  public chartview.util.SearchUtil();
+  public static java.util.List<java.lang.String> findMatchingFiles(java.lang.String, java.lang.String) throws java.lang.Exception;
+  public static java.lang.String findMostRecentFile(java.lang.String, java.lang.String) throws java.lang.Exception;
+  public static java.lang.String findMostRecentFax(java.lang.String, java.lang.String) throws java.lang.Exception;
+  public static java.util.List<java.lang.String> findMatchingSailmailFax(java.lang.String, java.lang.String) throws java.lang.Exception;
+  public static java.lang.String dynamicSearch(java.lang.String) throws java.lang.Exception;
+  public static void main(java.lang.String[]);
+  public static void main2(java.lang.String[]);
+  static {};
+}
+}}}
 
 == How to implement your own needs ==
 
