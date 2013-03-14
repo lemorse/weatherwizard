@@ -11,11 +11,16 @@ That's the kind of thing a computer is supposed to take care of.
 
 == What we have out of the box ==
 
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+If you check out the pattern of the *SailMail* directory, you will notice in the dynamic ones that the URLs of the faxes are quite cryptic.
+<br/>
+You would find things like this:
+{{{
+  search:chartview.util.SearchUtil.findMostRecentFax(".*500.*", "${fax.path}")
+}}}
 
 == How to implement your own needs ==
 
 _*That is the job of a Java programmer.*_
+<br/>
+If you are not a Java programmer..., maybe you know one. If you don't, then you need to be nice with me, and convince me that your needs will bring some good stuff to the soft ;0) .
+<br/>
