@@ -59,7 +59,7 @@ All the method you want to use with the {{{ search: }}} protocol must take zero 
 <br/>
 Write your implementation, i.e. {{{ my.search.stuff.SuperSearch }}}, and archive it into a jar-file that will be part of the classpath of the program.
 <br/>
-If the method you want to invoke the {{{ rockingSearch }} method from your pattern, all you need to do is to set the resource URL to
+If the method you want to invoke the {{{ rockingSearch }}} method from your pattern, all you need to do is to set the resource URL to
 {{{
   search:my.search.stuff.SuperSearch.rockingSearch("prm.one", "prm.two")
 }}}
