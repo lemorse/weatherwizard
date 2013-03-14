@@ -1,0 +1,17 @@
+#summary How to write your own search methods for the patterns
+
+= Implementing your own way to find resources =
+
+In shore, you can download faxes and GRIBs from the Internet.
+Wherever you don't have Internet access - like at sea - the resources you are interested in to build a Composite will very likely be on your disk.
+I had this exact problem during our [http://trip-2010-2011.lediouris.net 2010-2011 trip], the faxes and GRIBs were obtained through SailMail - and the SSB. Every time I wanted to visualize them in a Composite, I had to go and search the hard disk for the most recent fax of a given type, as many times as there was faxes in my Composite, and same for the GRIB... 
+Bummer.
+That's the kind of thing a computer is supposed to take care of.
+
+
+= Details =
+
+Add your content here.  Format your content with:
+  * Text in *bold* or _italic_
+  * Headings, paragraphs, and lists
+  * Automatic links to other wiki pages
