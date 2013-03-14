@@ -9,9 +9,13 @@ Bummer.
 That's the kind of thing a computer is supposed to take care of.
 
 
-= Details =
+== What we have out of the box ==
 
 Add your content here.  Format your content with:
   * Text in *bold* or _italic_
   * Headings, paragraphs, and lists
   * Automatic links to other wiki pages
+
+== How to implement your own needs ==
+
+_*That is the job of a Java programmer.*_
