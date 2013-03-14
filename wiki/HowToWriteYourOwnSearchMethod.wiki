@@ -66,3 +66,5 @@ If the method you want to invoke the {{{ rockingSearch }}} method from your patt
 ... assuming that the method takes 2 parameters.
 <br/>
 Good luck!
+<br/>
+If needed, Java programmer can ping <a href="mailto:olivier.lediouris@gmail.com">me</a> for details.
