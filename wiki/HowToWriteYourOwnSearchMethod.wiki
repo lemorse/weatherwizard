@@ -67,4 +67,4 @@ If the method you want to invoke the {{{ rockingSearch }}} method from your patt
 <br/>
 Good luck!
 <br/>
-If needed, Java programmer can ping [mailto:olivier.lediouris@gmail.com me] for details.
+If needed, Java programmers can ping [mailto:olivier.lediouris@gmail.com me] for details.
