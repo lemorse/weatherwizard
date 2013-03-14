@@ -17,6 +17,10 @@ You would find things like this:
 {{{
   search:chartview.util.SearchUtil.findMostRecentFax(".*500.*", "${fax.path}")
 }}}
+You need to notice several things:
+  * the prefix (protocoil ?) "search:"
+  * {{{ chartview.util.SearchUtil.findMostRecentFax(".*500.*", "${fax.path}") }}} that you can identify as a java method in its class, invoked with some parameters.
+
 
 == How to implement your own needs ==
 
