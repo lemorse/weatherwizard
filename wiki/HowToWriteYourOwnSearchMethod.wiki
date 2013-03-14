@@ -21,6 +21,10 @@ You need to notice several things:
   * the prefix (protocol ?) {{{search:}}}
   * {{{ chartview.util.SearchUtil.findMostRecentFax(".*500.*", "${fax.path}") }}} that you can identify as a java method in its class, invoked with some parameters.
 In the software, there is a Java class named {{{ chartview.util.SearchUtil }}}, in which lives the {{{ findMostRecentFax }}} method, that takes two *String* parameters, and returns the location - as a String - of the file containing the expected resource.
+<br/>
+Its signature is
+    public static String findMostRecentFax(String pattern, String startPath) throws Exception
+
 
 == How to implement your own needs ==
 
