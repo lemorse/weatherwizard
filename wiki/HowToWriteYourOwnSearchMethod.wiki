@@ -26,7 +26,7 @@ Its signature is
 {{{
     public static String findMostRecentFax(String pattern, String startPath) throws Exception
 }}}
-All the method you want to use with the {{{ search: }}} protocol must take zero or more String(s) as parameters, return a String (containing the location of the file containing the resource), and possibly throwing an Exception.
+All the methods you want to use with the {{{ search: }}} protocol must take zero or more String(s) as parameters, return a String (containing the location of the file containing the resource), and possibly throwing an Exception.
 <br/>
 To know what methods are available, check the {{{ chartview.util.SearchUtil }}} class in the source section.
 <br/>
@@ -55,7 +55,7 @@ Anyhow, here is the way to proceed.
 <br/>
 *Remember:*
 <br/>
-All the method you want to use with the {{{ search: }}} protocol must take zero or more String(s) as parameters, return a String (containing the location of the file containing the resource), and possibly throwing an Exception.
+All the methods you want to use with the {{{ search: }}} protocol must take zero or more String(s) as parameters, return a String (containing the location of the file containing the resource), and possibly throwing an Exception.
 <br/>
 Write your implementation, i.e. {{{ my.search.stuff.SuperSearch }}}, and archive it into a jar-file that will be part of the classpath of the program.
 <br/>
