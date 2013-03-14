@@ -20,15 +20,15 @@ You would find things like this:
 You need to notice several things:
   * the prefix (protocol ?) {{{search:}}}
   * {{{ chartview.util.SearchUtil.findMostRecentFax(".*500.*", "${fax.path}") }}} that you can identify as a java method in its class, invoked with some parameters.
-In the software, there is a Java class named {{{ chartview.util.SearchUtil }}}, in which lives the {{{ findMostRecentFax }}} method, that takes two *String* parameters, and returns the location - as a String - of the file containing the expected resource.
+In the software, there is a Java class named {{{ chartview.util.SearchUtil }}}, in which lives the {{{ findMostRecentFax }}} *static* method, that takes two *String* parameters, and returns the location - as a String - of the file containing the expected resource.
 <br/>
 Its signature is
 {{{
     public static String findMostRecentFax(String pattern, String startPath) throws Exception
 }}}
-All the method you want to use with the {{{ serach: }}} protocol must take zero or more String(s) as parameters, return a String (containing the location of the file containing the resource), and possibly throwing an Exception.
+All the method you want to use with the {{{ search: }}} protocol must take zero or more String(s) as parameters, return a String (containing the location of the file containing the resource), and possibly throwing an Exception.
 <br/>
-To know what method are available, check the {{{ chartview.util.SearchUtil }}} class in the source section.
+To know what methods are available, check the {{{ chartview.util.SearchUtil }}} class in the source section.
 <br/>
 Or you can use javap:
 {{{
@@ -41,8 +41,6 @@ Or you can use javap:
   public static java.lang.String findMostRecentFax(java.lang.String, java.lang.String) throws java.lang.Exception;
   public static java.util.List<java.lang.String> findMatchingSailmailFax(java.lang.String, java.lang.String) throws java.lang.Exception;
   public static java.lang.String dynamicSearch(java.lang.String) throws java.lang.Exception;
-  public static void main(java.lang.String[]);
-  public static void main2(java.lang.String[]);
   static {};
 }
 }}}
@@ -53,3 +51,18 @@ _*That is the job of a Java programmer.*_
 <br/>
 If you are not a Java programmer..., maybe you know one. If you don't, then you need to be nice with me, and convince me that your needs will bring some good stuff to the soft ;0) .
 <br/>
+Anyhow, is is the way to proceed.
+<br/>
+*Remember:*
+<br/>
+All the method you want to use with the {{{ search: }}} protocol must take zero or more String(s) as parameters, return a String (containing the location of the file containing the resource), and possibly throwing an Exception.
+<br/>
+Write your implementation, i.e. {{{ my.search.stuff.SuperSearch }}}, and archive it into a jar-file that will be part of the classpath of the program.
+<br/>
+If the method you want to invoke the {{{ rockingSearch }} method from your pattern, all you need to do is to set the resource URL to
+{{{
+  search:my.search.stuff.SuperSearch.rockingSearch("prm.one", "prm.two")
+}}}
+... assuming that the method takes 2 parameters.
+<br/>
+Good luck!
