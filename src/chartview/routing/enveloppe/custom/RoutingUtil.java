@@ -1226,7 +1226,12 @@ public class RoutingUtil
               File f = new File("routing/googlemaprouting.html");
               if (f.exists())
               {
-                String whatToOpen = f.toURI().toURL().toString() + "?data=" + new File(fileOutput).toURI().toURL().toString();
+                BufferedWriter bwjs = new BufferedWriter(new FileWriter("routing" + File.separator + "routing.js"));              
+                bwjs.write("var routing = " + clipboardContent + "\n");
+                bwjs.close();                
+                
+//              String whatToOpen = f.toURI().toURL().toString() + "?data=" + new File(fileOutput).toURI().toURL().toString();
+                String whatToOpen = f.toURI().toURL().toString();
                 System.out.println("Opening:" + whatToOpen);
                 try
                 {
