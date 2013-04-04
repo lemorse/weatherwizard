@@ -218,8 +218,8 @@ public class SearchUtil
 //    Class<?>[] parameterTypes = new Class<?>[2];
 //    parameterTypes[0] = String.class;
 //    parameterTypes[1] = String.class;
-        @SuppressWarnings("unchecked")
-      Method method = c.getDeclaredMethod(methodName, (Class<?>)String.class, (Class<?>)String.class); // Assume 2 String prms.
+      @SuppressWarnings("unchecked")
+      Method method = c.getDeclaredMethod(methodName, (Class<?>)String.class, (Class<?>)String.class); // Assume 2 String prms. TODO Make it more flexible.
 //    Method method = c.getDeclaredMethod(methodName, parameterTypes); // Assume 2 String prms.
       Object[] argList = new Object[prm.length];
       for (int i=0; i<prm.length; i++)
