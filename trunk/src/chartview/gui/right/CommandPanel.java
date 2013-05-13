@@ -83,14 +83,19 @@ import java.io.InputStream;
 
 import java.lang.reflect.InvocationTargetException;
 
+import java.text.SimpleDateFormat;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.ConcurrentModificationException;
 import java.util.Date;
 import java.util.EventObject;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -383,6 +388,12 @@ public class CommandPanel
   private String tzForDateDisplay = "Etc/UTC";
 
   private long replayDelay = 500L;
+  
+  private final static SimpleDateFormat COMPOSITE_SDF = new SimpleDateFormat("dd-MMM-yyyy HH:mm 'UTC'");
+//static { COMPOSITE_SDF.setTimeZone(TimeZone.getTimeZone("etc/UTC")); }
+  
+  private Map<String, String> compositeDate = null;
+  private boolean withCompositeDate = false;
   
   public boolean isBusy() // Is there a Composite in the panel?
   {
@@ -904,6 +915,7 @@ public class CommandPanel
     if (checkBoxPanelOption == CHECKBOX_OPTION)
     {
       compositeCheckBox = new JCheckBox[nbFaxes + EXTRA_CHECK_BOXES + (wgd!=null?1:0)];
+      compositeRadioButton = null;
     }
     if (checkBoxPanelOption == RADIOBUTTON_OPTION)
     {
@@ -2998,7 +3010,7 @@ public class CommandPanel
             if (b) // Start
             {
               nmeaPollingInterval = ((Integer) ParamPanel.data[ParamData.NMEA_POLLING_FREQ][ParamData.VALUE_INDEX]).intValue();
-              final boolean KEEP_LOOPING = false; // Will get the positions only once if set to false. Polling becomes useless.
+              final boolean KEEP_LOOPING = true; // Will get the positions only once if set to false. Polling becomes useless.
               nmeaThread = new Thread("nmea-data-thread")
               {
                 public void run()
@@ -3008,6 +3020,8 @@ public class CommandPanel
                     WWContext.getInstance().fireLogging("Starting NMEA Thread\n");
                     while (goNmea)
                     {
+                      WWContext.getInstance().fireLogging("Top of the Position Thread\n");
+                      System.out.println("Top of the Position Thread.");
                       WWGnlUtilities.BoatPosition bp = null;
                       // Read here
                       try
@@ -3020,6 +3034,7 @@ public class CommandPanel
                         catch (HTTPClient.NMEAServerException nse)
                         {
                           System.err.println("NMEA HTTP Server must be down. Trying Serial port");
+                          WWContext.getInstance().fireLogging(". NMEA HTTP Server must be down. Trying Serial port\n");
                           try
                           {
                             bp = WWGnlUtilities.getSerialBoatPosition(); // Try Serial port
@@ -3028,6 +3043,7 @@ public class CommandPanel
                           catch (Exception serialEx)
                           {
                             System.err.println("Cannot read Serial port either.\nStopping Serial Port reading, trying TCP");
+                            WWContext.getInstance().fireLogging(". Cannot read Serial port either.\nStopping Serial Port reading, trying TCP\n");
                             try
                             {
                               bp = WWGnlUtilities.getTCPBoatPosition(); // Try TCP
@@ -3036,6 +3052,7 @@ public class CommandPanel
                             catch (Exception tcpEx)
                             {
                               System.err.println("Cannot read TCP port either.\nStopping TCP Port reading, trying UDP");
+                              WWContext.getInstance().fireLogging(". Cannot read TCP port either.\nStopping TCP Port reading, trying UDP\n");
                               try
                               {
                                 bp = WWGnlUtilities.getUDPBoatPosition(); // Try UDP
@@ -3044,6 +3061,7 @@ public class CommandPanel
                               catch (Exception udpEx)
                               {
                                 System.err.println("Cannot read UDP port either.\nStopping UDP Port reading, trying GPSd");
+                                WWContext.getInstance().fireLogging(". Cannot read UDP port either.\ntopping UDP Port reading, trying GPSd");
                                 try
                                 {
                                   bp = WWGnlUtilities.getGPSdBoatPosition(); // Try GPSd
@@ -3053,7 +3071,9 @@ public class CommandPanel
                                 {
                                   String mess = "Cannot read GPSd port either.\nStopping GPSd Port reading, switch to manual entry";
                                   System.err.println(mess);
+                                  WWContext.getInstance().fireLogging(mess + "\n");
                                   WWGnlUtilities.getManualBoatPosition();
+                                  goNmea = false;
                                 }
                               }
                             }
@@ -3087,20 +3107,27 @@ public class CommandPanel
 //                        JOptionPane.showMessageDialog(instance, "No NMEA Data found.\nPlease try manual input.", "Position Input", JOptionPane.WARNING_MESSAGE);
 //                      }
 
-                      if (KEEP_LOOPING) // Wait and re-read
+                      if (KEEP_LOOPING && goNmea) // Wait and re-read
                       {
-                        try { this.wait((long)nmeaPollingInterval * 1000L); }
-                        catch (Exception ignore)
+                        nmeaPollingInterval = ((Integer) ParamPanel.data[ParamData.NMEA_POLLING_FREQ][ParamData.VALUE_INDEX]).intValue();
+                        if (nmeaPollingInterval > 0)
                         {
-                          WWContext.getInstance().fireLogging("oops\n");
-                          System.out.println(ignore.getMessage());
+                          try { this.wait((long)nmeaPollingInterval * 1000L); }
+                          catch (Exception ignore)
+                          {
+                            WWContext.getInstance().fireLogging("oops\n");
+                            System.out.println(ignore.getMessage());
+                          }
                         }
+                        else
+                          goNmea = false;
                       }
                       else
                         goNmea = false; // then exit, instead of re-looping
 
                     }
                     WWContext.getInstance().fireLogging("End of NMEA Thread\n");
+                    System.out.println("End of NMEA Thread");
                   }
                 }
               };
@@ -3559,6 +3586,15 @@ public class CommandPanel
             chartPanel.repaint();
           }
         }
+        
+        public void setWithCompositeDocumentDate(boolean b)
+        {
+          if (instance.isVisible())
+          {
+            withCompositeDate = b;
+            chartPanel.repaint();
+          }
+        }
       };
 
     WWContext.getInstance().addApplicationListener(ael);
@@ -3779,6 +3815,31 @@ public class CommandPanel
     }
   }
 
+  private boolean isDisplayed(int i)
+  {
+    int idx = 0;
+    if (faxImage != null && faxImage[0] != null && (faxImage[0].faxOrigin.startsWith(WWContext.INTERNAL_RESOURCE_PREFIX) || faxImage[0].faxOrigin.startsWith(WWContext.EXTERNAL_RESOURCE_PREFIX)))
+      idx = 1;
+
+    boolean b = false;
+    if (compositeRadioButton != null && compositeRadioButton[i -idx] != null)
+    {
+//      for (JRadioButton rb : compositeRadioButton)
+//        System.out.println("RB " + rb.getToolTipText() + ":" + (rb.isSelected() ? "yes" : "no"));
+      b = compositeRadioButton[i - idx].isSelected();
+    }
+    else if (compositeCheckBox != null && compositeCheckBox[i] != null)
+    {
+//      for (JCheckBox cb : compositeCheckBox)
+//      {
+//        if (cb != null)
+//          System.out.println("CB " + cb.getToolTipText() + ":" + (cb.isSelected() ? "yes" : "no"));
+//      }
+      b = compositeCheckBox[i].isSelected();
+    }
+    return b;
+  }
+      
   private static int getDataIndexOf(String str)
   {
     int idx = 0;
@@ -4178,6 +4239,31 @@ public class CommandPanel
     g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
 
     chartPanel.setCleanFirst(true);
+
+    // For date display
+    if (faxImage != null)
+    {
+      compositeDate = new HashMap<String, String>();
+      for (int i=0; i<faxImage.length; i++)
+      {
+        if (faxImage[i] != null && 
+            (!faxImage[i].faxOrigin.startsWith(WWContext.INTERNAL_RESOURCE_PREFIX) && !faxImage[i].faxOrigin.startsWith(WWContext.EXTERNAL_RESOURCE_PREFIX)) && 
+            isDisplayed(i))
+        {
+          // The date in the waz is GMT
+//        Calendar cal = GregorianCalendar.getInstance(TimeZone.getTimeZone("etc/UTC")); 
+          Calendar cal = GregorianCalendar.getInstance();
+          cal.setTimeInMillis(faxImage[i].created);
+       // Set the time zone on the mask here
+          if (faxImage[i].fileName.startsWith(WWContext.WAZ_PROTOCOL_PREFIX))
+            COMPOSITE_SDF.setTimeZone(TimeZone.getTimeZone("etc/UTC"));
+          else
+            COMPOSITE_SDF.setTimeZone(TimeZone.getDefault());
+       // System.out.println("Fax " + faxImage[i].faxTitle + ", created " + COMPOSITE_SDF.format(cal.getTime())); // + " (" + faxImage[i].created + ")");
+          compositeDate.put(faxImage[i].faxTitle, COMPOSITE_SDF.format(cal.getTime()));
+        }
+      }
+    }
 
     // If there was any opaque faxes, then draw the grid again
     if (thereIsAnOpaqueFax() && chartPanel.isWithGrid())
@@ -4742,6 +4828,44 @@ public class CommandPanel
         g2d.setTransform(origTx);
       }
     }
+    // Fax dates
+    if (withCompositeDate)
+    {
+      if (compositeDate != null)
+      {
+        Font f = gr.getFont();
+        gr.setFont(f.deriveFont(Font.BOLD));
+        Set<String> key = compositeDate.keySet();
+        if (key.size() > 0)
+        {
+          String[][] data = new String[key.size()][2];
+          int idx = 0;
+          for (String k : key)
+          {
+            data[idx][0] = k;
+            data[idx][1] = compositeDate.get(k);
+            idx++;
+          }
+          int x = (int)chartPanel.getVisibleRect().getX();
+          int y = (int)chartPanel.getVisibleRect().getY();    
+          gr.setColor(Color.white);        
+          y += 5;
+          Utilities.drawPanelTable(data, 
+                                   gr, 
+                                   new Point(x + 40, y + 5 + gr.getFont().getSize() + 2), 
+                                   10, 
+                                   2, 
+                                   new int[] { Utilities.LEFT_ALIGNED, Utilities.LEFT_ALIGNED }, 
+                                   true, 
+                                   Color.cyan,
+                                   Color.blue,
+                                   0.35f,
+                                   0.9f);        
+        }
+        gr.setFont(f);
+      }
+    }
+    
     // Reset transparency
     alpha = 1.0f;
     g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
@@ -7269,6 +7393,7 @@ public class CommandPanel
     public int imageHOffset = 0;
     public int imageVOffset = 0;
     public double imageRotationAngle = 0D;
+    public long created = 0L;
 
     protected FaxImage clone() throws CloneNotSupportedException
     {

@@ -56,6 +56,8 @@ public class ChartCommandPanelToolBar
   private JRadioButton crossRadioButton = new JRadioButton();
   private JRadioButton pencilRadioButton = new JRadioButton();
   private JRadioButton arrowRadioButton = new JRadioButton();
+
+  private JCheckBox documentDate = new JCheckBox();
   
   private JButton expandCollapseControlButton = new JButton();
   private JButton scrollThruOpenTabsButton = new JButton();
@@ -230,6 +232,8 @@ public class ChartCommandPanelToolBar
     radioButtonHolder.add(crossRadioButton, null);
     radioButtonHolder.add(pencilRadioButton, null);
     radioButtonHolder.add(arrowRadioButton, null);
+    
+    radioButtonHolder.add(documentDate, null);
 
     buttonGroup.add(ddRadioButton);
     buttonGroup.add(grabRadioButton);
@@ -248,6 +252,9 @@ public class ChartCommandPanelToolBar
     crossRadioButton.setText("<html><img src='" + this.getClass().getResource("img/ch.png").toString() + "'></html>");
     pencilRadioButton.setText("<html><img src='" + ChartPanel.class.getResource("crayon.16x16.png").toString() + "'></html>");
     arrowRadioButton.setText("<html><img src='" + this.getClass().getResource("img/arrow.png").toString() + "'></html>");
+    
+    documentDate.setText(WWGnlUtilities.buildMessage("with-date"));
+    documentDate.setToolTipText(WWGnlUtilities.buildMessage("with-date-tt"));
 
     ddRadioButton.setToolTipText(WWGnlUtilities.buildMessage("set-to-dd"));
     grabRadioButton.setToolTipText(WWGnlUtilities.buildMessage("set-to-gs"));
@@ -290,6 +297,14 @@ public class ChartCommandPanelToolBar
           newCursorSelected();
         }
       });
+        
+    documentDate.addActionListener(new ActionListener()
+       {
+         public void actionPerformed(ActionEvent e)
+         {
+           WWContext.getInstance().fireSetWithCompositeDocumentDate(documentDate.isSelected());
+         }
+       });
     this.validate();
   }
 

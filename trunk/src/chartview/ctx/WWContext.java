@@ -1151,6 +1151,13 @@ public class WWContext
     for (ApplicationEventListener l : WWContext.getInstance().getListeners())
       l.setReplayDelay(i);
   }  
+  
+  public void fireSetWithCompositeDocumentDate(boolean b)
+  {
+    for (ApplicationEventListener l : WWContext.getInstance().getListeners())
+      l.setWithCompositeDocumentDate(b);
+  }  
+
     
   public void setUseGRIBWindSpeedTransparency(Boolean useGRIBWindSpeedTransparency)
   {

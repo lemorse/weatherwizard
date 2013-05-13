@@ -30,7 +30,9 @@ public class WW_NMEAReader
   private BoatPositionClient parent = null;
   
   CustomNMEAClient nmeaClient = null;
-
+  /*
+   * Serial
+   */
   public WW_NMEAReader(boolean v,
                        BoatPositionClient parent,
                        String serial,
@@ -49,7 +51,10 @@ public class WW_NMEAReader
       e.printStackTrace();
     }
   }
-
+  
+  /*
+   * UDP/TCP
+   */
   public WW_NMEAReader(boolean v,
                        BoatPositionClient parent,
                        int option,
@@ -57,6 +62,7 @@ public class WW_NMEAReader
                        String hostName)
   {
     this.verbose = v;
+    System.setProperty("verbose", (verbose?"true":"false"));
     this.parent = parent;
     this.option = option;
     this.hostName = hostName;
@@ -98,8 +104,7 @@ public class WW_NMEAReader
       {
         System.out.println("Nothing to read, exiting.");
         System.exit(1);
-      }
-      
+      }      
     }
     catch(Exception e)
     {
@@ -194,11 +199,13 @@ public class WW_NMEAReader
         ex.printStackTrace();
       }
     }
+    else if (verbose)
+      System.out.println("... Chain " + chainID + ", dropped");
     try
     {
       if (parent != null && bp != null)
       {
-//      System.out.println("Sending result back to top.");
+        System.out.println(this.getClass().getName() + ", sending Boat Position back to top.");
         parent.setBoatPosition(bp);
       }
     }

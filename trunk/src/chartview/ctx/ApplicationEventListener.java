@@ -241,4 +241,5 @@ public abstract class ApplicationEventListener implements EventListener
   public void setTimeZoneForLabel(String tz) {}
 
   public void setReplayDelay(int i) {}
+  public void setWithCompositeDocumentDate(boolean b) {}
 }
