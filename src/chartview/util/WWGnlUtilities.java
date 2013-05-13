@@ -3887,12 +3887,12 @@ public class WWGnlUtilities
   
   public static BoatPosition getTCPBoatPosition() throws Exception
   {
-    BoatPositionTCPClient bptc = new BoatPositionTCPClient();
-    int nbTry = 0;
-    while (bptc.getBoatPosition() == null && bptc.allIsOk() && nbTry++ < 5)
-    {
-      try { Thread.sleep(1000L); } catch (Exception ex) {}
-    }
+    BoatPositionTCPClient bptc = new BoatPositionTCPClient(false);
+//    int nbTry = 0;
+//    while (bptc.getBoatPosition() == null && bptc.allIsOk() && nbTry++ < 5)
+//    {
+//      try { Thread.sleep(1000L); } catch (Exception ex) {}
+//    }
     if (bptc.allIsOk())
     {
       if (bptc.getBoatPosition() != null)

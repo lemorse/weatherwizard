@@ -85,6 +85,7 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
 import user.util.GeomUtil;
+import user.util.TimeUtil;
 
 public class CommandPanelUtils
 {
@@ -812,8 +813,16 @@ public class CommandPanelUtils
       }
       if (archiveRequired) // Archive here if necessary
       {
-  //      System.out.println("Archiving " + fileName);
+  //    System.out.println("Archiving " + fileName);
         boolean autoDownloadAndSave = fileName != null && !update;
+        for (int i=0; cp.getFaxImage() !=null && i<cp.getFaxImage().length; i++)
+        {
+          if (cp.getFaxImage()[i].faxOrigin.startsWith(SearchUtil.SEARCH_PROTOCOL)) // 2013-APR-14. 
+          {
+            autoDownloadAndSave = false;
+            break;
+          }
+        }
         WWGnlUtilities.archiveComposite(fileName, autoDownloadAndSave);
         WWContext.getInstance().fireReloadCompositeTree();
         WWContext.getInstance().fireReloadFaxTree();
@@ -1083,7 +1092,7 @@ public class CommandPanelUtils
               else // Non HTTP protocols
               {
                 // Non http protocols!
-                if (url.startsWith(SearchUtil.SEARCH_PROTOCOL)) // (local search, for SailMail)
+                if (url.startsWith(SearchUtil.SEARCH_PROTOCOL)) // (local search, for SailMail and similar)
                 {
                   // Parse Expression, like search:chartview.util.SearchUtil.findMostRecentFax(pattern, rootPath)
                   faxName = SearchUtil.dynamicSearch(url);
@@ -1196,6 +1205,10 @@ public class CommandPanelUtils
               cp.getFaxImage()[i].imageVOffset = imageVOffset;
               cp.getFaxImage()[i].imageRotationAngle = imageRotation;
               cp.getFaxImage()[i].comment = WWGnlUtilities.getHeader(faxName);
+           // int gmtOffset = 0;
+           // if (!cp.getFaxImage()[i].fileName.startsWith(WWContext.WAZ_PROTOCOL_PREFIX))
+           //   gmtOffset = TimeUtil.getLocalGMTOffset(); // Local
+              cp.getFaxImage()[i].created = (new File(faxName).lastModified()); // - (gmtOffset * 3600000L);
               String faxOrigin = "";
               try { faxOrigin = ((XMLElement)fax.selectNodes("./dynamic-resource").item(0)).getAttribute("url") ; }
               catch (Exception ignore) { ignore.printStackTrace(); }
@@ -1855,6 +1868,11 @@ public class CommandPanelUtils
               cp.getFaxImage()[i].imageVOffset = imageVOffset;
               cp.getFaxImage()[i].imageRotationAngle = imageRotation;
               cp.getFaxImage()[i].comment = WWGnlUtilities.getHeader(faxName);
+//            int gmtOffset = 0;
+//            if (!cp.getFaxImage()[i].fileName.startsWith(WWContext.WAZ_PROTOCOL_PREFIX))
+//              gmtOffset = TimeUtil.getLocalGMTOffset(); // Local
+              cp.getFaxImage()[i].created = (new File(faxName).lastModified()); // - (gmtOffset * 3600000L);
+
               cp.getFaxImage()[i].show = true;
               if (strTransparent == null || strTransparent.trim().length() == 0)
                 cp.getFaxImage()[i].transparent = true;
@@ -1873,6 +1891,7 @@ public class CommandPanelUtils
                   if (faxName.startsWith(WWContext.WAZ_PROTOCOL_PREFIX))
                     faxName = faxName.substring(WWContext.WAZ_PROTOCOL_PREFIX.length());
                   InputStream is = waz.getInputStream(waz.getEntry(faxName));
+                  cp.getFaxImage()[i].created = waz.getEntry(faxName).getTime();
                   boolean tif = faxName.toUpperCase().endsWith(".TIFF") || faxName.toUpperCase().endsWith(".TIF");
                   if (cp.getFaxImage()[i].transparent)
                   {
