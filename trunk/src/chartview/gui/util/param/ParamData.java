@@ -92,8 +92,9 @@ public class ParamData
   public final static int PLAY_SOUND_ON_JOB_COMPLETION   = 77;
   public final static int TRY_TO_AVOID_LAND              = 78;
   public final static int STOP_ROUTING_WHEN_CLOSER_TO    = 79;
+  public final static int NMEA_FALLBACK_TIMEOUT          = 80;
 
-  public final static int NB_PRFERENCES         = 80; 
+  public final static int NB_PRFERENCES         = 81; 
   
   private final static String[] labels = 
   { 
@@ -176,7 +177,8 @@ public class ParamData
     WWGnlUtilities.buildMessage("anemometer-hand-option"),
     WWGnlUtilities.buildMessage("play-sound-on-job-completion"),
     WWGnlUtilities.buildMessage("avoid-land"),
-    WWGnlUtilities.buildMessage("routing-completed-below")
+    WWGnlUtilities.buildMessage("routing-completed-below"),
+    WWGnlUtilities.buildMessage("nmea-fallback-timeout")
   };
 
   private final static String[] helptext = 
@@ -260,7 +262,8 @@ public class ParamData
     WWGnlUtilities.buildMessage("help-anemometer-hand-option"),
     WWGnlUtilities.buildMessage("help-play-sound-on-job-completion"),
     WWGnlUtilities.buildMessage("help-avoid-land"),
-    WWGnlUtilities.buildMessage("help-routing-completed-below")
+    WWGnlUtilities.buildMessage("help-routing-completed-below"),
+    WWGnlUtilities.buildMessage("help-nmea-fallback-timeout")
   };
     
   public static String[] getLabels()
