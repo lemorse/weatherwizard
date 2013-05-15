@@ -2,6 +2,9 @@ package chartview.util.nmeaclient;
 
 import astro.calc.GeoPoint;
 
+import chartview.gui.util.param.ParamData;
+import chartview.gui.util.param.ParamPanel;
+
 import chartview.util.WWGnlUtilities;
 
 import java.io.File;
@@ -11,7 +14,7 @@ import java.io.File;
 import nmea.server.NMEAEventManager;
 import nmea.server.datareader.CustomNMEAClient;
 
-import ocss.nmea.api.NMEAEvent;
+// import ocss.nmea.api.NMEAEvent;
 import ocss.nmea.parser.RMC;
 import ocss.nmea.parser.StringParsers;
 
@@ -112,10 +115,11 @@ public class WW_NMEAReader
     }
   }
 
+  /* Serial */
   private void read(String port, int br)
   {
-    System.out.println("Reading Serial port...");
-    long timeout = 5000L; // TODO Config Parameter
+    long timeout = 1000L * ((Integer) ParamPanel.data[ParamData.NMEA_FALLBACK_TIMEOUT][ParamData.VALUE_INDEX]).intValue();
+    System.out.println("Reading Serial port... (timeout " + timeout + ")");
     nmeaClient = new CustomNMEAClient(this, port, br, timeout)
       {
         public void manageNMEAError(Throwable t)
@@ -129,6 +133,7 @@ public class WW_NMEAReader
       };
   }
 
+  /* TCP/UDP */
   private void read(int port, String host, int option)
   {
     if (option == CustomNMEAClient.TCP_OPTION)

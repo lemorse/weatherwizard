@@ -145,6 +145,9 @@ public final class ParamPanel
       case ParamData.NMEA_POLLING_FREQ:
         it = new Integer(60);
         break;
+      case ParamData.NMEA_FALLBACK_TIMEOUT:
+        it = new Integer(60);
+        break;
       case ParamData.POLAR_FILE_LOC:
         it = new DataFile(new String[] {"xml", "polar-coeff"}, WWGnlUtilities.buildMessage("polars"), "." + File.separator + "polars" + File.separator + "polars.xml");
         break;
@@ -436,6 +439,7 @@ public final class ParamPanel
                        i == ParamData.UDP_PORT ||  
                        i == ParamData.GPSD_PORT ||  
                        i == ParamData.NMEA_POLLING_FREQ ||
+                       i == ParamData.NMEA_FALLBACK_TIMEOUT ||
                        i == ParamData.CHART_LINE_THICK ||
                        i == ParamData.AVOID_TWS_GT ||
                        i == ParamData.AVOID_TWA_LT || 
@@ -582,6 +586,7 @@ public final class ParamPanel
         ParamData.GPSD_PORT,
         ParamData.NMEA_HOST,
         ParamData.NMEA_POLLING_FREQ, 
+        ParamData.NMEA_FALLBACK_TIMEOUT,
         ParamData.POLAR_FILE_LOC, 
         ParamData.ROUTING_STEP, 
         ParamData.ROUTING_FORK_WIDTH, 
@@ -727,6 +732,7 @@ public final class ParamPanel
           if (currentIndex == ParamData.ROUTING_STEP ||
               currentIndex == ParamData.ROUTING_FORK_WIDTH ||
               currentIndex == ParamData.NMEA_POLLING_FREQ ||
+              currentIndex == ParamData.NMEA_FALLBACK_TIMEOUT ||
               currentIndex == ParamData.CHART_LINE_THICK ||
               currentIndex == ParamData.AVOID_TWS_GT ||
               currentIndex == ParamData.AVOID_TWA_LT ||
