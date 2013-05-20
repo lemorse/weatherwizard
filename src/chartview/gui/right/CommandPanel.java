@@ -923,7 +923,8 @@ public class CommandPanel
 
       for (int i=0; i<nbFaxes; i++)
       {
-        if (faxes[i].getOrigin().startsWith(WWContext.INTERNAL_RESOURCE_PREFIX) || faxes[i].getOrigin().startsWith(WWContext.EXTERNAL_RESOURCE_PREFIX))
+        if (faxes[i].getOrigin().startsWith(WWContext.INTERNAL_RESOURCE_PREFIX) || 
+            faxes[i].getOrigin().startsWith(WWContext.EXTERNAL_RESOURCE_PREFIX))
           ecb++;
       }
       compositeCheckBox = new JCheckBox[EXTRA_CHECK_BOXES + ecb + (wgd!=null?1:0)];
@@ -937,7 +938,9 @@ public class CommandPanel
     {
       if (faxes[i] == null)
         continue;
-      if (checkBoxPanelOption == CHECKBOX_OPTION || faxes[i].getOrigin().startsWith(WWContext.INTERNAL_RESOURCE_PREFIX) || faxes[i].getOrigin().startsWith(WWContext.EXTERNAL_RESOURCE_PREFIX))
+      if (checkBoxPanelOption == CHECKBOX_OPTION || 
+          faxes[i].getOrigin().startsWith(WWContext.INTERNAL_RESOURCE_PREFIX) || 
+          faxes[i].getOrigin().startsWith(WWContext.EXTERNAL_RESOURCE_PREFIX))
       {
         compositeCheckBox[nbCB] = new JCheckBox("");
         compositeCheckBox[nbCB].setBackground(faxes[i].getColor());
@@ -970,7 +973,9 @@ public class CommandPanel
                                                     new Insets(5, 5, 5, 5), 0, 0));
         nbCB++;
       }
-      if (checkBoxPanelOption == RADIOBUTTON_OPTION && !faxes[i].getOrigin().startsWith(WWContext.INTERNAL_RESOURCE_PREFIX) && !faxes[i].getOrigin().startsWith(WWContext.EXTERNAL_RESOURCE_PREFIX))
+      if (checkBoxPanelOption == RADIOBUTTON_OPTION && 
+          !faxes[i].getOrigin().startsWith(WWContext.INTERNAL_RESOURCE_PREFIX) && 
+          !faxes[i].getOrigin().startsWith(WWContext.EXTERNAL_RESOURCE_PREFIX))
       {
         compositeRadioButton[nbRB] = new JRadioButton("");
         compositeRadioButton[nbRB].setBackground(faxes[i].getColor());
@@ -3818,7 +3823,10 @@ public class CommandPanel
   private boolean isDisplayed(int i)
   {
     int idx = 0;
-    if (faxImage != null && faxImage[0] != null && (faxImage[0].faxOrigin.startsWith(WWContext.INTERNAL_RESOURCE_PREFIX) || faxImage[0].faxOrigin.startsWith(WWContext.EXTERNAL_RESOURCE_PREFIX)))
+    if (faxImage != null && 
+        faxImage[0] != null && 
+        (faxImage[0].faxOrigin.startsWith(WWContext.INTERNAL_RESOURCE_PREFIX) || 
+         faxImage[0].faxOrigin.startsWith(WWContext.EXTERNAL_RESOURCE_PREFIX)))
       idx = 1;
 
     boolean b = false;
@@ -4247,8 +4255,9 @@ public class CommandPanel
       for (int i=0; i<faxImage.length; i++)
       {
         if (faxImage[i] != null && 
-            (!faxImage[i].faxOrigin.startsWith(WWContext.INTERNAL_RESOURCE_PREFIX) && !faxImage[i].faxOrigin.startsWith(WWContext.EXTERNAL_RESOURCE_PREFIX)) && 
-            isDisplayed(i))
+            (!faxImage[i].faxOrigin.startsWith(WWContext.INTERNAL_RESOURCE_PREFIX) && 
+             !faxImage[i].faxOrigin.startsWith(WWContext.EXTERNAL_RESOURCE_PREFIX)) && 
+             isDisplayed(i))
         {
           // The date in the waz is GMT
 //        Calendar cal = GregorianCalendar.getInstance(TimeZone.getTimeZone("etc/UTC")); 

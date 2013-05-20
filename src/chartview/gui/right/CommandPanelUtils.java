@@ -817,13 +817,13 @@ public class CommandPanelUtils
         boolean autoDownloadAndSave = fileName != null && !update;
         for (int i=0; cp.getFaxImage() !=null && i<cp.getFaxImage().length; i++)
         {
-          if (cp.getFaxImage()[i].faxOrigin.startsWith(SearchUtil.SEARCH_PROTOCOL)) // 2013-APR-14. 
+          if (cp.getFaxImage()[i].faxOrigin.startsWith(SearchUtil.SEARCH_PROTOCOL)) // 2013-APR-14. TODO Idem for the GRIBs
           {
             autoDownloadAndSave = false;
             break;
           }
         }
-        WWGnlUtilities.archiveComposite(fileName, autoDownloadAndSave);
+        WWGnlUtilities.archiveComposite(fileName, autoDownloadAndSave, !cp.getGribRequest().startsWith(SearchUtil.SEARCH_PROTOCOL));
         WWContext.getInstance().fireReloadCompositeTree();
         WWContext.getInstance().fireReloadFaxTree();
         WWContext.getInstance().fireReloadGRIBTree();
