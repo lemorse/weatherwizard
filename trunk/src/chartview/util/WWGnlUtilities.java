@@ -640,7 +640,21 @@ public class WWGnlUtilities
 
     File ff = new File(where);
     if (ff.isDirectory())
-      chooser.setCurrentDirectory(ff);
+    {
+      try
+      {
+        chooser.setCurrentDirectory(ff);
+      }
+      catch (Exception e)
+      {
+        JOptionPane.showMessageDialog(null, 
+                                      "Exception when setting current directory to [" + where + "]\n" + 
+                                      e.toString(), 
+                                      "Error", 
+                                      JOptionPane.ERROR_MESSAGE);
+        e.printStackTrace();
+      }
+    }
     else
     {
       File f = new File(".");
@@ -2153,6 +2167,11 @@ public class WWGnlUtilities
   
   public static String archiveComposite(String compositeName, Boolean deleteOnceDone)
   {
+    return archiveComposite(compositeName, deleteOnceDone, true);
+  }
+  
+  public static String archiveComposite(String compositeName, Boolean deleteOnceDone, boolean deleteGRIBfile)
+  {
     List<String> filesToDelete = null;
     if (deleteOnceDone.booleanValue())
     {
@@ -2307,7 +2326,7 @@ public class WWGnlUtilities
                   try { fos.close(); } catch (Exception ignore) {}
               }
               gribNameNode.setNodeValue(WWContext.WAZ_PROTOCOL_PREFIX + "grib/" + newGrib);
-              if (deleteOnceDone.booleanValue())
+              if (deleteOnceDone.booleanValue() && deleteGRIBfile)
                 filesToDelete.add(gribName);
             }
           }
