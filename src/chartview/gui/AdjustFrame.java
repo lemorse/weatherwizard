@@ -43,6 +43,8 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -520,7 +522,27 @@ public class AdjustFrame
     
     Icon plus = new ImageIcon(this.getClass().getResource("img/plus.png"));
     masterTabPane.add(new JPanel(), plus); // The tab that adds tabs   
-    masterTabPane.setToolTipTextAt(1, WWGnlUtilities.buildMessage("click-to-add"));
+    masterTabPane.setToolTipTextAt(1, WWGnlUtilities.buildMessage("click-to-add") + " (Ctrl+T)");
+    
+    masterTabPane.addKeyListener(new KeyListener()
+      {
+        public void keyTyped(KeyEvent e)
+        {
+        }
+
+        public void keyPressed(KeyEvent e)
+        {
+          if ((e.getKeyCode() == KeyEvent.VK_T) && ((e.getModifiers() & KeyEvent.CTRL_MASK) != 0)) 
+          {
+//          System.out.println("Ctrl+T");          
+            addCompositeTab();
+          }
+        }
+
+        public void keyReleased(KeyEvent e)
+        {
+        }
+      });
     
     masterTabPane.addMouseListener(new MouseAdapter()
      {
