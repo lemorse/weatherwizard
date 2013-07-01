@@ -11,7 +11,7 @@ This page takes over and replaces the one [http://donpedro.lediouris.net/softwar
 = Details =
 
 || *Date* || *Description* || *Impacted file(s)* ||
-|| 15-May-2013  || Added the "open in a new tab" feature for composites. <br>There is also an HTML5 NMEA console, when data are rebroadcasted using XML over HTTP.  || chartadjust.jar, tideengineimplementation.jar, desktop.jar ||
+|| 01-Jul-2013  || Added the "open in a new tab" feature for composites. <br>There is also an HTML5 NMEA console, when data are rebroadcasted using XML over HTTP.  || chartadjust.jar, tideengineimplementation.jar, desktop.jar ||
 || 15-May-2013  || Fixed a problem in the Weather Wizard position acquisition. || chartadjust.jar, nmeareader.jar, desktop.jar ||
 || 19-Mar-2013  || Fixed a problem in the night of the Tide app. || tideengineimplmentation.jar ||
 || 11-Mar-2013  || Added the json over http for the NMEA rebroadcasting. || desktop.jar, nmeareader.jar ||
