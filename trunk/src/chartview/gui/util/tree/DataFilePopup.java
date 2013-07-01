@@ -12,6 +12,7 @@ import chartview.gui.util.param.ParamPanel;
 import chartview.util.WWGnlUtilities;
 import chartview.ctx.WWContext;
 
+import chartview.gui.AdjustFrame;
 import chartview.gui.right.CommandPanel;
 import chartview.gui.util.dialog.FaxPatternEditTablePanel;
 import chartview.gui.util.dialog.FileFilterPanel;
@@ -79,6 +80,7 @@ public class DataFilePopup
              PopupMenuListener
 {
   private JMenuItem show;
+  private JMenuItem showNewTab;
   private JMenuItem refresh;
   private JMenuItem filter;
   private JMenuItem gribDetails;
@@ -104,6 +106,7 @@ public class DataFilePopup
   private JTreeFilePanel parent = null;
 
   private final static String SHOW = WWGnlUtilities.buildMessage("show");
+  private final static String SHOW_NEW_TAB = WWGnlUtilities.buildMessage("show-in-new-tab");
   private final static String REFRESH = WWGnlUtilities.buildMessage("refresh-tree");
   private final static String FILTER = WWGnlUtilities.buildMessage("filter");
   private final static String GRIB_DETAILS = WWGnlUtilities.buildMessage("grib-details");
@@ -133,6 +136,8 @@ public class DataFilePopup
     this.parent = caller;
     this.add(show = new JMenuItem(SHOW));
     show.addActionListener(this);
+    this.add(showNewTab = new JMenuItem(SHOW_NEW_TAB));
+    showNewTab.addActionListener(this);
     this.add(refresh = new JMenuItem(REFRESH));
     refresh.addActionListener(this);
     this.add(filter = new JMenuItem(FILTER));
@@ -212,6 +217,13 @@ public class DataFilePopup
   {    
     if (event.getActionCommand().equals(SHOW))
     {
+      String fName = ((JTreeFilePanel.DataFileTreeNode) dtn).getFullFileName();
+//    System.out.println("Selected :" + fName);
+      parent.fireFileOpen(fName);
+    }
+    else if (event.getActionCommand().equals(SHOW_NEW_TAB))
+    {
+      ((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).addCompositeTab();
       String fName = ((JTreeFilePanel.DataFileTreeNode) dtn).getFullFileName();
 //    System.out.println("Selected :" + fName);
       parent.fireFileOpen(fName);
