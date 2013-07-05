@@ -532,10 +532,19 @@ public class AdjustFrame
 
         public void keyPressed(KeyEvent e)
         {
-          if ((e.getKeyCode() == KeyEvent.VK_T) && ((e.getModifiers() & KeyEvent.CTRL_MASK) != 0)) 
+          if ((e.getKeyCode() == KeyEvent.VK_T) && ((e.getModifiers() & KeyEvent.CTRL_MASK) != 0)) // New Tab
           {
 //          System.out.println("Ctrl+T");          
             addCompositeTab();
+          }
+          if ((e.getKeyCode() == KeyEvent.VK_R) && ((e.getModifiers() & KeyEvent.CTRL_MASK) != 0)) // Reload
+          {
+//          System.out.println("Ctrl+R");
+            String compositeName = ((ParamPanel.DataFile) ParamPanel.data[ParamData.LOAD_COMPOSITE_STARTUP][ParamData.VALUE_INDEX]).toString();
+            if (compositeName != null && compositeName.trim().length() != 0)
+              WWContext.getInstance().fireLoadDynamicComposite(compositeName);
+            else
+              JOptionPane.showMessageDialog(instance, "No default composite to reload.\nSet it up in the preferences.", "Reload Default Composite", JOptionPane.WARNING_MESSAGE);
           }
         }
 
