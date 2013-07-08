@@ -250,7 +250,8 @@ public class AdjustFrame
 
   private JMenu menuHelp = new JMenu();
   private JMenuItem menuHelpAbout = new JMenuItem();
-//private JMenuItem menuHelpContent = new JMenuItem();
+  private JMenuItem menuHelpManual = new JMenuItem();
+  private JMenuItem menuHelpOrderManual = new JMenuItem();
   private JMenuItem menuHelpContact = new JMenuItem();
   private JMenuItem menuCheckForUpdate = new JMenuItem();
   private JMenuBar menuBar = new JMenuBar();
@@ -1065,17 +1066,26 @@ public class AdjustFrame
 //                                          JOptionPane.PLAIN_MESSAGE);
           }
         });
-//    menuHelp.add(menuHelpContent);
-//    menuHelpContent.setText("Content");
-//    menuHelpContent.addActionListener(new ActionListener()
-//        {
-//          public void actionPerformed(ActionEvent ae)
-//          {
-//            showHelp();
-//          }
-//        });
-    // Removed
-//  menuHelp.add(new HelpOpenAction()).setAccelerator(KeyStroke.getKeyStroke("F1"));
+    menuHelp.add(menuHelpManual);
+    menuHelpManual.setText(WWGnlUtilities.buildMessage("download-manual"));
+    menuHelpManual.setIcon(new ImageIcon(this.getClass().getResource("img/book.gif")));
+    menuHelpManual.addActionListener(new ActionListener()
+        {
+          public void actionPerformed(ActionEvent ae)
+          {
+            dowloadPDFManual();
+          }
+        });
+    menuHelp.add(menuHelpOrderManual);
+    menuHelpOrderManual.setText(WWGnlUtilities.buildMessage("order-manual"));
+    menuHelpOrderManual.setIcon(new ImageIcon(this.getClass().getResource("img/book.gif")));
+    menuHelpOrderManual.addActionListener(new ActionListener()
+        {
+          public void actionPerformed(ActionEvent ae)
+          {
+            orderManual();
+          }
+        });
     
     menuHelpContact.setText(WWGnlUtilities.buildMessage("contact-dev-team-dot"));
     menuHelpContact.setIcon(new ImageIcon(this.getClass().getResource("img/onecamel.png")));
@@ -1124,7 +1134,6 @@ public class AdjustFrame
           }
         });
     menuHelp.add(menuHelpContact);
-    
     
     menuCheckForUpdate.setText(WWGnlUtilities.buildMessage("check-for-update-menu"));
     menuCheckForUpdate.setIcon(new ImageIcon(this.getClass().getResource("img/download.png")));
@@ -2307,16 +2316,14 @@ public class AdjustFrame
     }
   }
   
-  private void showHelp()
+  private void dowloadPDFManual()
   {
     try
     {
       // String lang = Locale.getDefault().getLanguage();
       // System.out.println("I speak " + lang);
       // String docFileName = System.getProperty("user.dir") + File.separator + "doc" + File.separator + "weather" + File.separator + "index.html";
-      String docFileName = 
-        "." + File.separator + "doc" + File.separator + "weather" + 
-        File.separator + "index.html";
+      String docFileName = "http://donpedro.lediouris.net/software/structure/datafiles/manual/WeatherWizardUserManual.2nd.edition.pdf";
       Utilities.openInBrowser(docFileName);
     }
     catch (Exception e)
@@ -2326,6 +2333,20 @@ public class AdjustFrame
     }
   }
   
+  private void orderManual()
+  {
+    try
+    {
+      String docFileName = "http://www.lulu.com/shop/olivier-le-diouris/weather-wizard-user-manual/paperback/product-20064234.html";
+      Utilities.openInBrowser(docFileName);
+    }
+    catch (Exception e)
+    {
+      WWContext.getInstance().fireExceptionLogging(e);
+      e.printStackTrace();
+    }
+  }
+    
   private List<PredefZone> getPredefZones() throws Exception
   {
     List<PredefZone> pdfz = new ArrayList<PredefZone>(5);
