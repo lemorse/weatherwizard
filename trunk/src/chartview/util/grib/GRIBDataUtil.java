@@ -70,7 +70,7 @@ public class GRIBDataUtil
         {
           float x = gribData.getGribPointData()[h][w].getU();
           float y = gribData.getGribPointData()[h][w].getV();
-          double speed = getGRIBWindSpeed(x, y);
+          double speed = getGRIBWindSpeed(x, y); // Already adjusted
   
           if (speed < minValue) minValue = speed;
           if (speed > maxValue) maxValue = speed;
@@ -107,7 +107,7 @@ public class GRIBDataUtil
     double tws = Math.sqrt((x * x) + (y * y));
     tws *= 3.600D; // m/s to km/h
     tws /= 1.852D; // km/h to knots
-    return tws;
+    return GribHelper.adjustWindSpeed((float)tws);
   }
   
   public final static double[] getPRMSLBoundaries(GribHelper.GribConditionData gribData)
