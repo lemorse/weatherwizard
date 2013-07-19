@@ -143,7 +143,7 @@ public class CommandPanel
   implements ChartPanelParentInterface_II,
              RoutingClientInterface
 {
-  @SuppressWarnings("compatibility:-3751240057959193755")
+  @SuppressWarnings("compatibility:-8025013529175853650")
   private final static long serialVersionUID = 1L;
   private long id = 0L;
   private final static Color CUSTOM_LIGHT_BLUE = new Color(85, 115, 170);
@@ -4376,6 +4376,7 @@ public class CommandPanel
                     speed = Math.sqrt(x * x + y * y);
                     speed *= 3.60D;
                     speed /= 1.852D;
+                    speed = GribHelper.adjustWindSpeed((float)speed);
                     dir = WWGnlUtilities.getDir(x, y);
                   }
                   // Current

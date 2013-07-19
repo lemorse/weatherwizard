@@ -9,6 +9,9 @@ import chartview.ctx.WWContext;
 
 import chartview.gui.util.dialog.GRIBDetailPanel;
 
+import chartview.gui.util.param.ParamData;
+import chartview.gui.util.param.ParamPanel;
+
 import coreutilities.Utilities;
 
 import java.awt.Point;
@@ -1441,7 +1444,7 @@ public class GribHelper
           speed /= 1.852D; // knots
           double dir = WWGnlUtilities.getDir(x, y);
           gribCond.winddir = (int)Math.round(dir);
-          gribCond.windspeed = (float)speed;
+          gribCond.windspeed = adjustWindSpeed((float)speed);
           gribCond.hgt500 = wpd[l][g].getHgt();
           gribCond.horIdx = g;
           gribCond.vertIdx = l;
@@ -1470,6 +1473,15 @@ public class GribHelper
     }
 //  System.out.println(GeomUtil.decToSex(gp.getL()) + "/" + GeomUtil.decToSex(gp.getG()) + " is not in that grid...");
     return gribCond;
+  }
+  
+  public static float adjustWindSpeed(float speed)
+  {
+    // TODO Implement something better. And make it a preference.
+    float coeff = 1f;
+//  try { coeff = Float.parseFloat(System.getProperty("GRIB.wind.factor", "1")); } catch (Exception ex) {}
+    coeff = (float)((Double) ParamPanel.data[ParamData.GRIB_TWS_COEFF][ParamData.VALUE_INDEX]).doubleValue();
+    return coeff * speed;
   }
   
   public static GribCondition gribLookup(GeoPoint gp, GribConditionData wgd)
@@ -1513,7 +1525,7 @@ public class GribHelper
               dir = WWGnlUtilities.getDir(x, y);
             }
             gribCond.winddir = (int)Math.round(dir);
-            gribCond.windspeed = (float)speed;
+            gribCond.windspeed = adjustWindSpeed((float)speed);
             gribCond.hgt500 = wpd[l][g].getHgt();
             gribCond.horIdx = g;
             gribCond.vertIdx = l;

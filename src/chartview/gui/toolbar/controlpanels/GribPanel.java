@@ -6,6 +6,9 @@ import chartview.ctx.WWContext;
 import chartview.gui.AdjustFrame;
 import chartview.gui.right.CompositeTabbedPane;
 
+import chartview.gui.util.param.ParamData;
+import chartview.gui.util.param.ParamPanel;
+
 import chartview.util.WWGnlUtilities;
 
 import java.awt.Color;
@@ -76,7 +79,8 @@ public class GribPanel
   
   private JCheckBox withLabelOnGribCheckBox = new JCheckBox(WWContext.getInstance().getOriginalDefaultTimeZone().getID());
   private GridBagLayout gridBagLayout3 = new GridBagLayout();
-  private JSlider replaySpeedSlider = new JSlider(); // "Etc/UTC"
+  private JSlider replaySpeedSlider = new JSlider();
+  private JLabel gribCoeffLabel = new JLabel(); // "Etc/UTC"
 //private JLabel timeZoneLabel = new JLabel("Etc/UTC");
 
   public GribPanel()
@@ -351,6 +355,8 @@ public class GribPanel
       });
     
     buttonPanel.setLayout(gridBagLayout3);
+    gribCoeffLabel.setText(""); // GRIB TWS Coeff: 1.00");
+    gribCoeffLabel.setForeground(Color.red);
     this.add(topPanel, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL,
           new Insets(0, 0, 0, 0), 0, 0));
     this.add(gribSmoothingPanel, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH,
@@ -371,6 +377,8 @@ public class GribPanel
     this.add(gribSlider, new GridBagConstraints(0, 4, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
           new Insets(0, 0, 2, 0), 0, 0));
     this.add(replaySpeedSlider, new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+          new Insets(0, 0, 0, 0), 0, 0));
+    this.add(gribCoeffLabel, new GridBagConstraints(0, 9, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
           new Insets(0, 0, 0, 0), 0, 0));
     gribSlider.addChangeListener(new ChangeListener()
       {
@@ -451,14 +459,20 @@ public class GribPanel
       });
     gribSmoothingPanel.setLayout(gridBagLayout2);
     gribSmoothingPanel.add(smoothLabel,
-                           new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE,
-                                                  new Insets(0, 0, 0, 0), 0, 0));
+                           new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
+                                                  GridBagConstraints.EAST,
+                                                  GridBagConstraints.NONE,
+                                                  new Insets(0, 0, 0, 0),
+                                                  0, 0));
     smoothValue.setPreferredSize(new Dimension(30, 20));
     smoothValue.setToolTipText(WWGnlUtilities.buildMessage("grib-smooth-tooltip"));
     smoothValue.setHorizontalAlignment(JTextField.CENTER);
     gribSmoothingPanel.add(smoothValue,
-                           new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
-                                                  new Insets(0, 0, 0, 0), 0, 0));
+                           new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0,
+                                                  GridBagConstraints.CENTER,
+                                                  GridBagConstraints.NONE,
+                                                  new Insets(0, 0, 0, 0),
+                                                  0, 0));
     smoothButton.setText("...");
     smoothButton.setToolTipText(WWGnlUtilities.buildMessage("apply-smooth"));
     smoothButton.setPreferredSize(new Dimension(30, 20));
@@ -470,17 +484,29 @@ public class GribPanel
         }
       });
     gribSmoothingPanel.add(smoothButton,
-                           new GridBagConstraints(2, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
-                                                  new Insets(0, 5, 0, 0), 0, 0));
+                           new GridBagConstraints(2, 0, 1, 1, 0.0, 0.0,
+                                                  GridBagConstraints.CENTER,
+                                                  GridBagConstraints.NONE,
+                                                  new Insets(0, 5, 0, 0),
+                                                  0, 0));
     gribSmoothingPanel.add(smoothTimeLabel,
-                           new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE,
-                                                  new Insets(0, 0, 0, 0), 0, 0));
+                           new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0,
+                                                  GridBagConstraints.EAST,
+                                                  GridBagConstraints.NONE,
+                                                  new Insets(0, 0, 0, 0),
+                                                  0, 0));
     gribSmoothingPanel.add(smoothTimeValue,
-                           new GridBagConstraints(1, 1, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
-                                                  new Insets(0, 0, 0, 0), 0, 0));
+                           new GridBagConstraints(1, 1, 1, 1, 0.0, 0.0,
+                                                  GridBagConstraints.CENTER,
+                                                  GridBagConstraints.NONE,
+                                                  new Insets(0, 0, 0, 0),
+                                                  0, 0));
     gribSmoothingPanel.add(smoothTimeButton,
-                           new GridBagConstraints(2, 1, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
-                                                  new Insets(0, 5, 0, 0), 0, 0));
+                           new GridBagConstraints(2, 1, 1, 1, 0.0, 0.0,
+                                                  GridBagConstraints.CENTER,
+                                                  GridBagConstraints.NONE,
+                                                  new Insets(0, 5, 0, 0),
+                                                  0, 0));
     smoothLabel.setEnabled(false);
     smoothValue.setEnabled(false);
     smoothButton.setEnabled(false);
@@ -504,6 +530,11 @@ public class GribPanel
 
     topPanel.add(googleLabel, null);
     topPanel.add(googleButton, null);
+  }
+  
+  public void setGRIBTWSCoeff(double d)
+  {
+    gribCoeffLabel.setText("GRIB TWS Coeff:" + Double.toString(d));
   }
 
   private void updateSliderData()
@@ -561,6 +592,10 @@ public class GribPanel
     setTemp(b4);
     setWaves(b5);
     setRain(b6);
+    
+    double d = ((Double) ParamPanel.data[ParamData.GRIB_TWS_COEFF][ParamData.VALUE_INDEX]).doubleValue();
+    if (d != 1.0)
+      setGRIBTWSCoeff(d);
   }
 
   private void smoothButton_actionPerformed(ActionEvent e)
