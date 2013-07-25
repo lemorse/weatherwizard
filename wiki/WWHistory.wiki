@@ -11,6 +11,7 @@ This page takes over and replaces the one [http://donpedro.lediouris.net/softwar
 = Details =
 
 || *Date* || *Description* || *Impacted file(s)* ||
+|| 25-Jul-2013  || Improved Ctrl+T (new tab) and Ctrl+R (Reload default composite). || chartadjust.jar ||
 || 23-Jul-2013  || Added progress status when publishing the tide calendar || tideengineimplementation.jar ||
 || 12-Jul-2013  || New preference: GRIB TWS Coeff. Several people mentioned that the TWS from the GRIBs were underestimated for the North Atlantic and the Mediterranean Sea. There is now a preference - in the Polars, Routing, NMEA category -  that allows you to apply a coefficient to the TWS from the GRIB.<br>This value - if not equal to 1.0 - is displayed in the GRIB Control panel. || chartadjust.jar ||
 || 08-Jul-2013  || Added the "Ctrl+R" feature to relodad the default composite.  || chartadjust.jar ||
