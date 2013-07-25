@@ -525,35 +525,6 @@ public class AdjustFrame
     masterTabPane.add(new JPanel(), plus); // The tab that adds tabs   
     masterTabPane.setToolTipTextAt(1, WWGnlUtilities.buildMessage("click-to-add") + " (Ctrl+T)");
     
-    masterTabPane.addKeyListener(new KeyListener()
-      {
-        public void keyTyped(KeyEvent e)
-        {
-        }
-
-        public void keyPressed(KeyEvent e)
-        {
-          if ((e.getKeyCode() == KeyEvent.VK_T) && ((e.getModifiers() & KeyEvent.CTRL_MASK) != 0)) // New Tab
-          {
-//          System.out.println("Ctrl+T");          
-            addCompositeTab();
-          }
-          if ((e.getKeyCode() == KeyEvent.VK_R) && ((e.getModifiers() & KeyEvent.CTRL_MASK) != 0)) // Reload
-          {
-//          System.out.println("Ctrl+R");
-            String compositeName = ((ParamPanel.DataFile) ParamPanel.data[ParamData.LOAD_COMPOSITE_STARTUP][ParamData.VALUE_INDEX]).toString();
-            if (compositeName != null && compositeName.trim().length() != 0)
-              WWContext.getInstance().fireLoadDynamicComposite(compositeName);
-            else
-              JOptionPane.showMessageDialog(instance, "No default composite to reload.\nSet it up in the preferences.", "Reload Default Composite", JOptionPane.WARNING_MESSAGE);
-          }
-        }
-
-        public void keyReleased(KeyEvent e)
-        {
-        }
-      });
-    
     masterTabPane.addMouseListener(new MouseAdapter()
      {
        public void mouseClicked(MouseEvent mouseEvent)
@@ -609,6 +580,8 @@ public class AdjustFrame
 //  menuFile.add(menuFileOpen);
     
     menuFile.add(new OpenAction()).setAccelerator(KeyStroke.getKeyStroke("ctrl O"));
+    menuFile.add(new NewTabAction()).setAccelerator(KeyStroke.getKeyStroke("ctrl T"));
+    menuFile.add(new ReloadAction()).setAccelerator(KeyStroke.getKeyStroke("ctrl R"));
     menuFile.add(new JSeparator());
     menuFile.add(menuDownload);
     menuDownload.add(menuDownloadFaxFromNet);    
@@ -2471,6 +2444,40 @@ public class AdjustFrame
     public void actionPerformed(ActionEvent ae)
     {
       fileOpen_ActionPerformed(ae);
+    }        
+  }
+
+  @SuppressWarnings("serial")
+  public class NewTabAction extends AbstractAction
+  {
+    public NewTabAction()
+    {
+      super(WWGnlUtilities.buildMessage("open-new-tab"),
+            new ImageIcon(instance.getClass().getResource("img/composite.png")));
+    }
+
+    public void actionPerformed(ActionEvent ae)
+    {
+      addCompositeTab();
+    }        
+  }
+
+  @SuppressWarnings("serial")
+  public class ReloadAction extends AbstractAction
+  {
+    public ReloadAction()
+    {
+      super(WWGnlUtilities.buildMessage("load-reload-defaut"),
+            new ImageIcon(instance.getClass().getResource("img/composite.png")));
+    }
+
+    public void actionPerformed(ActionEvent ae)
+    {
+      String compositeName = ((ParamPanel.DataFile) ParamPanel.data[ParamData.LOAD_COMPOSITE_STARTUP][ParamData.VALUE_INDEX]).toString();
+      if (compositeName != null && compositeName.trim().length() != 0)
+        WWContext.getInstance().fireLoadDynamicComposite(compositeName);
+      else
+        JOptionPane.showMessageDialog(instance, "No default composite to reload.\nSet it up in the preferences.", "Reload Default Composite", JOptionPane.WARNING_MESSAGE);
     }        
   }
 
