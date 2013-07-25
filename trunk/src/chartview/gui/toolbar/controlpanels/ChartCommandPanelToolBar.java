@@ -154,7 +154,7 @@ public class ChartCommandPanelToolBar
         }
       });
     reloadButton.setIcon(new ImageIcon(this.getClass().getResource("img/refresh.png")));
-    reloadButton.setToolTipText(WWGnlUtilities.buildMessage("load-reload-defaut"));
+    reloadButton.setToolTipText(WWGnlUtilities.buildMessage("load-reload-defaut") + " (Ctrl+R)");
     reloadButton.setPreferredSize(new Dimension(24, 24));
     reloadButton.setBorderPainted(false);
     final String compositeName = ((ParamPanel.DataFile) ParamPanel.data[ParamData.LOAD_COMPOSITE_STARTUP][ParamData.VALUE_INDEX]).toString();
