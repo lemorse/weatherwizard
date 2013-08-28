@@ -4862,7 +4862,7 @@ public class CommandPanel
           y += 5;
           Utilities.drawPanelTable(data, 
                                    gr, 
-                                   new Point(x + 40, y + 5 + gr.getFont().getSize() + 2), 
+                                   new Point(x + 40, y + 40 + gr.getFont().getSize() + 2), // y + 40 to allow the GRIB date to be visible too.
                                    10, 
                                    2, 
                                    new int[] { Utilities.LEFT_ALIGNED, Utilities.LEFT_ALIGNED }, 
