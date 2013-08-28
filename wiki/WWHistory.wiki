@@ -11,6 +11,7 @@ This page takes over and replaces the one [http://donpedro.lediouris.net/softwar
 = Details =
 
 || *Date* || *Description* || *Impacted file(s)* ||
+|| 28-Aug-2013  || Added the possibility to get p[osition and time from the GPS, in the Sight Reduction utility. For didactic purpose.|| almanactools.jar ||
 || 14-Aug-2013  || Cosmetix || chartadjust.jar ||
 || 25-Jul-2013  || Improved Ctrl+T (new tab) and Ctrl+R (Reload default composite). || chartadjust.jar ||
 || 23-Jul-2013  || Added progress status when publishing the tide calendar || tideengineimplementation.jar ||
