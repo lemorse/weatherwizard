@@ -154,6 +154,9 @@ public final class ParamPanel
       case ParamData.ROUTING_STEP:
         it = new Integer(10); 
         break;
+      case ParamData.DEFAULT_FONT_SIZE:
+        it = new Integer(12); 
+        break;
       case ParamData.ROUTING_FORK_WIDTH:
         it = new Integer(50);
         break;
@@ -449,7 +452,8 @@ public final class ParamPanel
                        i == ParamData.INTERVAL_BETWEEN_ISOBARS ||
                        i == ParamData.DEFAULT_FAX_INC_VALUE ||
                        i == ParamData.RELOAD_DEFAULT_COMPOSITE_INTERVAL ||
-                       i == ParamData.WAIT_ON_STARTUP)
+                       i == ParamData.WAIT_ON_STARTUP ||
+                       i == ParamData.DEFAULT_FONT_SIZE)
                 data[i][ParamData.VALUE_INDEX] = new Integer(s);
               else if (i == ParamData.ROUTING_TIME_INTERVAL ||     // Doubles
                        i == ParamData.POLAR_SPEED_FACTOR ||
@@ -574,7 +578,7 @@ public final class ParamPanel
       new int[] // Display
       { ParamData.CHART_LINE_THICK, 
         ParamData.FAX_TRANSPARENCY, 
-//      ParamData.LOOK_AND_FEEL, 
+        ParamData.DEFAULT_FONT_SIZE, 
         ParamData.PREFERRED_WIND_DISPLAY,
         ParamData.DISPLAY_WIND_WITH_COLOR_WIND_RANGE,
         ParamData.DEFAULT_FAX_BLUR,
@@ -743,7 +747,8 @@ public final class ParamPanel
               currentIndex == ParamData.AVOID_TWA_LT ||
               currentIndex == ParamData.DEFAULT_FAX_INC_VALUE ||
               currentIndex == ParamData.RELOAD_DEFAULT_COMPOSITE_INTERVAL ||
-              currentIndex == ParamData.WAIT_ON_STARTUP) // The int values
+              currentIndex == ParamData.WAIT_ON_STARTUP ||
+              currentIndex == ParamData.DEFAULT_FONT_SIZE) // The int values
           {
             try { /* int x = */ Integer.parseInt(after); }
             catch (Exception e) 
