@@ -73,6 +73,7 @@ import javax.swing.JScrollPane;
 import javax.swing.UIManager;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
+import javax.swing.plaf.FontUIResource;
 
 
 /**
@@ -183,6 +184,15 @@ public class ChartAdjust
     }
     
     ParamPanel.setUserValues();
+    // Might also try this:
+    // java -Dswing.aatext=true -Dswing.plaf.metal.controlFont=Tahoma -Dswing.plaf.metal.userFont=Tahoma …
+    int fontSize = 12; 
+    try { fontSize = ((Integer) ParamPanel.data[ParamData.DEFAULT_FONT_SIZE][ParamData.VALUE_INDEX]).intValue(); }
+    catch (Exception ex) 
+    {
+      System.err.println("No value for DEFAULT_FONT_SIZE");
+    }
+    setUIFont (new FontUIResource("Arial", Font.PLAIN, fontSize));
 /*  final JFrame */ frame = new AdjustFrame();
     
     boolean positioned = false;
@@ -650,6 +660,18 @@ public class ChartAdjust
       System.err.println("---------------------");
       e.printStackTrace();
       System.err.println("---------------------");
+    }
+  }
+
+  public static void setUIFont(javax.swing.plaf.FontUIResource f)
+  {
+    java.util.Enumeration keys = UIManager.getDefaults().keys();
+    while (keys.hasMoreElements())
+    {
+      Object key = keys.nextElement();
+      Object value = UIManager.get(key);
+      if (value != null && value instanceof javax.swing.plaf.FontUIResource)
+        UIManager.put(key, f);
     }
   }
 
