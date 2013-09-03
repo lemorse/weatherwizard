@@ -94,7 +94,7 @@ public class ParamData
   public final static int STOP_ROUTING_WHEN_CLOSER_TO    = 79;
   public final static int NMEA_FALLBACK_TIMEOUT          = 80;
   public final static int GRIB_TWS_COEFF                 = 81;
-  public final static int DEFAULT_FONT_SIZE              = 82;
+  public final static int DEFAULT_FONT                   = 82;
 
   public final static int NB_PRFERENCES         = 83; 
   

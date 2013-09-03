@@ -7,9 +7,12 @@ import chartview.gui.AdjustFrame;
 import chartview.gui.util.param.widget.BooleanCellEditor;
 import chartview.gui.util.param.widget.ColorPickerCellEditor;
 import chartview.gui.util.param.widget.DirectoryPickerCellEditor;
+import chartview.gui.util.param.widget.FieldPlusFontPicker;
 import chartview.gui.util.param.widget.FieldPlusLOVPicker;
 import chartview.gui.util.param.widget.FieldPlusPathPicker;
 import chartview.gui.util.param.widget.FilePickerCellEditor;
+
+import chartview.gui.util.param.widget.FontPanel;
 
 import chartview.util.WWGnlUtilities;
 
@@ -154,8 +157,15 @@ public final class ParamPanel
       case ParamData.ROUTING_STEP:
         it = new Integer(10); 
         break;
-      case ParamData.DEFAULT_FONT_SIZE:
-        it = new Integer(12); 
+      case ParamData.DEFAULT_FONT:
+        it = new Font("Arial", Font.PLAIN, 12)
+          {
+            @Override
+            public String toString()
+            {
+              return FontPanel.fontToString(this);
+            }
+          }; 
         break;
       case ParamData.ROUTING_FORK_WIDTH:
         it = new Integer(50);
@@ -452,9 +462,10 @@ public final class ParamPanel
                        i == ParamData.INTERVAL_BETWEEN_ISOBARS ||
                        i == ParamData.DEFAULT_FAX_INC_VALUE ||
                        i == ParamData.RELOAD_DEFAULT_COMPOSITE_INTERVAL ||
-                       i == ParamData.WAIT_ON_STARTUP ||
-                       i == ParamData.DEFAULT_FONT_SIZE)
+                       i == ParamData.WAIT_ON_STARTUP)
                 data[i][ParamData.VALUE_INDEX] = new Integer(s);
+              else if (i == ParamData.DEFAULT_FONT)
+                data[i][ParamData.VALUE_INDEX] = FontPanel.stringToFont(s);
               else if (i == ParamData.ROUTING_TIME_INTERVAL ||     // Doubles
                        i == ParamData.POLAR_SPEED_FACTOR ||
                        i == ParamData.DEFAULT_ZOOM_VALUE || 
@@ -578,7 +589,7 @@ public final class ParamPanel
       new int[] // Display
       { ParamData.CHART_LINE_THICK, 
         ParamData.FAX_TRANSPARENCY, 
-        ParamData.DEFAULT_FONT_SIZE, 
+        ParamData.DEFAULT_FONT, 
         ParamData.PREFERRED_WIND_DISPLAY,
         ParamData.DISPLAY_WIND_WITH_COLOR_WIND_RANGE,
         ParamData.DEFAULT_FAX_BLUR,
@@ -648,6 +659,8 @@ public final class ParamPanel
       try
       {
         Object cloned = null;
+        if (data[index][ParamData.VALUE_INDEX] == null)
+          data[index][ParamData.VALUE_INDEX] = oneFactorySetting(index); 
         if (data[index][ParamData.VALUE_INDEX] instanceof Color)
           cloned = new Color(((Color)data[index][ParamData.VALUE_INDEX]).getRed(),
                              ((Color)data[index][ParamData.VALUE_INDEX]).getGreen(),
@@ -681,6 +694,11 @@ public final class ParamPanel
           cloned = new TemperatureUnitList(((TemperatureUnitList)data[index][ParamData.VALUE_INDEX]).getCurrentIndex());
         else if (data[index][ParamData.VALUE_INDEX] instanceof ContourLinesList)
           cloned = new ContourLinesList(((ContourLinesList)data[index][ParamData.VALUE_INDEX]).toString());
+        else if (data[index][ParamData.VALUE_INDEX] instanceof Font)
+        {
+          Font f = (Font)data[index][ParamData.VALUE_INDEX];
+          cloned = new Font(f.getName(), f.getStyle(), f.getSize()); 
+        }
         else
         {
 //        WWContext.getInstance().fireLogging("Cloning a [" + (data[index][ParamData.VALUE_INDEX]).getClass().getName() + "] is not supported.");
@@ -747,14 +765,14 @@ public final class ParamPanel
               currentIndex == ParamData.AVOID_TWA_LT ||
               currentIndex == ParamData.DEFAULT_FAX_INC_VALUE ||
               currentIndex == ParamData.RELOAD_DEFAULT_COMPOSITE_INTERVAL ||
-              currentIndex == ParamData.WAIT_ON_STARTUP ||
-              currentIndex == ParamData.DEFAULT_FONT_SIZE) // The int values
+              currentIndex == ParamData.WAIT_ON_STARTUP) // The int values
           {
             try { /* int x = */ Integer.parseInt(after); }
             catch (Exception e) 
             { 
               JOptionPane.showMessageDialog(this, 
-                                            e.getMessage(), WWGnlUtilities.buildMessage("modifying-parameters"), 
+                                            e.getMessage(), 
+                                            WWGnlUtilities.buildMessage("modifying-parameters"), 
                                             JOptionPane.ERROR_MESSAGE);
               ok2go = false; 
             }           
@@ -1036,8 +1054,7 @@ public final class ParamPanel
   public class CustomTableCellRenderer extends DefaultTableCellRenderer
   {
     @Override
-    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row,
-                                                   int column)
+    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column)
     {
       Component comp = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
       System.out.println("TableCellRenderer is a " + comp.getClass().getName());
@@ -1106,6 +1123,14 @@ public final class ParamPanel
         g.fillRect(2, 2, Math.min(getWidth() - 5, 20), getHeight() - 5);
         g.setColor(Color.black);
         g.drawRect(2, 2, Math.min(getWidth() - 5, 20), getHeight() - 5);
+      }
+      else if (curValue instanceof Font)
+      {
+        Font f = (Font)curValue;
+        if (f.getSize() == 0)
+          f = f.deriveFont(12f);
+        g.setFont(f);
+        g.drawString("Default Swing Font", 1, getHeight() - 1);
       }
       else
       {
@@ -1202,6 +1227,11 @@ public final class ParamPanel
         ContourLinesList cll = (ContourLinesList)value;
         componentToApply = new FieldPlusLOVPicker(cll);
       }
+      else if (column == 1 && value instanceof Font)
+      {
+//      String font = FontPanel.fontToString((Font)value);
+        componentToApply = new FieldPlusFontPicker((Font)value);
+      }
       else if (column == 1 && value instanceof Boolean)
       {
         componentToApply = new BooleanCellEditor((Boolean)value);
@@ -1295,6 +1325,25 @@ public final class ParamPanel
         {
       //  System.out.println("Original Value is a " + originalValue.getClass().getName());
           return (ContourLinesList)originalValue;
+        }
+      }
+      else if (componentToApply instanceof FieldPlusFontPicker)
+      {
+        Object obj = ((FieldPlusFontPicker)componentToApply).getCellEditorValue();        
+        if (obj instanceof Font) // FIXME Fix that shit...
+          return (Font)obj;
+        else if (obj instanceof String)
+        {
+          String font = (String)((FieldPlusFontPicker)componentToApply).getCellEditorValue();
+          if (font != null)
+            return FontPanel.stringToFont(font);
+          else
+            return null;
+        }
+        else 
+        {
+      //  System.out.println("Original Value is a " + originalValue.getClass().getName());
+          return (Font)originalValue;
         }
       }
       else if (componentToApply instanceof FilePickerCellEditor)
@@ -1544,6 +1593,10 @@ public final class ParamPanel
         {
           WindOptionList wol = (WindOptionList)valueObject;
           val.setNodeValue(wol.getStringIndex());
+        }
+        else if (valueObject instanceof Font)
+        {
+          val.setNodeValue(FontPanel.fontToString((Font)valueObject));
         }
         else
         {
