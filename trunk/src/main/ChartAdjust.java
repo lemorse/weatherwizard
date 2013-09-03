@@ -8,6 +8,8 @@ import chartview.gui.util.dialog.UpdatePanel;
 import chartview.gui.util.param.ParamData;
 import chartview.gui.util.param.ParamPanel;
 
+import chartview.gui.util.param.widget.FontPanel;
+
 import chartview.util.WWGnlUtilities;
 
 import coreutilities.CheckForUpdateThread;
@@ -186,14 +188,19 @@ public class ChartAdjust
     ParamPanel.setUserValues();
     // Might also try this:
     // java -Dswing.aatext=true -Dswing.plaf.metal.controlFont=Tahoma -Dswing.plaf.metal.userFont=Tahoma …
-    int fontSize = 12; 
-    try { fontSize = ((Integer) ParamPanel.data[ParamData.DEFAULT_FONT_SIZE][ParamData.VALUE_INDEX]).intValue(); }
+    Font defaultFont = null;
+    try 
+    { 
+      defaultFont = ((Font) ParamPanel.data[ParamData.DEFAULT_FONT][ParamData.VALUE_INDEX]); 
+      if (defaultFont == null)
+        defaultFont = new Font("Arial", Font.PLAIN, 12);
+      setUIFont(new FontUIResource(defaultFont));
+    }
     catch (Exception ex) 
     {
-      System.err.println("No value for DEFAULT_FONT_SIZE");
+      System.err.println("No value for DEFAULT_FONT");
     }
-    setUIFont (new FontUIResource("Arial", Font.PLAIN, fontSize));
-/*  final JFrame */ frame = new AdjustFrame();
+    frame = new AdjustFrame();
     
     boolean positioned = false;
     File propFile = new File("ww_position.properties");
