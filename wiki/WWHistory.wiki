@@ -11,6 +11,7 @@ This page takes over and replaces the one [http://donpedro.lediouris.net/softwar
 = Details =
 
 || *Date* || *Description* || *Impacted file(s)* ||
+|| 02-Sep-2013  || New preference in Display > Others, to set the default font. In some Look & Feels (like Metal), the default font is way tto big in the control pane. With this preference, you can choose a font that allows you to see and read whatever is displayed. || chartadjust.jar ||
 || 28-Aug-2013  || Added the possibility to get position and time from the GPS, in the Sight Reduction utility. For didactic purpose.|| almanactools.jar ||
 || 14-Aug-2013  || Cosmetix || chartadjust.jar ||
 || 25-Jul-2013  || Improved Ctrl+T (new tab) and Ctrl+R (Reload default composite). || chartadjust.jar ||
