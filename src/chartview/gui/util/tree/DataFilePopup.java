@@ -223,8 +223,11 @@ public class DataFilePopup
     }
     else if (event.getActionCommand().equals(SHOW_NEW_TAB))
     {
-      ((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).addCompositeTab();
       String fName = ((JTreeFilePanel.DataFileTreeNode) dtn).getFullFileName();
+//    String tabName = ((JTreeFilePanel.DataFileTreeNode) dtn).name;
+//    if (tabName.endsWith(".ptrn"))
+//      tabName = tabName.substring(0, tabName.length() - ".ptrn".length());
+      ((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).addCompositeTab(); // tabName);
 //    System.out.println("Selected :" + fName);
       parent.fireFileOpen(fName);
     }

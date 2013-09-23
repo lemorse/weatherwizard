@@ -1423,9 +1423,18 @@ public class AdjustFrame
   
   public void addCompositeTab()
   {
+    addCompositeTab(null);
+  }
+  
+  public void addCompositeTab(String tabName)
+  {
     final CompositeTabbedPane nctp = new CompositeTabbedPane();
-    masterTabPane.add(nctp, "Composite (" + masterTabPane.getTabCount() + ")", masterTabPane.getTabCount() - 1);
-    masterTabPane.setTabComponentAt(masterTabPane.getTabCount() - 2, new CompositeTabComponent("Composite (" + Integer.toString(masterTabPane.getTabCount() - 1) + ")", "right/remove_composite.png")
+    String _tabName = tabName;
+    if (_tabName == null)
+      _tabName = "Composite (" + masterTabPane.getTabCount() + ")";
+    masterTabPane.add(nctp, _tabName, masterTabPane.getTabCount() - 1);
+//  masterTabPane.setTabComponentAt(masterTabPane.getTabCount() - 2, new CompositeTabComponent("Composite (" + Integer.toString(masterTabPane.getTabCount() - 1) + ")", "right/remove_composite.png")
+    masterTabPane.setTabComponentAt(masterTabPane.getTabCount() - 2, new CompositeTabComponent(_tabName, "right/remove_composite.png")
       {
         public void onClose()
         {
