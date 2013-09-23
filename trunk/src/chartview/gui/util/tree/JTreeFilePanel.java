@@ -1054,7 +1054,7 @@ public class JTreeFilePanel
 
   protected void fireFileOpen(String fName)
   {
-    if (type ==  JTreeFilePanel.COMPOSITE_TYPE)
+    if (type == JTreeFilePanel.COMPOSITE_TYPE)
     {
       if (((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getCommandPanel().isBusy())
         ((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).addCompositeTab();

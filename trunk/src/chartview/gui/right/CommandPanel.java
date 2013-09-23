@@ -12,6 +12,7 @@ import chart.components.util.World;
 import chartview.ctx.ApplicationEventListener;
 import chartview.ctx.WWContext;
 
+import chartview.gui.AdjustFrame;
 import chartview.gui.toolbar.controlpanels.ChartCommandPanelToolBar;
 import chartview.gui.toolbar.controlpanels.MainZoomPanel;
 import chartview.gui.util.dialog.BlurMatrixDimPanel;
@@ -111,6 +112,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -2447,6 +2449,14 @@ public class CommandPanel
           {
             if (fileName != null && fileName.trim().length() > 0)
             {
+              int currTabIdx = ((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getMasterTabPane().getSelectedIndex();
+              String tabName = fileName.substring(fileName.lastIndexOf(File.separator) + 1);
+              if (tabName.endsWith(".ptrn"))
+                tabName = tabName.substring(0, tabName.length() - ".ptrn".length());
+//            System.out.println("Replacing [" + ((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getMasterTabPane().getTitleAt(currTabIdx) + "] with [" + tabName + "]");
+              ((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getMasterTabPane().setTitleAt(currTabIdx, tabName);
+              ((CompositeTabComponent)((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getMasterTabPane().getTabComponentAt(currTabIdx)).setTabTitle(tabName);
+
               // Reset comment
               currentComment = "";
               boolean dyn = WWGnlUtilities.isPatternDynamic(fileName); // TODO http:// protocol
