@@ -2390,7 +2390,10 @@ public class AdjustFrame
               Thread.sleep(1000L * 60L * interval); 
               System.out.println("-- Thread " + this.getName() + " waking up.");
             } 
-            catch (Exception ex) {} 
+            catch (Exception ex) 
+            {
+              ex.printStackTrace();
+            } 
           }
         }
       };

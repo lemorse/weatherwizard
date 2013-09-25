@@ -392,7 +392,7 @@ public class GribPanel
             if (sv != sliderValue)
             {
               sliderValue = sv;
-              //              System.out.println("Slider Value:" + sliderValue);
+//            System.out.println("Slider Value:" + sliderValue);
               updateSliderData();
             }
             slider.setToolTipText("Frame #" + Integer.toString(sv));

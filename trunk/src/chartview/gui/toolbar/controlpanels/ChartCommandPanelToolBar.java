@@ -1,5 +1,6 @@
 package chartview.gui.toolbar.controlpanels;
 
+
 import chart.components.ui.ChartPanel;
 
 import chartview.ctx.ApplicationEventListener;
@@ -13,29 +14,27 @@ import chartview.gui.util.param.ParamPanel;
 
 import chartview.util.WWGnlUtilities;
 
+import chartview.util.grib.GribHelper;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
 import java.awt.event.MouseEvent;
+
+import java.util.Date;
 
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
-import javax.swing.JSeparator;
-import javax.swing.JTextField;
 import javax.swing.JToolBar;
+
 
 @SuppressWarnings("serial")
 public class ChartCommandPanelToolBar
@@ -58,6 +57,7 @@ public class ChartCommandPanelToolBar
   private JRadioButton arrowRadioButton = new JRadioButton();
 
   private JCheckBox documentDate = new JCheckBox();
+  private JButton nowGRIBButton = new JButton();
   
   private JButton expandCollapseControlButton = new JButton();
   private JButton scrollThruOpenTabsButton = new JButton();
@@ -104,6 +104,10 @@ public class ChartCommandPanelToolBar
        public void setOpenTabNum(int i) 
        {
          scrollThruOpenTabsButton.setEnabled(i > 1);
+       }
+       public void gribLoaded() 
+       {
+         setNowButton();
        }
      };
   
@@ -234,6 +238,7 @@ public class ChartCommandPanelToolBar
     radioButtonHolder.add(arrowRadioButton, null);
     
     radioButtonHolder.add(documentDate, null);
+    radioButtonHolder.add(nowGRIBButton, null);
 
     buttonGroup.add(ddRadioButton);
     buttonGroup.add(grabRadioButton);
@@ -255,6 +260,9 @@ public class ChartCommandPanelToolBar
     
     documentDate.setText(WWGnlUtilities.buildMessage("with-date"));
     documentDate.setToolTipText(WWGnlUtilities.buildMessage("with-date-tt"));
+    
+    nowGRIBButton.setText("GRIB Now"); // TRANSLATE
+    nowGRIBButton.setToolTipText("Position the GRIB on current date"); // TRANSLATE
 
     ddRadioButton.setToolTipText(WWGnlUtilities.buildMessage("set-to-dd"));
     grabRadioButton.setToolTipText(WWGnlUtilities.buildMessage("set-to-gs"));
@@ -305,6 +313,29 @@ public class ChartCommandPanelToolBar
            WWContext.getInstance().fireSetWithCompositeDocumentDate(documentDate.isSelected());
          }
        });
+    
+    nowGRIBButton.addActionListener(new ActionListener()
+      {
+        public void actionPerformed(ActionEvent e)
+        {
+          int gribIndex = 0;
+          GribHelper.GribConditionData[] currentGRIB = ((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getCommandPanel().getGribData();
+          Date now = new Date();
+          if (currentGRIB != null)
+          {      
+            for (GribHelper.GribConditionData gribData : currentGRIB)
+            {
+              Date gribDate = gribData.getDate(); 
+              if (gribDate.after(now))
+                break;
+              else
+                gribIndex++;
+            }
+          }          
+          WWContext.getInstance().fireGribIndex(gribIndex);
+
+        }
+      });
     this.validate();
   }
 
@@ -362,5 +393,31 @@ public class ChartCommandPanelToolBar
       grab = PENCIL_CURSOR;
 
     WWContext.getInstance().fireSetCursor(grab);
+  }
+  
+  public void paintComponent(Graphics g)
+  {
+//  System.out.println("PaintComponent invoked on toolbar");     
+    setNowButton();
+  }
+  
+  public void setNowButton()
+  {
+    GribHelper.GribConditionData[] currentGRIB = ((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getCommandPanel().getGribData();
+    boolean displayButton = (currentGRIB != null);
+
+    Date now = new Date();
+    if (currentGRIB != null)
+    {      
+      displayButton = false;
+      for (GribHelper.GribConditionData gribData : currentGRIB)
+      {
+        Date gribDate = gribData.getDate(); 
+//      System.out.println("GRIB Date:" + gribDate.toString() + ", now is " + now.toString());  
+        if (gribDate.after(now))
+          displayButton = true;
+      }
+    }
+    nowGRIBButton.setVisible(displayButton);
   }
 }
