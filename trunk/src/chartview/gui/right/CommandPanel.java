@@ -3847,13 +3847,13 @@ public class CommandPanel
       idx = 1;
 
     boolean b = false;
-    if (compositeRadioButton != null && compositeRadioButton[i -idx] != null)
+    if (compositeRadioButton != null && compositeRadioButton.length > (i - idx) && compositeRadioButton[i - idx] != null)
     {
 //      for (JRadioButton rb : compositeRadioButton)
 //        System.out.println("RB " + rb.getToolTipText() + ":" + (rb.isSelected() ? "yes" : "no"));
       b = compositeRadioButton[i - idx].isSelected();
     }
-    else if (compositeCheckBox != null && compositeCheckBox[i] != null)
+    else if (compositeCheckBox != null && compositeCheckBox.length > i && compositeCheckBox[i] != null)
     {
 //      for (JCheckBox cb : compositeCheckBox)
 //      {
