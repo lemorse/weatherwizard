@@ -1158,6 +1158,16 @@ public class WWContext
       l.setWithCompositeDocumentDate(b);
   }  
 
+  public void fireClickOnChart()
+  {
+    for (int i=0; i < this.getListeners().size(); i++)
+    {
+      ApplicationEventListener l = this.getListeners().get(i);
+      l.clickOnChart();
+    }    
+  }
+
+
     
   public void setUseGRIBWindSpeedTransparency(Boolean useGRIBWindSpeedTransparency)
   {
