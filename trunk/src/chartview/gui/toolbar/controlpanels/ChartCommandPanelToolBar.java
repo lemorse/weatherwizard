@@ -58,6 +58,7 @@ public class ChartCommandPanelToolBar
 
   private JCheckBox documentDate = new JCheckBox();
   private JButton nowGRIBButton = new JButton();
+  private JButton routingButton = new JButton();
   
   private JButton expandCollapseControlButton = new JButton();
   private JButton scrollThruOpenTabsButton = new JButton();
@@ -107,7 +108,11 @@ public class ChartCommandPanelToolBar
        }
        public void gribLoaded() 
        {
-         setNowButton();
+         setGRIBButtons();
+       }
+       public void clickOnChart()
+       {
+         setGRIBButtons();
        }
      };
   
@@ -224,6 +229,10 @@ public class ChartCommandPanelToolBar
     this.add(zoomOutButton);
     this.add(reloadButton);
 //  this.add(resetZoomButton);
+    this.add(routingButton, null);
+    this.add(nowGRIBButton, null);
+    routingButton.setEnabled(false);
+    nowGRIBButton.setEnabled(false);
     
     this.add(extraComponentHolder);
     extraComponentHolder.add(radioButtonHolder, BorderLayout.WEST);
@@ -238,7 +247,6 @@ public class ChartCommandPanelToolBar
     radioButtonHolder.add(arrowRadioButton, null);
     
     radioButtonHolder.add(documentDate, null);
-    radioButtonHolder.add(nowGRIBButton, null);
 
     buttonGroup.add(ddRadioButton);
     buttonGroup.add(grabRadioButton);
@@ -261,8 +269,24 @@ public class ChartCommandPanelToolBar
     documentDate.setText(WWGnlUtilities.buildMessage("with-date"));
     documentDate.setToolTipText(WWGnlUtilities.buildMessage("with-date-tt"));
     
-    nowGRIBButton.setText("GRIB Now"); // TRANSLATE
+//  nowGRIBButton.setText("GRIB Now");
+    nowGRIBButton.setIcon(new ImageIcon(this.getClass().getResource("img/down.png")));
     nowGRIBButton.setToolTipText("Position the GRIB on current date"); // TRANSLATE
+    nowGRIBButton.setPreferredSize(new Dimension(24, 24));
+    nowGRIBButton.setBorderPainted(false);
+    
+    routingButton.setIcon(new ImageIcon(this.getClass().getResource("img/navigation.png")));
+    routingButton.setToolTipText(WWGnlUtilities.buildMessage("routing"));
+    routingButton.setPreferredSize(new Dimension(24, 24));
+    routingButton.setBorderPainted(false);
+    routingButton.addActionListener(new ActionListener()
+      {
+        public void actionPerformed(ActionEvent e)
+        {
+//        System.out.println("Routing!!!");
+          ((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getCommandPanel().calculateRouting();
+        }
+      });
 
     ddRadioButton.setToolTipText(WWGnlUtilities.buildMessage("set-to-dd"));
     grabRadioButton.setToolTipText(WWGnlUtilities.buildMessage("set-to-gs"));
@@ -398,14 +422,20 @@ public class ChartCommandPanelToolBar
   public void paintComponent(Graphics g)
   {
 //  System.out.println("PaintComponent invoked on toolbar");     
-    setNowButton();
+    setGRIBButtons();
   }
   
-  public void setNowButton()
+  public void setGRIBButtons()
   {
     GribHelper.GribConditionData[] currentGRIB = ((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getCommandPanel().getGribData();
     boolean displayButton = (currentGRIB != null);
-
+    if (((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getCommandPanel().getFrom() != null && 
+        ((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getCommandPanel().getTo() != null && 
+        currentGRIB != null)
+      routingButton.setEnabled(true);
+    else
+      routingButton.setEnabled(false);
+    
     Date now = new Date();
     if (currentGRIB != null)
     {      
@@ -418,6 +448,6 @@ public class ChartCommandPanelToolBar
           displayButton = true;
       }
     }
-    nowGRIBButton.setVisible(displayButton);
+    nowGRIBButton.setEnabled(displayButton);
   }
 }

@@ -6013,6 +6013,8 @@ public class CommandPanel
                 intermediateRoutingWP.add(here);
               }
             }
+            // Broadcast the click
+            WWContext.getInstance().fireClickOnChart();
           }
         }
       }
@@ -6640,6 +6642,7 @@ public class CommandPanel
     wgd = null;
     System.gc();
     WWContext.getInstance().fireGribUnloaded();
+    WWContext.getInstance().fireClickOnChart();
     displayComboBox.setEnabled(false);
   }
 

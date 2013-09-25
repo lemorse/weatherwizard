@@ -859,6 +859,7 @@ public class CommandPanelPopup
         parent.insertRoutingWP = false;
         parent.intermediateRoutingWP = null;
         parent.chartPanel.repaint();
+        WWContext.getInstance().fireClickOnChart();
       }
     }
     else if (event.getActionCommand().equals(INSERT_ROUTING_WP))

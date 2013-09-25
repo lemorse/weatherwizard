@@ -242,4 +242,6 @@ public abstract class ApplicationEventListener implements EventListener
 
   public void setReplayDelay(int i) {}
   public void setWithCompositeDocumentDate(boolean b) {}
+  
+  public void clickOnChart() {}
 }
