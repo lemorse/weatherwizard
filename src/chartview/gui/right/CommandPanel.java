@@ -2451,7 +2451,13 @@ public class CommandPanel
             {
               int currTabIdx = ((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getMasterTabPane().getSelectedIndex();
               String tabName = fileName.substring(fileName.lastIndexOf(File.separator) + 1);
-              tabName = tabName.substring(fileName.lastIndexOf("/") + 1);
+              try { tabName = tabName.substring(tabName.lastIndexOf("/") + 1); }
+              catch (Exception ex)
+              {
+                System.err.println("FileName:" + fileName);
+                System.err.println("TabName :" + tabName);
+                ex.printStackTrace();
+              }
               if (tabName.endsWith(".ptrn"))
                 tabName = tabName.substring(0, tabName.length() - ".ptrn".length());
 //            System.out.println("Replacing [" + ((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getMasterTabPane().getTitleAt(currTabIdx) + "] with [" + tabName + "]");
