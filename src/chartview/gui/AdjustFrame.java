@@ -1368,7 +1368,14 @@ public class AdjustFrame
           layers.repaint();
         }
         
-        
+        @Override
+        public void setGribIndex(int idx) 
+        {
+          GribHelper.GribConditionData[] currentGRIB = ((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getCommandPanel().getGribData();
+          Date gribDate = currentGRIB[idx].getDate(); 
+//        System.out.println("GRIB Date:" + gribDate.toString()); 
+          setStatusLabel("GRIB Date:" + gribDate.toString());
+        }
         
         @Override
         public void progressing(String mess)

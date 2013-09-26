@@ -351,12 +351,15 @@ public class ChartCommandPanelToolBar
             {
               Date gribDate = gribData.getDate(); 
               if (gribDate.after(now))
+              {
+                gribIndex--;
                 break;
+              }
               else
                 gribIndex++;
             }
           }          
-          WWContext.getInstance().fireGribIndex(gribIndex);
+          WWContext.getInstance().fireGribIndex(gribIndex<0?0:gribIndex);
 
         }
       });
