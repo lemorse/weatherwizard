@@ -11,7 +11,7 @@ This page takes over and replaces the one [http://donpedro.lediouris.net/softwar
 = Details =
 
 || *Date* || *Description* || *Impacted file(s)* ||
-|| 29-Sep-2013  || Minor bug fix || chartadjust.jar ||
+|| 29-Sep-2013  || Minor bug fix, and HTML5 first implementation (more to come) || chartadjust.jar ||
 || 23-Sep-2013  || Cosmetix || chartadjust.jar ||
 || 22-Sep-2013  || Added VMG & ZMG, plus performance ratio (requires polars) || nmeareader.jar ||
 || 02-Sep-2013  || New preference in Display > Others, to set the default font. In some Look & Feels (like Metal), the default font is way too big in the control pane. With this preference, you can choose a font that allows you to see and read whatever is displayed. Default is Arial 12. || chartadjust.jar ||
