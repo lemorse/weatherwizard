@@ -1755,7 +1755,8 @@ public class CommandPanelUtils
         try
         { 
           XMLElement chartOpt = (XMLElement)(doc.selectNodes("//chart-opt").item(0));
-          showChart = "yes".equals(chartOpt.getAttribute("show")); 
+          if (chartOpt != null)
+            showChart = "yes".equals(chartOpt.getAttribute("show")); 
         } 
         catch (Exception ignore) {}
         cp.setDrawChart(showChart);
@@ -1764,8 +1765,11 @@ public class CommandPanelUtils
         try
         {
           XMLElement scroll = (XMLElement)(doc.selectNodes("//scroll").item(0));
-          xScroll = Integer.parseInt(scroll.getAttribute("x"));
-          yScroll = Integer.parseInt(scroll.getAttribute("y"));
+          if (scroll != null)
+          {
+            xScroll = Integer.parseInt(scroll.getAttribute("x"));
+            yScroll = Integer.parseInt(scroll.getAttribute("y"));
+          }
         }
         catch (Exception ignore)
         {
@@ -1775,13 +1779,18 @@ public class CommandPanelUtils
         try
         {
           XMLElement faxOption = (XMLElement)(doc.selectNodes("//fax-option").item(0));
-          String opt = faxOption.getAttribute("value");
-          if (opt.equals("CHECKBOX"))
-            cp.setCheckBoxPanelOption(CommandPanel.CHECKBOX_OPTION);
-          else if (opt.equals("RADIOBUTTON"))
-            cp.setCheckBoxPanelOption(CommandPanel.RADIOBUTTON_OPTION);
+          if (faxOption != null)
+          {
+            String opt = faxOption.getAttribute("value");
+            if (opt.equals("CHECKBOX"))
+              cp.setCheckBoxPanelOption(CommandPanel.CHECKBOX_OPTION);
+            else if (opt.equals("RADIOBUTTON"))
+              cp.setCheckBoxPanelOption(CommandPanel.RADIOBUTTON_OPTION);
+            else
+              System.out.println("Unknown option [" + opt + "]");
+          }
           else
-            System.out.println("Unknown option [" + opt + "]");
+            System.err.println("No //fax-option node in this document.");
         }
         catch (Exception ignore)
         {
