@@ -11,6 +11,7 @@ This page takes over and replaces the one [http://donpedro.lediouris.net/softwar
 = Details =
 
 || *Date* || *Description* || *Impacted file(s)* ||
+|| 01-Oct-2013  || pdf publishing on Linux, HTML5/JavaScripts || nmeareader.jar ||
 || 29-Sep-2013  || Minor bug fix, and HTML5 first implementation (more to come) || chartadjust.jar ||
 || 23-Sep-2013  || Cosmetix || chartadjust.jar ||
 || 22-Sep-2013  || Added VMG & ZMG, plus performance ratio (requires polars) || nmeareader.jar ||
