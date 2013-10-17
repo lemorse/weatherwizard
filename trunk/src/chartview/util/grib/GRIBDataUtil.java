@@ -227,15 +227,28 @@ public class GRIBDataUtil
   { return generateIsoCurves(gribData, va, TYPE_WAVE); }
   
   public final static List<List<List<GeoPoint>>> generateIsorain(GribHelper.GribConditionData gribData, int[] va)
-  { return generateIsoCurves(gribData, va, TYPE_RAIN); }
+  { 
+    double[] dva = new double[va.length];
+    for (int i=0; i<va.length; i++)
+      dva[i] = ((double)va[i] / 1E4);
+    return generateIsoCurves(gribData, dva, TYPE_RAIN); 
+  }
   
   private final static List<List<List<GeoPoint>>> generateIsoCurves(GribHelper.GribConditionData gribData, int[] va, int dataType)
+  {
+    double[] dva = new double[va.length];
+    for (int i=0; i<va.length; i++)
+      dva[i] = (double)va[i];
+    return generateIsoCurves(gribData, dva, dataType);
+  }
+  
+  private final static List<List<List<GeoPoint>>> generateIsoCurves(GribHelper.GribConditionData gribData, double[] va, int dataType)
   {
     List<List<List<GeoPoint>>> alalalgp = new ArrayList<List<List<GeoPoint>>>();
     for (int i=0; i<va.length; i++)
     {
   //  long before = System.currentTimeMillis();
-      alalalgp.add(detect((double)va[i], gribData, dataType));
+      alalalgp.add(detect(va[i], gribData, dataType));
   //  long after = System.currentTimeMillis();
   //  System.out.println("Detection + Binding done in " + Long.toString(after - before) + " ms for " + Integer.toString(va[i]));
     }
