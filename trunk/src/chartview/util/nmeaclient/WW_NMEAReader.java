@@ -187,7 +187,12 @@ public class WW_NMEAReader
   public void manageDataEvent(String payload)
   {
     if (verbose)
-      System.out.println("Read from NMEA :[" + payload + "]");
+    {
+      String displ = payload;
+        while ((displ.endsWith("\r") || displ.endsWith("\n")) && displ.length() >= 0)
+        displ = displ.substring(0, displ.length() - 1);
+      System.out.println(this.getClass().getName() + ": Read from NMEA :[" + displ + "]");
+    }
     
     String chainID = payload.substring(3, 6);
     if (chainID.equals("RMC")) // TODO More Strings here, like GLL...
