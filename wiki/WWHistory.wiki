@@ -11,6 +11,7 @@ This page takes over and replaces the one [http://donpedro.lediouris.net/softwar
 = Details =
 
 || *Date* || *Description* || *Impacted file(s)* ||
+|| 25-Oct-2013  || Fixed bugs in the TCP & UDP re-broadcasting. || desktop.jar, nmeareader.jar ||
 || 17-Oct-2013  || Fixed a bug in the prate contour detection. || chartadjust.jar ||
 || 01-Oct-2013  || pdf publishing on Linux, HTML5/JavaScripts || nmeareader.jar ||
 || 29-Sep-2013  || Minor bug fix, and HTML5 first implementation (more to come) || chartadjust.jar ||
