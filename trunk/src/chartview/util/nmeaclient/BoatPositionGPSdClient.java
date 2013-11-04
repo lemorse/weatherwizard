@@ -30,7 +30,7 @@ public class BoatPositionGPSdClient implements BoatPositionClient, GPSdClientInt
       client = new GPSdClient(this, 
                               (ParamPanel.data[ParamData.NMEA_HOST][ParamData.VALUE_INDEX]).toString(),
                               Integer.parseInt(gpsdPortNumber), 
-                              false); // Verbose
+                              "true".equals(System.getProperty("gpsd.verbose", "false"))); // Verbose
     }
     catch (Exception e)
     {
@@ -90,6 +90,7 @@ public class BoatPositionGPSdClient implements BoatPositionClient, GPSdClientInt
   {
     return ok;
   }
+  
   public Throwable getProblemCause()
   {
     return problemCause;
