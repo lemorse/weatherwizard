@@ -183,19 +183,24 @@ public class HTTPClient
         throw e;
       }
       File f = new File(fName);
-      if (fName.endsWith(".jpg"))
-        ImageIO.write((RenderedImage)image, "jpg", f);
-      else if (fName.endsWith(".gif"))
-        gifImage.write(new GIFOutputStream(new FileOutputStream(f)));
-      else if (fName.endsWith(".png"))
-        ImageIO.write((RenderedImage)image, "png", f);
+      if (new File(outputdir).canWrite())
+      {
+        if (fName.endsWith(".jpg"))
+          ImageIO.write((RenderedImage)image, "jpg", f);
+        else if (fName.endsWith(".gif"))
+          gifImage.write(new GIFOutputStream(new FileOutputStream(f)));
+        else if (fName.endsWith(".png"))
+          ImageIO.write((RenderedImage)image, "png", f);
+        else
+          System.out.println("Extension not supported (" + fName + ")");
+        long diff = System.currentTimeMillis() - before;
+        retFile = f.getAbsolutePath();
+        if (verbose) System.out.println("New Chart available " + retFile + " [" + Long.toString(diff) + " ms]");
+      }
       else
-        System.out.println("Extension not supported (" + fName + ")");
-      long diff = System.currentTimeMillis() - before;
-      retFile = f.getAbsolutePath();
-      if (verbose) System.out.println("New Chart available " + retFile + " [" + Long.toString(diff) + " ms]");
+        throw new CannotWriteException("Cannot write in " + outputdir);
     }
-    catch(Exception e)
+    catch (Exception e)
     {
       WWContext.getInstance().fireExceptionLogging(e);
       throw e;
@@ -203,7 +208,7 @@ public class HTTPClient
     return image;
   }
 
-  public static byte[] getGRIB(String urlString, String dir, String fileName, boolean verbose)
+  public static byte[] getGRIB(String urlString, String dir, String fileName, boolean verbose) throws Exception
   {
     byte[] content = null;
     String retFile = "";
@@ -259,18 +264,24 @@ public class HTTPClient
         WWContext.getInstance().fireExceptionLogging(e);
         e.printStackTrace();
       }
-      File f = new File(fName);
-      FileOutputStream fos = new FileOutputStream(f);
-      fos.write(content);
-      fos.close();
-      long diff = System.currentTimeMillis() - before;
-      retFile = f.getAbsolutePath();
-      if (verbose) System.out.println("New GRIB available " + retFile + " [" + Long.toString(diff) + " ms]");
+      File f = new File(fName); 
+      if (new File(outputdir).canWrite())
+      {
+        FileOutputStream fos = new FileOutputStream(f);
+        fos.write(content);
+        fos.close();
+        long diff = System.currentTimeMillis() - before;
+        retFile = f.getAbsolutePath();
+        if (verbose) System.out.println("New GRIB available " + retFile + " [" + Long.toString(diff) + " ms]");
+      }
+      else
+        throw new CannotWriteException("Nannot write in " + outputdir);
     }
     catch(Exception e)
     {
       WWContext.getInstance().fireExceptionLogging(e);
-      e.printStackTrace();
+//    e.printStackTrace();
+      throw e;
     }
     return content;
   }
@@ -294,6 +305,29 @@ public class HTTPClient
     }
 
     public NMEAServerException()
+    {
+      super();
+    }
+  }
+  
+  public static class CannotWriteException extends IOException
+  {
+    public CannotWriteException(Throwable cause)
+    {
+      super(cause);
+    }
+
+    public CannotWriteException(String message, Throwable cause)
+    {
+      super(message, cause);
+    }
+
+    public CannotWriteException(String message)
+    {
+      super(message);
+    }
+
+    public CannotWriteException()
     {
       super();
     }

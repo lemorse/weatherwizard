@@ -24,6 +24,8 @@ import chartview.util.grib.GribHelper;
 
 import chartview.util.http.HTTPClient;
 
+import chartview.util.http.HTTPClient.CannotWriteException;
+
 import coreutilities.Utilities;
 
 import java.awt.Color;
@@ -1078,11 +1080,23 @@ public class CommandPanelUtils
                   try
                   {
                     WWContext.getInstance().fireLogging(WWGnlUtilities.buildMessage("loading2", new String[] { url }) + "\n", LoggingPanel.WHITE_STYLE);
+                    System.out.println("Loading " + faxName);
                     HTTPClient.getChart(url, dir, faxName, true);
                     WWContext.getInstance().fireReloadFaxTree();
                   }
+                  catch (CannotWriteException cwe) // Case of a permission
+                  {
+                    String message = cwe.getMessage();
+                    message += ("\nUser [" + System.getProperty("user.name") + "] seems not to have write access to " + faxDir);
+                    System.out.println(">>> *********************************");
+                    System.err.println(message);
+                    System.out.println(">>> *********************************");
+                    JOptionPane.showMessageDialog(cp, message, "Downloading fax", JOptionPane.WARNING_MESSAGE);
+                    cwe.printStackTrace();
+                  }
                   catch (Exception ex)
                   {
+                    System.out.println("!!!!!!! >>> Loading fax, Exception is a " + ex.getClass().getName());
   //                System.out.println("HTTPClient.getChart interrupted..., returning.");
                     WWContext.getInstance().fireInterruptProcess();
                     return;
@@ -1151,6 +1165,13 @@ public class CommandPanelUtils
                     ImageIO.write(ImageUtil.toBufferedImage(image), "png", temp);
                     faxName = temp.getAbsolutePath();
                     temp.deleteOnExit();
+                  }
+                  catch (CannotWriteException cwe) // Case of a permission
+                  {
+                    String message = cwe.getMessage();
+                    message += ("\nUser [" + System.getProperty("user.name") + "] seems not to have write access...");
+                    JOptionPane.showMessageDialog(cp, message, "Download", JOptionPane.WARNING_MESSAGE);
+                    cwe.printStackTrace();
                   }
                   catch(Exception e)
                   {
@@ -1390,6 +1411,13 @@ public class CommandPanelUtils
                 GribHelper.GribConditionData wgd[] = GribHelper.getGribData(new ByteArrayInputStream(gribContent), request);
                 cp.setGribData(wgd, gribFileName);
                 cp.setGribFileName(gribFileName);
+              }
+              catch (CannotWriteException cwe) // Case of a permission
+              {
+                String message = cwe.getMessage();
+                message += ("\nUser [" + System.getProperty("user.name") + "] seems not to have write access to " + gribDir);
+                JOptionPane.showMessageDialog(cp, message, "Download", JOptionPane.WARNING_MESSAGE);
+                cwe.printStackTrace();
               }
               catch (Exception ex)
               {

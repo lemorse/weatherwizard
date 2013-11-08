@@ -700,7 +700,19 @@ public class CompositeTabbedPane
           {
             String saveAs = ing.getGRIBLocalFile();
             WWContext.getInstance().fireLogging(WWGnlUtilities.buildMessage("loading2", new String[] { ing.getGRIBLocalFile() }) + "\n", LoggingPanel.WHITE_STYLE);
-            HTTPClient.getGRIB(WWGnlUtilities.generateGRIBRequest(ing.getGRIBRequest()), ".", saveAs, true);
+            try { HTTPClient.getGRIB(WWGnlUtilities.generateGRIBRequest(ing.getGRIBRequest()), ".", saveAs, true); }
+            catch (Exception ex)
+            {
+              if (ex instanceof HTTPClient.CannotWriteException)
+              {
+                JOptionPane.showMessageDialog(instance, 
+                                              "Check your write permissions on " + new File(".").getAbsolutePath() + " !", 
+                                              WWGnlUtilities.buildMessage("grib-download"), 
+                                              JOptionPane.WARNING_MESSAGE);
+              }
+              else
+                ex.printStackTrace();
+            }
             JOptionPane.showMessageDialog(instance, WWGnlUtilities.buildMessage("is-ready", new String[] { saveAs }), WWGnlUtilities.buildMessage("grib-download"), JOptionPane.INFORMATION_MESSAGE);
 //          allJTrees.refreshGribTree();
             WWContext.getInstance().fireReloadGRIBTree();
@@ -911,7 +923,20 @@ public class CompositeTabbedPane
                 String fileName = gribDir + File.separator + girbPrefix + sdf.format(new Date()) + "." + gribExt;
 
                 WWContext.getInstance().fireLogging(WWGnlUtilities.buildMessage("loading2", new String[] { request }) + "\n", LoggingPanel.WHITE_STYLE);
-                HTTPClient.getGRIB(WWGnlUtilities.generateGRIBRequest(request), gribDir, fileName, true);
+                try { HTTPClient.getGRIB(WWGnlUtilities.generateGRIBRequest(request), gribDir, fileName, true); }
+                catch (Exception ex)
+                {
+                  if (ex instanceof HTTPClient.CannotWriteException)
+                  {
+                    JOptionPane.showMessageDialog(instance, 
+                                                  "Check your write permissions on " + new File(gribDir).getAbsolutePath() + " !", 
+                                                  WWGnlUtilities.buildMessage("grib-download"), 
+                                                  JOptionPane.WARNING_MESSAGE);
+                  }
+                  else
+                    ex.printStackTrace();
+                }
+
                 finalMess += ("- " + fileName + "\n");
               }
             }

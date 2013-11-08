@@ -50,6 +50,7 @@ import java.awt.event.MouseEvent;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 
@@ -797,7 +798,7 @@ public class AdjustFrame
         {
           public void actionPerformed(ActionEvent ae)
           {
-            String compositeDir = ((ParamPanel.DataDirectory)ParamPanel.data[ParamData.COMPOSITE_ROOT_DIR][ParamData.VALUE_INDEX]).toString();
+            final String compositeDir = ((ParamPanel.DataDirectory)ParamPanel.data[ParamData.COMPOSITE_ROOT_DIR][ParamData.VALUE_INDEX]).toString();
             boolean ok = true;
             if (((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().isDisplayAltTooltip())
             {
@@ -809,7 +810,7 @@ public class AdjustFrame
                 ok = false;
             }
             if (ok)
-              WWGnlUtilities.generateImagesFromComposites(compositeDir, ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel());
+             WWGnlUtilities.generateImagesFromComposites(compositeDir, ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel());
           }
         });
     menuAdmin.add(menuDetectUnusedFiles);
@@ -1221,9 +1222,15 @@ public class AdjustFrame
         }
 
         @Override
-        public void setStatus(String str)
+        public void setStatus(final String str)
         {
-          setStatusLabel(str);
+          new Thread()
+            {
+              public void run() 
+              { 
+                setStatusLabel(str); 
+              }
+            }.start();
         }
 
         @Override
@@ -1550,6 +1557,7 @@ public class AdjustFrame
   public void setStatusLabel(String s)
   {
     statusLabel.setText(s);  
+    statusLabel.repaint();
   }
   
   private void generatePattern()
@@ -2015,7 +2023,19 @@ public class AdjustFrame
           {
             String saveAs = ing.getGRIBLocalFile();
             WWContext.getInstance().fireLogging(WWGnlUtilities.buildMessage("loading2", new String[] { ing.getGRIBLocalFile() }) + "\n", LoggingPanel.WHITE_STYLE);
-            HTTPClient.getGRIB(WWGnlUtilities.generateGRIBRequest(ing.getGRIBRequest()), ".", saveAs, true);
+            try { HTTPClient.getGRIB(WWGnlUtilities.generateGRIBRequest(ing.getGRIBRequest()), ".", saveAs, true); }
+            catch (Exception ex)
+            {
+              if (ex instanceof HTTPClient.CannotWriteException)
+              {
+                JOptionPane.showMessageDialog(instance, 
+                                              "Check your write permissions on " + new File(".").getAbsolutePath() + " !", 
+                                              WWGnlUtilities.buildMessage("grib-download"), 
+                                              JOptionPane.WARNING_MESSAGE);
+              }
+              else
+                ex.printStackTrace();
+            }
             JOptionPane.showMessageDialog(instance, WWGnlUtilities.buildMessage("is-ready", new String[] { saveAs }), WWGnlUtilities.buildMessage("grib-download"), JOptionPane.INFORMATION_MESSAGE);
 //          allJTrees.refreshGribTree();
             WWContext.getInstance().fireReloadGRIBTree();
@@ -2204,6 +2224,13 @@ public class AdjustFrame
                   HTTPClient.getChart(faxUrl, faxDir, fileName, true);    
                   finalMess += ("- " + fileName + "\n");
                 }
+                catch (FileNotFoundException fnfe) // Case of a permission
+                {
+                  String message = fnfe.getMessage();
+                  message += ("\nUser [" + System.getProperty("user.name") + "] seems not to have write access to " + faxDir);
+                  JOptionPane.showMessageDialog(instance, message, "Download", JOptionPane.WARNING_MESSAGE);
+                  fnfe.printStackTrace();
+                }
                 catch (Exception ex)
                 {
                   ex.printStackTrace();
@@ -2226,7 +2253,19 @@ public class AdjustFrame
                 String fileName = gribDir + File.separator + girbPrefix + sdf.format(new Date()) + "." + gribExt;
 
                 WWContext.getInstance().fireLogging(WWGnlUtilities.buildMessage("loading2", new String[] { request }) + "\n", LoggingPanel.WHITE_STYLE);
-                HTTPClient.getGRIB(WWGnlUtilities.generateGRIBRequest(request), gribDir, fileName, true);
+                try { HTTPClient.getGRIB(WWGnlUtilities.generateGRIBRequest(request), gribDir, fileName, true); }
+                catch (Exception ex)
+                {
+                  if (ex instanceof HTTPClient.CannotWriteException)
+                  {
+                    JOptionPane.showMessageDialog(instance, 
+                                                  "Check your write permissions on " + new File(gribDir).getAbsolutePath() + " !", 
+                                                  WWGnlUtilities.buildMessage("grib-download"), 
+                                                  JOptionPane.WARNING_MESSAGE);
+                  }
+                  else
+                    ex.printStackTrace();
+                }
                 finalMess += ("- " + fileName + "\n");
               }
             }
