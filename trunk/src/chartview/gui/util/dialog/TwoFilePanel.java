@@ -57,11 +57,12 @@ public class TwoFilePanel
   private JRadioButton justFaxesRadioButton = new JRadioButton();
   private JRadioButton justGRIBRadioButton = new JRadioButton();
   private JCheckBox pdfCheckBox = new JCheckBox();
-  private JLabel pdfTitleLabel = new JLabel("A title for the pdf:");
+  private JLabel pdfTitleLabel = new JLabel("A title for the pdf:");  // LOCALIZE
   private JTextField pdfTitle = new JTextField();
   private JCheckBox boatAndTrackCheckBox = new JCheckBox();
   private JCheckBox faxFilterCheckBox = new JCheckBox();
   private JTextField faxNameFilterTextField = new JTextField();
+  private JCheckBox withCommentOnlyCheckBox = new JCheckBox();
 
   public TwoFilePanel()
   {
@@ -164,7 +165,9 @@ public class TwoFilePanel
       });
     faxNameFilterTextField.setPreferredSize(new Dimension(150, 24));
     faxNameFilterTextField.setEnabled(false);
-    faxNameFilterTextField.setToolTipText("Regular Expression for the Fax Names");
+    faxNameFilterTextField.setToolTipText("Regular Expression for the Fax Names"); // LOCALIZE
+    withCommentOnlyCheckBox.setText("With comments only");  // LOCALIZE
+    withCommentOnlyCheckBox.setToolTipText("<html><b><i>Warning</i></b>:<br>This is a demanding operation, will take more time...</html>");
     this.add(leftLabel, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
     this.add(rightLabel, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
     this.add(leftChooser, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
@@ -183,6 +186,8 @@ public class TwoFilePanel
     gribOptionPanel.add(pdfTitle, null);
     this.add(gribOptionPanel, new GridBagConstraints(0, 4, 2, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(10, 10, 0, 0), 0, 0));
     //Previous regexpr?
+    this.add(withCommentOnlyCheckBox, new GridBagConstraints(1, 2, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
+          new Insets(0, 0, 0, 0), 0, 0));
     Properties p = new Properties();
     try
     {
@@ -253,6 +258,11 @@ public class TwoFilePanel
   public boolean withBoatAndTrack()
   {
     return boatAndTrackCheckBox.isSelected();
+  }
+  
+  public boolean withCommentsOnly()
+  {
+    return withCommentOnlyCheckBox.isSelected();
   }
   
   public String getPDFTitle()

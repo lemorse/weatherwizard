@@ -11,6 +11,7 @@ import chartview.gui.AdjustFrame;
 import chartview.gui.left.FileTypeHolder;
 import chartview.gui.right.CommandPanel;
 import chartview.gui.util.dialog.ExitPanel;
+import chartview.gui.util.dialog.FaxType;
 import chartview.gui.util.dialog.OneColumnTablePanel;
 import chartview.gui.util.dialog.PositionInputPanel;
 import chartview.gui.util.dialog.TwoFilePanel;
@@ -22,6 +23,7 @@ import chartview.gui.util.param.ParamPanel;
 
 import chartview.gui.util.param.widget.FieldPlusFinder;
 
+import chartview.util.grib.GribHelper;
 import chartview.util.http.HTTPClient;
 import chartview.util.local.WeatherAssistantResourceBundle;
 
@@ -63,6 +65,8 @@ import java.awt.event.ActionListener;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+
+import java.beans.XMLDecoder;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -141,6 +145,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.UIManager;
+
+import jgrib.GribFile;
 
 import oracle.xml.parser.v2.DOMParser;
 import oracle.xml.parser.v2.NSResolver;
@@ -694,6 +700,7 @@ public class WWGnlUtilities
     String fileNameTwo = "";
     String displayOpt = null;
     String withBoatStr = "true";
+    String withCommentStr = "false";
     String faxNameFilter = null;
 
     if (twoFilePanel == null)
@@ -757,9 +764,10 @@ public class WWGnlUtilities
       regExp = twoFilePanel.getRegExprPatternTextField().getText();
       displayOpt = twoFilePanel.getDisplayOption();
       withBoatStr = (twoFilePanel.withBoatAndTrack()?"true":"false");
+      withCommentStr = (twoFilePanel.withCommentsOnly()?"true":"false");
       faxNameFilter = twoFilePanel.getFaxNameRegExpr();
     }
-    return new String[] { fileNameOne, fileNameTwo, regExp, displayOpt, twoFilePanel.getPDFTitle(), withBoatStr, faxNameFilter };
+    return new String[] { fileNameOne, fileNameTwo, regExp, displayOpt, twoFilePanel.getPDFTitle(), withBoatStr, withCommentStr, faxNameFilter };
   }
   
   public final static int NOTHING  = 0;
@@ -2045,7 +2053,8 @@ public class WWGnlUtilities
                                                boolean countOnly,
                                                String displayOption,
                                                BufferedWriter corellation,
-                                               boolean withBoatAndTrack)
+                                               boolean withBoatAndTrack,
+                                               boolean withCommentsOnly)
   {
     int howMany = 0;
     
@@ -2066,7 +2075,7 @@ public class WWGnlUtilities
               if (ok && !pathname.isDirectory() && pattern != null)
               {
                 Matcher m = pattern.matcher(pathname.toString());
-                System.out.println("Checking if [" + pathname.toString() + "] matches [" + pattern + "]");
+                if ("true".equals(System.getProperty("verbose", "false"))) System.out.println("Checking if [" + pathname.toString() + "] matches [" + pattern + "]");
                 if (!m.matches())
                   ok = false;
               }
@@ -2077,40 +2086,60 @@ public class WWGnlUtilities
       for (int i=0; i<flist.length && keepWorking.valueOf(); i++)
       {
         if (flist[i].isDirectory())
-          howMany += drillDownAndGenerateImage(flist[i], imgDir, cp, pattern, faxPattern, countOnly, displayOption, corellation, withBoatAndTrack);
+          howMany += drillDownAndGenerateImage(flist[i], imgDir, cp, pattern, faxPattern, countOnly, displayOption, corellation, withBoatAndTrack, withCommentsOnly);
         else
         {
           String fName = flist[i].getAbsolutePath();
-          if (!countOnly)
+          String comment = "";
+          if (withCommentsOnly) 
+            comment = WWGnlUtilities.getCompositeComment(flist[i].getAbsolutePath());
+          
+          if (withCommentsOnly && comment.trim().length() == 0)
           {
-            System.out.println("Generating Image for Composite [" + fName + "]");
-            // That's here !!
-            int nbc = cp.restoreComposite(flist[i].getAbsolutePath(), displayOption, faxPattern, withBoatAndTrack);
-            if (nbc == 0)
-            {
-              System.out.println(">>>>>> No component for " + fName + ", skipping.");
-              continue;
-            }
-//          else
-//            System.out.println(">>> " + nbc + " component(s) for " + fName);
-            String compositeComment = cp.getCurrentComment();            
-            String imgfName = fName.substring(fName.lastIndexOf(File.separator) + 1) + ".png"; 
-            if (corellation != null)
-            {
-              String xmlCorellation = "  <data file='" + imgfName + "'>" +
-                                          "<![CDATA[" + compositeComment + "]]>" +
-                                        "</data>\n";
-              try { corellation.write(xmlCorellation); } catch (Exception ignore) {}
-            }
-            imgfName = imgDir.toString() + File.separator + imgfName;
-            String prefix = imgfName.trim().substring(0, imgfName.trim().lastIndexOf("."));
-            String suffix = imgfName.trim().substring(imgfName.trim().lastIndexOf(".") + 1);        
-//          System.out.print("Generating image from composite (" + imgfName + ")...");
-            int[] ret = cp.getChartPanel().genImage(prefix, suffix.toLowerCase());
-//          System.out.println("Ok.");
-            WWContext.getInstance().fireProgressing();
+            WWContext.getInstance().fireLogging("Comment required, skipping [" + fName + "]");
+            WWContext.getInstance().fireSetStatus("Comment required, skipping [" + fName + "]");
+            System.out.println("-- Comment required, skipping [" + fName + "]");
           }
-          howMany++;
+          else
+          {
+            if (withCommentsOnly)
+            {
+              WWContext.getInstance().fireLogging("Comment for [" + fName + "] [" + comment.trim() + "]");
+              WWContext.getInstance().fireSetStatus("Comment for [" + fName + "] [" + comment.trim() + "]");
+              System.out.println("-- Comment for [" + fName + "] [" + comment.trim() + "]");
+            }
+            if (!countOnly)
+            {
+              System.out.println("Generating Image for Composite [" + fName + "]");
+              // That's here !!
+              int nbc = cp.restoreComposite(flist[i].getAbsolutePath(), displayOption, faxPattern, withBoatAndTrack);
+              if (nbc == 0)
+              {
+                System.out.println(">>>>>> No component for " + fName + ", skipping.");
+                continue;
+              }
+  //          else
+  //            System.out.println(">>> " + nbc + " component(s) for " + fName);
+              String compositeComment = cp.getCurrentComment();  
+              
+              String imgfName = fName.substring(fName.lastIndexOf(File.separator) + 1) + ".png"; 
+              if (corellation != null)
+              {
+                String xmlCorellation = "  <data file='" + imgfName + "'>" +
+                                            "<![CDATA[" + compositeComment + "]]>" +
+                                          "</data>\n";
+                try { corellation.write(xmlCorellation); } catch (Exception ignore) {}
+              }
+              imgfName = imgDir.toString() + File.separator + imgfName;
+              String prefix = imgfName.trim().substring(0, imgfName.trim().lastIndexOf("."));
+              String suffix = imgfName.trim().substring(imgfName.trim().lastIndexOf(".") + 1);        
+  //          System.out.print("Generating image from composite (" + imgfName + ")...");
+              int[] ret = cp.getChartPanel().genImage(prefix, suffix.toLowerCase());
+  //          System.out.println("Ok.");
+              WWContext.getInstance().fireProgressing();
+            }
+            howMany++;
+          }
         } 
       }      
     }
@@ -3014,7 +3043,8 @@ public class WWGnlUtilities
     final String displayOpt = fromTo[3];
     final String pdfTitle   = fromTo[4];
     final boolean withBoatAndTrack = "true".equals(fromTo[5]);
-    final String faxNameFilter = fromTo[6];
+    final boolean withCommentOnly = "true".equals(fromTo[6]);
+    final String faxNameFilter = fromTo[7];
     
     Pattern pattern = null;
     Pattern faxNamePattern = null;
@@ -3067,31 +3097,49 @@ public class WWGnlUtilities
         // Store patterns
         try
         {
+          Properties prevProps = new Properties();
+          prevProps.load(new FileInputStream(WWGnlUtilities.REGEXPR_PROPERTIES_FILE));
           Properties props = new Properties();
-          props.setProperty(COMPOSITE_FILTER, regExpPattern);
-          props.setProperty(FAX_NAME_FILTER, faxNameFilter);
+          if (regExpPattern != null) 
+            props.setProperty(COMPOSITE_FILTER, regExpPattern);
+          else
+            props.setProperty(COMPOSITE_FILTER, prevProps.getProperty(COMPOSITE_FILTER, ""));
+          if (faxNameFilter != null) 
+            props.setProperty(FAX_NAME_FILTER, faxNameFilter); 
+          else
+            props.setProperty(FAX_NAME_FILTER, prevProps.getProperty(FAX_NAME_FILTER, ""));
           props.store(new FileWriter(REGEXPR_PROPERTIES_FILE), "Last Regular Expressions");
         }
         catch (Exception ex)
         {
           ex.printStackTrace();
         }
+        final Pattern _pattern = pattern;
+        final Pattern _faxNamePattern = faxNamePattern;
+        new Thread() { public void run() {
+        ////////////////////////////////////
         // 1 - Count        
-        final int howMany = drillDownAndGenerateImage(new File(startFrom), new File(generateIn), cp, pattern, faxNamePattern, true, displayOpt, null, withBoatAndTrack);       
-        int resp = JOptionPane.showConfirmDialog(cp, 
-                                                 WWGnlUtilities.buildMessage("image-gen-prompt", 
-                                                                             new String[] { Integer.toString(howMany) }), 
-                                                 WWGnlUtilities.buildMessage("image-generation"), 
-                                                 JOptionPane.OK_CANCEL_OPTION, 
-                                                 JOptionPane.QUESTION_MESSAGE);
+        final int howMany = drillDownAndGenerateImage(new File(startFrom), new File(generateIn), cp, _pattern, _faxNamePattern, true, displayOpt, null, withBoatAndTrack, withCommentOnly);       
+        int resp = 0;
+        if (howMany > 0)
+          resp = JOptionPane.showConfirmDialog(cp, 
+                                               WWGnlUtilities.buildMessage("image-gen-prompt", 
+                                                                           new String[] { Integer.toString(howMany) }), 
+                                               WWGnlUtilities.buildMessage("image-generation"), 
+                                               JOptionPane.OK_CANCEL_OPTION, 
+                                               JOptionPane.QUESTION_MESSAGE);
+        else
+        {
+          JOptionPane.showMessageDialog(cp, "No file to generate.\nCheck your regular expression.", WWGnlUtilities.buildMessage("image-generation"), JOptionPane.WARNING_MESSAGE);
+          resp = JOptionPane.CANCEL_OPTION;
+        }
         if (resp == JOptionPane.OK_OPTION)
         {
-          final Pattern ptrn = pattern;
-          final Pattern faxPtrn = faxNamePattern;
+          final Pattern ptrn = _pattern;
+          final Pattern faxPtrn = _faxNamePattern;
           Runnable heavyRunnable = new Runnable() // Show progress bar
           {
 //          ProgressMonitor monitor = null;
-            
             public void run()
             {
               keepWorking.setValue(true);
@@ -3139,7 +3187,8 @@ public class WWGnlUtilities
                                                         false,
                                                         displayOpt,
                                                         xc,
-                                                        withBoatAndTrack); 
+                                                        withBoatAndTrack,
+                                                        withCommentOnly); 
                 xc.write("</root>\n");
                 xc.close();
                 if (howMuch > 0 && pdfTitle != null && pdfTitle.trim().length() > 0)
@@ -3209,6 +3258,8 @@ public class WWGnlUtilities
         }
         else
           System.out.println("Image generation canceled by user.");
+        
+        } }.start();
       }
     }
   }
@@ -3646,6 +3697,56 @@ public class WWGnlUtilities
         nb++;
     }
     return nb;
+  }
+
+  public static String getCompositeComment(String fileName)
+  {
+    boolean fromArchive = false;
+    ZipFile waz = null;
+    XMLDocument doc = null;
+    String comment = "";
+    DOMParser parser = WWContext.getInstance().getParser();
+    synchronized (parser)
+    {
+      parser.setValidationMode(DOMParser.NONVALIDATING);
+      try
+      {
+        if (fileName.endsWith(WWContext.WAZ_EXTENSION))
+        {
+          fromArchive = true;
+          waz = new ZipFile(fileName);
+          ZipEntry composite = waz.getEntry("composite.xml");
+          if (composite != null)
+          {
+            InputStream is = waz.getInputStream(composite);
+            parser.parse(is);
+          }
+          else
+            System.out.println("composite.xml not found :(");
+        }
+        else if (fileName.endsWith(".xml"))
+        {
+          if (!(new File(fileName).isDirectory()))
+            parser.parse(new File(fileName).toURI().toURL());
+          else
+          {
+            JOptionPane.showMessageDialog(null, fileName + " is a directory", "Restoring Composite", JOptionPane.ERROR_MESSAGE);
+            return "";
+          }
+        }
+        doc = parser.getDocument();
+
+        if (doc.selectNodes("//composite-comment").getLength() > 0)
+        {
+          comment = Utilities.superTrim(doc.selectNodes("//composite-comment").item(0).getFirstChild().getNodeValue());
+        }
+      }
+      catch (Exception ex)
+      {
+        ex.printStackTrace();
+      }
+    }
+    return comment;
   }
   
   @SuppressWarnings("serial")
