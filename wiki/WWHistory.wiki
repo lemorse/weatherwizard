@@ -11,6 +11,7 @@ This page takes over and replaces the one [http://donpedro.lediouris.net/softwar
 = Details =
 
 || *Date* || *Description* || *Impacted file(s)* ||
+|| 15-Nov-2013  || Minor date bug fix, headless console || nmeaparser.jar, desktop.jar ||
 || 08-Nov-2013  || Improved the image generation (Admin Tools) || chartadjust.jar ||
 || 06-Nov-2013  || For Linux systems, in case the file system is not writable, an explicit exception is raised. || chartadjust.jar ||
 || 25-Oct-2013  || Fixed bugs in the TCP & UDP re-broadcasting. || desktop.jar, nmeareader.jar ||
