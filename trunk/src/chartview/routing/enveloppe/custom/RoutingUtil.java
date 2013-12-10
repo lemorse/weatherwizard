@@ -82,13 +82,13 @@ public class RoutingUtil
   private static int getBearing(RoutingPoint center)
   {
     int brg = 0;
-    gc.setStart(new GeoPoint(Math.toRadians(center.getPosition().getL()),
+    GreatCircle.setStart(new GeoPoint(Math.toRadians(center.getPosition().getL()),
                              Math.toRadians(center.getPosition().getG())));
-    gc.setArrival(new GeoPoint(Math.toRadians(finalDestination.getPosition().getL()),
+    GreatCircle.setArrival(new GeoPoint(Math.toRadians(finalDestination.getPosition().getL()),
                                Math.toRadians(finalDestination.getPosition().getG())));
 //  gc.calculateGreatCircle(10);
 //  double gcDistance = Math.toDegrees(gc.getDistance() * 60D);
-    gc.calculateRhumLine();
+    GreatCircle.calculateRhumLine();
     double rlZ = gc.getRhumbLineRoute();
     brg = (int)Math.round(Math.toDegrees(rlZ));
     return brg;
@@ -97,13 +97,13 @@ public class RoutingUtil
   private static int getBearingTo(RoutingPoint center, RoutingPoint dest)
   {
     int brg = 0;
-    gc.setStart(new GeoPoint(Math.toRadians(center.getPosition().getL()),
+    GreatCircle.setStart(new GeoPoint(Math.toRadians(center.getPosition().getL()),
                              Math.toRadians(center.getPosition().getG())));
-    gc.setArrival(new GeoPoint(Math.toRadians(dest.getPosition().getL()),
+    GreatCircle.setArrival(new GeoPoint(Math.toRadians(dest.getPosition().getL()),
                                Math.toRadians(dest.getPosition().getG())));
   //  gc.calculateGreatCircle(10);
   //  double gcDistance = Math.toDegrees(gc.getDistance() * 60D);
-    gc.calculateRhumLine();
+    GreatCircle.calculateRhumLine();
     double rlZ = gc.getRhumbLineRoute();
     brg = (int)Math.round(Math.toDegrees(rlZ));
     return brg;
@@ -422,18 +422,18 @@ public class RoutingUtil
         {
 //        timer = logDiffTime(timer, "Milestone 10");
           RoutingPoint forecast = finalIterator.next();
-          gc.setStart(new GeoPoint(Math.toRadians(forecast.getPosition().getL()),
+          GreatCircle.setStart(new GeoPoint(Math.toRadians(forecast.getPosition().getL()),
                                    Math.toRadians(forecast.getPosition().getG())));
           if (aimFor == null)
-            gc.setArrival(new GeoPoint(Math.toRadians(finalDestination.getPosition().getL()),
+            GreatCircle.setArrival(new GeoPoint(Math.toRadians(finalDestination.getPosition().getL()),
                                        Math.toRadians(finalDestination.getPosition().getG())));
           else
-            gc.setArrival(new GeoPoint(Math.toRadians(aimFor.getPosition().getL()),
+            GreatCircle.setArrival(new GeoPoint(Math.toRadians(aimFor.getPosition().getL()),
                                        Math.toRadians(aimFor.getPosition().getG())));
           try
           {
             gc.calculateGreatCircle(10);                                       
-            gcDistance = Math.toDegrees(gc.getDistance() * 60D);
+            gcDistance = Math.toDegrees(GreatCircle.getDistance() * 60D);
             if (gcDistance < localSmallOne)
             {
               localSmallOne = gcDistance;
