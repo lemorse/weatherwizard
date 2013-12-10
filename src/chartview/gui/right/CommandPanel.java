@@ -98,8 +98,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -112,7 +110,6 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -194,7 +191,7 @@ public class CommandPanel
   private JButton cbPanelScrollDownButton;
 
   private JLabel displayLabel       = new JLabel(WWGnlUtilities.buildMessage("display"));
-  private JComboBox displayComboBox = new JComboBox();
+  private JComboBox<String> displayComboBox = new JComboBox<String>();
   private JLabel boundariesLabel    = new JLabel(" - ");
 
   private JSlider faxOpacitySlider     = new JSlider();

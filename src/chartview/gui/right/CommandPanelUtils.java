@@ -4,6 +4,8 @@ import astro.calc.GeoPoint;
 
 import chart.components.ui.ChartPanel;
 
+import chart.components.ui.ChartPanelInterface;
+
 import chartview.ctx.WWContext;
 
 import chartview.gui.toolbar.controlpanels.LoggingPanel;
@@ -1753,13 +1755,13 @@ public class CommandPanelUtils
         }
         else if  (projType.equals(CommandPanel.POLAR_STEREO))
         {
-          cp.getChartPanel().setProjection(cp.getChartPanel().POLAR_STEREOGRAPHIC);
-          WWContext.getInstance().fireSetProjection(cp.getChartPanel().POLAR_STEREOGRAPHIC);
+          cp.getChartPanel().setProjection(ChartPanelInterface.POLAR_STEREOGRAPHIC);
+          WWContext.getInstance().fireSetProjection(ChartPanelInterface.POLAR_STEREOGRAPHIC);
         }
         else if (projType.equals(CommandPanel.SATELLITE))
         {
-          cp.getChartPanel().setProjection(cp.getChartPanel().SATELLITE_VIEW);
-          WWContext.getInstance().fireSetProjection(cp.getChartPanel().SATELLITE_VIEW);
+          cp.getChartPanel().setProjection(ChartPanelInterface.SATELLITE_VIEW);
+          WWContext.getInstance().fireSetProjection(ChartPanelInterface.SATELLITE_VIEW);
           double nl  = Double.parseDouble(((XMLElement)doc.selectNodes("//projection").item(0)).getAttribute("nadir-latitude"));
           double ng  = Double.parseDouble(((XMLElement)doc.selectNodes("//projection").item(0)).getAttribute("nadir-longitude"));
           double alt = Double.parseDouble(((XMLElement)doc.selectNodes("//projection").item(0)).getAttribute("altitude"));
@@ -1837,8 +1839,8 @@ public class CommandPanelUtils
           cp.setBoatHeading(hdg);
         }
 
-        if (cp.getChartPanel().getProjection() != cp.getChartPanel().GLOBE_VIEW &&
-            cp.getChartPanel().getProjection() != cp.getChartPanel().SATELLITE_VIEW)
+        if (cp.getChartPanel().getProjection() != ChartPanelInterface.GLOBE_VIEW &&
+            cp.getChartPanel().getProjection() != ChartPanelInterface.SATELLITE_VIEW)
           cp.getChartPanel().setWidthFromChart(cp.getNLat(), cp.getSLat(), cp.getWLong(), cp.getELong());
   //    eLong = cp.getChartPanel().calculateEastG(nLat, sLat, wLong);
         cp.getChartPanel().setEastG(cp.getELong());

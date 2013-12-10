@@ -675,11 +675,11 @@ public class CommandPanelPopup
     }
     else if (event.getActionCommand().equals(WIND_BASE))
     {
-      Color orig = parent.initialGribWindBaseColor;
+      Color orig = CommandPanel.initialGribWindBaseColor;
       Color newColor = JColorChooser.showDialog(this, WWGnlUtilities.buildMessage("change-wind-base"), orig);
       if (newColor != null)
       {
-        parent.initialGribWindBaseColor = newColor;
+        CommandPanel.initialGribWindBaseColor = newColor;
 //      parent.chartPanel.repaint();
       }
       parent.chartPanel.repaint();
