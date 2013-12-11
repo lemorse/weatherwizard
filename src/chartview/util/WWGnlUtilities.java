@@ -4154,10 +4154,11 @@ public class WWGnlUtilities
       int heading = pip.getHeading();
       WWContext.getInstance().fireManuallyEnterBoatPosition(new GeoPoint(l, g), heading);
       WWGnlUtilities.storeBoatPosAndHeading(l, g, heading, manualPositionFile);
+      WWContext.getInstance().fireSetStatus("Manual Position input:" +new GeoPoint(l, g).toString());
     }
   }
 
-  // Beaufort Scale                               0   1   2   3    4    5    6    7    8    9   10   11   12
+  // Beaufort Scale                                  0   1   2   3    4    5    6    7    8    9   10   11   12
   protected final static double[] BEAUFORT_SCALE = { 0d, 1d, 4d, 7d, 11d, 16d, 22d, 28d, 34d, 41d, 48d, 56d, 64d };
 
   public static int getBeaufort(double d)

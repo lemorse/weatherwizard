@@ -3048,7 +3048,7 @@ public class CommandPanel
                         try
                         {
                           bp = WWGnlUtilities.getHTTPBoatPosition(); // Try HTTP port
-                          WWContext.getInstance().fireSetStatus("Got Position from HTTP");
+                          WWContext.getInstance().fireSetStatus("Got Position from HTTP:" + bp.getPos().toString());
                         }
                         catch (HTTPClient.NMEAServerException nse)
                         {
@@ -3057,7 +3057,7 @@ public class CommandPanel
                           try
                           {
                             bp = WWGnlUtilities.getSerialBoatPosition(); // Try Serial port
-                            WWContext.getInstance().fireSetStatus("Got Position from Serial Port");
+                            WWContext.getInstance().fireSetStatus("Got Position from Serial Port:" + bp.getPos().toString());
                           }
                           catch (Exception serialEx)
                           {
@@ -3066,7 +3066,7 @@ public class CommandPanel
                             try
                             {
                               bp = WWGnlUtilities.getTCPBoatPosition(); // Try TCP
-                              WWContext.getInstance().fireSetStatus("Got Position from TCP");
+                              WWContext.getInstance().fireSetStatus("Got Position from TCP:" + bp.getPos().toString());
                             }
                             catch (Exception tcpEx)
                             {
@@ -3075,7 +3075,7 @@ public class CommandPanel
                               try
                               {
                                 bp = WWGnlUtilities.getUDPBoatPosition(); // Try UDP
-                                WWContext.getInstance().fireSetStatus("Got Position from UDP");
+                                WWContext.getInstance().fireSetStatus("Got Position from UDP:" + bp.getPos().toString());
                               }
                               catch (Exception udpEx)
                               {
@@ -3084,7 +3084,7 @@ public class CommandPanel
                                 try
                                 {
                                   bp = WWGnlUtilities.getGPSdBoatPosition(); // Try GPSd
-                                  WWContext.getInstance().fireSetStatus("Got Position from GPSd");
+                                  WWContext.getInstance().fireSetStatus("Got Position from GPSd:" + bp.getPos().toString());
                                 }
                                 catch (Exception gpsdEx)
                                 {
