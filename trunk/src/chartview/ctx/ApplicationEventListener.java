@@ -1,6 +1,5 @@
 package chartview.ctx;
 
-
 import astro.calc.GeoPoint;
 
 import chartview.gui.right.CommandPanel;
