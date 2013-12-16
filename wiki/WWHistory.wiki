@@ -11,6 +11,7 @@ This page takes over and replaces the one [http://donpedro.lediouris.net/softwar
 = Details =
 
 || *Date* || *Description* || *Impacted file(s)* ||
+|| 16-Dec-2013  || Introducing Console User=Exits. || desktop.jar ||
 || 11-Dec-2013  || Position acquisition: in the status bar || chartadjust.jar ||
 || 15-Nov-2013  || Minor date bug fix, headless console || nmeaparser.jar, desktop.jar ||
 || 08-Nov-2013  || Improved the image generation (Admin Tools) || chartadjust.jar ||
