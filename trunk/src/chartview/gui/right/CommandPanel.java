@@ -394,6 +394,8 @@ public class CommandPanel
   private Map<String, String> compositeDate = null;
   private boolean withCompositeDate = false;
   
+  private boolean headlessMode = false;
+  
   public boolean isBusy() // Is there a Composite in the panel?
   {
     return (wgd != null || faxImage != null);
@@ -406,6 +408,8 @@ public class CommandPanel
 
   public CommandPanel(CompositeTabbedPane caller, MainZoomPanel dp)
   {
+    this.headlessMode = "true".equals(System.getProperty("headless", "false"));
+    
     this.id = (long)(Math.random() + Long.MAX_VALUE);
 
     this.parent = caller;
@@ -2473,44 +2477,46 @@ public class CommandPanel
 
                   public void run()
                   {
-                    WWContext.getInstance().setMonitor(ProgressUtil.createModalProgressMonitor(WWContext.getInstance().getMasterTopFrame(), 1, true, true));
-                    ProgressMonitor monitor = WWContext.getInstance().getMonitor();
-                    if (monitor != null)
+                    if (!headlessMode)
                     {
-                      synchronized (monitor)
+                      WWContext.getInstance().setMonitor(ProgressUtil.createModalProgressMonitor(WWContext.getInstance().getMasterTopFrame(), 1, true, true));
+                      ProgressMonitor monitor = WWContext.getInstance().getMonitor();
+                      if (monitor != null)
                       {
-                        monitor.start(WWGnlUtilities.buildMessage("loading-with-pattern"));
-                      }
-                    }
-                    if (WWContext.getInstance().getAel4monitor() != null)
-                    {
-                      System.out.println("Warning!!! AELMonitor != null !! (2, in " + this.getClass().getName() + ")" );
-                    }
-                    WWContext.getInstance().setAel4monitor(new ApplicationEventListener()
-                      {
-                        public String toString()
+                        synchronized (monitor)
                         {
-                          return "{" + Long.toString(id) + "} from Runnable in CommandPanel (2).";
+                          monitor.start(WWGnlUtilities.buildMessage("loading-with-pattern"));
                         }
-                        public void progressing(String mess)
+                      }
+                      if (WWContext.getInstance().getAel4monitor() != null)
+                      {
+                        System.out.println("Warning!!! AELMonitor != null !! (2, in " + this.getClass().getName() + ")" );
+                      }
+                      WWContext.getInstance().setAel4monitor(new ApplicationEventListener()
                         {
-                          ProgressMonitor monitor = WWContext.getInstance().getMonitor();
-                          if (monitor != null)
+                          public String toString()
                           {
-                            synchronized (monitor)
+                            return "{" + Long.toString(id) + "} from Runnable in CommandPanel (2).";
+                          }
+                          public void progressing(String mess)
+                          {
+                            ProgressMonitor monitor = WWContext.getInstance().getMonitor();
+                            if (monitor != null)
                             {
-                              monitor.setCurrent(mess, monitor.getCurrent());
+                              synchronized (monitor)
+                              {
+                                monitor.setCurrent(mess, monitor.getCurrent());
+                              }
                             }
                           }
-                        }
-
-  //                    public void interruptProcess()
-  //                    {
-  //                      System.out.println("Interrupting Pattern Loading.");
-  //                    }
-                      });
-                    WWContext.getInstance().addApplicationListener(WWContext.getInstance().getAel4monitor());
-
+  
+    //                    public void interruptProcess()
+    //                    {
+    //                      System.out.println("Interrupting Pattern Loading.");
+    //                    }
+                        });
+                      WWContext.getInstance().addApplicationListener(WWContext.getInstance().getAel4monitor());
+                    }
                     try
                     {
                       WWContext.getInstance().fireSetLoading(true);
