@@ -100,7 +100,7 @@ import user.util.TimeUtil;
 
 @SuppressWarnings({ "serial", "oracle.jdeveloper.java.serialversionuid-field-missing" })
 public class AdjustFrame
-  extends JFrame
+     extends JFrame
 {
   private static final String FRAME_BASE_TITLE = WWGnlUtilities.buildMessage("product-name");
   private static final SimpleDateFormat SDF_FOR_TITLE = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss");
@@ -282,10 +282,23 @@ public class AdjustFrame
     String displayComposite = System.getProperty("display.composite", "");
     if (displayComposite.trim().length() == 0)
     {
-      final String compositeName = ((ParamPanel.DataFile) ParamPanel.data[ParamData.LOAD_COMPOSITE_STARTUP][ParamData.VALUE_INDEX]).toString();
+      final String compositeName = ((ParamPanel.DataFile)ParamPanel.data[ParamData.LOAD_COMPOSITE_STARTUP][ParamData.VALUE_INDEX]).toString();
       if (compositeName.trim().length() > 0)
       {
-        askAndWaitForLoadAtStartup(compositeName, ((Integer) ParamPanel.data[ParamData.WAIT_ON_STARTUP][ParamData.VALUE_INDEX]).intValue());
+        boolean headlessMode = "true".equals(System.getProperty("headless", "false"));        
+        if (!headlessMode)
+          askAndWaitForLoadAtStartup(compositeName, ((Integer)ParamPanel.data[ParamData.WAIT_ON_STARTUP][ParamData.VALUE_INDEX]).intValue());
+        else
+        {
+          int interval = ((Integer)ParamPanel.data[ParamData.RELOAD_DEFAULT_COMPOSITE_INTERVAL][ParamData.VALUE_INDEX]).intValue();
+          if (interval > 0)
+            enterReloadLoop(compositeName, interval);
+          else
+          {
+            // This should NEVER happen here
+            WWContext.getInstance().fireLoadDynamicComposite(compositeName);
+          }
+        }
       }
     }
     else

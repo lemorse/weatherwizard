@@ -8,8 +8,6 @@ import chartview.gui.util.dialog.UpdatePanel;
 import chartview.gui.util.param.ParamData;
 import chartview.gui.util.param.ParamPanel;
 
-import chartview.gui.util.param.widget.FontPanel;
-
 import chartview.util.WWGnlUtilities;
 
 import coreutilities.CheckForUpdateThread;
@@ -28,7 +26,6 @@ import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
@@ -50,12 +47,8 @@ import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -68,7 +61,6 @@ import java.util.jar.Manifest;
 
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -84,8 +76,9 @@ import javax.swing.plaf.FontUIResource;
 public class ChartAdjust
 {
   protected final AdjustFrame frame;
+  private static boolean headlessMode = false;
   
-  public ChartAdjust()
+  public ChartAdjust(String[] args)
   {
 //  System.out.println("ClassLoader:" + this.getClass().getClassLoader().getClass().getName());
     // Cleanup from previous session if necessary
@@ -200,6 +193,66 @@ public class ChartAdjust
     {
       System.err.println("No value for DEFAULT_FONT");
     }
+    if (headlessMode)
+    {
+      if (args != null && args.length > 0)
+      {
+        for (int a=0; a<args.length; a++)
+        {
+          if (args[a].startsWith("-composite:"))
+          {
+            String s = args[a].substring("-composite:".length());
+            ParamPanel.data[ParamData.LOAD_COMPOSITE_STARTUP][ParamData.VALUE_INDEX] = new ParamPanel.DataFile(new String[] {"ptrn"}, 
+                                                                                                               "pattern", 
+                                                                                                               s);
+          }
+          else if (args[a].startsWith("-interval:"))
+          {
+            String s = args[a].substring("-interval:".length());
+            ParamPanel.data[ParamData.RELOAD_DEFAULT_COMPOSITE_INTERVAL][ParamData.VALUE_INDEX] = new Integer(s);
+          }
+          else if (args[a].startsWith("-pattern:"))
+          {
+            String s = args[a].substring("-pattern:".length());
+            ParamPanel.data[ParamData.AUTO_SAVE_DEFAULT_COMPOSITE][ParamData.VALUE_INDEX] = s;
+          }
+        }
+      }
+      // We need some preferences to be set: RELOAD_DEFAULT_COMPOSITE_INTERVAL, AUTO_SAVE_DEFAULT_COMPOSITE, LOAD_COMPOSITE_STARTUP
+      try
+      {
+        String s1 = ((ParamPanel.DataFile) ParamPanel.data[ParamData.LOAD_COMPOSITE_STARTUP][ParamData.VALUE_INDEX]).toString();
+        String s2 = (String)ParamPanel.data[ParamData.AUTO_SAVE_DEFAULT_COMPOSITE][ParamData.VALUE_INDEX];
+        String s3 = Integer.toString(((Integer) ParamPanel.data[ParamData.RELOAD_DEFAULT_COMPOSITE_INTERVAL][ParamData.VALUE_INDEX]).intValue());
+    //      System.out.println(" -> " + s1);
+    //      System.out.println(" -> " + s2);
+    //      System.out.println(" -> " + s3);
+        if (s1.trim().length() == 0 ||
+            s2.trim().length() == 0 ||
+            s3.trim().length() == 0)
+        {
+          System.err.println("In headless mode, you need the following preferences to be set:");
+          System.err.println("- " + WWGnlUtilities.buildMessage("load-composite-at-startup") + (s1.trim().length() > 0 ? ". Yours is [" + s1 + "]" : " [missing!]"));
+          System.err.println("- " + WWGnlUtilities.buildMessage("auto-save-pattern") +         (s2.trim().length() > 0 ? ". Yours is [" + s2 + "]" : " [missing!]"));
+          System.err.println("- " + WWGnlUtilities.buildMessage("auto-reload-interval") +      (s3.trim().length() > 0 ? ". Yours is [" + s3 + "]" : " [missing!]"));
+          System.err.println("Exiting...");
+          System.err.println("Please set those values, and restart in headless mode.");
+          System.exit(1);
+        }
+      }
+      catch (Exception ex)
+      {
+        System.err.println("In headless mode, you need the following preferences to be set:");
+        System.err.println(WWGnlUtilities.buildMessage("load-composite-at-startup"));
+        System.err.println(WWGnlUtilities.buildMessage("auto-save-pattern"));
+        System.err.println(WWGnlUtilities.buildMessage("auto-reload-interval"));
+        System.err.println("Exiting...");
+        System.err.println("Please set those values, and restart in headless mode.");
+        ex.printStackTrace();
+        System.exit(1);
+      }
+    }
+
     frame = new AdjustFrame();
     
     boolean positioned = false;
@@ -269,7 +322,7 @@ public class ChartAdjust
         }
       });
 //  frame.setUndecorated(true);
-    frame.setVisible(true);
+    frame.setVisible(!headlessMode);
     checkForUpdate();
     // lastModified, like Thu 02/16/2012 18:11:14.08
     Date compiledDate = null;
@@ -597,6 +650,8 @@ public class ChartAdjust
   
   public static void main(String args[])
   {
+    headlessMode = "true".equals(System.getProperty("headless", "false"));
+    
     System.out.println("=======\nIn the main, " + args.length + " arguments:");
     String displayComposite = "";
     for (int i=0; i<args.length; i++)
@@ -660,7 +715,7 @@ public class ChartAdjust
       for (int i = 0; i < info.length; i++)
         System.out.println(info[i].getName() + ":" + info[i].getClassName());
     }
-    try { new ChartAdjust(); }
+    try { new ChartAdjust(args); }
     catch (Exception e)
     {
       System.err.println("Cought from the main:");
@@ -761,10 +816,11 @@ public class ChartAdjust
           wr.flush();
           // Get the response, even if it is empty
           BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-          String line;
-          while ((line = rd.readLine()) != null) 
+          String line = "";
+          while (line != null) 
           {
             // Process line... Validation would occur here
+            line = rd.readLine();
 //          System.out.println("\nReturned by the ping: [" + line + "]");
           }
 //        JOptionPane.showMessageDialog(null, mess, "From OlivSoft", JOptionPane.INFORMATION_MESSAGE);
