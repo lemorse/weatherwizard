@@ -11,6 +11,7 @@ This page takes over and replaces the one [http://donpedro.lediouris.net/softwar
 = Details =
 
 || *Date* || *Description* || *Impacted file(s)* ||
+|| 18-Dec-2013  || Introducing Headless Weather Wizard, see [http://donpedrodalfaroubeira.blogspot.com/2013/12/introducing-headless-weather-wizard.html this post] || chartadjust.jar ||
 || 16-Dec-2013  || Introducing Console User-Exits. || desktop.jar ||
 || 11-Dec-2013  || Position acquisition: in the status bar || chartadjust.jar ||
 || 15-Nov-2013  || Minor date bug fix, headless console || nmeaparser.jar, desktop.jar ||
