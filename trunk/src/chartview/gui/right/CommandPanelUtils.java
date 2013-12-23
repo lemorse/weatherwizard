@@ -707,7 +707,7 @@ public class CommandPanelUtils
 
     // Show Chart
     boolean showChart = cp.isDrawChart(); 
-    if (!showChart)
+    if (!showChart && !"yes".equals(System.getProperty("headless", "no")))
     {
       int resp = JOptionPane.showConfirmDialog(cp, 
                                                "Chart will not be drawn (by default) for this composite.\nDo you confirm?", // LOCALIZE                                                    

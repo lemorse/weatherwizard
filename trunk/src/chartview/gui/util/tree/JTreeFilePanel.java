@@ -623,7 +623,7 @@ public class JTreeFilePanel
   {
     
     if (!dir.exists() || !dir.isDirectory())
-      throw new RuntimeException("[" + dir.getName() + "] not found, or is not a directory");
+      throw new RuntimeException("[" + dir.getAbsolutePath() + "] not found, or is not a directory (from " + System.getProperty("user.dir") + ")");
     else
     {
       File[] flist = dir.listFiles(new FilenameFilter()
