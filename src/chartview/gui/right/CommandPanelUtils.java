@@ -1482,8 +1482,9 @@ public class CommandPanelUtils
             if (!faxDir.exists())
               faxDir.mkdirs();
 
-            cp.runStorageThread(false, saveAsName);
+            cp.runStorageThread(false, saveAsName); // TODO Chain possible user-exit. FTP on a site, etc.
             System.out.println("-- Saved as [" + saveAsName + "]");
+            
           }
           catch (Exception ex)
           {
