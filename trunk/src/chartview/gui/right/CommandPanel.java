@@ -2309,7 +2309,8 @@ public class CommandPanel
                 {
   //              pattern.print(System.out);
                   pattern.print(new FileOutputStream(patt));
-                  WWContext.getInstance().fireReloadPatternTree();
+                  if ("false".equals(System.getProperty("headless", "false")))
+                    WWContext.getInstance().fireReloadPatternTree();
                 }
               }
               catch (Exception e)

@@ -942,8 +942,7 @@ public class DataFilePopup
 //        refreshTree();
           WWContext.getInstance().fireReloadCompositeTree();
           WWContext.getInstance().fireReloadFaxTree();
-          WWContext.getInstance().fireReloadGRIBTree();
-          
+          WWContext.getInstance().fireReloadGRIBTree();          
         }
       }
       else if (dtn instanceof JTreeFilePanel.CompositeFileTreeNode)

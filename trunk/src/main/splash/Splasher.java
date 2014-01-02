@@ -5,7 +5,11 @@ import chartview.ctx.WWContext;
 
 import chartview.util.WWGnlUtilities;
 
+import coreutilities.Utilities;
+
 import java.lang.reflect.Method;
+
+import java.util.Date;
 
 import javax.swing.ImageIcon;
 
@@ -38,11 +42,22 @@ public class Splasher
     {
       try
       {
+        final Date started = new Date();
         Class<?> main = Class.forName("main.ChartAdjust");
         Method mainMethod = main.getMethod("main", String[].class);
         Object[] params = new Object[1];
         params[0] = args;
         mainMethod.invoke(null, params);
+        
+        Runtime.getRuntime().addShutdownHook(new Thread() 
+        {
+          public void run() 
+          { 
+            Date now = new Date();
+            System.out.println("** Shutting down (headless) at " + now.toString() + " (was running for " + Utilities.readableTime(now.getTime() - started.getTime()) + ")");
+          }
+        });
+
       }
       catch (Exception ex)
       {

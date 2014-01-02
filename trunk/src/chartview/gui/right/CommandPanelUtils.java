@@ -806,7 +806,7 @@ public class CommandPanelUtils
           OutputStream os = new FileOutputStream(composite);
           storage.print(os);
           os.close();
-          if (!archiveRequired)
+          if (!archiveRequired && "false".equals(System.getProperty("headless", "false")))
             WWContext.getInstance().fireReloadCompositeTree();
         }
       }
@@ -860,7 +860,8 @@ public class CommandPanelUtils
             ex.printStackTrace();
           }
           // Finally
-          WWContext.getInstance().fireReloadCompositeTree();
+          if ("false".equals(System.getProperty("headless", "false")))
+            WWContext.getInstance().fireReloadCompositeTree();
         }
       }
       else
@@ -1084,7 +1085,8 @@ public class CommandPanelUtils
                     WWContext.getInstance().fireLogging(WWGnlUtilities.buildMessage("loading2", new String[] { url }) + "\n", LoggingPanel.WHITE_STYLE);
                     System.out.println("Loading " + faxName);
                     HTTPClient.getChart(url, dir, faxName, true);
-                    WWContext.getInstance().fireReloadFaxTree();
+                    if ("true".equals(System.getProperty("headless", "false")))
+                      WWContext.getInstance().fireReloadFaxTree();
                   }
                   catch (CannotWriteException cwe) // Case of a permission
                   {
