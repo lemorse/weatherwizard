@@ -659,7 +659,8 @@ public class CompositeTabbedPane
               HTTPClient.getChart(inf.getFaxStrURL(), ".", saveAs, true);
               JOptionPane.showMessageDialog(instance, WWGnlUtilities.buildMessage("is-ready", new String[] { saveAs }), WWGnlUtilities.buildMessage("fax-download"), JOptionPane.INFORMATION_MESSAGE);
   //          allJTrees.refreshFaxTree();
-              WWContext.getInstance().fireReloadFaxTree();          
+              if ("false".equals(System.getProperty("headless", "false")))
+                WWContext.getInstance().fireReloadFaxTree();          
             }
             catch (Exception ex)
             {
@@ -715,7 +716,8 @@ public class CompositeTabbedPane
             }
             JOptionPane.showMessageDialog(instance, WWGnlUtilities.buildMessage("is-ready", new String[] { saveAs }), WWGnlUtilities.buildMessage("grib-download"), JOptionPane.INFORMATION_MESSAGE);
 //          allJTrees.refreshGribTree();
-            WWContext.getInstance().fireReloadGRIBTree();
+            if ("false".equals(System.getProperty("headless", "false")))
+              WWContext.getInstance().fireReloadGRIBTree();
           }
         };
         downLoadThread.start();
@@ -942,11 +944,11 @@ public class CompositeTabbedPane
             }
             finalMess += WWGnlUtilities.buildMessage("are-ready");
             JOptionPane.showMessageDialog(instance, finalMess, WWGnlUtilities.buildMessage("automatic-download"), JOptionPane.INFORMATION_MESSAGE);
-            if (fax > 0)
+            if (fax > 0 && "false".equals(System.getProperty("headless", "false")))
 //            allJTrees.refreshFaxTree();
               WWContext.getInstance().fireReloadFaxTree();
 
-            if (grib > 0)
+            if (grib > 0 && "false".equals(System.getProperty("headless", "false")))
 //            allJTrees.refreshGribTree();
               WWContext.getInstance().fireReloadGRIBTree();
           }

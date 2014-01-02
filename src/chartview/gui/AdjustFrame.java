@@ -1993,7 +1993,8 @@ public class AdjustFrame
               HTTPClient.getChart(inf.getFaxStrURL(), ".", saveAs, true);
               JOptionPane.showMessageDialog(instance, WWGnlUtilities.buildMessage("is-ready", new String[] { saveAs }), WWGnlUtilities.buildMessage("fax-download"), JOptionPane.INFORMATION_MESSAGE);
   //          allJTrees.refreshFaxTree();
-              WWContext.getInstance().fireReloadFaxTree();          
+              if ("false".equals(System.getProperty("headless", "false")))
+                WWContext.getInstance().fireReloadFaxTree();          
             }
             catch (Exception ex)
             {
@@ -2049,7 +2050,8 @@ public class AdjustFrame
             }
             JOptionPane.showMessageDialog(instance, WWGnlUtilities.buildMessage("is-ready", new String[] { saveAs }), WWGnlUtilities.buildMessage("grib-download"), JOptionPane.INFORMATION_MESSAGE);
 //          allJTrees.refreshGribTree();
-            WWContext.getInstance().fireReloadGRIBTree();
+            if ("false".equals(System.getProperty("headless", "false")))
+              WWContext.getInstance().fireReloadGRIBTree();
           }
         };
         downLoadThread.start();
@@ -2283,12 +2285,17 @@ public class AdjustFrame
             finalMess += WWGnlUtilities.buildMessage("are-ready");
             JOptionPane.showMessageDialog(instance, finalMess, WWGnlUtilities.buildMessage("automatic-download"), JOptionPane.INFORMATION_MESSAGE);
             if (fax > 0)
+            {
 //            allJTrees.refreshFaxTree();
-              WWContext.getInstance().fireReloadFaxTree();
-
+              if ("false".equals(System.getProperty("headless", "false")))
+                WWContext.getInstance().fireReloadFaxTree();
+            }
             if (grib > 0)
+            {  
 //            allJTrees.refreshGribTree();
-              WWContext.getInstance().fireReloadGRIBTree();
+              if ("false".equals(System.getProperty("headless", "false")))
+                WWContext.getInstance().fireReloadGRIBTree();
+            }
           }
         };
         autoDownload.start();
@@ -2444,7 +2451,7 @@ public class AdjustFrame
             WWContext.getInstance().fireLoadDynamicComposite(compositeName);
             try 
             { 
-              System.out.println("-- Taking a " + interval + " minute(s) nap (" + Long.toString(1000L * 60L * (long)interval) + " ms)");
+              System.out.println("-- Taking a nap (" + Utilities.readableTime(interval * 1000 * 60).trim() + ")");
               String mess = WWGnlUtilities.buildMessage("next-download") + " " + WWGnlUtilities.formatTimeDiff(interval * 60); //"Next automatic download in " + Integer.toString(interval) + " minute(s)";
               WWContext.getInstance().fireSetStatus(mess);
               Thread.sleep(1000L * 60L * interval); 
