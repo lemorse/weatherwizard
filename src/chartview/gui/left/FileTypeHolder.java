@@ -113,23 +113,35 @@ public class FileTypeHolder
         
         public void reloadFaxTree() 
         { 
-          System.out.println("Reloading Fax Tree"); 
-          faxTree.reloadTree(); 
+          if ("false".equals(System.getProperty("headless", "false")))
+          {
+            System.out.println("Reloading Fax Tree"); 
+            faxTree.reloadTree(); 
+          }
         }
         public void reloadGRIBTree() 
         { 
-          System.out.println("Reloading GRIB Tree"); 
-          gribTree.reloadTree();
+          if ("false".equals(System.getProperty("headless", "false")))
+          {
+            System.out.println("Reloading GRIB Tree"); 
+            gribTree.reloadTree();
+          }
         }
         public void reloadCompositeTree() 
         { 
-          System.out.println("Reloading Composite Tree"); 
-          compositeTree.reloadTree(); 
+          if ("false".equals(System.getProperty("headless", "false")))
+          {
+            System.out.println("Reloading Composite Tree"); 
+            compositeTree.reloadTree(); 
+          }
         }
         public void reloadPatternTree() 
         { 
-          System.out.println("Reloading Pattern Tree"); 
-          patternTree.reloadTree(); 
+          if ("false".equals(System.getProperty("headless", "false")))
+          {
+            System.out.println("Reloading Pattern Tree"); 
+            patternTree.reloadTree(); 
+          }
         }
       });
 
