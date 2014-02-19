@@ -2438,7 +2438,7 @@ public class AdjustFrame
     return allJTrees;
   }
   
-  private void enterReloadLoop(final String compositeName, final int interval)
+  public static void enterReloadLoop(final String compositeName, final int interval)
   {
     String threadName = Long.toString(new Date().getTime());
     Thread t = new Thread("AutoLoad-" + threadName)

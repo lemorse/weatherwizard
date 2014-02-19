@@ -1,6 +1,7 @@
 package main;
 
 
+import chartview.ctx.ApplicationEventListener;
 import chartview.ctx.WWContext;
 
 import chartview.gui.AdjustFrame;
@@ -24,6 +25,7 @@ import java.awt.Font;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
+import java.awt.HeadlessException;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.WindowAdapter;
@@ -75,7 +77,7 @@ import javax.swing.plaf.FontUIResource;
  */ 
 public class ChartAdjust
 {
-  protected final AdjustFrame frame;
+  protected AdjustFrame frame = null;
   private static boolean headlessMode = false;
   
   public ChartAdjust(String[] args)
@@ -252,77 +254,115 @@ public class ChartAdjust
         System.exit(1);
       }
     }
-
-    frame = new AdjustFrame();
-    
-    boolean positioned = false;
-    File propFile = new File("ww_position.properties");
-    if (propFile.exists())
+//  if (!headlessMode)
     {
       try
       {
-        Properties props = new Properties();
-        props.load(new FileReader(propFile));
-        int w  = Integer.parseInt(props.getProperty("frame.width"));
-        int h  = Integer.parseInt(props.getProperty("frame.height"));
-        int x  = Integer.parseInt(props.getProperty("frame.x.pos"));
-        int y  = Integer.parseInt(props.getProperty("frame.y.pos"));
-        int dl = Integer.parseInt(props.getProperty("divider.location", "175"));
+        frame = new AdjustFrame();
         
-        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-        GraphicsDevice[] screenDevices = ge.getScreenDevices();
-        boolean foundMatch = false;
-        for (GraphicsDevice curGs: screenDevices)
+        boolean positioned = false;
+        File propFile = new File("ww_position.properties");
+        if (propFile.exists())
         {
-          GraphicsConfiguration[] gc = curGs.getConfigurations();
-          for (GraphicsConfiguration curGc: gc)
+          try
           {
-            Rectangle bounds = curGc.getBounds();
-//          System.out.println(bounds.getX() + "," + bounds.getY() + " " + bounds.getWidth() + " x " + bounds.getHeight());
-            if (x > bounds.getX() && x < (bounds.getX() + bounds.getWidth()) && y > bounds.getY() && y < (bounds.getY() + bounds.getHeight()))
+            Properties props = new Properties();
+            props.load(new FileReader(propFile));
+            int w  = Integer.parseInt(props.getProperty("frame.width"));
+            int h  = Integer.parseInt(props.getProperty("frame.height"));
+            int x  = Integer.parseInt(props.getProperty("frame.x.pos"));
+            int y  = Integer.parseInt(props.getProperty("frame.y.pos"));
+            int dl = Integer.parseInt(props.getProperty("divider.location", "175"));
+            
+            GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+            GraphicsDevice[] screenDevices = ge.getScreenDevices();
+            boolean foundMatch = false;
+            for (GraphicsDevice curGs: screenDevices)
             {
-              foundMatch = true;
-              break;
+              GraphicsConfiguration[] gc = curGs.getConfigurations();
+              for (GraphicsConfiguration curGc: gc)
+              {
+                Rectangle bounds = curGc.getBounds();
+    //          System.out.println(bounds.getX() + "," + bounds.getY() + " " + bounds.getWidth() + " x " + bounds.getHeight());
+                if (x > bounds.getX() && x < (bounds.getX() + bounds.getWidth()) && y > bounds.getY() && y < (bounds.getY() + bounds.getHeight()))
+                {
+                  foundMatch = true;
+                  break;
+                }
+              }
+            }
+    
+            if (!foundMatch)
+            {
+              System.out.println("Frame position has been saved on another screen configuration. Reseting.");
+              positioned = false;
+            }
+            else
+            {
+              frame.setSize(w, h);
+              frame.setLocation(x, y);
+              frame.setDividerLocation(dl);
+              positioned = true;
             }
           }
+          catch (Exception forgetit) 
+          { System.err.println(forgetit.toString()); }
         }
-
-        if (!foundMatch)
+        
+        if (!positioned)
         {
-          System.out.println("Frame position has been saved on another screen configuration. Reseting.");
-          positioned = false;
+          Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+          Dimension frameSize = frame.getSize();
+          if(frameSize.height > screenSize.height)
+            frameSize.height = screenSize.height;
+          if(frameSize.width > screenSize.width)
+            frameSize.width = screenSize.width;
+          frame.setLocation((screenSize.width - frameSize.width) / 2, (screenSize.height - frameSize.height) / 2);
         }
-        else
-        {
-          frame.setSize(w, h);
-          frame.setLocation(x, y);
-          frame.setDividerLocation(dl);
-          positioned = true;
-        }
+        frame.addWindowListener(new WindowAdapter() 
+          {
+            public void windowClosing(WindowEvent e)
+            {
+              WWGnlUtilities.doOnExit(frame);
+            }
+          });
+    //  frame.setUndecorated(true);
+        frame.setVisible(!headlessMode);
       }
-      catch (Exception forgetit) 
-      { System.err.println(forgetit.toString()); }
-    }
-    
-    if (!positioned)
-    {
-      Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-      Dimension frameSize = frame.getSize();
-      if(frameSize.height > screenSize.height)
-        frameSize.height = screenSize.height;
-      if(frameSize.width > screenSize.width)
-        frameSize.width = screenSize.width;
-      frame.setLocation((screenSize.width - frameSize.width) / 2, (screenSize.height - frameSize.height) / 2);
-    }
-    frame.addWindowListener(new WindowAdapter() 
+      catch (HeadlessException he)
       {
-        public void windowClosing(WindowEvent e)
-        {
-          WWGnlUtilities.doOnExit(frame);
-        }
-      });
-//  frame.setUndecorated(true);
-    frame.setVisible(!headlessMode);
+        System.err.println("We're probably not in a Graphical Environment.");
+        he.printStackTrace();
+      }
+    }
+//    else
+//    {
+//      frame = null;
+//      final String compositeName = ((ParamPanel.DataFile)ParamPanel.data[ParamData.LOAD_COMPOSITE_STARTUP][ParamData.VALUE_INDEX]).toString();
+//      if (compositeName.trim().length() > 0)
+//      {
+//        int interval = ((Integer)ParamPanel.data[ParamData.RELOAD_DEFAULT_COMPOSITE_INTERVAL][ParamData.VALUE_INDEX]).intValue();
+//        if (interval > 0)
+//        {
+//          System.out.println("... Adding application listener, for [" + compositeName + "]");
+//          WWContext.getInstance().addApplicationListener(new ApplicationEventListener()
+//           {
+//             public void patternFileOpen(String str)
+//             {
+//               System.out.println(" (headless) Loading with pattern: [" + str + "]");
+//               loadWithPattern(str);
+//             }
+//           });
+//          System.out.println("Entering reload loop.");
+//          AdjustFrame.enterReloadLoop(compositeName, interval);
+//        }
+//        else
+//        {
+//          // This should NEVER happen here
+//          System.out.println("Whoops!");
+//        }
+//      }      
+//    }
     checkForUpdate();
     // lastModified, like Thu 02/16/2012 18:11:14.08
     Date compiledDate = null;
