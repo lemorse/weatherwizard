@@ -11,6 +11,7 @@ This page takes over and replaces the one [http://donpedro.lediouris.net/softwar
 = Details =
 
 || *Date* || *Description* || *Impacted file(s)* ||
+|| 26-Mar-2014  || "SPOT Here" now available in the Weather Wizard. || chartadjust.jar, coreutilities.jar, nmeareader.jar ||
 || 24-Mar-2014  || SPOT Parser now available in the Desktop. || desktop.jar, coreutilities.jar, nmeareader.jar ||
 || 16-Jan-2014  || Foreground data in the desktop. Daylight info. || desktop.jar, tideengineimplementation.jar, almanactools.jar ||
 || 23-Dec-2013  || Satellites in View in the console, and minor details. || desktop.jar, tideengineimplementation.jar, nmeareader.jar, nmeaparser.jar, chartadjust.jar ||
