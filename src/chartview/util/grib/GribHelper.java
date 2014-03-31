@@ -48,6 +48,8 @@ import jgrib.GribRecord;
 import jgrib.GribRecordBDS;
 import jgrib.GribRecordPDS;
 
+import nmea.ui.viewer.spot.utils.SpotParser.SpotLine;
+
 public class GribHelper
 {
   private static boolean alreadySaidTooOld;
@@ -485,6 +487,52 @@ public class GribHelper
     {
       e.printStackTrace();
     }
+  }
+  
+  public static List<SpotLine> getSpotLines(GribFile gf, GeoPoint spot)
+  {
+    List<SpotLine> sl = new ArrayList<SpotLine>();
+    try
+    {
+      List<GribConditionData> gcd = dumper(gf, null);
+//      GribConditionData[] gcd = null;
+//      if (wgd != null)
+//        gcd = new GribConditionData[wgd.size()];
+
+      for (GribConditionData g : gcd)
+      {
+        Date utc = g.getDate();
+        GribPointData[][] gpd = g.getGribPointData();
+        List<Integer> coord = g.getDataPointsAround(spot);
+        int x = coord.get(1).intValue() + 1;
+        int y = coord.get(0).intValue() + 1;
+        float rain  = gpd[y][x].getRain() * 3600f;
+        double twd, tws;
+        if (gpd[y][x].getTwd() != -1D && 
+            gpd[y][x].getTws() != -1D)
+        {
+          tws = gpd[y][x].getTws();
+          twd = gpd[y][x].getTwd();
+        }
+        else
+        {
+          float _x = gpd[y][x].getU();
+          float _y = gpd[y][x].getV();
+          tws = Math.sqrt(_x * _x + _y * _y); // m/s
+          tws *= 3.600D; // km/h
+          tws /= 1.852D; // knots
+          twd = WWGnlUtilities.getDir(_x, _y);
+        }
+        float prmsl = Math.round(gpd[y][x].getPrmsl() / 10f) / 10f;
+        SpotLine spotLine = new SpotLine(utc, prmsl, tws, (int)Math.round(twd), rain);
+        sl.add(spotLine);
+      }
+    }
+    catch (Exception ex)
+    {
+      ex.printStackTrace();
+    }
+    return sl;
   }
   
   public static class GribCondition
@@ -1012,7 +1060,7 @@ public class GribHelper
     WWGnlUtilities.SDF.setTimeZone(tz);
   
     
-    for (int i = 0; i < gribFile.getLightRecords().length; i++)
+    for (int i=0; i<gribFile.getLightRecords().length; i++)
     {        
       try
       {

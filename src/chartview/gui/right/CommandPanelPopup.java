@@ -32,6 +32,7 @@ import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JColorChooser;
+import javax.swing.JDialog;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -40,6 +41,12 @@ import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JSeparator;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
+
+import main.help.AboutBox;
+
+import nmea.ui.viewer.spot.SpotParserPanel;
+
+import nmea.ui.viewer.spot.utils.SpotParser.SpotLine;
 
 import oracle.xml.parser.v2.DOMParser;
 import oracle.xml.parser.v2.XMLDocument;
@@ -78,6 +85,7 @@ public class CommandPanelPopup
   private JMenu GRIBnWindDisplayMenu;
   
   private JMenuItem gribDetails;
+  private JMenuItem spotHere;
   private JRadioButtonMenuItem smallDot;
   private JRadioButtonMenuItem heavyDot;
   private JRadioButtonMenuItem background;
@@ -141,6 +149,7 @@ public class CommandPanelPopup
 
   private final String WIND_AND_GRIB_MENU = WWGnlUtilities.buildMessage("wind-and-grib-optiopns-menu");
   private final String GRIB_DETAILS = WWGnlUtilities.buildMessage("grib-details");
+  private final String SPOT_HERE = WWGnlUtilities.buildMessage("spot-here");
   private final String SMALL_DOT = WWGnlUtilities.buildMessage("small-dot");
   private final String HEAVY_DOT = WWGnlUtilities.buildMessage("heavy-dot");
   private final String BACKGROUND = WWGnlUtilities.buildMessage("background");
@@ -266,6 +275,13 @@ public class CommandPanelPopup
     gribDetails.addActionListener(this);
     gribDetails.setBackground(Color.white);
     gribDetails.setIcon(new ImageIcon(this.getClass().getResource("grib.png")));
+
+    spotHere = new JMenuItem(SPOT_HERE);
+    GRIBnWindDisplayMenu.add(spotHere);
+    spotHere.addActionListener(this);
+    spotHere.setBackground(Color.white);
+    spotHere.setIcon(new ImageIcon(this.getClass().getResource("anchor.png")));
+    
     smallDot = new JRadioButtonMenuItem(SMALL_DOT);
     GRIBnWindDisplayMenu.add(smallDot);
     smallDot.addActionListener(this);
@@ -654,6 +670,28 @@ public class CommandPanelPopup
         GribHelper.displayGRIBDetails(WWContext.getInstance().getGribFile(), mess);
       else
         System.out.println("No GribFile...");
+    }    
+    else if (event.getActionCommand().equals(SPOT_HERE))
+    {
+      if (WWContext.getInstance().getGribFile() != null)
+      {
+        SpotParserPanel spotPanel = new SpotParserPanel();
+        List<SpotLine> spotLines = null;
+        // Mouse coordinates at this._x, this._y
+        GeoPoint spot = parent.chartPanel.getGeoPos(this._x, this._y);
+        System.out.println("Spooting " + spot.toString());
+        spotLines = GribHelper.getSpotLines(WWContext.getInstance().getGribFile(), spot);
+        spotPanel.setSpotLines(spotLines);        
+        final JDialog dialog = new JDialog(WWContext.getInstance().getMasterTopFrame(), "SPOT " + spot.toString(), true);
+        dialog.setContentPane(spotPanel);
+        dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+        dialog.pack();
+        dialog.setLocationRelativeTo(WWContext.getInstance().getMasterTopFrame());
+        dialog.setVisible(true);      
+//      JOptionPane.showMessageDialog(null, spotPanel, "SPOT " + spot.toString(), JOptionPane.PLAIN_MESSAGE);
+      }
+      else
+        System.out.println("No GribFile...");
     }
     else if (event.getActionCommand().equals(SMALL_DOT))
     {
@@ -949,6 +987,7 @@ public class CommandPanelPopup
     {
       removeGRIB.setEnabled(true);
       gribDetails.setEnabled(true);
+      spotHere.setEnabled(true);
       smallDot.setEnabled(true);
       heavyDot.setEnabled(true);
       background.setEnabled(true);
@@ -957,6 +996,7 @@ public class CommandPanelPopup
     {
       removeGRIB.setEnabled(false);
       gribDetails.setEnabled(false);
+      spotHere.setEnabled(false);
       smallDot.setEnabled(false);
       heavyDot.setEnabled(false);
       background.setEnabled(false);
