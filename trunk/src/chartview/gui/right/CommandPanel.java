@@ -4659,7 +4659,7 @@ public class CommandPanel
             }
             catch (Exception ex1)
             {
-              System.err.println("---------------------------------------------");
+              System.err.println("\n---------------------------------------------");
               System.err.println("From thread [" + Thread.currentThread().getName() + "]");
               System.err.println("gribData.getGribPointData():" +
                                  (gribData.getGribPointData()==null?"":"not ") + "null, h=" +
