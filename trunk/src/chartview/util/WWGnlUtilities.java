@@ -10,6 +10,7 @@ import chartview.ctx.WWContext;
 import chartview.gui.AdjustFrame;
 import chartview.gui.left.FileTypeHolder;
 import chartview.gui.right.CommandPanel;
+import chartview.gui.right.CompositeTabComponent;
 import chartview.gui.util.dialog.ExitPanel;
 import chartview.gui.util.dialog.FaxType;
 import chartview.gui.util.dialog.OneColumnTablePanel;
@@ -1735,6 +1736,30 @@ public class WWGnlUtilities
 
   public static void doOnExit(AdjustFrame frame)
   {
+    // Any unsaved doc?
+    int nbOpenTab = ((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getMasterTabPane().getTabCount();
+    int nbUnsaved = 0;
+    for (int i=0; i<nbOpenTab; i++)
+    {
+      if (((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getMasterTabPane().getTitleAt(i).trim().length() > 0 && 
+          !((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getMasterTabPane().getTitleAt(i).endsWith(".xml") && 
+          !((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getMasterTabPane().getTitleAt(i).endsWith(".waz"))
+      {
+        System.out.println("-> Not saved:[" + ((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getMasterTabPane().getTitleAt(i) + "]");
+        nbUnsaved++;
+      }
+    }
+    if (nbUnsaved != 0)
+    {
+      int resp = JOptionPane.showConfirmDialog(WWContext.getInstance().getMasterTopFrame(), 
+                                               Integer.toString(nbUnsaved) + " document(s) not saved,\nexit anyway?", // LOCALIZE
+                                               "Exit",
+                                               JOptionPane.YES_NO_OPTION, 
+                                               JOptionPane.QUESTION_MESSAGE);
+      if (resp == JOptionPane.NO_OPTION)
+        return;
+    }
+    
     boolean confirm = ((Boolean)ParamPanel.data[ParamData.CONFIRM_ON_EXIT][ParamData.VALUE_INDEX]).booleanValue();
     boolean go = false;
     if (confirm)
