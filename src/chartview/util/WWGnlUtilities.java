@@ -1749,6 +1749,8 @@ public class WWGnlUtilities
         nbUnsaved++;
       }
     }
+    boolean confirm = ((Boolean)ParamPanel.data[ParamData.CONFIRM_ON_EXIT][ParamData.VALUE_INDEX]).booleanValue();
+    boolean go = false;
     if (nbUnsaved != 0)
     {
       int resp = JOptionPane.showConfirmDialog(WWContext.getInstance().getMasterTopFrame(), 
@@ -1758,10 +1760,10 @@ public class WWGnlUtilities
                                                JOptionPane.QUESTION_MESSAGE);
       if (resp == JOptionPane.NO_OPTION)
         return;
+      else
+        confirm = false; // Don't ask twice
     }
     
-    boolean confirm = ((Boolean)ParamPanel.data[ParamData.CONFIRM_ON_EXIT][ParamData.VALUE_INDEX]).booleanValue();
-    boolean go = false;
     if (confirm)
     {
       ExitPanel exitPanel = new ExitPanel();      
