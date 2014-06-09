@@ -14,6 +14,7 @@ import chartview.gui.right.CompositeTabComponent;
 import chartview.gui.util.dialog.ExitPanel;
 import chartview.gui.util.dialog.FaxType;
 import chartview.gui.util.dialog.OneColumnTablePanel;
+import chartview.gui.util.dialog.OneFilePanel;
 import chartview.gui.util.dialog.PositionInputPanel;
 import chartview.gui.util.dialog.TwoFilePanel;
 import chartview.gui.util.dialog.UserExitTablePanel;
@@ -684,6 +685,7 @@ public class WWGnlUtilities
   }
 
   private static TwoFilePanel twoFilePanel = null;
+  private static OneFilePanel oneFilePanel = null;
   
   public static String[] chooseTwoFiles(Component parent, 
                                         int modeOne, 
@@ -769,6 +771,57 @@ public class WWGnlUtilities
       faxNameFilter = twoFilePanel.getFaxNameRegExpr();
     }
     return new String[] { fileNameOne, fileNameTwo, regExp, displayOpt, twoFilePanel.getPDFTitle(), withBoatStr, withCommentStr, faxNameFilter };
+  }
+  
+  public static String[] chooseCompositeDirAndPattern(Component parent, 
+                                                      int modeOne, 
+                                                      String[] fltOne, 
+                                                      String descOne, 
+                                                      String whereOne, 
+                                                      String dialogLabel)
+  {
+    String regExp = ""; 
+    String fileNameOne = "";
+    String displayOpt = null;
+
+    if (oneFilePanel == null)
+    {
+      oneFilePanel = new OneFilePanel();
+      oneFilePanel.getLeftLabel().setText(descOne);
+      oneFilePanel.getPatternLabel().setText(WWGnlUtilities.buildMessage("reg-expr-composite"));
+      
+      // From
+      WWContext.ToolFileFilter filterOne = new WWContext.ToolFileFilter(fltOne, descOne);
+      oneFilePanel.getLeftChooser().addChoosableFileFilter(filterOne);
+      oneFilePanel.getLeftChooser().setFileFilter(filterOne);
+      oneFilePanel.getLeftChooser().setFileSelectionMode(modeOne);
+      oneFilePanel.getLeftChooser().setControlButtonsAreShown(false);
+      File ffOne = new File(whereOne);
+      if (ffOne.isDirectory())
+      {
+        oneFilePanel.getLeftChooser().setCurrentDirectory(ffOne);
+        oneFilePanel.getLeftChooser().setSelectedFile(ffOne);
+      }
+      else
+      {
+        File f = new File(".");
+        String currPath = f.getAbsolutePath();
+        f = new File(currPath.substring(0, currPath.lastIndexOf(File.separator)));
+        oneFilePanel.getLeftChooser().setCurrentDirectory(f);
+        oneFilePanel.getLeftChooser().setSelectedFile(f);
+      }
+    }
+    int resp = JOptionPane.showConfirmDialog(parent, 
+                                             oneFilePanel, 
+                                             dialogLabel, 
+                                             JOptionPane.OK_CANCEL_OPTION,
+                                             JOptionPane.PLAIN_MESSAGE);
+    if (resp == JOptionPane.OK_OPTION)
+    {
+      fileNameOne = oneFilePanel.getLeftChooser().getSelectedFile().toString();
+      regExp = oneFilePanel.getRegExprPatternTextField().getText();
+    }
+    return new String[] { fileNameOne, regExp };
   }
   
   public final static int NOTHING  = 0;

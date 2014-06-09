@@ -617,7 +617,7 @@ public class JTreeFilePanel
   }
 
   private Pattern  pattern = null;
-  private transient Matcher  matcher = null;
+  private transient Matcher matcher = null;
 
   private void drillDown(File dir, DefaultMutableTreeNode parent, final String filter, final boolean regExp)
   {

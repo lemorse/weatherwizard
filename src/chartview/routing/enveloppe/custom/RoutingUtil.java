@@ -4,35 +4,31 @@ import astro.calc.GeoPoint;
 import astro.calc.GreatCircle;
 
 import chart.components.ui.ChartPanel;
-
 import chart.components.util.World;
 
-import chartview.util.grib.GribHelper;
+import chartview.ctx.ApplicationEventListener;
+import chartview.ctx.WWContext;
 
+import chartview.gui.right.CommandPanel;
+import chartview.gui.right.CommandPanelUtils;
 import chartview.gui.toolbar.controlpanels.LoggingPanel;
+import chartview.gui.util.dialog.RoutingOutputFlavorPanel;
+import chartview.gui.util.dialog.WhatIfRoutingPanel;
+import chartview.gui.util.param.ParamData;
+import chartview.gui.util.param.ParamPanel;
 
 import chartview.routing.polars.PolarHelper;
 
 import chartview.util.WWGnlUtilities;
-import chartview.ctx.WWContext;
-
-import chartview.gui.right.CommandPanel;
-import chartview.gui.util.dialog.RoutingOutputFlavorPanel;
-import chartview.gui.util.dialog.WhatIfRoutingPanel;
-
-import chartview.gui.util.param.ParamData;
-import chartview.gui.util.param.ParamPanel;
-
-import chartview.util.grib.GribHelper.GribCondition;
-import chartview.util.grib.GribHelper.GribConditionData;
-
+import chartview.util.grib.GribHelper;
 import chartview.util.progress.ProgressMonitor;
+
+import chartview.util.progress.ProgressUtil;
 
 import coreutilities.Utilities;
 
 import java.awt.Point;
 import java.awt.Polygon;
-
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
@@ -40,21 +36,24 @@ import java.awt.datatransfer.StringSelection;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
-
-import java.net.URLEncoder;
+import java.io.FilenameFilter;
 
 import java.text.NumberFormat;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
-
 import java.util.List;
-
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.JOptionPane;
 
@@ -771,6 +770,124 @@ public class RoutingUtil
   }
   
   private static WhatIfRoutingPanel wirp = null;
+  
+  public static List<RoutingPoint> routingWithArchivedGRIBs(CommandPanel cp, String archiveDir, String fileNamePattern) 
+  {
+    List<RoutingPoint> route = null;
+    // 1 - Build the map of the available GRIBs
+    File dir = new File(archiveDir);
+    boolean go = true;
+    if (!dir.exists())
+    {
+      go = false;
+      JOptionPane.showMessageDialog(cp, archiveDir + " not found.", "Directory", JOptionPane.ERROR_MESSAGE); 
+    }
+    if (!dir.isDirectory())
+    {
+      go = false;
+      JOptionPane.showMessageDialog(cp, archiveDir + " is not a directory.", "Directory", JOptionPane.ERROR_MESSAGE); 
+    }
+    if (go)
+    {
+      List<File> list = new ArrayList<File>();
+      list = drillDownArchive(list, dir, fileNamePattern, true);
+      if (list.size() == 0)
+      {
+        JOptionPane.showMessageDialog(cp, "No file found, aborting...\n(You might wan to change your RegExp)", "Archives", JOptionPane.INFORMATION_MESSAGE);
+        return route;
+      }
+      JOptionPane.showMessageDialog(cp, "Creating Big GRIB file with " + list.size() + " archive(s).\nThis may take a while...", "Archives", JOptionPane.INFORMATION_MESSAGE);
+      // TODO Display progress bar
+
+      // Build the map with the GRIB dates
+      // Create a BIG GribHelper.GribConditionData[]
+      Map<Date, GribHelper.GribConditionData> bigGribMap = new TreeMap<Date, GribHelper.GribConditionData>();
+      for (File f : list)
+      {
+        GribHelper.GribConditionData[] gribData = CommandPanelUtils.getGribFromComposite(f.getAbsolutePath());
+        if (gribData != null)
+        {
+//        System.out.println(f.getAbsolutePath() + " contains data for:");
+          for (GribHelper.GribConditionData grib : gribData)
+          {
+            if (grib != null) 
+            {
+//            System.out.println("  -> " + grib.getDate());
+              bigGribMap.put(grib.getDate(), grib);
+            }
+            else
+              System.out.println("  -> NULL grib");
+          }
+        }
+        else
+          System.out.println("*** No GRIB data in " + f.getAbsolutePath());
+      }
+      System.out.println("The big GRIB map has " + bigGribMap.size() + " entry(ies).");
+      GribHelper.GribConditionData[] bigData = new GribHelper.GribConditionData[bigGribMap.size()];
+      Set<Date> keys = bigGribMap.keySet();
+      int idx = 0;
+      for (Date d : keys)
+        bigData[idx++] = bigGribMap.get(d);
+      cp.setGribData(bigData, "OneBigGRIBArray");
+      // TODO Hide progress bar
+      // TODO ? Save the BIG Grib?
+      
+      // TODO Display warning for the dates
+      // Invoke routing
+      cp.calculateRouting();
+    }
+    return route;    
+  }
+  
+  private static Pattern  pattern = null;
+  private static Matcher  matcher = null;
+  private static List<File> drillDownArchive(List<File> list, File dir, final String filter, final boolean regExp)
+  {
+    if (!dir.exists() || !dir.isDirectory())
+      throw new RuntimeException("[" + dir.getAbsolutePath() + "] not found, or is not a directory (from " + System.getProperty("user.dir") + ")");
+    else
+    {
+      if (regExp)
+        pattern = Pattern.compile(filter); // , Pattern.CASE_INSENSITIVE);
+
+      File[] flist = dir.listFiles(new FilenameFilter()
+          {
+            public boolean accept(File dir, String name)
+            {
+              boolean cond = false;
+              cond = new File(dir, name).isDirectory() || name.endsWith(WWContext.WAZ_EXTENSION);
+              if (cond && filter != null && filter.trim().length() > 0)
+              {
+                if (!new File(dir, name).isDirectory())
+                {
+                  if (!regExp)
+                    cond = cond && (name.indexOf(filter) > -1);
+                  else
+                  {
+                    matcher = pattern.matcher(name);
+                    cond = cond && matcher.find();
+                  }
+                }
+              }
+//            if (cond)
+//              System.out.println("Accepted " + name + " in " + dir);
+              return cond;
+            }
+          });      
+      List<File> _list = Arrays.asList(flist);
+      List<File> lf = new ArrayList<File>();
+      for (File f : _list)
+      {
+        if (f.isDirectory())
+          lf = drillDownArchive(lf, f, filter, regExp);
+        else
+          lf.add(f);
+      }
+      list.addAll(lf);
+  //  flist = (File[])list.toArray();
+      return list;
+    }    
+  }
   
   public static List<RoutingPoint> whatIfRouting(CommandPanel cp, GeoPoint fromPt, GribHelper.GribConditionData[] gribData) 
   {

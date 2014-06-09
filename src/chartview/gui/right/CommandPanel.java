@@ -5582,6 +5582,18 @@ public class CommandPanel
       WWContext.getInstance().fireRoutingForecastAvailable(true, route);
     }
   }
+  
+  public void routingWithArchivedGRIBs(String compositeDirectory, String pattern)
+  {
+    List<RoutingPoint> route = RoutingUtil.routingWithArchivedGRIBs(this, compositeDirectory, pattern);
+    if (route != null)
+    {
+      routingForecastMode = true;
+      routingMode = false;
+      closestPoint = route.get(0);
+      WWContext.getInstance().fireRoutingForecastAvailable(true, route);
+    }
+  }
 
   public void calculateRouting()
   {

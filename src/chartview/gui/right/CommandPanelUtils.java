@@ -2204,4 +2204,67 @@ public class CommandPanelUtils
     }
     return nbComponents;
   }
+
+  public static GribHelper.GribConditionData[] getGribFromComposite(String fileName)
+  {
+    ZipFile waz = null;
+    XMLDocument doc = null;
+    GribHelper.GribConditionData wgd[] = null;
+    DOMParser parser = WWContext.getInstance().getParser();
+    synchronized (parser)
+    {
+      parser.setValidationMode(DOMParser.NONVALIDATING);
+      try
+      {
+        if (fileName.endsWith(WWContext.WAZ_EXTENSION))
+        {
+          waz = new ZipFile(fileName);
+          ZipEntry composite = waz.getEntry("composite.xml");
+          if (composite != null)
+          {
+            InputStream is = waz.getInputStream(composite);
+            parser.parse(is);
+          }
+          else
+            System.out.println("composite.xml not found :(");
+        }
+        else 
+        {
+          // This should not happen
+        }
+        doc = parser.getDocument();
+        // TODO IF there is a GRIB...
+        try
+        {
+          XMLElement gribNode = (XMLElement)doc.selectNodes("//grib").item(0);
+
+          String gribFileName = gribNode.getFirstChild().getNodeValue().substring(WWContext.WAZ_PROTOCOL_PREFIX.length());
+          InputStream is = waz.getInputStream(waz.getEntry(gribFileName));
+          try
+          {
+            wgd = GribHelper.getGribData(is, gribFileName);
+          }
+          catch (RuntimeException rte)
+          {
+            String mess = rte.getMessage();
+//                  System.out.println("RuntimeException getMessage(): [" + mess + "]");
+            if (mess.startsWith("DataArray (width) size mismatch"))
+              System.out.println(mess);
+            else
+              throw rte;
+          }
+          is.close();
+        }
+        catch (Exception ex)
+        {
+          ex.printStackTrace();
+        }
+      }
+      catch (Exception ex)
+      {
+        ex.printStackTrace();
+      }
+    }
+    return wgd;
+  }
 }
