@@ -55,7 +55,8 @@ public class WWContext
 //public final static String VERSION_NUMBER = "3.0.1.0"; // Sep-17, 2012
 //public final static String VERSION_NUMBER = "3.0.1.1"; // Oct-31, 2012
 //public final static String VERSION_NUMBER = "3.0.1.2"; // Nov-27, 2012
-  public final static String VERSION_NUMBER = "3.0.1.3"; // Feb-06, 2013
+//public final static String VERSION_NUMBER = "3.0.1.3"; // Feb-06, 2013
+  public final static String VERSION_NUMBER = "3.0.1.4"; // Jun-09, 2014
   public final static String PRODUCT_ID     = "weather_assistant." + VERSION_NUMBER;
   
   public final static String PRODUCT_KEY    = "WW";

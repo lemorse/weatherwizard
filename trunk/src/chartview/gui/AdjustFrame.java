@@ -67,6 +67,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
@@ -230,6 +231,8 @@ public class AdjustFrame
   private JMenu menuRouting = new JMenu();
   private JMenuItem menuToolsRouting = new JMenuItem();
   private JMenuItem whatIfMenuItem = new JMenuItem();
+  
+  private JMenuItem gribPilotChartRoutingMenuItem = new JMenuItem();
   
   private JMenuItem menuToolsGeostrophicWind = new JMenuItem();
   private JMenuItem menuToolsRetryNetwork = new JMenuItem();
@@ -792,6 +795,7 @@ public class AdjustFrame
     menuTools.add(menuRouting);
     menuRouting.add(menuToolsRouting);
     menuRouting.add(whatIfMenuItem);
+    menuRouting.add(gribPilotChartRoutingMenuItem);
     menuTools.add(menuToolsGeostrophicWind);
     
     menuTools.add(nmeaMenu);
@@ -963,6 +967,39 @@ public class AdjustFrame
             }
           }
         });
+    
+    gribPilotChartRoutingMenuItem.setText(WWGnlUtilities.buildMessage("grib-as-pilot-chart")); // Based on archived GRIBs.
+    gribPilotChartRoutingMenuItem.setIcon(new ImageIcon(instance.getClass().getResource("img/navigation.png")));
+    gribPilotChartRoutingMenuItem.setToolTipText(WWGnlUtilities.buildMessage("grib-as-pilot-chart-hint"));
+    gribPilotChartRoutingMenuItem.addActionListener(new ActionListener()
+        {
+          public void actionPerformed(ActionEvent ae)
+          {
+            if (((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().getFrom() != null && 
+                ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().getTo() != null)
+            {
+              // Ask what directory to look into for the GRIBs, pattern, etc.
+              String[] respStr = WWGnlUtilities.chooseCompositeDirAndPattern(((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel(),
+                                                                             JFileChooser.DIRECTORIES_ONLY, 
+                                                                             new String[] { "" }, 
+                                                                             WWGnlUtilities.buildMessage("composite-directories"),
+                                                                             ".",
+                                                                             WWGnlUtilities.buildMessage("composite-directories"));
+              if (respStr != null)
+              {
+                ((CompositeTabbedPane)masterTabPane.getSelectedComponent()).getCommandPanel().routingWithArchivedGRIBs(respStr[0], respStr[1]);
+              }
+            }
+            else
+            {
+              JOptionPane.showMessageDialog(instance, 
+                                            WWGnlUtilities.buildMessage("orig-dest-routing"), 
+                                            WWGnlUtilities.buildMessage("routing"), 
+                                            JOptionPane.WARNING_MESSAGE);
+            }
+          }
+        });
+      
     menuToolsGeostrophicWind.setText(WWGnlUtilities.buildMessage("geostrophic-wind"));
 //  menuToolsGeostrophicWind.setIcon(new ImageIcon(this.getClass().getResource("img/greenflag.png")));
     menuToolsGeostrophicWind.setIcon(new ImageIcon(this.getClass().getResource("img/pushpin_16x16.png")));
