@@ -9,6 +9,6 @@ Download is now deprecated on Google Code...
 = New Downloads =
 
  * Download [https://drive.google.com/file/d/0B1OXF1qWHj9memVJNU83a0FlR28/edit?usp=sharing Navigation Desktop version 3.0.1.4] for Windows.
- * Download Navigation Desktop version 3.0.1.4 for Linux & Mac.
+ * Download [https://drive.google.com/file/d/0B1OXF1qWHj9mWEpVdTVLSVg0SFk/edit?usp=sharing Navigation Desktop version 3.0.1.4] for Linux & Mac.
  * Download [https://drive.google.com/file/d/0B1OXF1qWHj9mVEVHVnJUVm9vdW8/edit?usp=sharing Weather Wizard version 3.0.1.4] for Windows.
- * Download Weather Wizard version 3.0.1.4 for Linux & Mac.
+ * Download [https://drive.google.com/file/d/0B1OXF1qWHj9mWEpVdTVLSVg0SFk/edit?usp=sharing Weather Wizard version 3.0.1.4] for Linux & Mac.
