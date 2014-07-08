@@ -168,6 +168,8 @@ public class WWGnlUtilities
 {
   public final static String REGEXPR_PROPERTIES_FILE = "regexpr.properties";
   public final static String COMPOSITE_FILTER        = "composite.filter";
+  public final static String REGEXPR_ROUTING_PROPERTIES_FILE = "regexpr.routing.properties";
+  public final static String COMPOSITE_FILTER_FOR_ROUTING    = "composite.filter.routing";
   public final static String FAX_NAME_FILTER         = "fax.filter";
   
   public final static DecimalFormat XX14   = new DecimalFormat("##0.0000");
@@ -782,7 +784,6 @@ public class WWGnlUtilities
   {
     String regExp = ""; 
     String fileNameOne = "";
-    String displayOpt = null;
 
     if (oneFilePanel == null)
     {
@@ -820,6 +821,18 @@ public class WWGnlUtilities
     {
       fileNameOne = oneFilePanel.getLeftChooser().getSelectedFile().toString();
       regExp = oneFilePanel.getRegExprPatternTextField().getText();
+      // Write the regexp for further reuse
+      try
+      {
+        Properties props = new Properties();
+        props.setProperty(COMPOSITE_FILTER_FOR_ROUTING, regExp);
+        props.store(new FileWriter(REGEXPR_ROUTING_PROPERTIES_FILE), "Last Regular Expressions");
+
+      }
+      catch (Exception ex)
+      {
+        ex.printStackTrace();
+      }
     }
     return new String[] { fileNameOne, regExp };
   }
