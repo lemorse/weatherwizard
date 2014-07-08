@@ -61,7 +61,7 @@ public class OneFilePanel
     throws Exception
   {
     this.setLayout(gridBagLayout1);
-    this.setSize(new Dimension(500, 453));
+    this.setSize(new Dimension(666, 453));
     leftLabel.setText("Composite Directory");
     leftLabel.setFont(new Font("Tahoma", 1, 11));
     regExprPatternTextField.setText(".*");
@@ -99,8 +99,8 @@ public class OneFilePanel
     Properties p = new Properties();
     try
     {
-      p.load(new FileInputStream(WWGnlUtilities.REGEXPR_PROPERTIES_FILE));
-      regExprPatternTextField.setText(p.getProperty(WWGnlUtilities.COMPOSITE_FILTER, ".*"));
+      p.load(new FileInputStream(WWGnlUtilities.REGEXPR_ROUTING_PROPERTIES_FILE));
+      regExprPatternTextField.setText(p.getProperty(WWGnlUtilities.COMPOSITE_FILTER_FOR_ROUTING, ".*"));
     }
     catch (FileNotFoundException fnfe)
     {

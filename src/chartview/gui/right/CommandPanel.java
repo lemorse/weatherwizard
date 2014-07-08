@@ -5674,7 +5674,10 @@ public class CommandPanel
 
     if (init)
     {
-      startRoutingPanel.setDate(currentDate);
+      if (currentDate.after(gribFrom) && currentDate.before(gribTo))
+        startRoutingPanel.setDate(currentDate);
+      else
+        startRoutingPanel.setDate(gribFrom);
 
       startRoutingPanel.setTimeInterval((int)timeInterval);
       startRoutingPanel.setAngularStep(routingStep);
