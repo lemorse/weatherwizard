@@ -904,6 +904,10 @@ public class WWGnlUtilities
   
   public static void drawTWAOverBoat(Graphics2D g2d, int hLength, Point center, int twa)
   {
+    drawTWAOverBoat(g2d, hLength, center, twa, null);
+  }
+  public static void drawTWAOverBoat(Graphics2D g2d, int hLength, Point center, int twa, Color arrowColor)
+  {
     int handOption = Integer.parseInt(((ParamPanel.AnemometerHandOptionList)(ParamPanel.data[ParamData.ANEMOMETER_HAND_OPTION][ParamData.VALUE_INDEX])).getStringIndex());    
     // Hand shadow
     g2d.setColor(Color.gray);
@@ -927,7 +931,7 @@ public class WWGnlUtilities
     {
       Point from = new Point(center.x + shadowOffset + (int)((handLength) * Math.sin(Math.toRadians((double)twa))),
                              center.y + shadowOffset - (int)((handLength) * Math.cos(Math.toRadians((double)twa))));
-      drawAnemometerArrow(g2d, from, center, 20, BACKWARD, null);      
+      drawAnemometerArrow(g2d, from, center, 20, BACKWARD, arrowColor);      
     }
     else if (handOption == ParamPanel.AnemometerHandOptionList.BIG_HAND_OPTION)
     {
@@ -935,7 +939,7 @@ public class WWGnlUtilities
                              center.y + shadowOffset - (int)(handLength * Math.cos(Math.toRadians((double)twa))));
       Point from = new Point(center.x + shadowOffset - (int)(handLength * Math.sin(Math.toRadians((double)twa))),
                              center.y + shadowOffset + (int)(handLength * Math.cos(Math.toRadians((double)twa))));
-      drawAnemometerArrow(g2d, from, to, 30, FORWARD, null);      
+      drawAnemometerArrow(g2d, from, to, 30, FORWARD, arrowColor);      
     }
     g2d.fillOval(center.x + shadowOffset - (KNOB_DIAMETER / 2),
                  center.y + shadowOffset - (KNOB_DIAMETER / 2),
@@ -947,7 +951,7 @@ public class WWGnlUtilities
     if (handOption == ParamPanel.AnemometerHandOptionList.SIMPLE_HAND_OPTION)
     {
       Color c = g2d.getColor();
-      g2d.setColor(new Color(19, 234, 186));
+      g2d.setColor(arrowColor == null ? new Color(19, 234, 186) : arrowColor);
       g2d.drawLine(center.x, 
                    center.y, 
                    center.x + (int)(handLength * Math.sin(Math.toRadians((double)twa))),
@@ -958,7 +962,7 @@ public class WWGnlUtilities
     {
       Point from = new Point(center.x + (int)((handLength) * Math.sin(Math.toRadians((double)twa))),
                              center.y - (int)((handLength) * Math.cos(Math.toRadians((double)twa))));
-      Color c = new Color(19, 234, 186);
+      Color c = arrowColor == null ? new Color(19, 234, 186) : arrowColor;
       drawAnemometerArrow(g2d, from, center, 20, BACKWARD, c, c);      
     }
     else if (handOption == ParamPanel.AnemometerHandOptionList.BIG_HAND_OPTION)
@@ -967,7 +971,7 @@ public class WWGnlUtilities
                              center.y - (int)(handLength * Math.cos(Math.toRadians((double)twa))));
       Point from = new Point(center.x - (int)(handLength * Math.sin(Math.toRadians((double)twa))),
                              center.y + (int)(handLength * Math.cos(Math.toRadians((double)twa))));
-      Color c = new Color(19, 234, 186);
+      Color c = arrowColor == null ? new Color(19, 234, 186) : arrowColor;
       drawAnemometerArrow(g2d, from, to, 30, FORWARD, c, c);      
     }
     g2d.fillOval(center.x - (KNOB_DIAMETER / 2),

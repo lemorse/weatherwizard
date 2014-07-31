@@ -94,6 +94,7 @@ public class GRIBSlicePanel
   private JCheckBox tempCheckBox = new JCheckBox();
   private JCheckBox rainCheckBox = new JCheckBox();
   private JCheckBox bspCheckBox  = new JCheckBox();
+  private JCheckBox hdgCheckBox  = new JCheckBox();
   
   private boolean displayTWS = true,
                   displayPRMSL = false,
@@ -101,7 +102,8 @@ public class GRIBSlicePanel
                   displayWAVES = false,
                   displayTEMP = false,
                   displayRAIN = false,
-                  displayBSP  = false;
+                  displayBSP  = false,
+                  displayHDG = false;
   
   private JLabel smoothLabel = new JLabel();
   private GridBagLayout gridBagLayout2 = new GridBagLayout();
@@ -222,7 +224,7 @@ public class GRIBSlicePanel
     dataLabel.setFont(new Font("Tahoma", 1, 11));
 
     prmslCheckBox.setText("PRMSL");
-    prmslCheckBox.setToolTipText("PRMSL");
+    prmslCheckBox.setToolTipText("Pressure at Mean Sea Level");
     Color c = (Color)ParamPanel.data[ParamData.PRMSL_COLOR_IN_ROUTING][ParamData.VALUE_INDEX];
     prmslCheckBox.setBackground(c);
     prmslCheckBox.setForeground(reverseColor(c));
@@ -234,7 +236,7 @@ public class GRIBSlicePanel
         }
       });
     hgt500CheckBox.setText("HGT500");
-    hgt500CheckBox.setToolTipText("HGT500");
+    hgt500CheckBox.setToolTipText("500mb Altitude");
     c = (Color)ParamPanel.data[ParamData.HGT500_COLOR_IN_ROUTING][ParamData.VALUE_INDEX];
     hgt500CheckBox.setBackground(c);
     hgt500CheckBox.setForeground(reverseColor(c));
@@ -246,7 +248,7 @@ public class GRIBSlicePanel
         }
       });
     twsCheckBox.setText("TWS");
-    twsCheckBox.setToolTipText("TWS");
+    twsCheckBox.setToolTipText("True Wind Speed");
     c = (Color)ParamPanel.data[ParamData.TWS_COLOR_IN_ROUTING][ParamData.VALUE_INDEX];
     twsCheckBox.setBackground(c);
     twsCheckBox.setForeground(reverseColor(c));
@@ -258,7 +260,7 @@ public class GRIBSlicePanel
         }
       });
     wavesCheckBox.setText("WAVES");
-    wavesCheckBox.setToolTipText("WAVES");
+    wavesCheckBox.setToolTipText("Waves Height");
     wavesCheckBox.setBackground((Color)ParamPanel.data[ParamData.WAVES_COLOR_IN_ROUTING][ParamData.VALUE_INDEX]);
     wavesCheckBox.addActionListener(new ActionListener()
       {
@@ -268,7 +270,7 @@ public class GRIBSlicePanel
         }
       });
     tempCheckBox.setText("AIRTMP");
-    tempCheckBox.setToolTipText("AIRTMP");
+    tempCheckBox.setToolTipText("Air Temperature");
     c = (Color)ParamPanel.data[ParamData.AIRTMP_COLOR_IN_ROUTING][ParamData.VALUE_INDEX];
     tempCheckBox.setBackground(c);
     tempCheckBox.setForeground(reverseColor(c));
@@ -280,7 +282,7 @@ public class GRIBSlicePanel
         }
       });
     rainCheckBox.setText("RAIN");
-    rainCheckBox.setToolTipText("RAIN");
+    rainCheckBox.setToolTipText("Precipitation");
     c = (Color)ParamPanel.data[ParamData.RAIN_COLOR_IN_ROUTING][ParamData.VALUE_INDEX];
     rainCheckBox.setBackground(c);
     rainCheckBox.setForeground(reverseColor(c));
@@ -293,7 +295,7 @@ public class GRIBSlicePanel
       });
     
     bspCheckBox.setText("BSP");
-    bspCheckBox.setToolTipText("BSP");
+    bspCheckBox.setToolTipText("Boat Speed");
     c = (Color)ParamPanel.data[ParamData.BSP_COLOR_IN_ROUTING][ParamData.VALUE_INDEX];
     bspCheckBox.setBackground(c);
     bspCheckBox.setForeground(reverseColor(c));
@@ -302,6 +304,19 @@ public class GRIBSlicePanel
         public void actionPerformed(ActionEvent e)
         {
           bspCheckBox_actionPerformed(e);
+        }
+      });
+
+    hdgCheckBox.setText("HDG-TWD");
+    hdgCheckBox.setToolTipText("Heading & True Wind Direction");
+//    c = (Color)ParamPanel.data[ParamData.BSP_COLOR_IN_ROUTING][ParamData.VALUE_INDEX];
+//    bspCheckBox.setBackground(c);
+    hdgCheckBox.setForeground(reverseColor(c));
+    hdgCheckBox.addActionListener(new ActionListener()
+      {
+        public void actionPerformed(ActionEvent e)
+        {
+          hdgCheckBox_actionPerformed(e);
         }
       });
 
@@ -318,8 +333,10 @@ public class GRIBSlicePanel
     rainCheckBox.setSelected(displayRAIN);
     rainCheckBox.setFont(new Font("Tahoma", 0, 9));
     bspCheckBox.setSelected(displayBSP);
-
     bspCheckBox.setFont(new Font("Tahoma", 0, 9));
+    hdgCheckBox.setSelected(displayHDG);
+    hdgCheckBox.setFont(new Font("Tahoma", 0, 9));
+
     smoothLabel.setText("Smooth");
     smoothLabel.setFont(new Font("Tahoma", 0, 9));
     smoothTextField.setSize(new Dimension(30, 20));
@@ -363,6 +380,8 @@ public class GRIBSlicePanel
     checkBoxTopPanel.add(rainCheckBox, new GridBagConstraints(0, 6, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL,
           new Insets(0, 3, 0, 0), 0, 0));
     checkBoxTopPanel.add(bspCheckBox, new GridBagConstraints(0, 7, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL,
+          new Insets(0, 3, 0, 0), 0, 0));
+    checkBoxTopPanel.add(hdgCheckBox, new GridBagConstraints(0, 8, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL,
           new Insets(0, 3, 0, 0), 0, 0));
 
     computeData();
@@ -703,6 +722,12 @@ public class GRIBSlicePanel
     displayBSP = bspCheckBox.isSelected();
     repaint();
   }
+  
+  private void hdgCheckBox_actionPerformed(ActionEvent e)
+  {
+    displayHDG = hdgCheckBox.isSelected();
+    repaint();
+  }
 
   private void smoothTextField_actionPerformed(ActionEvent e)
   {
@@ -884,6 +909,33 @@ public class GRIBSlicePanel
       {
         drawBoatSpeed(gr, smoothedBsp, bspscale);
 //      drawTWA(gr, smoothedTwa, dirScale);
+        if (displayHDG)
+        {
+          for (int idx=0; idx<=10; idx++)
+          {
+            int x = idx * (this.getWidth() / 10);
+            int dataIdx = (int)((float)x * (float)gribSize / (float)this.getWidth());
+            if (dataIdx > smoothedData.size() - 1) dataIdx = smoothedData.size() - 1;
+            if (dataIdx < 0) dataIdx = 0;
+            Integer heading   = smoothedHdg.get(dataIdx);
+            Integer windAngle = smoothedTwa.get(dataIdx);
+            // Draw the boat with TWA
+            Point boatCenter = new Point(x, (this.getHeight() / 2));
+            WWGnlUtilities.drawBoat((Graphics2D)gr, 
+                                    Color.LIGHT_GRAY, 
+                                    boatCenter,             // Pos on the Panel
+                                    (this.getHeight() / 4), // Boat Length
+                                    heading,                // Heading
+                                    0.5f);                  // Alpha
+            // Now, the wind
+            Color c = gr.getColor();
+            WWGnlUtilities.drawTWAOverBoat((Graphics2D)gr, 
+                                           (this.getHeight() / 8), // Hand Length
+                                           boatCenter, 
+                                           heading - windAngle, // TODO See why -windAngle
+                                           Color.GRAY);
+          }          
+        }
       }
       if (infoX != -1) // Mouse is pressed
       {
