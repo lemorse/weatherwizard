@@ -5307,6 +5307,22 @@ public class CommandPanel
               Point toPoint = chartPanel.getPanelPoint(next.getPosition());
               gr.drawLine(fromPoint.x, fromPoint.y, toPoint.x, toPoint.y);
               gr.fillOval(toPoint.x - 4, toPoint.y - 4, 8, 8); // A dot
+              // Wind ?
+              int twd    = thisPoint.getTwd();
+              double tws = thisPoint.getTws();
+              Color c = gr.getColor();
+              WWGnlUtilities.drawWind(gr,
+                                      toPoint.x,
+                                      toPoint.y,
+                                      tws,
+                                      180 - twd,
+                                      false,
+                                      Color.blue,
+                                      false,
+                                      false,
+                                      false,
+                                      false);
+              gr.setColor(c);
               thisPoint = next;
               fromPoint = toPoint;
             }
