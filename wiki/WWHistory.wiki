@@ -11,6 +11,7 @@ This page takes over and replaces the one [http://donpedro.lediouris.net/softwar
 = Details =
 
 || *Date* || *Description* || *Impacted file(s)* ||
+|| 20-Aug-2014  || Send SPOT requests in Airmail outbox. New preference in the SailFax category. || nmeareader.jar, desktop.jar ||
 || 26-Jun-2014  || Stored the reg-exp in the Routing from Archives || chartadjust.jar ||
 || 26-Jun-2014  || Marquee in the "Live wallpaper" || desktop.jar ||
 || 09-Apr-2014  || Replaced "foreground data" with "Live wallpaper" || desktop.jar ||
