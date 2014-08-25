@@ -1426,12 +1426,15 @@ public class AdjustFrame
         @Override
         public void setGribIndex(int idx) 
         {
-          GribHelper.GribConditionData[] currentGRIB = ((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getCommandPanel().getGribData();
-          if (currentGRIB[idx] != null)
+          if (idx >= 0)
           {
-            Date gribDate = currentGRIB[idx].getDate(); 
-//          System.out.println("GRIB Date:" + gribDate.toString()); 
-            setStatusLabel("GRIB Date:" + gribDate.toString());
+            GribHelper.GribConditionData[] currentGRIB = ((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getCommandPanel().getGribData();
+            if (currentGRIB != null && currentGRIB[idx] != null)
+            {
+              Date gribDate = currentGRIB[idx].getDate(); 
+  //          System.out.println("GRIB Date:" + gribDate.toString()); 
+              setStatusLabel("GRIB Date:" + gribDate.toString());
+            }
           }
         }
         
