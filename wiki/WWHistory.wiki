@@ -11,6 +11,7 @@ This page takes over and replaces the one [http://donpedro.lediouris.net/softwar
 = Details =
 
 || *Date* || *Description* || *Impacted file(s)* ||
+|| 10-Sep-2014  || Improved NMEA Analyzer, mostly to manage logging aberrations || nmeareader.jar ||
 || 08-Sep-2014  || NMEA Analyzer and Converter (into GPX). Possibility to define your own NMEA Strings (in config/extra.nmea.properties) || nmeareader.jar, desktop.jar ||
 || 20-Aug-2014  || Send SPOT requests in Airmail outbox. New preference in the SailFax category. || nmeareader.jar, desktop.jar ||
 || 26-Jun-2014  || Stored the reg-exp in the Routing from Archives || chartadjust.jar ||
