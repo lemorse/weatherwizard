@@ -11,7 +11,8 @@ This page takes over and replaces the one [http://donpedro.lediouris.net/softwar
 = Details =
 
 || *Date* || *Description* || *Impacted file(s)* ||
-|| 03-Oct-2014  || Intriduced a loggr (java logger)  || coreutilities.jar, nmeareader.jar, desktop.jar ||
+|| 14-Oct-2014  || Cache age (mostly when using re-broadcasting)  || coreutilities.jar, nmeareader.jar, nmeaparser.jar, desktop.jar ||
+|| 03-Oct-2014  || Introduced a logger (java logger)  || coreutilities.jar, nmeareader.jar, desktop.jar ||
 || 10-Sep-2014  || Improved NMEA Analyzer, mostly to manage logging aberrations. Also added the performance (polar-based) in the consoles (a graph in the graphical one, and a value in the character one).  || nmeareader.jar, desktop.jar ||
 || 08-Sep-2014  || NMEA Analyzer and Converter (into GPX). Possibility to define your own NMEA Strings (in config/extra.nmea.properties) || nmeareader.jar, desktop.jar ||
 || 20-Aug-2014  || Send SPOT requests in Airmail outbox. New preference in the SailFax category. || nmeareader.jar, desktop.jar ||
