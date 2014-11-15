@@ -12,7 +12,7 @@ Download is now deprecated on Google Code...
  * Download [https://drive.google.com/file/d/0B1OXF1qWHj9mZHo0d1dCZXFDTDg/view?usp=sharing Navigation Desktop version 3.0.1.4] for Linux & Mac.
  * Download [https://drive.google.com/file/d/0B1OXF1qWHj9mVEVHVnJUVm9vdW8/edit?usp=sharing Weather Wizard version 3.0.1.4] for Windows.
  * Download [https://drive.google.com/file/d/0B1OXF1qWHj9mZHo0d1dCZXFDTDg/view?usp=sharing Weather Wizard version 3.0.1.4] for Linux & Mac.
- * Download [https://drive.google.com/file/d/0B1OXF1qWHj9mdzZxLTdUR3o2a00/view?usp=sharing the doc of the console] (pdf).
  * Download [https://drive.google.com/open?id=0B1OXF1qWHj9mMlNKX1dFdzVlaXM&authuser=0 everything] for the Raspberry PI.
+ * Download [https://drive.google.com/file/d/0B1OXF1qWHj9mdzZxLTdUR3o2a00/view?usp=sharing the doc of the console] (pdf).
 = Problems? =
 If you are experiencing any problem, please drop me a line at olivier@lediouris.net.
