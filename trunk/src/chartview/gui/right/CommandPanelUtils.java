@@ -1470,15 +1470,27 @@ public class CommandPanelUtils
             System.out.println("-- Created from [" + fileName + "]. Saving!");
             String compositeDir = ((ParamPanel.DataDirectory)ParamPanel.data[ParamData.COMPOSITE_ROOT_DIR][ParamData.VALUE_INDEX]).toString();
             String bigPattern = ((String)ParamPanel.data[ParamData.AUTO_SAVE_DEFAULT_COMPOSITE][ParamData.VALUE_INDEX]);
+            String dir = "", prefix = "", pattern = "", suffix = "", ext = "";
             String[] patternElements = bigPattern.split("\\|");
-            String dir = compositeDir + patternElements[0].trim(); // "/yyyy/MM-MMM";
-            String prefix = patternElements[1].trim();             // "Auto_";
-            String pattern =patternElements[2].trim();             // "yyyy_MM_dd_HH_mm_ss_z";
-            String ext = patternElements[3].trim();                // "waz";
+            if (patternElements.length == 4) // Old version
+            {
+              dir = compositeDir + patternElements[0].trim(); // "/yyyy/MM-MMM";
+              prefix = patternElements[1].trim();             // "Auto_";
+              pattern =patternElements[2].trim();             // "yyyy_MM_dd_HH_mm_ss_z";
+              ext = patternElements[3].trim();                // "waz";
+            }
+            else if (patternElements.length == 5) // New version
+            {
+              dir = compositeDir + patternElements[0].trim(); // "/yyyy/MM-MMM";
+              prefix = patternElements[1].trim();             // "Auto_";
+              pattern =patternElements[2].trim();             // "yyyy_MM_dd_HH_mm_ss_z";
+              suffix =patternElements[3].trim();             // "_Pacific";
+              ext = patternElements[4].trim();                // "waz";
+            }
             Date now = new Date();
             dir = WWGnlUtilities.translatePath(dir, now).replace('/', File.separatorChar);
             SimpleDateFormat sdf = new SimpleDateFormat(pattern);
-            String saveAsName = dir + File.separator + prefix + sdf.format(now) + "." + ext;
+            String saveAsName = dir + File.separator + prefix + sdf.format(now) + suffix + "." + ext;
 
             File faxDir = new File(dir);
             if (!faxDir.exists())
