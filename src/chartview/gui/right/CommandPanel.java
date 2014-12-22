@@ -4352,7 +4352,8 @@ public class CommandPanel
         BufferedImage bufferedImage = null;
         if (smoothColors)
         {
-          bufferedImage = new BufferedImage(this.getWidth(), this.getHeight(), BufferedImage.TYPE_INT_ARGB);
+//        bufferedImage = new BufferedImage(this.getWidth(), this.getHeight(), BufferedImage.TYPE_INT_ARGB);
+          bufferedImage = new BufferedImage(chartPanel.getWidth(), chartPanel.getHeight(), BufferedImage.TYPE_INT_ARGB);
           // Create a graphics contents on the buffered image
           Graphics2D imageG2d = bufferedImage.createGraphics();
        // imageG2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
