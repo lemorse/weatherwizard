@@ -195,7 +195,7 @@ public class HTTPClient
           System.out.println("Extension not supported (" + fName + ")");
         long diff = System.currentTimeMillis() - before;
         retFile = f.getAbsolutePath();
-        if (verbose) System.out.println("New Chart available " + retFile + " [" + Long.toString(diff) + " ms]");
+        if (verbose) System.out.println("New Fax available " + retFile + " [" + Long.toString(diff) + " ms]");
       }
       else
         throw new CannotWriteException("Cannot write in " + outputdir);

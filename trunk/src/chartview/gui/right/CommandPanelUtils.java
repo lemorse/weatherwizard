@@ -707,7 +707,8 @@ public class CommandPanelUtils
 
     // Show Chart
     boolean showChart = cp.isDrawChart(); 
-    if (!showChart && !"yes".equals(System.getProperty("headless", "no")))
+    if (!showChart && !("yes".equals(System.getProperty("headless", "no")) || 
+                        "true".equals(System.getProperty("headless", "no"))) )
     {
       int resp = JOptionPane.showConfirmDialog(cp, 
                                                "Chart will not be drawn (by default) for this composite.\nDo you confirm?", // LOCALIZE                                                    
@@ -1463,48 +1464,63 @@ public class CommandPanelUtils
         System.out.println("-- Composite [" + fileName + "] created. Saving?");
   //      System.out.println("Default Composite: [" + ((ParamPanel.DataFile) ParamPanel.data[ParamData.LOAD_COMPOSITE_STARTUP][ParamData.VALUE_INDEX]).toString() + "]");
         boolean autoSaveDefaultComposite = ((String)ParamPanel.data[ParamData.AUTO_SAVE_DEFAULT_COMPOSITE][ParamData.VALUE_INDEX]).trim().length() > 0;
-        if (((ParamPanel.DataFile) ParamPanel.data[ParamData.LOAD_COMPOSITE_STARTUP][ParamData.VALUE_INDEX]).toString().equals(fileName) && autoSaveDefaultComposite)
+        String compositeName = ((ParamPanel.DataFile) ParamPanel.data[ParamData.LOAD_COMPOSITE_STARTUP][ParamData.VALUE_INDEX]).toString();
+        String ca[] = compositeName.split(",");
+        for (int i=0; i<ca.length; i++)
         {
-          try
+          if (ca[i].equals(fileName) && autoSaveDefaultComposite)
           {
-            System.out.println("-- Created from [" + fileName + "]. Saving!");
-            String compositeDir = ((ParamPanel.DataDirectory)ParamPanel.data[ParamData.COMPOSITE_ROOT_DIR][ParamData.VALUE_INDEX]).toString();
-            String bigPattern = ((String)ParamPanel.data[ParamData.AUTO_SAVE_DEFAULT_COMPOSITE][ParamData.VALUE_INDEX]);
-            String dir = "", prefix = "", pattern = "", suffix = "", ext = "";
-            String[] patternElements = bigPattern.split("\\|");
-            if (patternElements.length == 4) // Old version
+            try
             {
-              dir = compositeDir + patternElements[0].trim(); // "/yyyy/MM-MMM";
-              prefix = patternElements[1].trim();             // "Auto_";
-              pattern =patternElements[2].trim();             // "yyyy_MM_dd_HH_mm_ss_z";
-              ext = patternElements[3].trim();                // "waz";
+              System.out.println("-- Created from [" + fileName + "]. Saving!");
+              String compositeDir = ((ParamPanel.DataDirectory)ParamPanel.data[ParamData.COMPOSITE_ROOT_DIR][ParamData.VALUE_INDEX]).toString();
+              // Warning!! If the LOAD_COMPOSITE_STARTUP is an array, the AUTO_SAVE_DEFAULT_COMPOSITE must be an array too.
+              String bigPattern = ((String)ParamPanel.data[ParamData.AUTO_SAVE_DEFAULT_COMPOSITE][ParamData.VALUE_INDEX]);
+              String patterns[] = bigPattern.split(",");
+              String onePattern = "";
+              if (patterns.length != ca.length)
+              {
+                onePattern = patterns[0];
+                System.out.println(">>> Warning: Using " + onePattern + " for " + ca[i] + ".");
+              }
+              else
+                onePattern = patterns[i];
+              String dir = "", prefix = "", pattern = "", suffix = "", ext = "";
+              String[] patternElements = onePattern.split("\\|");
+              if (patternElements.length == 4) // Old version
+              {
+                dir = compositeDir + patternElements[0].trim(); // "/yyyy/MM-MMM";
+                prefix = patternElements[1].trim();             // "Auto_";
+                pattern =patternElements[2].trim();             // "yyyy_MM_dd_HH_mm_ss_z";
+                ext = patternElements[3].trim();                // "waz";
+              }
+              else if (patternElements.length == 5) // New version
+              {
+                dir = compositeDir + patternElements[0].trim(); // "/yyyy/MM-MMM";
+                prefix = patternElements[1].trim();             // "Auto_";
+                pattern =patternElements[2].trim();             // "yyyy_MM_dd_HH_mm_ss_z";
+                suffix =patternElements[3].trim();             // "_Pacific";
+                ext = patternElements[4].trim();                // "waz";
+              }
+              Date now = new Date();
+              dir = WWGnlUtilities.translatePath(dir, now).replace('/', File.separatorChar);
+              SimpleDateFormat sdf = new SimpleDateFormat(pattern);
+              String saveAsName = dir + File.separator + prefix + sdf.format(now) + suffix + "." + ext;
+  
+              File faxDir = new File(dir);
+              if (!faxDir.exists())
+                faxDir.mkdirs();
+  
+              cp.runStorageThread(false, saveAsName); // TODO Chain possible user-exit. FTP on a site, etc.
+              System.out.println("-- Saved as [" + saveAsName + "]");
+              
             }
-            else if (patternElements.length == 5) // New version
+            catch (Exception ex)
             {
-              dir = compositeDir + patternElements[0].trim(); // "/yyyy/MM-MMM";
-              prefix = patternElements[1].trim();             // "Auto_";
-              pattern =patternElements[2].trim();             // "yyyy_MM_dd_HH_mm_ss_z";
-              suffix =patternElements[3].trim();             // "_Pacific";
-              ext = patternElements[4].trim();                // "waz";
+              String message = "Error: " + ex.getLocalizedMessage() + "\nfor [" +
+                              ((String)ParamPanel.data[ParamData.AUTO_SAVE_DEFAULT_COMPOSITE][ParamData.VALUE_INDEX]) + "]";
+              JOptionPane.showMessageDialog(cp, message, "Auto-save", JOptionPane.ERROR_MESSAGE);
             }
-            Date now = new Date();
-            dir = WWGnlUtilities.translatePath(dir, now).replace('/', File.separatorChar);
-            SimpleDateFormat sdf = new SimpleDateFormat(pattern);
-            String saveAsName = dir + File.separator + prefix + sdf.format(now) + suffix + "." + ext;
-
-            File faxDir = new File(dir);
-            if (!faxDir.exists())
-              faxDir.mkdirs();
-
-            cp.runStorageThread(false, saveAsName); // TODO Chain possible user-exit. FTP on a site, etc.
-            System.out.println("-- Saved as [" + saveAsName + "]");
-            
-          }
-          catch (Exception ex)
-          {
-            String message = "Error: " + ex.getLocalizedMessage() + "\nfor [" +
-                            ((String)ParamPanel.data[ParamData.AUTO_SAVE_DEFAULT_COMPOSITE][ParamData.VALUE_INDEX]) + "]";
-            JOptionPane.showMessageDialog(cp, message, "Auto-save", JOptionPane.ERROR_MESSAGE);
           }
         }
       }
