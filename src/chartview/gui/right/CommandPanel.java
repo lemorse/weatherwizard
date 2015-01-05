@@ -2449,124 +2449,130 @@ public class CommandPanel
         {
           if (parent != null && parent.isVisible())
           {
-            if (fileName != null && fileName.trim().length() > 0)
+            // Is the filename an array (csv) ?
+            String pa[] = fileName.split(",");
+            for (int i=0; i<pa.length; i++)
             {
-              int currTabIdx = ((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getMasterTabPane().getSelectedIndex();
-              String tabName = fileName.substring(fileName.lastIndexOf(File.separator) + 1);
-              try { tabName = tabName.substring(tabName.lastIndexOf("/") + 1); }
-              catch (Exception ex)
+              if (pa[i] != null && pa[i].trim().length() > 0)
               {
-                System.err.println("FileName:" + fileName);
-                System.err.println("TabName :" + tabName);
-                ex.printStackTrace();
-              }
-              if (tabName.endsWith(".ptrn"))
-                tabName = tabName.substring(0, tabName.length() - ".ptrn".length());
-//            System.out.println("Replacing [" + ((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getMasterTabPane().getTitleAt(currTabIdx) + "] with [" + tabName + "]");
-              ((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getMasterTabPane().setTitleAt(currTabIdx, tabName);
-              ((CompositeTabComponent)((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getMasterTabPane().getTabComponentAt(currTabIdx)).setTabTitle(tabName);
-
-              // Reset comment
-              currentComment = "";
-              boolean dyn = WWGnlUtilities.isPatternDynamic(fileName); // TODO http:// protocol
-              if (dyn)
-              {
-//              Runnable heavyRunnable = new Runnable()
-                Thread heavyRunnable = new Thread("pattern-loader")
+                final String pattern = pa[i];
+                int currTabIdx = ((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getMasterTabPane().getSelectedIndex();
+                String tabName = pattern.substring(pattern.lastIndexOf(File.separator) + 1);
+                try { tabName = tabName.substring(tabName.lastIndexOf("/") + 1); }
+                catch (Exception ex)
                 {
-  //              ProgressMonitor monitor = null;
-
-                  public void run()
+                  System.err.println("FileName:" + pattern);
+                  System.err.println("TabName :" + tabName);
+                  ex.printStackTrace();
+                }
+                if (tabName.endsWith(".ptrn"))
+                  tabName = tabName.substring(0, tabName.length() - ".ptrn".length());
+  //            System.out.println("Replacing [" + ((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getMasterTabPane().getTitleAt(currTabIdx) + "] with [" + tabName + "]");
+                ((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getMasterTabPane().setTitleAt(currTabIdx, tabName);
+                ((CompositeTabComponent)((AdjustFrame)WWContext.getInstance().getMasterTopFrame()).getMasterTabPane().getTabComponentAt(currTabIdx)).setTabTitle(tabName);
+  
+                // Reset comment
+                currentComment = "";
+                boolean dyn = WWGnlUtilities.isPatternDynamic(pattern); // TODO http:// protocol
+                if (dyn)
+                {
+  //              Runnable heavyRunnable = new Runnable()
+                  Thread heavyRunnable = new Thread("pattern-loader")
                   {
-                    if (!headlessMode)
+    //              ProgressMonitor monitor = null;
+  
+                    public void run()
                     {
-                      WWContext.getInstance().setMonitor(ProgressUtil.createModalProgressMonitor(WWContext.getInstance().getMasterTopFrame(), 1, true, true));
-                      ProgressMonitor monitor = WWContext.getInstance().getMonitor();
-                      if (monitor != null)
+                      if (!headlessMode)
                       {
-                        synchronized (monitor)
+                        WWContext.getInstance().setMonitor(ProgressUtil.createModalProgressMonitor(WWContext.getInstance().getMasterTopFrame(), 1, true, true));
+                        ProgressMonitor monitor = WWContext.getInstance().getMonitor();
+                        if (monitor != null)
                         {
-                          monitor.start(WWGnlUtilities.buildMessage("loading-with-pattern"));
-                        }
-                      }
-                      if (WWContext.getInstance().getAel4monitor() != null)
-                      {
-                        System.out.println("Warning!!! AELMonitor != null !! (2, in " + this.getClass().getName() + ")" );
-                      }
-                      WWContext.getInstance().setAel4monitor(new ApplicationEventListener()
-                        {
-                          public String toString()
+                          synchronized (monitor)
                           {
-                            return "{" + Long.toString(id) + "} from Runnable in CommandPanel (2).";
+                            monitor.start(WWGnlUtilities.buildMessage("loading-with-pattern"));
                           }
-                          public void progressing(String mess)
+                        }
+                        if (WWContext.getInstance().getAel4monitor() != null)
+                        {
+                          System.out.println("Warning!!! AELMonitor != null !! (2, in " + this.getClass().getName() + ")" );
+                        }
+                        WWContext.getInstance().setAel4monitor(new ApplicationEventListener()
                           {
-                            ProgressMonitor monitor = WWContext.getInstance().getMonitor();
-                            if (monitor != null)
+                            public String toString()
                             {
-                              synchronized (monitor)
+                              return "{" + Long.toString(id) + "} from Runnable in CommandPanel (2).";
+                            }
+                            public void progressing(String mess)
+                            {
+                              ProgressMonitor monitor = WWContext.getInstance().getMonitor();
+                              if (monitor != null)
                               {
-                                monitor.setCurrent(mess, monitor.getCurrent());
+                                synchronized (monitor)
+                                {
+                                  monitor.setCurrent(mess, monitor.getCurrent());
+                                }
                               }
                             }
-                          }
-  
-    //                    public void interruptProcess()
-    //                    {
-    //                      System.out.println("Interrupting Pattern Loading.");
-    //                    }
-                        });
-                      WWContext.getInstance().addApplicationListener(WWContext.getInstance().getAel4monitor());
-                    }
-                    try
-                    {
-                      WWContext.getInstance().fireSetLoading(true);
-                      createFromPattern(fileName);
-                      WWContext.getInstance().fireSetLoading(false);
-                    }
-                    finally
-                    {
-  //                  System.out.println("End of Progress Monitor");
-                      // to ensure that progress dlg is closed in case of any exception
-                   // ProgressMonitor pm = WWContext.getInstance().getMonitor();
-                      if (WWContext.getInstance().getMonitor() != null)
+    
+      //                    public void interruptProcess()
+      //                    {
+      //                      System.out.println("Interrupting Pattern Loading.");
+      //                    }
+                          });
+                        WWContext.getInstance().addApplicationListener(WWContext.getInstance().getAel4monitor());
+                      }
+                      try
                       {
-                        synchronized (WWContext.getInstance().getMonitor())
+                        WWContext.getInstance().fireSetLoading(true);
+                        createFromPattern(pattern);
+                        WWContext.getInstance().fireSetLoading(false);
+                      }
+                      finally
+                      {
+    //                  System.out.println("End of Progress Monitor");
+                        // to ensure that progress dlg is closed in case of any exception
+                     // ProgressMonitor pm = WWContext.getInstance().getMonitor();
+                        if (WWContext.getInstance().getMonitor() != null)
                         {
-                          try
+                          synchronized (WWContext.getInstance().getMonitor())
                           {
-                            if (WWContext.getInstance().getMonitor().getCurrent() != WWContext.getInstance().getMonitor().getTotal())
-                              WWContext.getInstance().getMonitor().setCurrent(null, WWContext.getInstance().getMonitor().getTotal());
-  //                        WWContext.getInstance().removeApplicationListener(WWContext.getInstance().getAel4monitor());
-                            WWContext.getInstance().setAel4monitor(null);
-                            WWContext.getInstance().setMonitor(null);
-                          }
-                          catch (Exception ex)
-                          {
-                            ex.printStackTrace();
+                            try
+                            {
+                              if (WWContext.getInstance().getMonitor().getCurrent() != WWContext.getInstance().getMonitor().getTotal())
+                                WWContext.getInstance().getMonitor().setCurrent(null, WWContext.getInstance().getMonitor().getTotal());
+    //                        WWContext.getInstance().removeApplicationListener(WWContext.getInstance().getAel4monitor());
+                              WWContext.getInstance().setAel4monitor(null);
+                              WWContext.getInstance().setMonitor(null);
+                            }
+                            catch (Exception ex)
+                            {
+                              ex.printStackTrace();
+                            }
                           }
                         }
                       }
                     }
-                  }
-                };
-//              new Thread(heavyRunnable).start();
-                heavyRunnable.start();
-              }
-              else
-              {
-                Thread loader = new Thread("non-dynamic-pattern-loader")
+                  };
+  //              new Thread(heavyRunnable).start();
+                  heavyRunnable.start();
+                }
+                else
                 {
-                  public void run()
+                  Thread loader = new Thread("non-dynamic-pattern-loader")
                   {
-      //            System.out.println("Loader top");
-                    WWContext.getInstance().fireSetLoading(true);
-                    createFromPattern(fileName); // TODO http protocol
-                    WWContext.getInstance().fireSetLoading(false);
-      //            System.out.println("Loader bottom");
-                  }
-                };
-                loader.start();
+                    public void run()
+                    {
+        //            System.out.println("Loader top");
+                      WWContext.getInstance().fireSetLoading(true);
+                      createFromPattern(pattern); // TODO http protocol
+                      WWContext.getInstance().fireSetLoading(false);
+        //            System.out.println("Loader bottom");
+                    }
+                  };
+                  loader.start();
+                }
               }
             }
             // Apply values

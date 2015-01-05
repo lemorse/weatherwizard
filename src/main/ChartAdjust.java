@@ -204,9 +204,23 @@ public class ChartAdjust
           if (args[a].startsWith("-composite:"))
           {
             String s = args[a].substring("-composite:".length());
-            ParamPanel.data[ParamData.LOAD_COMPOSITE_STARTUP][ParamData.VALUE_INDEX] = new ParamPanel.DataFile(new String[] {"ptrn"}, 
-                                                                                                               "pattern", 
-                                                                                                               s);
+            // An array?
+            String ca[] = s.split(",");
+            if (ca.length > 1)
+              ParamPanel.data[ParamData.LOAD_COMPOSITE_STARTUP][ParamData.VALUE_INDEX] = new ParamPanel.DataFile(new String[] {"ptrn"}, 
+                                                                                                                 "pattern", 
+                                                                                                                 s);
+            else
+            {
+              ParamPanel.DataFile[] ppdf = new ParamPanel.DataFile[ca.length];
+              for (int j=0; j<ca.length; j++)
+              {
+                ppdf[i] = new ParamPanel.DataFile(new String[] {"ptrn"}, 
+                                                  "pattern", 
+                                                  ca[j]);
+              }
+              ParamPanel.data[ParamData.LOAD_COMPOSITE_STARTUP][ParamData.VALUE_INDEX] = ppdf;
+            }
           }
           else if (args[a].startsWith("-interval:"))
           {
@@ -223,7 +237,7 @@ public class ChartAdjust
       // We need some preferences to be set: RELOAD_DEFAULT_COMPOSITE_INTERVAL, AUTO_SAVE_DEFAULT_COMPOSITE, LOAD_COMPOSITE_STARTUP
       try
       {
-        String s1 = ((ParamPanel.DataFile) ParamPanel.data[ParamData.LOAD_COMPOSITE_STARTUP][ParamData.VALUE_INDEX]).toString();
+        String s1 = ((ParamPanel.DataFile)ParamPanel.data[ParamData.LOAD_COMPOSITE_STARTUP][ParamData.VALUE_INDEX]).toString();
         String s2 = (String)ParamPanel.data[ParamData.AUTO_SAVE_DEFAULT_COMPOSITE][ParamData.VALUE_INDEX];
         String s3 = Integer.toString(((Integer) ParamPanel.data[ParamData.RELOAD_DEFAULT_COMPOSITE_INTERVAL][ParamData.VALUE_INDEX]).intValue());
     //      System.out.println(" -> " + s1);
