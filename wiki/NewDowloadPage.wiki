@@ -14,7 +14,7 @@ Download is now deprecated on Google Code...
  * Download [https://drive.google.com/file/d/0B1OXF1qWHj9mWVVqbUN0Qi16eEk/view?usp=sharing Navigation Desktop version 3.0.1.5] for Windows.
  * Download [https://drive.google.com/file/d/0B1OXF1qWHj9mLVhneDJ1Rno3NGM/view?usp=sharing Weather Wizard version 3.0.1.5] for Windows.
  * Download [https://drive.google.com/file/d/0B1OXF1qWHj9mQ1k1aEZsUExkRDg/view?usp=sharing Weather Wizard & Navigation Desktop version 3.0.1.5] for Linux & Mac.
-
+ * Raspberry PI image will be available soon.
 
  * Download [https://drive.google.com/file/d/0B1OXF1qWHj9memVJNU83a0FlR28/edit?usp=sharing Navigation Desktop version 3.0.1.4] for Windows.
  * Download [https://drive.google.com/file/d/0B1OXF1qWHj9mZHo0d1dCZXFDTDg/view?usp=sharing Navigation Desktop version 3.0.1.4] for Linux & Mac.
