@@ -1915,7 +1915,8 @@ public class CommandPanel
               }
               catch (Exception ex)
               {
-                JOptionPane.showMessageDialog(null, ex.toString(), "Updating archive", JOptionPane.ERROR_MESSAGE);
+                if ("false".equals(System.getProperty("headless", "false")))
+                  JOptionPane.showMessageDialog(null, ex.toString(), "Updating archive", JOptionPane.ERROR_MESSAGE);
                 ex.printStackTrace();
                 ok2go = false;
               }

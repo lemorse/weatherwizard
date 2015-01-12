@@ -59,7 +59,9 @@ import java.net.URLConnection;
 import java.text.SimpleDateFormat;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.TimeZone;
 
@@ -288,7 +290,7 @@ public class AdjustFrame
       final String compositeName = ((ParamPanel.DataFile)ParamPanel.data[ParamData.LOAD_COMPOSITE_STARTUP][ParamData.VALUE_INDEX]).toString();
       if (compositeName.trim().length() > 0)
       {
-        boolean headlessMode = "true".equals(System.getProperty("headless", "false"));        
+        boolean headlessMode = ("true".equals(System.getProperty("headless", "false")) || "yes".equals(System.getProperty("headless", "false")));        
         if (!headlessMode)
           askAndWaitForLoadAtStartup(compositeName, ((Integer)ParamPanel.data[ParamData.WAIT_ON_STARTUP][ParamData.VALUE_INDEX]).intValue());
         else
@@ -1151,7 +1153,11 @@ public class AdjustFrame
             }
             else
             {
-              JOptionPane.showMessageDialog(instance, "You're not on line,\nor your Internet connection is not accessible.\nThere is currently not way to send a message...", "Contact", JOptionPane.WARNING_MESSAGE);
+              String mess = "You're not on line,\nor your Internet connection is not accessible.\nThere is currently not way to send a message...";
+              if ("true".equals(System.getProperty("headless", "false")) || "yes".equals(System.getProperty("headless", "false")))
+                System.out.println("-> " + mess);
+              else
+                JOptionPane.showMessageDialog(instance, mess, "Contact", JOptionPane.WARNING_MESSAGE);
             }
           }
         });
@@ -1169,7 +1175,11 @@ public class AdjustFrame
             }
             else
             {
-              JOptionPane.showMessageDialog(instance, "You're not on line,\nor your Internet connection is not accessible.\nThere is currently not way to send a message...", "Contact", JOptionPane.WARNING_MESSAGE);
+              String mess = "You're not on line,\nor your Internet connection is not accessible.\nThere is currently not way to send a message...";
+              if ("true".equals(System.getProperty("headless", "false")) || "yes".equals(System.getProperty("headless", "false")))
+                System.out.println("-> " + mess);
+              else
+                JOptionPane.showMessageDialog(instance, mess, "Contact", JOptionPane.WARNING_MESSAGE);
             }
           }
         });
@@ -1592,7 +1602,8 @@ public class AdjustFrame
               }
               catch (Exception ex)
               {
-                JOptionPane.showMessageDialog(instance, ex.toString(), ":)", JOptionPane.ERROR_MESSAGE);  
+                if ("false".equals(System.getProperty("headless", "false")))
+                  JOptionPane.showMessageDialog(instance, ex.toString(), ":)", JOptionPane.ERROR_MESSAGE);  
                 ex.printStackTrace();
               }                            
             }
@@ -2281,7 +2292,10 @@ public class AdjustFrame
                 {
                   String message = fnfe.getMessage();
                   message += ("\nUser [" + System.getProperty("user.name") + "] seems not to have write access to " + faxDir);
-                  JOptionPane.showMessageDialog(instance, message, "Download", JOptionPane.WARNING_MESSAGE);
+                  if ("false".equals(System.getProperty("headless", "false")))
+                    JOptionPane.showMessageDialog(instance, message, "Download", JOptionPane.WARNING_MESSAGE);
+                  else
+                    System.out.println(message);
                   fnfe.printStackTrace();
                 }
                 catch (Exception ex)
@@ -2485,6 +2499,48 @@ public class AdjustFrame
       {
         public void run()
         {
+          String startAt = System.getProperty("start.loop.at", "");
+          if (startAt.trim().length() > 0)
+          {
+            // Pattern is "HH:MM"
+            String[] hhmm = startAt.split(":");
+            try
+            {
+              int hh = Integer.parseInt(hhmm[0]);              
+              int mm = Integer.parseInt(hhmm[1]);              
+              long now = System.currentTimeMillis();
+              Calendar start = GregorianCalendar.getInstance();
+              start.set(Calendar.HOUR_OF_DAY, hh);
+              start.set(Calendar.MINUTE, mm);
+              start.set(Calendar.SECOND, 0);
+              start.set(Calendar.MILLISECOND, 0);
+              long startMS = start.getTimeInMillis();
+//            System.out.println("-> Will Start at " + new Date(startMS).toString());
+              while (startMS < now)
+              {
+                start.add(Calendar.HOUR, 24);
+                startMS = start.getTimeInMillis();
+                System.out.println("-> Will Start at " + new Date(startMS).toString());
+              }
+              long timeToWait = startMS - now;
+              try 
+              { 
+                System.out.println("-> Will Start at " + new Date(startMS).toString());
+                System.out.println("Waiting for " + timeToWait + " ms before looping.");
+                Thread.sleep(timeToWait); 
+              }
+              catch (Exception ex)
+              {
+                ex.printStackTrace();
+              }
+            }
+            catch (Exception ex)
+            {
+              System.err.println("Problem with -Dstart.loop.at=" + startAt);
+              ex.printStackTrace();
+            }
+          }
+          
           while (true)
           {
             System.out.println("-- Auto load for [" + compositeName + "], thread " + this.getName());

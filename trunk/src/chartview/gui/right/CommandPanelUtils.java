@@ -1519,7 +1519,10 @@ public class CommandPanelUtils
             {
               String message = "Error: " + ex.getLocalizedMessage() + "\nfor [" +
                               ((String)ParamPanel.data[ParamData.AUTO_SAVE_DEFAULT_COMPOSITE][ParamData.VALUE_INDEX]) + "]";
-              JOptionPane.showMessageDialog(cp, message, "Auto-save", JOptionPane.ERROR_MESSAGE);
+              if ("true".equals(System.getProperty("headless", "false")) || "yes".equals(System.getProperty("headless", "false")))
+                System.out.println(message);
+              else
+                JOptionPane.showMessageDialog(cp, message, "Auto-save", JOptionPane.ERROR_MESSAGE);
             }
           }
         }
