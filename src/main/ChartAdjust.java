@@ -704,7 +704,11 @@ public class ChartAdjust
   
   public static void main(String args[])
   {
-    headlessMode = "true".equals(System.getProperty("headless", "false"));
+    System.out.println("-------------------------------------");
+    System.out.println("Starting: " + WWContext.PRODUCT_ID);
+    System.out.println("-------------------------------------");
+
+    headlessMode = ("true".equals(System.getProperty("headless", "false")) || "yes".equals(System.getProperty("headless", "false")));
     
     System.out.println("=======\nIn the main, " + args.length + " arguments:");
     String displayComposite = "";

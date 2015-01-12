@@ -29,7 +29,7 @@ public class Splasher
   }
   public static void main(String[] args)
   {
-    boolean headlessMode = "true".equals(System.getProperty("headless", "false"));
+    boolean headlessMode = ("true".equals(System.getProperty("headless", "false")) || "yes".equals(System.getProperty("headless", "false")));
     if (!headlessMode)
     {
       System.out.println(WWGnlUtilities.buildMessage("welcome"));
