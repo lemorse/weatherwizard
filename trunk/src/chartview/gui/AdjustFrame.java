@@ -2543,14 +2543,21 @@ public class AdjustFrame
           
           while (true)
           {
+            System.out.println("------------------------------------------------------------------------------");
+            System.out.println("-- Auto load starting at " + new Date().toString());
             System.out.println("-- Auto load for [" + compositeName + "], thread " + this.getName());
+            System.out.println("------------------------------------------------------------------------------");
+            long startedAt = System.currentTimeMillis();
             WWContext.getInstance().fireLoadDynamicComposite(compositeName);
             try 
             { 
               System.out.println("-- Taking a nap (" + Utilities.readableTime(interval * 1000 * 60).trim() + ")");
               String mess = WWGnlUtilities.buildMessage("next-download") + " " + WWGnlUtilities.formatTimeDiff(interval * 60); //"Next automatic download in " + Integer.toString(interval) + " minute(s)";
               WWContext.getInstance().fireSetStatus(mess);
-              Thread.sleep(1000L * 60L * interval); 
+              long now = System.currentTimeMillis();
+              long amount2Sleep = (1000L * 60L * interval) - (now - startedAt);
+              if (amount2Sleep > 0)
+                Thread.sleep(amount2Sleep); 
               System.out.println("-- Thread " + this.getName() + " waking up.");
             } 
             catch (Exception ex) 
