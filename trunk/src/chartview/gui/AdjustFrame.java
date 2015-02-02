@@ -540,7 +540,7 @@ public class AdjustFrame
     
     Icon plus = new ImageIcon(this.getClass().getResource("img/plus.png"));
     masterTabPane.add(new JPanel(), plus); // The tab that adds tabs   
-    masterTabPane.setToolTipTextAt(1, WWGnlUtilities.buildMessage("click-to-add") + " (Ctrl+T)");
+    masterTabPane.setToolTipTextAt(1, WWGnlUtilities.buildMessage("click-to-add"));
     
     masterTabPane.addMouseListener(new MouseAdapter()
      {
@@ -598,6 +598,7 @@ public class AdjustFrame
     
     menuFile.add(new OpenAction()).setAccelerator(KeyStroke.getKeyStroke("ctrl O"));
     menuFile.add(new NewTabAction()).setAccelerator(KeyStroke.getKeyStroke("ctrl T"));
+    menuFile.add(new NewTabAction(true)).setAccelerator(KeyStroke.getKeyStroke("ctrl shift T"));
     menuFile.add(new ReloadAction()).setAccelerator(KeyStroke.getKeyStroke("ctrl R"));
     menuFile.add(new JSeparator());
     menuFile.add(menuDownload);
@@ -2548,7 +2549,7 @@ public class AdjustFrame
             System.out.println("-- Auto load for [" + compositeName + "], thread " + this.getName());
             System.out.println("------------------------------------------------------------------------------");
             long startedAt = System.currentTimeMillis();
-            WWContext.getInstance().fireLoadDynamicComposite(compositeName);
+            WWContext.getInstance().fireLoadDynamicComposite(compositeName); // Asynchronous!
             try 
             { 
               System.out.println("-- Taking a nap (" + Utilities.readableTime(interval * 1000 * 60).trim() + ")");
@@ -2632,15 +2633,30 @@ public class AdjustFrame
   @SuppressWarnings("serial")
   public class NewTabAction extends AbstractAction
   {
+    private boolean withLoad = false;
     public NewTabAction()
+    {
+      this(false);
+    }
+    public NewTabAction(boolean b)
     {
       super(WWGnlUtilities.buildMessage("open-new-tab"),
             new ImageIcon(instance.getClass().getResource("img/composite.png")));
+      this.withLoad = b;
     }
 
     public void actionPerformed(ActionEvent ae)
     {
+//    System.out.println("With Load default:" + this.withLoad);
       addCompositeTab();
+      if (this.withLoad)
+      {
+        String compositeName = ((ParamPanel.DataFile) ParamPanel.data[ParamData.LOAD_COMPOSITE_STARTUP][ParamData.VALUE_INDEX]).toString();
+        if (compositeName != null && compositeName.trim().length() != 0)
+          WWContext.getInstance().fireLoadDynamicComposite(compositeName);
+        else
+          JOptionPane.showMessageDialog(instance, "No default composite to reload.\nSet it up in the preferences.", "Reload Default Composite", JOptionPane.WARNING_MESSAGE);        
+      }
     }        
   }
 
