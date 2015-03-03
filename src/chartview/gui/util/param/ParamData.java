@@ -95,8 +95,9 @@ public class ParamData
   public final static int NMEA_FALLBACK_TIMEOUT          = 80;
   public final static int GRIB_TWS_COEFF                 = 81;
   public final static int DEFAULT_FONT                   = 82;
+  public final static int CONFIRM_COMMENT                = 83;
 
-  public final static int NB_PRFERENCES         = 83; 
+  public final static int NB_PRFERENCES         = 84; 
   
   private final static String[] labels = 
   { 
@@ -182,7 +183,8 @@ public class ParamData
     WWGnlUtilities.buildMessage("routing-completed-below"),
     WWGnlUtilities.buildMessage("nmea-fallback-timeout"),
     WWGnlUtilities.buildMessage("grib-tws-coeff"),
-    WWGnlUtilities.buildMessage("default-font-size")
+    WWGnlUtilities.buildMessage("default-font-size"),
+    WWGnlUtilities.buildMessage("ask-confirm-comment")
   };
 
   private final static String[] helptext = 
@@ -269,7 +271,8 @@ public class ParamData
     WWGnlUtilities.buildMessage("help-routing-completed-below"),
     WWGnlUtilities.buildMessage("help-nmea-fallback-timeout"),
     WWGnlUtilities.buildMessage("help-grib-tws-coeff"),
-    WWGnlUtilities.buildMessage("help-default-font-size")
+    WWGnlUtilities.buildMessage("help-default-font-size"),
+    WWGnlUtilities.buildMessage("help-ask-confirm-comment")
   };
     
   public static String[] getLabels()

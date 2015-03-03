@@ -1929,8 +1929,14 @@ public class CommandPanel
               System.out.println("Updating " + compositeName);
             }
             // A comment for this composite?
-            if (ok2go && currentComment.trim().length() > 0)
+            boolean confirm = ((Boolean)ParamPanel.data[ParamData.CONFIRM_COMMENT][ParamData.VALUE_INDEX]).booleanValue();
+
+            if (ok2go && confirm && currentComment.trim().length() > 0)
             {
+              JPanel messagePane = new JPanel(new GridBagLayout());
+              JCheckBox dontAskCheckBox = new JCheckBox();
+              dontAskCheckBox.setText(WWGnlUtilities.buildMessage("dont-ask-again"));
+
               Object message = WWGnlUtilities.buildMessage("confirm-comment",
                                                            new String[] { currentComment });
               String title = WWGnlUtilities.buildMessage("composite-comment");
@@ -1944,9 +1950,21 @@ public class CommandPanel
                 jScrollPane.setPreferredSize(new Dimension(400, 200));
                 message = jScrollPane;
                 title = WWGnlUtilities.buildMessage("confirm-comment-2");
+                messagePane.add((JScrollPane)message,  
+                       new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, 
+                                              new Insets(0, 0, 10, 0), 0, 0));
               }
+              else
+                messagePane.add(new JLabel((String)message),  
+                       new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, 
+                                              new Insets(0, 0, 10, 0), 0, 0));
+              
+              messagePane.add(dontAskCheckBox, 
+                       new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, 
+                                              new Insets(0, 0, 0, 0), 0, 0));
+
               int resp = JOptionPane.showConfirmDialog(instance,
-                                                       message,
+                                                       messagePane, // message,
                                                        title,
                                                        JOptionPane.YES_NO_CANCEL_OPTION,
                                                        JOptionPane.QUESTION_MESSAGE);
@@ -1954,6 +1972,12 @@ public class CommandPanel
                 currentComment = "";
               else if (resp == JOptionPane.CANCEL_OPTION)
                 ok2go = false;
+              
+              if (dontAskCheckBox.isSelected())
+              {
+                ParamPanel.data[ParamData.CONFIRM_COMMENT][ParamData.VALUE_INDEX] = Boolean.valueOf(false);
+                ParamPanel.saveParameters();
+              }
             }
             if (ok2go)
             {

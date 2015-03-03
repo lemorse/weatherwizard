@@ -401,15 +401,27 @@ public class JTreeFilePanel
   
   private void fillUpTree()
   {
-    fillUpTree(null, false);
+    fillUpTree(null, false, null, false);
   }
-  private void fillUpTree(String filter, boolean regExp)
+  private void fillUpTree(String filter, boolean regExp, String commentFilter, boolean commentRegExp)
   {
     pattern = null; 
+    commentPattern = null;
     
     if (regExp)
     {
       try { pattern = Pattern.compile(filter); }
+      catch (PatternSyntaxException pse)
+      {
+        JOptionPane.showMessageDialog(this, 
+                                      pse.toString(), WWGnlUtilities.buildMessage("reg-expr-tt"), 
+                                      JOptionPane.ERROR_MESSAGE);
+        return;
+      }
+    }
+    if (commentRegExp)
+    {
+      try { commentPattern = Pattern.compile(commentFilter); }
       catch (PatternSyntaxException pse)
       {
         JOptionPane.showMessageDialog(this, 
@@ -516,7 +528,12 @@ public class JTreeFilePanel
       for (int i=0; i<pathElem.length; i++)      
       {
   //    System.out.println("--> Drilling down " + pathElem[i]);
-        drillDown(new File(pathElem[i]), (insertedNodes != null?insertedNodes[i]:(localPatterns != null?localPatterns:root)), filter, regExp);
+        drillDown(new File(pathElem[i]), 
+                  (insertedNodes != null?insertedNodes[i]:(localPatterns != null?localPatterns:root)), 
+                  filter, 
+                  regExp,
+                  commentFilter, 
+                  commentRegExp);
       }
       WWContext.getInstance().fireLogging("\n" + Integer.toString(nbFile) + " " + names[type] + ".");
     }
@@ -529,8 +546,13 @@ public class JTreeFilePanel
   
   public void reloadTree(String filter, boolean regExp)
   {
+    reloadTree(filter, regExp, null, false);
+  }
+  
+  public void reloadTree(String filter, boolean regExp, String commentFilter, boolean commentRegExp)
+  {
     root.removeAllChildren();
-    fillUpTree(filter, regExp);    
+    fillUpTree(filter, regExp, commentFilter, commentRegExp);    
 
     removeEmptyBranches(root);
     
@@ -613,13 +635,20 @@ public class JTreeFilePanel
   
   private void drillDown(File dir, DefaultMutableTreeNode parent)
   {
-    drillDown(dir, parent, null, false);
+    drillDown(dir, parent, null, false, null, false);
   }
 
   private Pattern  pattern = null;
+  private Pattern commentPattern = null;
   private transient Matcher matcher = null;
+  private transient Matcher commentMatcher = null;
 
-  private void drillDown(File dir, DefaultMutableTreeNode parent, final String filter, final boolean regExp)
+  private void drillDown(File dir, 
+                         DefaultMutableTreeNode parent, 
+                         final String filter, 
+                         final boolean regExp,
+                         final String commentFilter,
+                         final boolean commentRegExp)
   {
     
     if (!dir.exists() || !dir.isDirectory())
@@ -675,16 +704,34 @@ public class JTreeFilePanel
                   break;
                 case JTreeFilePanel.COMPOSITE_TYPE:
                   cond = new File(dir, name).isDirectory() || name.endsWith(".xml") || name.endsWith(WWContext.WAZ_EXTENSION);
-                  if (cond && filter != null && filter.trim().length() > 0)
+                  if (cond && ((filter != null && filter.trim().length() > 0) || 
+                               (commentFilter != null && commentFilter.trim().length() > 0)))
                   {
-                    if (!new File(dir, name).isDirectory())
+                    File f = new File(dir, name);
+                    if (!f.isDirectory())
                     {
-                      if (!regExp)
-                        cond = cond && (name.indexOf(filter) > -1);
-                      else
+                      if (filter != null && filter.trim().length() > 0)
                       {
-                        matcher = pattern.matcher(name);
-                        cond = cond && matcher.find();
+                        if (!regExp)
+                          cond = cond && (name.indexOf(filter) > -1);
+                        else
+                        {
+                          matcher = pattern.matcher(name);
+                          cond = cond && matcher.find();
+                        }
+                      }
+                      if (cond && commentFilter != null && commentFilter.trim().length() > 0)
+                      {
+                        // Get the comment
+                        String compositeComment = WWGnlUtilities.getCompositeComment(f.getAbsolutePath());
+//                      System.out.println("Matching [" + compositeComment + "] against ["+ commentFilter + "]");
+                        if (!commentRegExp)
+                          cond = cond && (compositeComment.indexOf(commentFilter) > -1); 
+                        else
+                        {
+                          commentMatcher = commentPattern.matcher(compositeComment);
+                          cond = cond && commentMatcher.find();
+                        }
                       }
                     }
                   }
@@ -733,7 +780,7 @@ public class JTreeFilePanel
 //        DefaultMutableTreeNode dtn = new DefaultMutableTreeNode(flist[i].getName());
           DirectoryTreeNode dtn = new DirectoryTreeNode(flist[i].getAbsolutePath(), flist[i].getName(), flist[i].getName());
           parent.add(dtn);
-          drillDown(flist[i], dtn, filter, regExp);
+          drillDown(flist[i], dtn, filter, regExp, commentFilter, commentRegExp);
         }
         else
         {
