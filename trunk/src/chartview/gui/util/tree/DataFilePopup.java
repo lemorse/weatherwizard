@@ -183,7 +183,10 @@ public class DataFilePopup
       public void run()
       {
         WWContext.getInstance().fireSetLoading(true, WWGnlUtilities.buildMessage("refreshing"));
-        parent.reloadTree(fileFilter, regExp);
+        if (withCommentFilter)
+          parent.reloadTree(fileFilter, regExp, commentFilter, commentRegExp);
+        else
+          parent.reloadTree(fileFilter, regExp);
 //      ((DefaultTreeModel)parent.getJTree().getModel()).reload(parent.getRoot());
         WWContext.getInstance().fireSetLoading(false, WWGnlUtilities.buildMessage("refreshing"));
       }
@@ -194,12 +197,15 @@ public class DataFilePopup
   private FileFilterPanel ffp = null;
   private String fileFilter   = "";
   private boolean regExp      = false;
+  private boolean withCommentFilter = false;
+  private String commentFilter  = "";
+  private boolean commentRegExp = false;
   
   private void filter()
   {
     // Filter
     if (ffp == null)
-      ffp = new FileFilterPanel();
+      ffp = new FileFilterPanel(parent.getType() == JTreeFilePanel.COMPOSITE_TYPE);
     int resp = JOptionPane.showConfirmDialog(parent, 
                                              ffp, WWGnlUtilities.buildMessage("file-filter"), 
                                              JOptionPane.OK_CANCEL_OPTION, 
@@ -208,6 +214,14 @@ public class DataFilePopup
     {
       fileFilter = ffp.getFilter();
       regExp     = ffp.isRegExpr();
+      if (ffp.filterOnComment())
+      {
+        withCommentFilter = true;
+        commentFilter = ffp.getCommentFilter();
+        commentRegExp = ffp.isCommentRegExp();
+      }
+      else
+        withCommentFilter = false;
     }
     // Refresh
     refreshTree();  

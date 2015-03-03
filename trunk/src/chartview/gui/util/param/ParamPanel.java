@@ -268,6 +268,9 @@ public final class ParamPanel
       case ParamData.CONFIRM_ON_EXIT:
         it = Boolean.TRUE;
         break;
+      case ParamData.CONFIRM_COMMENT:
+        it = Boolean.TRUE;
+        break;
       case ParamData.USE_TRANSPARENT_GRIB_WIND:
         it = Boolean.TRUE;
         break;
@@ -383,7 +386,8 @@ public final class ParamPanel
         it = new AnemometerHandOptionList(AnemometerHandOptionList.ARROW_HAND_OPTION);
         break;
       case ParamData.PLAY_SOUND_ON_JOB_COMPLETION:
-        it = new SoundFile(new String[] {"wav", "ogg"}, WWGnlUtilities.buildMessage("sounds"), "." + File.separator + "sounds" + File.separator + "gong.wav");
+  //    it = new SoundFile(new String[] {"wav", "ogg"}, WWGnlUtilities.buildMessage("sounds"), "." + File.separator + "sounds" + File.separator + "gong.wav");
+        it = new SoundFile(new String[] {"wav", "ogg"}, WWGnlUtilities.buildMessage("sounds"), "");
         break;
       case ParamData.TRY_TO_AVOID_LAND:
         it = Boolean.FALSE;
@@ -425,7 +429,11 @@ public final class ParamPanel
               String s = "";
               if (nl.item(0) != null && nl.item(0).getFirstChild() != null)
                 s = nl.item(0).getFirstChild().getNodeValue();    
-              
+              else
+              {
+                onePreference(i);
+                continue;
+              }
               if (i == ParamData.CHART_COLOR ||                    // Colors
                   i == ParamData.GRID_COLOR ||
                   i == ParamData.CHART_BG_COLOR ||
@@ -479,6 +487,7 @@ public final class ParamPanel
                        i == ParamData.CONFIRM_DD_ZOOM ||
                        i == ParamData.STOP_ROUTING_ON_EXHAUSTED_GRIB ||
                        i == ParamData.CONFIRM_ON_EXIT ||
+                       i == ParamData.CONFIRM_COMMENT ||
                        i == ParamData.USE_TRANSPARENT_GRIB_WIND || 
                        i == ParamData.COLOR_RANGE ||
                        i == ParamData.DISPLAY_WIND_WITH_COLOR_WIND_RANGE ||
@@ -646,7 +655,8 @@ public final class ParamPanel
         ParamData.DEFAULT_FAX_INC_VALUE,
         ParamData.GRAY_PANEL_OPTION,
         ParamData.GRAY_PANEL_OPACITY,
-        ParamData.PLAY_SOUND_ON_JOB_COMPLETION }
+        ParamData.PLAY_SOUND_ON_JOB_COMPLETION,
+        ParamData.CONFIRM_COMMENT }
     };
   
   private Object[][] mkDataArray(int idx)
